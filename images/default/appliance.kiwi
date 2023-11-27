@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="6.8" name="ebcl_1.0">
+    <description type="system">
+        <author>Elektrobit Automotive GmbH</author>
+        <contact>info@elektrobit.com</contact>
+        <specification>Image description for using systemd</specification>
+    </description>
+
+    <preferences>
+        <version>1.0.0</version>
+        <packagemanager>apt-get</packagemanager>
+        <locale>en_US</locale>
+        <keytable>us</keytable>
+        <timezone>UTC</timezone>
+        <rpm-check-signatures>false</rpm-check-signatures>
+        <type image="oem" filesystem="ext4" initrd_system="dracut" firmware="efi">
+            <oemconfig>
+                <oem-swap>true</oem-swap>
+                <oem-device-filter>/dev/ram</oem-device-filter>
+                <oem-multipath-scan>false</oem-multipath-scan>
+            </oemconfig>
+        </type>
+    </preferences>
+
+    <users>
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root"/>
+    </users>
+
+    <packages type="image">
+        <package name="grub2-themes-ubuntu-mate"/>
+        <package name="plymouth-theme-sabily"/>
+        <package name="plymouth"/>
+        <package name="grub-efi-amd64"/>
+        <package name="grub-common"/>
+        <package name="grub2-common"/>
+        <package name="grub-pc-bin"/>
+        <package name="linux-generic"/>
+        <package name="isolinux"/>
+        <package name="syslinux"/>
+        <package name="syslinux-common"/>
+        <package name="systemd"/>
+        <package name="dracut"/>
+        <package name="init"/>
+        <package name="gnupg"/>
+        <package name="iproute2"/>
+        <package name="iptables"/>
+        <package name="iputils-ping"/>
+        <package name="ifupdown"/>
+        <package name="isc-dhcp-client"/>
+        <package name="netbase"/>
+        <package name="dbus"/>
+        <package name="xz-utils"/>
+        <package name="btrfs-progs"/>
+        <package name="shim"/>
+        <package name="shim-signed"/>
+        <package name="dracut-kiwi-oem-repart"/>
+        <package name="dracut-kiwi-oem-dump"/>
+        <!-- app dependency -->
+        <package name="libjsoncpp25"/>
+    </packages>
+    <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
+        <package name="bootstrap-root-ubuntu-jammy"/>
+        <!-- comptibility package for /usr/lib paths -->
+        <package name="usrmerge"/>
+    </packages>
+    <packages type="delete">
+        <!-- Force delete packages we don't need or want -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+</image>

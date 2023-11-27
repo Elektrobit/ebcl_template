@@ -1,0 +1,115 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot (aarch64)",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "raspberry-pi/appliance_sysroot.kiwi"
+      ],
+      "options": {
+        "cwd": "/build/app"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot for an aarch64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot (amd64)",
+      "command": "box_build_sysroot.sh",
+      "args": [
+        "default/appliance_sysroot.kiwi"
+      ],
+      "options": {
+        "cwd": "/build/app"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot for an amd64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: App (aarch64)",
+      "command": "cmake_aarch64.sh",
+      "args": [],
+      "options": {
+        "cwd": "/build"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build CMake App for aarch64."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: App (amd64)",
+      "command": "cmake_amd64.sh",
+      "args": [],
+      "options": {
+        "cwd": "/build"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build CMake App for amd64."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image (aarch64)",
+      "command": "cross_build_image.sh",
+      "args": [
+        "raspberry-pi/applicance.kiwi"
+      ],
+      "options": {
+        "cwd": "/build/app"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build an aarch64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image (amd64)",
+      "command": "cross_build_image.sh",
+      "args": [
+        "default/applicance.kiwi"
+      ],
+      "options": {
+        "cwd": "/build/app"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build an amd64 image."
+    }
+  ]
+}
