@@ -78,7 +78,7 @@
       "label": "EBcL: Image (aarch64)",
       "command": "cross_build_image.sh",
       "args": [
-        "raspberry-pi/applicance.kiwi"
+        "raspberry-pi/appliance.kiwi"
       ],
       "options": {
         "cwd": "/build/app"
@@ -95,9 +95,9 @@
     {
       "type": "shell",
       "label": "EBcL: Image (amd64)",
-      "command": "cross_build_image.sh",
+      "command": "box_build_image.sh",
       "args": [
-        "default/applicance.kiwi"
+        "default/appliance.kiwi"
       ],
       "options": {
         "cwd": "/build/app"
