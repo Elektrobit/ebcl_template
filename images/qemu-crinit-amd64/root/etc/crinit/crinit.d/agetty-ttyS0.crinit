@@ -1,0 +1,4 @@
+NAME = agetty-ttyS0
+COMMAND[0] = /bin/setsid /sbin/agetty -a root 115200 ttyS0
+DEPENDS = ""
+RESPAWN = YES
