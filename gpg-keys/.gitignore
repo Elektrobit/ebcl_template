@@ -1,0 +1,3 @@
+.gnupg
+.gnupg/**/*
+gen_key_script

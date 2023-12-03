@@ -29,3 +29,4 @@ The used EB corbos Linux SDK container provides the following commands:
 - Commands to build images:
   - `box_build_image.sh`: Build an image for and amd64/x86_64 SoC or QEMU.
   - `cross_build_image.sh`: Build an image for and aarch64/arm64 SoC or QEMU.
+

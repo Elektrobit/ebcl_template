@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="7.5" name="ebcl_rpi_systemd">
+    <description type="system">
+        <author>Elektrobit Automotive GmbH</author>
+        <contact>info@elektrobit.com</contact>
+        <specification>Image description for using systemd</specification>
+    </description>
+
+    <preferences>
+        <version>1.0.0</version>
+        <packagemanager>apt</packagemanager>
+        <locale>en_US</locale>
+        <keytable>us</keytable>
+        <timezone>UTC</timezone>
+        <type image="oem" filesystem="xfs" firmware="efi" bootpartition="false" efipartsize="128" devicepersistency="by-label" editbootinstall="editbootinstall_rpi.sh">
+            <bootloader name="custom"/>
+            <oemconfig>
+                <oem-resize>true</oem-resize>
+                <oem-swap>false</oem-swap>
+                <oem-skip-verify>true</oem-skip-verify>
+            </oemconfig>
+        </type>
+    </preferences>
+
+    <users>
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root"/>
+    </users>
+
+    <packages type="image">
+        <!-- raspi packages -->
+        <package name="linux-raspi"/>
+        <package name="ubuntu-raspi-settings"/>
+        <package name="linux-firmware"/>
+        <package name="u-boot-rpi"/>
+        <package name="u-boot-tools"/>
+        <package name="rpi-eeprom"/>
+        <package name="libraspberrypi-bin"/>
+        <!-- network, sudo -->
+        <package name="netbase"/>
+        <package name="sudo"/>
+        <package name="cron"/>
+        <!-- system -->
+        <package name="systemd"/>
+        <package name="systemd-timesyncd"/>
+        <package name="locales"/>
+        <package name="busybox-static"/>
+        <package name="dpkg-licenses"/>
+        <!-- app dependency -->
+        <package name="libjsoncpp25"/>
+        <!-- packages required for oem image type -->
+        <package name="dracut-kiwi-oem-repart"/>
+    </packages>
+    <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+    <packages type="delete">
+        <!-- Force delete packages we don't need or want -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+</image>

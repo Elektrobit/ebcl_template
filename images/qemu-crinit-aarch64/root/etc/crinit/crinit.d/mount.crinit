@@ -1,0 +1,12 @@
+NAME = mount
+
+COMMAND[] = /bin/mount -o remount,rw /dev/root
+COMMAND[] = /bin/mount -t tmpfs none /tmp
+COMMAND[] = /bin/mkdir -p /dev/shm
+COMMAND[] = /bin/mount -t tmpfs shmfs /dev/shm
+COMMAND[] = /bin/mount -t cgroup2 none /sys/fs/cgroup
+COMMAND[] = /bin/mount -a
+
+DEPENDS = ""
+PROVIDES = fstab:wait tmpdir:wait shmfs:wait cgroup2fs:wait
+RESPAWN = NO
