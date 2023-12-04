@@ -7,18 +7,6 @@
         <specification>Minimum qemu amd64 image with systemd</specification>
     </description>
 
-    <preferences arch="x86_64">
-        <version>1.0.0</version>
-        <packagemanager>apt</packagemanager>
-        <type image="oem" filesystem="ext4" firmware="custom" initrd_system="none" bootpartition="true" bootpartsize="60" format="qcow2">
-            <bootloader name="grub2"/>
-            <oemconfig>
-                <oem-resize>false</oem-resize>
-            </oemconfig>
-            <size unit="M">512</size>
-        </type>
-    </preferences>
-
     <preferences arch="aarch64">
         <version>1.0.0</version>
         <packagemanager>apt</packagemanager>

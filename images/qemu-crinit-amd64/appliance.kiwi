@@ -26,7 +26,7 @@
     <packages type="image">
         <!-- kernel -->
         <package name="linux-image-unsigned-5.15.0-78-generic"/>
-        <!-- network, ssh, sudo -->
+        <!-- network, sudo -->
         <package name="udhcpc"/>
         <package name="netbase"/>
         <package name="sudo"/>
@@ -41,6 +41,7 @@
         <package name="dpkg-licenses"/>
         <package name="crinit"/>
         <package name="elos"/>
+        <package name="elos-coredump"/>
         <!-- system, only for buildtime -->
         <package name="dracut"/>
     </packages>

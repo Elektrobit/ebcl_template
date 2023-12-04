@@ -3,53 +3,217 @@
   "tasks": [
     {
       "type": "shell",
-      "label": "EBcL: Sysroot (aarch64)",
-      "command": "cross_build_sysroot.sh",
+      "label": "EBcL: Image Raspberry Pi crinit",
+      "command": "cross_build_image.sh",
       "args": [
-        "raspberry-pi/appliance_sysroot.kiwi"
-      ],
-      "options": {
-        "cwd": "/build/app"
-      },
-      "problemMatcher": [
-        "$gcc"
+        "raspberry-pi-crinit/appliance.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Prepare sysroot for an aarch64 image."
+      "detail": "Build the Rasperry Pi crinit image."
     },
     {
       "type": "shell",
-      "label": "EBcL: Sysroot (amd64)",
-      "command": "box_build_sysroot.sh",
+      "label": "EBcL: Image Raspberry Pi systemd",
+      "command": "cross_build_image.sh",
       "args": [
-        "default/appliance_sysroot.kiwi"
-      ],
-      "options": {
-        "cwd": "/build/app"
-      },
-      "problemMatcher": [
-        "$gcc"
+        "raspberry-pi-systemd/appliance.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Prepare sysroot for an amd64 image."
+      "detail": "Build the Rasperry Pi systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image qemu-crinit (aarch64)",
+      "command": "cross_build_image.sh",
+      "args": [
+        "qemu-crinit-aarch64/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build the aarch64 QEMU crinit image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image qemu-crinit (amd64)",
+      "command": "box_build_image.sh",
+      "args": [
+        "qemu-crinit-amd64/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build the amd64 QEMU crinit image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image qemu-systemd (aarch64)",
+      "command": "cross_build_image.sh",
+      "args": [
+        "qemu-systemd-aarch64/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build the aarch64 QEMU systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image qemu-systemd (amd64)",
+      "command": "box_build_image.sh",
+      "args": [
+        "qemu-systemd-amd64/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build the amd64 QEMU systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Run QEMU crinit (aarch64)",
+      "command": "qemu_efi_aarch64.sh",
+      "args": [
+        "ebcl_qemu_crinit_aarch64/ebcl_qemu_crinit_aarch64.aarch64-1.0.0-0.qcow2"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Run the QEMU crinit aarch64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Run QEMU crinit (amd64)",
+      "command": "qemu_efi_amd64.sh",
+      "args": [
+        "ebcl_qemu_crinit_amd64/ebcl_qemu_crinit_amd64.x86_64-1.0.0-0.qcow2"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Run the QEMU crinit amd64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Run QEMU systemd (aarch64)",
+      "command": "qemu_efi_aarch64.sh",
+      "args": [
+        "ebcl_qemu_systemd_aarch64/ebcl_qemu_systemd_aarch64.aarch64-1.0.0-0.qcow2"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Run the QEMU systemd aarch64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Run QEMU systemd (amd64)",
+      "command": "qemu_efi_amd64.sh",
+      "args": [
+        "ebcl_qemu_systemd_amd64/ebcl_qemu_systemd_amd64.x86_64-1.0.0-0.qcow2"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Run the QEMU systemd amd64 image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot Raspberry Pi crinit",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "raspberry-pi-crinit/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot aarch64 for the Rasperry Pi crinit image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot Raspberry Pi systemd",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "raspberry-pi-systemd/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot aarch64 for the Rasperry Pi systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot qemu-crinit (aarch64)",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "qemu-crinit-aarch64/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot aarch64 QEMU crinit image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot qemu-crinit (amd64)",
+      "command": "box_build_sysroot.sh",
+      "args": [
+        "qemu-crinit-amd64/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot amd64 QEMU crinit image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot qemu-systemd (aarch64)",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "qemu-systemd-aarch64/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot aarch64 QEMU systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot qemu-systemd (amd64)",
+      "command": "box_build_sysroot.sh",
+      "args": [
+        "qemu-systemd-amd64/appliance_sysroot.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot amd64 QEMU systemd image."
     },
     {
       "type": "shell",
       "label": "EBcL: App (aarch64)",
       "command": "cmake_aarch64.sh",
       "args": [],
-      "options": {
-        "cwd": "/build"
-      },
-      "problemMatcher": [
-        "$gcc"
-      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -61,12 +225,6 @@
       "label": "EBcL: App (amd64)",
       "command": "cmake_amd64.sh",
       "args": [],
-      "options": {
-        "cwd": "/build"
-      },
-      "problemMatcher": [
-        "$gcc"
-      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -75,41 +233,80 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Image (aarch64)",
-      "command": "cross_build_image.sh",
-      "args": [
-        "raspberry-pi/appliance.kiwi"
-      ],
-      "options": {
-        "cwd": "/build/app"
-      },
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "label": "EBcL: Generate signing key",
+      "command": "gen_sign_key.sh",
+      "args": [],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build an aarch64 image."
+      "detail": "Generate a signing key for Debian packageing. Please update gpg-keys/env.sh before running this task!"
     },
     {
       "type": "shell",
-      "label": "EBcL: Image (amd64)",
-      "command": "box_build_image.sh",
-      "args": [
-        "default/appliance.kiwi"
-      ],
-      "options": {
-        "cwd": "/build/app"
-      },
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "label": "EBcL: Generate Debian metadata for app",
+      "command": "prepare_deb_metadata.sh",
+      "args": [],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build an amd64 image."
+      "detail": "Generate the Debian metadata for the app. Please update gpg-keys/env.sh before running this task!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Package app (amd64)",
+      "command": "build_package.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the amd64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Package app (aarch64)",
+      "command": "cross_build_package.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the aarch64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Prepare local repository",
+      "command": "prepare_repo_config.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate apt repositry metadata and Berrymill config for generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Serve local repository",
+      "command": "serve_packages.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Serve the apt repository containg the generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Build config package",
+      "command": "build_config_package.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build a platform indepent Makefile package."
     }
   ]
 }
