@@ -3,29 +3,6 @@
 set -ex
 
 #=======================================
-# Move coreutils to busybox
-#---------------------------------------
-# remove coreutils and others for which a busybox
-# replacement exists
-dpkg \
-    --remove --force-remove-reinstreq \
-    --force-remove-essential --force-depends \
-coreutils tar
-
-for file in $(busybox --list);do
-    if [ "${file}" = "busybox" ] || \
-       [ "${file}" = "init" ] || \
-       [ "${file}" = "reboot" ] || \
-       [ "${file}" = "poweroff" ]
-    then
-        # unwanted from busybox
-        continue
-    fi
-    busybox rm -f /bin/$file
-    busybox ln /usr/bin/busybox /bin/$file || true
-done
-
-#=======================================
 # Create /etc/hosts
 #---------------------------------------
 cat >/etc/hosts <<- EOF
@@ -34,11 +11,6 @@ cat >/etc/hosts <<- EOF
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 EOF
-
-#=======================================
-# Relink /var/lib/dhcp to /run (rw)
-#---------------------------------------
-(cd /var/lib && rm -rf dhcp && ln -s /run dhcp)
 
 #=======================================
 # Update license data

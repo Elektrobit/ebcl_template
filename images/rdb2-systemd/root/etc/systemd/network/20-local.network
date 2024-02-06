@@ -1,0 +1,7 @@
+[Match]
+Name=lan0
+
+[Network]
+DHCP=yes
+Address=1:2:3:4::5/64
+Gateway=fe80::1

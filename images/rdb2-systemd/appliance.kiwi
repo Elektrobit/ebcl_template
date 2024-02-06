@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="7.4" name="adg-on-ebcl-nxp-rdb2">
+    <description type="system">
+        <author>Elektrobit Automotive GmbH</author>
+        <contact>info@elektrobit.com</contact>
+        <specification>Minimum qemu aarch64 image with systemd</specification>
+    </description>
+
+    <preferences>
+        <version>1.0.1</version>
+        <packagemanager>apt</packagemanager>
+        <type image="oem" filesystem="ext2" firmware="custom" initrd_system="dracut" bootpartition="true" bootpartsize="300" editbootinstall="uboot-install.sh" bootfilesystem="fat32" disk_start_sector="8192">
+            <bootloader name="custom"/>
+            <oemconfig>
+                <oem-resize>false</oem-resize>
+            </oemconfig>
+            <size unit="G">4</size>
+        </type>
+    </preferences>
+
+    <users>
+        <user password="linux" pwdformat="plain" home="/root" name="root" groups="root"/>
+        <user password="linux" pwdformat="plain" home="/home/ebcl" name="ebcl" groups="users,kvm" shell="/bin/bash"/>
+    </users>
+
+    <!-- The following repo setup is valid to build the image in OBS -->
+    <!-- nautilos devel repos -->
+    <repository type="apt-deb" alias="Nautilos-Devel" repository_gpgcheck="false">
+        <source path="obs://nautilos:2.0:devel/xUbuntu_22.04"/>
+    </repository>
+    <repository type="apt-deb" alias="Nautilos-Devel-debbuild" repository_gpgcheck="false">
+        <source path="obs://nautilos:2.0:devel/xUbuntu_22.04_debbuild"/>
+    </repository>
+    <!-- nautilos release repos -->
+    <repository type="apt-deb" alias="Nautilos-Release" repository_gpgcheck="false">
+        <source path="obs://nautilos:2.0:release/xUbuntu_22.04"/>
+    </repository>
+    <repository type="apt-deb" alias="Nautilos-Release-debbuild" repository_gpgcheck="false">
+        <source path="obs://nautilos:2.0:release/xUbuntu_22.04_debbuild"/>
+    </repository>
+    <!-- jammy repos, needed for worker setup in obs -->
+    <repository type="apt-deb" alias="Infra-OBS-debbuild" repository_gpgcheck="false">
+        <source path="obs://infra:OBS/xUbuntu_22.04_debbuild"/>
+    </repository>
+    <repository type="apt-deb" alias="Ubuntu-Jammy-Universe" distribution="jammy" components="main multiverse restricted universe" repository_gpgcheck="false">
+        <source path="obs://ubuntu:22.04/universe"/>
+    </repository>
+    <repository type="apt-deb" alias="Ubuntu-Jammy-Standard" distribution="jammy" components="main multiverse restricted universe" repository_gpgcheck="false">
+        <source path="obs://ubuntu:22.04/standard"/>
+    </repository>
+    <!-- ADG repo -->
+    <repository type="apt-deb" alias="ADG" repository_gpgcheck="false">
+        <source path="obs://pfd:adg:2.15.0/nautilos_2.0_devel"/>
+    </repository>
+
+    <packages type="image">
+        <!-- kernel -->
+        <package name="linux-image-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <package name="linux-modules-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <package name="linux-modules-extra-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <!-- bootloader -->
+        <package name="arm-trusted-firmware-s32g"/>
+        <package name="nautilos-uboot-tools"/>
+        <package name="device-tree-compiler"/>
+        <package name="nxp-s32g-firmware"/>
+        <!-- network, ssh, sudo -->
+        <package name="openssh-client"/>
+        <package name="openssh-server"/>
+        <package name="netbase"/>
+        <package name="iproute2"/>
+        <package name="iptables"/>
+        <package name="iputils-ping"/>
+        <package name="sudo"/>
+        <package name="cron"/>
+        <package name="zstd"/>
+        <!-- system -->
+        <package name="systemd"/>
+        <package name="dracut"/>
+        <package name="locales"/>
+        <package name="busybox-static"/>
+        <package name="dpkg-licenses"/>
+        <package name="file"/>
+        <package name="findutils"/>
+        <package name="apt-utils"/>
+        <!-- required for apt gpg key verification -->
+        <package name="gnupg"/>
+        <!-- required for apt update -->
+        <package name="dialog"/>
+        <!-- add editors -->
+        <package name="vim"/>
+        <package name="nano"/>
+        <!-- ADG dependencies -->
+        <package name="libstdc++6"/>
+        <!-- ADG -->
+        <package name="psmisc"/>      
+        <package name="adaptivecore-platform"/>
+    </packages>
+
+    <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
+        <!-- only exists to make sure obs puts the package into the worker repo -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+
+    <packages type="delete">
+        <!-- Force delete packages we don't need or want -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+</image>
