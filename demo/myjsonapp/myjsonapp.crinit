@@ -1,0 +1,5 @@
+NAME = MyJsonApp
+
+COMMAND = /usr/bin/myjsonapp
+
+RESPAWN = NO

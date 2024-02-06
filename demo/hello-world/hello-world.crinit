@@ -1,0 +1,5 @@
+NAME = hello-world
+
+COMMAND = /usr/bin/hello-world
+
+RESPAWN = NO
