@@ -3,7 +3,7 @@ This document describes the creation and start of an SDK docker container
 which supports building an application based on EB corbos Linux (EBcL) 
 as well as the starting of a qemu image running the EBcL for x86_64 based on crinit.
 
-After installation and run of this application there can be called a script which is collecting some report data used for certification.
+After installation and run of this application there can be called a script which is collecting some report data used for product compatibility testing.
 
 ## Preconditions
 ### Download EB corbos Linux SDK workspace
