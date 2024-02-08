@@ -1,5 +1,6 @@
 NAME = netifd-static
 
-COMMAND[0] = /sbin/netifd -r /run/resolv.conf.netifd -c /etc/config/network-static/
+COMMAND[0] = /bin/ln -s /run/resolv.conf.netifd /etc/resolv.conf
+COMMAND[1] = /sbin/netifd -r /run/resolv.conf.netifd -c /etc/config/network-static/
 DEPENDS = "ubus:spawn"
 RESPAWN = YES
