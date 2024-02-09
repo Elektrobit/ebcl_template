@@ -15,6 +15,4 @@ target_link_libraries(myjsonapp ${JSONCPP_LIBRARIES})
 
 install(TARGETS myjsonapp DESTINATION)
 
-install(FILES myjsonapp.crinit DESTINATION /etc/crinit/crinit.d/)
-
 SET (CPACK_SET_DESTDIR "/usr/local/bin/")

@@ -1,0 +1,11 @@
+[Unit]
+Description=hello world
+
+[Service]
+ExecStart=/usr/bin/hello-world
+Type=simple
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
