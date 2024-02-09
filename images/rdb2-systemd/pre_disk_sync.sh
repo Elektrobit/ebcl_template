@@ -81,13 +81,3 @@ for p in $(dpkg --list | grep ^ii | cut -f3 -d" ");do
     grep -m 1 "ii  $p" /licenses || true
 done > /licenses.new
 mv /licenses.new /licenses
-
-#==================================
-# Delete data not needed or wanted
-#----------------------------------
-rm -rf /usr/share/perl*
-rm -rf /usr/lib/*-linux-gnu/perl
-rm -rf /usr/share/java
-rm -rf /usr/lib/python3*
-rm -rf /usr/share/python3
-rm -rf /var/cache/apt/archives

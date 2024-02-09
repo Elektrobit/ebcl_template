@@ -3,7 +3,6 @@
 set -eux
 
 diskname=$1
-diskname_update_state="${diskname}.ustate"
 
 # Dump ATF/u-boot image...
 #
@@ -14,6 +13,3 @@ diskname_update_state="${diskname}.ustate"
 #
 dd if=boot/fip.s32 of="${diskname}" conv=notrunc bs=256 count=1 seek=0
 dd if=boot/fip.s32 of="${diskname}" conv=notrunc bs=512 seek=1 skip=1
-
-# Dump Update magic
-dd if="${diskname_update_state}" of="${diskname}" conv=notrunc bs=1 seek=2052K count=12

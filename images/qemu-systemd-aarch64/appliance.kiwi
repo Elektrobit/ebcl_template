@@ -48,6 +48,7 @@
         <package name="busybox-static"/>
         <package name="dpkg-licenses"/>
         <package name="systemd"/>
+        <package name="systemd-coredump"/>
         <package name="strace"/>
         <!-- required for apt gpg key verification -->
         <package name="gnupg"/>

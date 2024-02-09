@@ -3,5 +3,6 @@ Name=lan0
 
 [Network]
 DHCP=yes
-Address=1:2:3:4::5/64
+Address=fd00::eb:2/64
 Gateway=fe80::1
+IPv6DuplicateAddressDetection=none

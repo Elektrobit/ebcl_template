@@ -32,14 +32,6 @@ chmod u+s /usr/bin/busybox
 rm -f /boot/initrd*
 
 #==================================
-# Delete data not needed or wanted
-#----------------------------------
-rm -rf /var/backups
-rm -rf /usr/share/man
-rm -rf /usr/share/doc/*
-rm -rf /usr/lib/x86_64-linux-gnu/gconv
-
-#==================================
 # Create init symlink
 #----------------------------------
 pushd /usr/sbin
@@ -64,3 +56,4 @@ done
 #--------------------------------------
 baseInsertService ssh
 baseInsertService systemd-networkd
+baseInsertService ntp

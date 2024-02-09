@@ -87,6 +87,13 @@
         <package name="gnupg"/>
         <!-- required for apt update -->
         <package name="dialog"/>
+        <!-- required for apt -->
+        <package name="perl"/>
+        <package name="perl-base"/>
+        <package name="debconf"/>
+        <!-- ntp -->
+        <package name="tzdata"/>
+        <package name="ntp"/>
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
@@ -94,7 +101,7 @@
         <package name="libstdc++6"/>
         <!-- ADG -->
         <package name="psmisc"/>      
-        <package name="adaptivecore-platform"/>
+        <package name="adaptivecore-platform-systemd"/>
     </packages>
 
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
