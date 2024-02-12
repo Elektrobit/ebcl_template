@@ -141,6 +141,45 @@ else
 fi
 printf "\n\n" >> "$REPORT_FILE"
 
+# Application status
+# systemd service file
+SYSTEMD_FILE_SELECTION=""
+if [ -d "/lib/systemd" ] && [ -n "$(find /lib/systemd/ -name "*.service")" ] ; then
+    set -- $(find /lib/systemd/ -name "*.service"|grep "\.service"| awk '{print $1}')
+    while [ $# -gt 0 ] ; do
+        SYSTEMD_CFG_FILE=$1
+        if [ -n "$(grep "${BINARY_FILE_SELECTION}" "${SYSTEMD_CFG_FILE}")" ] ; then
+            SYSTEMD_FILE_SELECTION="${SYSTEMD_CFG_FILE}"
+            APP_SYSTEMD_PATH=$(readlink -f "${SYSTEMD_FILE_SELECTION}")
+            APP_SYSTEMD=$(basename -- "${APP_SYSTEMD_PATH}")
+        fi
+        shift
+    done
+    {
+        printf "systemd information:\n\n";
+        printf "systemctl status:\n";
+        systemctl status;
+        printf "\n\n";
+    } >> "$REPORT_FILE"
+    if [ -n "${SYSTEMD_FILE_SELECTION}" ] && [ -f "${SYSTEMD_FILE_SELECTION}" ] ; then
+        {
+            printf "Status of application %s:\n\n" "${APP_FILE}";
+            printf "systemctl status %s:\n" "${APP_SYSTEMD}";
+            systemctl status "${APP_SYSTEMD}";
+
+            printf "\nsystemd service file:\n";
+            printf "ls -laF %s\n" "${SYSTEMD_FILE_SELECTION}";
+            ls -laF "${SYSTEMD_FILE_SELECTION}";
+        } >> "$REPORT_FILE"
+        cp "${SYSTEMD_FILE_SELECTION}" "${REPORT_DIR}"/
+    else
+        printf "systemd service file not available for %s!\n" "${BINARY_FILE_SELECTION}" >> "$REPORT_FILE"
+    fi
+else
+    printf "No systemd information available!\n" >> "$REPORT_FILE"
+fi
+printf "\n\n" >> "$REPORT_FILE"
+
 # system call info
 if [ -n "$(find /tmp/ -name "${APP_FILE}*")" ] ; then
     mkdir -p "${REPORT_DIR}"/straces
@@ -156,7 +195,10 @@ fi
 printf "\n\n" >> "$REPORT_FILE"
 
 # Crash info
+CRASH_INFO=""
 if [ -n "$(find /tmp/ -name "core.*")" ] ; then
+    # Crash Info for crinit
+    CRASH_INFO="crinit crash"
     mkdir -p "${REPORT_DIR}"/coredumps
     printf "Crash information:\n\n" >> "$REPORT_FILE"
     if [ -n "$(find /var/log/ -name "coredumps_*")" ] ; then
@@ -178,7 +220,20 @@ if [ -n "$(find /tmp/ -name "core.*")" ] ; then
         ls -laF /tmp/core.*;
     } >> "$REPORT_FILE"
     cp /tmp/core.* "${REPORT_DIR}"/coredumps/
-else
+fi
+if [ -d "/var/lib/systemd/coredump" ] && [ -n "$(find /var/lib/systemd/coredump/ -name "core.*")" ] ; then
+    # Crash Info for systemd
+    CRASH_INFO="systemd crash"
+    mkdir -p "${REPORT_DIR}"/coredumps
+    printf "Crash information:\n\n" >> "$REPORT_FILE"
+    {
+        printf "ls -laF /var/lib/systemd/coredump/core.*:\n";
+        ls -laF /var/lib/systemd/coredump/core.*;
+    } >> "$REPORT_FILE"
+    cp /var/lib/systemd/coredump/core.* "${REPORT_DIR}"/coredumps/
+fi
+
+if [ -z "${CRASH_INFO}" ] ; then
     printf "No crash information available!\n" >> "$REPORT_FILE"
 fi
 
