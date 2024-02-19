@@ -3,7 +3,7 @@
 {
 	"name": "EB corbos Linux SDK 1.0.0",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "linux.elektrobit.com/ebcl/sdk:latest",
+	"image": "linux.elektrobit.com/ebcl/sdk:1.0.3",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},

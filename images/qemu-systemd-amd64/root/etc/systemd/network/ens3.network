@@ -1,0 +1,7 @@
+[Match]
+Name=ens3
+
+[Network]
+DHCP=ipv4
+Address=1:2:3:4::5/64
+Gateway=fe80::1

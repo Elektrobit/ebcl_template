@@ -1,0 +1,6 @@
+NAME = earlysetup
+
+COMMAND = /bin/hostname vmtimetracker
+          /usr/bin/machine-id-gen
+          
+PROVIDES = machine-id:wait

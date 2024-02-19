@@ -1,3 +1,15 @@
-result*/**/*
 sysroot*/**/*
 
+# do not ignore .gitkeep files:
+result*/**
+!result/.gitkeep
+!result/image
+result/image/*
+!result/image/.gitkeep
+!result/app
+result/app/*
+!result/app/.gitkeep
+!sysroot_aarch64/.gitkeep
+!sysroot_amd64/.gitkeep
+
+images/berrymill.conf
