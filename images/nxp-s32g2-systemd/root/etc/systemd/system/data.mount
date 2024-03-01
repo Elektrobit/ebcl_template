@@ -1,8 +1,0 @@
-[Unit]
-Description=Mount Data Partition
-Before=multi-user.target
-[Mount]
-What=/dev/vda2
-Where=/data
-Type=ext4
-Options=rw

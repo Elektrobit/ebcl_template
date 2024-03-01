@@ -43,6 +43,7 @@
         <package name="cron"/>
         <!-- system -->
         <package name="crinit"/>
+        <package name="crinit-shutdown"/>
         <package name="elos"/>
         <package name="elos-coredump"/>
         <package name="locales"/>

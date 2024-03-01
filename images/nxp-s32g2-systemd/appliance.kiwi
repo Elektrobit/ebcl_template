@@ -8,16 +8,22 @@
     <preferences>
         <version>1.0.2</version>
         <packagemanager>apt</packagemanager>
-        <type image="kis" filesystem="ext4" compressed="false"/>
+        <type image="oem" filesystem="ext4" initrd_system="none" firmware="efi" format="qcow2">
+            <bootloader name="grub2"/>
+            <oemconfig>
+                <oem-resize>false</oem-resize>
+            </oemconfig>
+            <size unit="G">5</size>
+            <partitions>
+                <partition name="containers" size="4G" mountpoint="/containers" filesystem="ext4"/>
+            </partitions>
+        </type>
     </preferences>
   
     <users>
         <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/root" name="root" groups="root" shell="/bin/ash"/>
-        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/ebcl" name="ebcl" groups="users" shell="/bin/ash"/>
+        <user password="$1$wYJUgpM5$RXMMeASDc035eX.NbYWFl0" home="/home/ebcl" name="ebcl" groups="users,docker" shell="/bin/ash"/>
     </users>
-    <repository type="apt-deb" alias="Patched-Kiwi" repository_gpgcheck="false">
-        <source path="obs://nautilos:2.0:demo:nxps32g_hv_pfe/xUbuntu_22.04_debbuild"/>
-    </repository>
     <!-- nautilos devel repos -->
     <repository type="apt-deb" alias="Nautilos-Devel" repository_gpgcheck="false">
         <source path="obs://nautilos:2.0:devel/xUbuntu_22.04"/>
@@ -39,6 +45,8 @@
         <!-- kernel -->
         <!-- Using development kernel, no NXP patches yet -->
         <package name="linux-image-unsigned-5.15.0-78-generic"/>
+        <!-- bootloader -->
+        <package name="grub-efi-arm64" arch="aarch64"/>
         <!-- network, ssh, sudo -->
         <package name="sudo"/>
         <package name="netbase"/>
@@ -49,6 +57,8 @@
         <package name="dracut"/>
         <package name="locales"/>
         <package name="busybox-static"/>
+        <!-- container -->
+        <package name="docker.io"/>
     </packages>
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
         <!-- only exists to make sure obs puts the package into the worker repo -->

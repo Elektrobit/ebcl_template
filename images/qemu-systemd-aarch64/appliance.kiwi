@@ -60,6 +60,9 @@
         <!-- system, only for buildtime -->
         <!-- required for correct partition UUIDs -->
         <package name="dracut"/>
+        <!-- add gdb server -->
+        <package name="gdbserver"/>
+        <package name="libc6-dbg"/>
     </packages>
 
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">

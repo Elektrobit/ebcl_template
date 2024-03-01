@@ -6,6 +6,7 @@ test -f /.kconfig && . /.kconfig
 
 set -ex
 
+
 #==================================
 # Turn grub-mkconfig into a noop
 #----------------------------------
@@ -13,7 +14,7 @@ cp /bin/true /usr/sbin/grub-mkconfig
 #==================================
 # Allow suid tools with busybox
 #----------------------------------
-chmod u+s /usr/bin/busybox
+chmod oug+s /usr/bin/busybox
 
 #======================================
 # Create license information

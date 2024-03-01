@@ -29,8 +29,18 @@ done
 # Create /etc/hosts
 #---------------------------------------
 cat >/etc/hosts <<- EOF
-127.0.0.1       localhost
-::1             localhost ip6-localhost ip6-loopback
+127.0.0.1       localhost vm-registry
+::1             localhost vm-registry ip6-localhost ip6-loopback
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 EOF
+
+# Kiwi dropped resolv.conf on cleanup
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
+
+#================================================
+# Add link to enable additional systemd service
+#------------------------------------------------
+ln -sf /etc/systemd/system/mosquitto-container.service \
+    /etc/systemd/system/multi-user.target.wants/mosquitto-container.service
+
