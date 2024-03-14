@@ -1,0 +1,46 @@
+/dts-v1/;
+/ {
+  description = "BaseOS Boot Image";
+  #address-cells = <1>;
+  images {
+    kernel-1 {
+      description = "Linux kernel image";
+      data = /incbin/("Image");
+      type = "kernel";
+      arch = "arm64";
+      os = "linux";
+      compression = "none";
+      load = <0x80000000>;
+      entry = <0x80000000>;
+      hash-1 { algo = "md5"; };
+    };
+    fdt-1 {
+      description = "Flattened device tree blob";
+      data = /incbin/("target.dtb");
+      type = "flat_dt";
+      arch = "arm64";
+      compression = "none";
+      hash-1 { algo = "md5"; };
+    };
+    ramdisk-1 {
+      description = "Initial ramdisk image";
+      data = /incbin/("initrd");
+      type = "ramdisk";
+      arch = "arm64";
+      os = "linux";
+      compression = "gzip";
+      load =  <0x90000000>;
+      entry = <0x90000000>;
+      hash-1 { algo = "md5"; };
+    };
+  };
+  configurations {
+    default = "config-1";
+    config-1 {
+      description = "Default boot config";
+      kernel = "kernel-1";
+      ramdisk = "ramdisk-1";
+      fdt = "fdt-1";
+    };
+  };
+};

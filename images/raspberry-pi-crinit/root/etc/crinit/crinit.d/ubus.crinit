@@ -1,0 +1,4 @@
+NAME = ubus
+
+COMMAND = /sbin/ubusd
+RESPAWN = YES

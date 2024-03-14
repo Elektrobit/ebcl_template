@@ -58,6 +58,9 @@
         <package name="grub-efi-arm64" arch="aarch64"/>
         <!-- podman, clockd -->
         <package name="podman"/>
+        <package name="slirp4netns"/>
+        <package name="uidmap"/>
+        <package name="fuse-overlayfs"/> 
         <package name="clockd"/>    
         <!-- network, ssh, sudo -->
         <package name="udhcpc"/>

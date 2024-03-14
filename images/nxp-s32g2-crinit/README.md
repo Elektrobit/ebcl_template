@@ -126,6 +126,10 @@ All necessary Info on what was changed is in the file.
 ##### ../registries.conf
 E.g: **podman pull ebcl/sdk** will be resolved as **podman pull linux.elektrobit.com/ebcl/sdk**
 
+#### /etc/crinit/crinit.d/enable-tun.crinit
+Read,Write Access for users needed for device /dev/net/tun to enable
+rootless operation of container. slirp4netns needs permission to operate on this
+virtual network simulator.
 
 ## Other
 Take a close look at the files. Detailed comments on what does what can be found in each file.

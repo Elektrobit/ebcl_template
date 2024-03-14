@@ -10,6 +10,8 @@ result/image/*
 result/app/*
 !result/app/.gitkeep
 !sysroot_aarch64/.gitkeep
-!sysroot_amd64/.gitkeep
+!sysroot_x86_64/.gitkeep
+!apt/.gitkeep
+!bin/.gitkeep
 
-images/berrymill.conf
+images/berrymill*

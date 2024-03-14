@@ -50,19 +50,29 @@ EOF
 #---------------------------------------
 (cd /var/lib && rm -rf cni && ln -s /run cni)
 
+
+# Podman rootless operation requires
+# the directories below as writeable
+# there is no working config that
+# is able to change those directories
+# so a relinking is needed here
 #=======================================
-# Relink /var/tmp to /containers/tmp (rw)
+# Relink /home/ebcl/.config to /data/ebcl (rw)
 #---------------------------------------
-mkdir -p /containers/tmp
-(cd /var && rm -rf tmp && ln -s /containers/tmp tmp)
+mkdir /data/ebcl
+(cd /home/ebcl && rm -rf .config && ln -s /data/ebcl .config)
 
 #=======================================
-# Update license data
+# Relink /home/ebcl/.cache to /data/ebcl/.cache (rw)
 #---------------------------------------
-for p in $(dpkg --list | grep ^ii | cut -f3 -d" ");do
-    grep -m 1 "ii  $p" /licenses || true
-done > /licenses.new
-mv /licenses.new /licenses
+(cd /home/ebcl && rm -rf .cache && ln -s /data/ebcl .cache)
+
+#=======================================
+# Relink /home/ebcl/.local to /data/ebcl/.local (rw)
+#---------------------------------------
+mkdir /home/ebcl/.local
+mkdir /data/ebcl/.local
+(cd /home/ebcl/.local && rm -rf share && ln -s /data/ebcl/.local share)
 
 #=======================================
 # create so that that tmpfs can be 

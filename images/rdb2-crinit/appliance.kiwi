@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="7.4" name="adg-on-ebcl-nxp-rdb2">
+    <description type="system">
+        <author>Elektrobit Automotive GmbH</author>
+        <contact>info@elektrobit.com</contact>
+        <specification>Minimum NXP RDB2 image with crinit</specification>
+    </description>
+
+    <preferences>
+        <version>1.1.0</version>
+        <packagemanager>apt</packagemanager>
+        <type image="oem" filesystem="ext2" firmware="custom" initrd_system="dracut" bootpartition="true" bootpartsize="300" editbootinstall="uboot-install.sh" bootfilesystem="fat32" disk_start_sector="8192">
+            <bootloader name="custom"/>
+            <oemconfig>
+                <oem-resize>false</oem-resize>
+            </oemconfig>
+            <size unit="G">4</size>
+        </type>
+    </preferences>
+
+    <users>
+        <user password="linux" pwdformat="plain" home="/root" name="root" groups="root"/>
+        <user password="linux" pwdformat="plain" home="/home/ebcl" name="ebcl" groups="users,kvm" shell="/bin/bash"/>
+    </users>
+
+    <packages type="image">
+        <!-- kernel -->
+        <package name="linux-image-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <package name="linux-modules-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <package name="linux-modules-extra-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <!-- bootloader -->
+        <package name="arm-trusted-firmware-s32g"/>
+        <package name="nautilos-uboot-tools"/>
+        <package name="device-tree-compiler"/>
+        <package name="nxp-s32g-firmware"/>
+        <!-- network, ssh, sudo -->
+        <package name="openssh-client"/>
+        <package name="openssh-server"/>
+        <package name="netbase"/>
+        <package name="iproute2"/>
+        <package name="iptables"/>
+        <package name="iputils-ping"/>
+        <package name="sudo"/>
+        <package name="cron"/>
+        <package name="zstd"/>
+        <!-- system -->
+        <package name="crinit"/>
+        <package name="crinit-shutdown"/>
+        <package name="elos"/>
+        <package name="elos-coredump"/>
+        <package name="dracut"/>
+        <package name="locales"/>
+        <package name="busybox-static"/>
+        <package name="dpkg-licenses"/>
+        <package name="file"/>
+        <package name="findutils"/>
+        <package name="apt-utils"/>
+        <!-- required for apt gpg key verification -->
+        <package name="gnupg"/>
+        <!-- required for apt update -->
+        <package name="dialog"/>
+        <!-- required for apt -->
+        <package name="perl"/>
+        <package name="perl-base"/>
+        <package name="debconf"/>
+        <!-- ntp -->
+        <package name="tzdata"/>
+        <package name="ntp"/>
+        <!-- add editors -->
+        <package name="vim"/>
+        <package name="nano"/>
+        <!-- ADG dependencies -->
+        <package name="libstdc++6"/>
+    </packages>
+
+    <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
+        <!-- only exists to make sure obs puts the package into the worker repo -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+
+    <packages type="delete">
+        <!-- Force delete packages we don't need or want -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+        <package name="systemd"/>
+    </packages>
+</image>

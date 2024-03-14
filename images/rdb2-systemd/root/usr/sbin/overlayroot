@@ -1,0 +1,5 @@
+#!/bin/dash
+
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t tmpfs tmpfs /run

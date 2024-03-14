@@ -1,5 +1,5 @@
 NAME = getty-tty1
-COMMAND[0] = /bin/setsid /bin/getty 38400 tty1
+COMMAND = /bin/setsid /sbin/agetty 38400 tty1
 DEPENDS = ""
 RESPAWN = YES
 RESPAWN_RETRIES = 3

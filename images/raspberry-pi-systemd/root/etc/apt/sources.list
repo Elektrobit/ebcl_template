@@ -1,0 +1,4 @@
+deb http://linux.elektrobit.com/corbos corbos prod
+deb http://linux.elektrobit.com/corbos corbos dev
+deb http://linux.elektrobit.com/corbos corbos sdk
+deb http://linux.elektrobit.com/corbos corbos testing

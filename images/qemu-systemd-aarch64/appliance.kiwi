@@ -4,14 +4,14 @@
     <description type="system">
         <author>Elektrobit Automotive GmbH</author>
         <contact>info@elektrobit.com</contact>
-        <specification>Minimum qemu aarch64 image with systemd</specification>
+        <specification>Image description for using systemd</specification>
     </description>
 
     <preferences arch="aarch64">
         <version>1.1.0</version>
         <packagemanager>apt</packagemanager>
         <type image="oem" filesystem="ext4" firmware="efi" initrd_system="none" format="qcow2">
-            <bootloader name="grub2" console="serial" timeout="1"/>
+            <bootloader name="grub2"/>
             <oemconfig>
                 <oem-resize>false</oem-resize>
             </oemconfig>
@@ -30,26 +30,30 @@
         <!-- bootloader -->
         <package name="grub-efi-arm64" arch="aarch64"/>
         <!-- system -->
-        <package name="udhcpc"/>
+        <!-- systemd init manager -->
+        <package name="systemd"/>
+        <package name="systemd-coredump"/>
+        <package name="systemd-timesyncd"/>
+        <!-- core tools -->
         <package name="netbase"/>
-        <package name="ubus"/>
-        <package name="openssh-server"/>
-        <package name="openssh-client"/>
+        <package name="locales"/>
+        <package name="busybox-static"/>
+        <!-- other tools -->
         <package name="sudo"/>
         <package name="cron"/>
+        <package name="file"/>
+        <package name="findutils"/>
+        <!-- licenses tool -->
+        <package name="dpkg-licenses"/>
+        <!-- ssh -->
+        <package name="openssh-server"/>
+        <package name="openssh-client"/>
+        <!-- network tools -->
         <package name="iproute2"/>
         <package name="iptables"/>
         <package name="iputils-ping"/>
-        <package name="netbase"/>
-        <package name="file"/>
-        <package name="findutils"/>
+        <!-- apt support -->
         <package name="apt-utils"/>
-        <package name="locales"/>
-        <package name="busybox-static"/>
-        <package name="dpkg-licenses"/>
-        <package name="systemd"/>
-        <package name="systemd-coredump"/>
-        <package name="strace"/>
         <!-- required for apt gpg key verification -->
         <package name="gnupg"/>
         <!-- required for apt update -->
@@ -57,12 +61,17 @@
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
+        <!-- debug tools -->
+        <package name="gdbserver"/>
+        <package name="libc6-dbg"/>
+        <package name="socat"/>
+        <package name="iperf3"/>
+        <package name="tcpdump"/>
+        <package name="traceroute"/>
+        <package name="strace"/>
         <!-- system, only for buildtime -->
         <!-- required for correct partition UUIDs -->
         <package name="dracut"/>
-        <!-- add gdb server -->
-        <package name="gdbserver"/>
-        <package name="libc6-dbg"/>
     </packages>
 
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
