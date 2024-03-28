@@ -1,12 +1,53 @@
 #!/bin/bash
-set -ex
-
-echo "Configure image: [$kiwi_iname]..."
 
 #======================================
-# add missing fonts
+# Functions...
 #--------------------------------------
-CONSOLE_FONT="eurlatgr.psfu"
+test -f /.kconfig && . /.kconfig
+
+set -ex
+
+#======================================
+# Setup default target, multi-user
+#--------------------------------------
+baseSetRunlevel 3
+
+#======================================
+# Create license information
+#--------------------------------------
+/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
+
+#==================================
+# Turn grub-mkconfig into a noop
+#----------------------------------
+# We provide our own static version of the grub config
+cp /bin/true /usr/sbin/grub-mkconfig
+
+#==================================
+# Allow suid tools with busybox
+#----------------------------------
+chmod u+s /usr/bin/busybox
+
+#==================================
+# Mask/Disable services
+#----------------------------------
+for service in \
+    apt-daily.service \
+    apt-daily.timer \
+    apt-daily-upgrade.service \
+    apt-daily-upgrade.timer \
+    grub-common.service \
+    grub-initrd-fallback.service
+do
+    systemctl mask "${service}"
+done
+
+#======================================
+# Activate services
+#--------------------------------------
+baseInsertService systemd-networkd
+baseInsertService systemd-resolved
+baseInsertService systemd-timesyncd
 
 #======================================
 # Install firmware
@@ -14,43 +55,16 @@ CONSOLE_FONT="eurlatgr.psfu"
 dpkg -i /var/tmp/firmware/linux-firmware-raspi_6-0ubuntu3_arm64.deb
 dpkg -i /var/tmp/firmware/linux-firmware-raspi2_6-0ubuntu3_arm64.deb
 
-# On Debian based distributions the kiwi built in way
-# to setup locale, keyboard and timezone via systemd tools
-# does not work because not(yet) provided by the distribution.
-# Thus the following manual steps to make the values provided
-# in the image description effective needs to be done.
-#
-#=======================================
-# Setup system locale
-#---------------------------------------
-echo "LANG=${kiwi_language}" > /etc/locale.conf
-
-#=======================================
-# Setup system keymap
-#---------------------------------------
-echo "KEYMAP=${kiwi_keytable}" > /etc/vconsole.conf
-echo "FONT=eurlatgr.psfu" >> /etc/vconsole.conf
-echo "FONT_MAP=" >> /etc/vconsole.conf
-echo "FONT_UNIMAP=" >> /etc/vconsole.conf
-
 #=======================================
 # Setup system timezone
 #---------------------------------------
 rm -f /etc/localtime
 ln -s /usr/share/zoneinfo/${kiwi_timezone} /etc/localtime
 
-#=======================================
-# Setup HW clock to UTC
-#---------------------------------------
-echo "0.0 0 0.0" > /etc/adjtime
-echo "0" >> /etc/adjtime
-echo "UTC" >> /etc/adjtime
-
 #======================================
-# Sysconfig Update
+# Create license information
 #--------------------------------------
-# Systemd controls the console font now
-echo FONT="$CONSOLE_FONT" >> /etc/vconsole.conf
+/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
 
 # Work around HDMI connector bug and network issues
 # No HDMI hotplug available
