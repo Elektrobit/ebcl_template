@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<image schemaversion="7.4" name="raspberry_pi_crinit">
+    <description type="system">
+        <author>Elektrobit Automotive GmbH</author>
+        <contact>info@elektrobit.com</contact>
+        <specification>Image description for Raspberry Pi 4 using crinit</specification>
+    </description>
+
+    <preferences>
+        <version>1.1.0</version>
+        <packagemanager>apt</packagemanager>
+        <type image="oem" filesystem="ext4" firmware="efi" initrd_system="none" bootpartition="false" efipartsize="128" devicepersistency="by-label" editbootinstall="editbootinstall_rpi.sh">
+            <bootloader name="custom"/>
+            <oemconfig>
+                <oem-resize>true</oem-resize>
+                <oem-swap>false</oem-swap>
+                <oem-skip-verify>true</oem-skip-verify>
+            </oemconfig>
+            <size unit="G">4</size>
+        </type>
+    </preferences>
+
+    <users>
+        <user password="linux" pwdformat="plain" home="/root" name="root" groups="root"/>
+        <user password="linux" pwdformat="plain" home="/home/ebcl" name="ebcl" groups="users,kvm" shell="/bin/bash"/>
+    </users>
+
+    <packages type="image">
+        <!-- raspi packages -->
+        <package name="linux-raspi"/>
+        <package name="ubuntu-raspi-settings"/>
+        <package name="linux-firmware"/>
+        <package name="u-boot-rpi"/>
+        <package name="u-boot-tools"/>
+        <package name="rpi-eeprom"/>
+        <package name="libraspberrypi-bin"/>
+        <!-- system -->
+        <!-- crinit and related packages -->
+        <package name="crinit"/>
+        <package name="crinit-shutdown"/>
+        <package name="elos"/>
+        <package name="elos-coredump"/>
+        <package name="netifd"/>
+        <package name="crinit-machine-id-gen"/>
+        <package name="udhcpc"/>
+        <package name="ubus"/>
+        <!-- core tools -->
+        <package name="netbase"/>
+        <package name="locales"/>
+        <package name="busybox-static"/>
+        <!-- other tools -->
+        <package name="sudo"/>
+        <package name="cron"/>
+        <package name="file"/>
+        <package name="findutils"/>
+        <!-- modprobe - for loading USB drivers -->
+        <package name="kmod"/>
+        <!-- licenses tool -->
+        <package name="dpkg-licenses"/>
+        <!-- ssh -->
+        <package name="openssh-server"/>
+        <package name="openssh-client"/>
+        <!-- network tools -->
+        <package name="iproute2"/>
+        <package name="iptables"/>
+        <package name="iputils-ping"/>
+        <!-- apt support -->
+        <package name="apt-utils"/>
+        <!-- required for apt gpg key verification -->
+        <package name="gnupg"/>
+        <!-- required for apt update -->
+        <package name="dialog"/>
+        <!-- add editors -->
+        <package name="vim"/>
+        <package name="nano"/>
+        <!-- debug tools -->
+        <package name="gdbserver"/>
+        <package name="libc6-dbg"/>
+        <package name="socat"/>
+        <package name="iperf3"/>
+        <package name="tcpdump"/>
+        <package name="traceroute"/>
+        <package name="strace"/>
+        <package name="fdisk"/>
+        <!-- time update -->
+        <package name="ntpdate"/>
+        <!-- resize root to SD card size -->
+        <!-- growpart command -->
+        <package name="cloud-utils"/>
+        <!-- resize2fs command -->
+        <package name="e2fsprogs"/>
+        <!-- system, only for buildtime -->
+        <!-- required for correct partition UUIDs -->
+        <package name="dracut"/>
+    </packages>
+
+    <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
+        <package name="bootstrap-root-ubuntu-jammy"/>
+    </packages>
+
+    <packages type="delete">
+        <!-- Force delete packages we don't need or want -->
+        <package name="bootstrap-root-ubuntu-jammy"/>
+        <package name="dracut"/>
+        <package name="dracut-core"/>
+        <package name="systemd"/>
+    </packages>
+</image>

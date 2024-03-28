@@ -1,0 +1,5 @@
+#!/bin/dash
+
+mount -t proc proc /proc
+
+exec /usr/bin/crinit
