@@ -1,0 +1,5 @@
+NAME = getty-ttyLF0
+COMMAND = /bin/setsid /sbin/agetty 115200 ttyLF0
+DEPENDS = ""
+RESPAWN = YES
+RESPAWN_RETRIES = 3

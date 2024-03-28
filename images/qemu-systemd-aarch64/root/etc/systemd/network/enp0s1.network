@@ -1,0 +1,8 @@
+[Match]
+Name=enp0s1
+
+[Network]
+DHCP=ipv4
+Address=fd00::eb:2/64
+Gateway=fe80::1
+IPv6DuplicateAddressDetection=none
