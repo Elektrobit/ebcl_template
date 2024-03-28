@@ -1,0 +1,9 @@
+NAME = sshd
+
+COMMAND = /bin/mkdir -p /run/sshd
+          /usr/sbin/sshd -D
+
+DEPENDS = ubus:spawn
+
+RESPAWN = YES
+RESPAWN_RETRIES = 3

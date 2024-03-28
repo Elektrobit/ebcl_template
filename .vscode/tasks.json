@@ -42,16 +42,16 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Image qemu-crinit (amd64)",
+      "label": "EBcL: Image qemu-crinit (x86_64)",
       "command": "box_build_image.sh",
       "args": [
-        "qemu-crinit-amd64/appliance.kiwi"
+        "qemu-crinit-x86_64/appliance.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build the amd64 QEMU crinit image."
+      "detail": "Build the x86_64 QEMU crinit image."
     },
     {
       "type": "shell",
@@ -68,23 +68,49 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Image qemu-systemd (amd64)",
+      "label": "EBcL: Image qemu-systemd (x86_64)",
       "command": "box_build_image.sh",
       "args": [
-        "qemu-systemd-amd64/appliance.kiwi"
+        "qemu-systemd-x86_64/appliance.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build the amd64 QEMU systemd image."
+      "detail": "Build the x86_64 QEMU systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image rdb2-systemd",
+      "command": "cross_build_image.sh",
+      "args": [
+        "rdb2-systemd/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot RDB2 systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Image rdb2-crinit",
+      "command": "cross_build_image.sh",
+      "args": [
+        "rdb2-crinit/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot RDB2 crinit image."
     },
     {
       "type": "shell",
       "label": "EBcL: Run QEMU crinit (aarch64)",
       "command": "qemu_efi_aarch64.sh",
       "args": [
-        "ebcl_qemu_crinit_aarch64/ebcl_qemu_crinit_aarch64.aarch64-1.0.0-0.qcow2"
+        "qemu_crinit_aarch64/qemu_crinit_aarch64.aarch64-1.1.0-0.qcow2"
       ],
       "group": {
         "kind": "build",
@@ -94,23 +120,23 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Run QEMU crinit (amd64)",
-      "command": "qemu_efi_amd64.sh",
+      "label": "EBcL: Run QEMU crinit (x86_64)",
+      "command": "qemu_efi_x86_64.sh",
       "args": [
-        "ebcl_qemu_crinit_amd64/ebcl_qemu_crinit_amd64.x86_64-1.0.0-0.qcow2"
+        "qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-1.1.0-0.qcow2"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Run the QEMU crinit amd64 image."
+      "detail": "Run the QEMU crinit x86_64 image."
     },
     {
       "type": "shell",
       "label": "EBcL: Run QEMU systemd (aarch64)",
       "command": "qemu_efi_aarch64.sh",
       "args": [
-        "ebcl_qemu_systemd_aarch64/ebcl_qemu_systemd_aarch64.aarch64-1.0.0-0.qcow2"
+        "qemu_systemd_aarch64/qemu_systemd_aarch64.aarch64-1.1.0-0.qcow2"
       ],
       "group": {
         "kind": "build",
@@ -120,16 +146,16 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Run QEMU systemd (amd64)",
-      "command": "qemu_efi_amd64.sh",
+      "label": "EBcL: Run QEMU systemd (x86_64)",
+      "command": "qemu_efi_x86_64.sh",
       "args": [
-        "ebcl_qemu_systemd_amd64/ebcl_qemu_systemd_amd64.x86_64-1.0.0-0.qcow2"
+        "qemu_systemd_x86_64/qemu_systemd_x86_64.x86_64-1.1.0-0.qcow2"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Run the QEMU systemd amd64 image."
+      "detail": "Run the QEMU systemd x86_64 image."
     },
     {
       "type": "shell",
@@ -172,16 +198,16 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Sysroot qemu-crinit (amd64)",
+      "label": "EBcL: Sysroot qemu-crinit (x86_64)",
       "command": "box_build_sysroot.sh",
       "args": [
-        "qemu-crinit-amd64/appliance_sysroot.kiwi"
+        "qemu-crinit-x86_64/appliance_sysroot.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Prepare sysroot amd64 QEMU crinit image."
+      "detail": "Prepare sysroot x86_64 QEMU crinit image."
     },
     {
       "type": "shell",
@@ -198,22 +224,50 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Sysroot qemu-systemd (amd64)",
+      "label": "EBcL: Sysroot qemu-systemd (x86_64)",
       "command": "box_build_sysroot.sh",
       "args": [
-        "qemu-systemd-amd64/appliance_sysroot.kiwi"
+        "qemu-systemd-x86_64/appliance_sysroot.kiwi"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Prepare sysroot amd64 QEMU systemd image."
+      "detail": "Prepare sysroot x86_64 QEMU systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot rdb2-systemd",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "rdb2-systemd/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot RDB2 systemd image."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Sysroot rdb2-crinit",
+      "command": "cross_build_sysroot.sh",
+      "args": [
+        "rdb2-crinit/appliance.kiwi"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Prepare sysroot RDB2 crinit image."
     },
     {
       "type": "shell",
       "label": "EBcL: App (aarch64)",
       "command": "cmake_aarch64.sh",
-      "args": [],
+      "args": [
+        "my-json-app"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -222,14 +276,16 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: App (amd64)",
-      "command": "cmake_amd64.sh",
-      "args": [],
+      "label": "EBcL: App (x86_64)",
+      "command": "cmake_x86_64.sh",
+      "args": [
+        "my-json-app"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build CMake App for amd64."
+      "detail": "Build CMake App for x86_64."
     },
     {
       "type": "shell",
@@ -246,7 +302,11 @@
       "type": "shell",
       "label": "EBcL: Generate Debian metadata for app",
       "command": "prepare_deb_metadata.sh",
-      "args": [],
+      "args": [
+        "my-json-app",
+        "my-json-app",
+        "1.1.0"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -255,20 +315,39 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Package app (amd64)",
-      "command": "build_package.sh",
-      "args": [],
+      "label": "EBcL: Generate Debian metadata for config",
+      "command": "prepare_deb_metadata.sh",
+      "args": [
+        "my-config",
+        "my-config",
+        "1.1.0"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Generate the amd64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
+      "detail": "Generate the Debian metadata for the app. Please update gpg-keys/env.sh before running this task!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Package app (x86_64)",
+      "command": "build_package.sh",
+      "args": [
+        "my-json-app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the x86_64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
     },
     {
       "type": "shell",
       "label": "EBcL: Package app (aarch64)",
       "command": "cross_build_package.sh",
-      "args": [],
+      "args": [
+        "my-json-app"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -288,9 +367,24 @@
     },
     {
       "type": "shell",
-      "label": "EBcL: Serve local repository",
+      "label": "EBcL: Serve app packages",
       "command": "serve_packages.sh",
-      "args": [],
+      "args": [
+        "result/app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Serve the apt repository containg the generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Serve workspace apt folder",
+      "command": "serve_packages.sh",
+      "args": [
+        "apt"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
@@ -301,7 +395,9 @@
       "type": "shell",
       "label": "EBcL: Build config package",
       "command": "build_config_package.sh",
-      "args": [],
+      "args": [
+        "my-config"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true

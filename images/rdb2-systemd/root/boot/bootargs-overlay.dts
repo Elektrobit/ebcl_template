@@ -1,0 +1,6 @@
+/dts-v1/;
+/plugin/;
+
+&{/chosen} {
+    bootargs = "console=ttyLF0,115200 earlycon nohz=off coherent_pool=64M root=/dev/mmcblk0p2 rw";
+};
