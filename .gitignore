@@ -14,4 +14,4 @@ result/app/*
 !apt/.gitkeep
 !bin/.gitkeep
 
-images/berrymill*.old
+images/berrymill*

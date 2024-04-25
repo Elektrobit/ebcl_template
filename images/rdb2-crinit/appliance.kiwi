@@ -33,8 +33,6 @@
         <package name="u-boot-s32-tools"/>
         <package name="arm-trusted-firmware-s32g"/>
         <package name="device-tree-compiler"/>
-        <package name="nxp-pfeng-firmware"/>
-        <package name="nxp-pfeng-dkms"/>
         <package name="nautilos-uboot-tools"/>
         <!-- system -->
         <!-- crinit and related packages -->

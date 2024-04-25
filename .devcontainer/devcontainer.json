@@ -1,9 +1,9 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "EB corbos Linux SDK 1.1.0",
+	"name": "EB corbos Linux SDK 1.1.1",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "linux.elektrobit.com/ebcl/sdk:1.1.0",
+	"image": "linux.elektrobit.com/ebcl/sdk:1.1.1",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
