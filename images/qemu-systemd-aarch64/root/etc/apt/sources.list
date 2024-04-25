@@ -1,2 +1,4 @@
-deb http://linux.elektrobit.com/eb-corbos-linux ebcl_1.1 prod
-deb http://linux.elektrobit.com/eb-corbos-linux ebcl_1.1 dev
+deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod
+deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl dev
+deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl all
+deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl main

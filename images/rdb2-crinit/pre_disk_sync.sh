@@ -8,18 +8,6 @@ set -ex
 chmod u+s /usr/bin/sudo
 
 #=======================================
-# Delete symlinks from /boot
-#---------------------------------------
-# symlinks not supported on fat and uboot is configured to do
-# fatboot which is the reason why the boot filesystem is set
-# to fat32
-for file in /boot/*;do
-    if [ -L ${file} ];then
-        rm -f ${file}
-    fi
-done
-
-#=======================================
 # Create /etc/hosts
 #---------------------------------------
 cat >/etc/hosts <<- EOF
@@ -92,6 +80,7 @@ cp /usr/lib/arm-trusted-firmware-s32g/s32g274ardb2/fip.s32 \
 #---------------------------------------
 (
     cd /boot
+    ls
     dtc -I dts -O dtb -o bootargs-overlay.dtbo bootargs-overlay.dts
     fdtoverlay -i fsl-s32g274a-rdb2.dtb -o target.dtb bootargs-overlay.dtbo
     mkimage -f bootargs.its fitImage
@@ -102,3 +91,16 @@ rm -f /boot/System.map*
 rm -f /boot/fsl-s32g274a-rdb2.dtb
 rm -f /boot/target.dtb
 
+#=======================================
+# Delete symlinks from /boot
+#---------------------------------------
+# symlinks not supported on fat and uboot is configured to do
+# fatboot which is the reason why the boot filesystem is set
+# to fat32
+for file in /boot/*;do
+    if [ -L ${file} ];then
+        rm -f ${file}
+    fi
+done
+
+chown -R root:root /boot
