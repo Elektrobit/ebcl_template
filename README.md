@@ -22,6 +22,8 @@ The workspace is structured in the following way:
     - _qemu-systemd-x86_64_: QEMU example image for Intel x86_64 CPU architecture using systemd init manager
     - _raspberry-pi-crinit_: Raspberry Pi 4 image using crinit init manager
     - _raspberry-pi-systemd_: Raspberry Pi 4 image using systemd init manager
+    - _rdb2-crinit_: RDB2 image using crinit init manager
+    - _rdb2_systemd_: RDB2 image using systemd init manager
 - _result_: build results
     - _app_: app build and packaging results
     - _image_: image build results
