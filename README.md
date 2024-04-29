@@ -119,6 +119,8 @@ Commands for local apt repository:
 
 - _gen_sign_key.sh_: generate a GPG key later used for Debian repository metadata signing.
   Please update your data in _gpg-keys/env.sh_ before running this command.
+  This script updates environment variables. Please run it as `source gen_sign_key.sh` to apply the
+  changes to the current shell.
 - _prepare_repo_config.sh_: generate apt repository metadata, signed with the available primary GPG key
   This command generates valid apt repository metadata for all Debian packages found in the _result/app_
   workspace folder. It also generates a Berrymill config template and config file containing the current

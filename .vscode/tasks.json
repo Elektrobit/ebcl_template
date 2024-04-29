@@ -326,7 +326,7 @@
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Generate the Debian metadata for the app. Please update gpg-keys/env.sh before running this task!"
+      "detail": "Generate the Debian metadata for the config. Please update gpg-keys/env.sh before running this task!"
     },
     {
       "type": "shell",
