@@ -2,3 +2,4 @@ deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod
 deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl dev
 deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl all
 deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl main
+deb http://de.archive.ubuntu.com/ubuntu jammy main restricted universe multiverse
