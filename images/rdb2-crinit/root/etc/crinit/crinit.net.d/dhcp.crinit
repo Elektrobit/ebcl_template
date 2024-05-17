@@ -1,0 +1,6 @@
+NAME = netifd-dhcp
+
+COMMAND = /sbin/netifd -r /var/run/resolv.conf.netifd -c /etc/config/network-dhcp/
+DEPENDS = "ubus:spawn"
+PROVIDES = network:spawn
+RESPAWN = YES

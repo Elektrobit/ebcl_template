@@ -1,0 +1,7 @@
+NAME = firstboot_resize
+
+COMMAND = growpart /dev/mmcblk0 2
+          resize2fs /dev/mmcblk0p2
+          rm /etc/crinit/crinit.d/fistboot_resize.crinit
+
+DEPENDS = @provided:tmpdir

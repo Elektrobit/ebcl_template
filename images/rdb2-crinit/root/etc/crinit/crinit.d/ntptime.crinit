@@ -1,0 +1,5 @@
+NAME = ntptime
+
+COMMAND = /usr/sbin/ntp_time.sh
+DEPENDS = @provided:tmpdir
+RESPAWN = NO

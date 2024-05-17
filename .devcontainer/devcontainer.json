@@ -1,19 +1,15 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "EB corbos Linux SDK 1.0.0",
+	"name": "EB corbos Linux SDK 1.1.1",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "linux.elektrobit.com/ebcl/sdk:latest",
-
+	"image": "linux.elektrobit.com/ebcl/sdk:1.1.1",
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "uname -a",
-
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
@@ -34,12 +30,15 @@
 			]
 		}
 	},
-
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "ebcl",
 	"privileged": false,
 	"mounts": [
-		{ "source": "ebcl-build-boxes", "target": "/home/ebcl/.kiwi_boxes", "type": "volume" }
+		{
+			"source": "ebcl-build-boxes",
+			"target": "/home/ebcl/.kiwi_boxes",
+			"type": "volume"
+		}
 	],
 	"workspaceMount": "source=${localWorkspaceFolder},target=/build/workspace,type=bind,consistency=cached",
 	"workspaceFolder": "/build/workspace"

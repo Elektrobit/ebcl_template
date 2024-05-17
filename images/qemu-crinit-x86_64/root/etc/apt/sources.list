@@ -1,0 +1,5 @@
+deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod dev
+deb [arch=amd64] http://archive.ubuntu.com/ubuntu jammy main universe multiverse restricted
+deb [arch=amd64] http://archive.ubuntu.com/ubuntu jammy-security main universe multiverse restricted
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main universe multiverse restricted
+deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main universe multiverse restricted

@@ -1,0 +1,8 @@
+NAME = earlysetup
+
+COMMAND = /bin/hostname qemucrinitvm
+          /usr/bin/machine-id-gen
+          
+PROVIDES = machine-id:wait
+RESPAWN = NO
+DEPENDS = ""
