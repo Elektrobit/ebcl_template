@@ -82,6 +82,14 @@
         <package name="tcpdump"/>
         <package name="traceroute"/>
         <package name="strace"/>
+        <package name="fdisk"/>
+        <!-- time update -->
+        <package name="ntpdate"/>
+        <!-- resize root to SD card size -->
+        <!-- growpart command -->
+        <package name="cloud-utils"/>
+        <!-- resize2fs command -->
+        <package name="e2fsprogs"/>
         <!-- system, only for buildtime -->
         <!-- required for correct partition UUIDs -->
         <package name="dracut"/>

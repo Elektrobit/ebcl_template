@@ -1,9 +1,9 @@
 # loads usb related kernel modules
 NAME = usb-modprobe
 
-COMMAND = /usr/bin/modprobe xhci_pci
-          /usr/bin/modprobe usbkbd
-          /usr/bin/modprobe usbhid
+COMMAND = /usr/sbin/modprobe xhci_pci
+          /usr/sbin/modprobe usbkbd
+          /usr/sbin/modprobe usbhid
 
-DEPENDS = ""
+DEPENDS = @provided:tmpdir
 RESPAWN = NO

@@ -14,10 +14,6 @@ baseSetRunlevel 3
 #======================================
 # Create license information
 #--------------------------------------
-# This data gets updated in images.sh when the
-# strip down of the system in terms of packages
-# has been completed. At this time only a subset
-# of the information produced now will be relevant
 /usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
 
 #==================================
@@ -56,4 +52,5 @@ done
 #--------------------------------------
 baseInsertService ssh
 baseInsertService systemd-networkd
-baseInsertService ntp
+baseInsertService systemd-resolved
+baseInsertService systemd-timesyncd

@@ -15,7 +15,7 @@
             <oemconfig>
                 <oem-resize>false</oem-resize>
             </oemconfig>
-            <size unit="G">2</size>
+            <size unit="G">4</size>
         </type>
     </preferences>
 
@@ -26,7 +26,7 @@
 
     <packages type="image">
         <!-- kernel -->
-        <package name="linux-image-unsigned-5.15.0-78-generic"/>
+        <package name="linux-generic"/>
         <!-- bootloader -->
         <package name="grub-efi-arm64" arch="aarch64"/>
         <!-- system -->
@@ -43,6 +43,8 @@
         <package name="cron"/>
         <package name="file"/>
         <package name="findutils"/>
+<!-- modprobe - for loading USB drivers -->
+        <package name="kmod"/>
         <!-- licenses tool -->
         <package name="dpkg-licenses"/>
         <!-- ssh -->
@@ -72,6 +74,7 @@
         <!-- system, only for buildtime -->
         <!-- required for correct partition UUIDs -->
         <package name="dracut"/>
+        <package name="zstd"/>
     </packages>
 
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">

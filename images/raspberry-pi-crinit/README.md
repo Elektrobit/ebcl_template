@@ -1,4 +1,4 @@
-# Raspberry Pi image
+# Raspberry Pi 4 crinit image
 
 The files in this folder can be used to provision a Raspberry Pi 4 image with crinit as an init manager.
 

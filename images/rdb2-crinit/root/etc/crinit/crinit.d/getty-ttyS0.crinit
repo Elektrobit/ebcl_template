@@ -1,5 +1,0 @@
-NAME = getty-ttyS0
-COMMAND[0] = /bin/setsid /bin/getty 115200 ttyS0
-DEPENDS = ""
-RESPAWN = YES
-RESPAWN_RETRIES = 3

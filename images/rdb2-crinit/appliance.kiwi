@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="7.4" name="adg-on-ebcl-nxp-rdb2">
+<image schemaversion="7.4" name="rdb2_crinit">
     <description type="system">
         <author>Elektrobit Automotive GmbH</author>
         <contact>info@elektrobit.com</contact>
-        <specification>Minimum NXP RDB2 image with crinit</specification>
+        <specification>Image description for NXP RDB2 using crinit</specification>
     </description>
 
     <preferences>
@@ -26,56 +26,76 @@
 
     <packages type="image">
         <!-- kernel -->
-        <package name="linux-image-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
-        <package name="linux-modules-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
-        <package name="linux-modules-extra-5.15.0-59.65-bsp35.0-ppa14-nxp-s32"/>
+        <package name="linux-image-unsigned-5.15.0-1023-s32-eb"/>
+        <package name="linux-modules-5.15.0-1023-s32-eb"/>
+        <package name="linux-modules-extra-5.15.0-1023-s32-eb"/>
         <!-- bootloader -->
+        <package name="u-boot-s32-tools"/>
         <package name="arm-trusted-firmware-s32g"/>
-        <package name="nautilos-uboot-tools"/>
         <package name="device-tree-compiler"/>
-        <package name="nxp-s32g-firmware"/>
-        <!-- network, ssh, sudo -->
-        <package name="openssh-client"/>
-        <package name="openssh-server"/>
-        <package name="netbase"/>
-        <package name="iproute2"/>
-        <package name="iptables"/>
-        <package name="iputils-ping"/>
-        <package name="sudo"/>
-        <package name="cron"/>
-        <package name="zstd"/>
+        <package name="nautilos-uboot-tools"/>
         <!-- system -->
+        <!-- crinit and related packages -->
         <package name="crinit"/>
         <package name="crinit-shutdown"/>
         <package name="elos"/>
         <package name="elos-coredump"/>
-        <package name="dracut"/>
+        <package name="netifd"/>
+        <package name="crinit-machine-id-gen"/>
+        <package name="udhcpc"/>
+        <package name="ubus"/>
+        <!-- core tools -->
+        <package name="netbase"/>
         <package name="locales"/>
         <package name="busybox-static"/>
-        <package name="dpkg-licenses"/>
+        <!-- other tools -->
+        <package name="sudo"/>
+        <package name="cron"/>
         <package name="file"/>
         <package name="findutils"/>
+        <!-- modprobe - for loading USB drivers -->
+        <package name="kmod"/>
+        <!-- licenses tool -->
+        <package name="dpkg-licenses"/>
+        <!-- ssh -->
+        <package name="openssh-server"/>
+        <package name="openssh-client"/>
+        <!-- network tools -->
+        <package name="iproute2"/>
+        <package name="iptables"/>
+        <package name="iputils-ping"/>
+        <!-- apt support -->
         <package name="apt-utils"/>
         <!-- required for apt gpg key verification -->
         <package name="gnupg"/>
         <!-- required for apt update -->
         <package name="dialog"/>
-        <!-- required for apt -->
-        <package name="perl"/>
-        <package name="perl-base"/>
-        <package name="debconf"/>
-        <!-- ntp -->
-        <package name="tzdata"/>
-        <package name="ntp"/>
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
-        <!-- ADG dependencies -->
-        <package name="libstdc++6"/>
+        <!-- debug tools -->
+        <package name="gdbserver"/>
+        <package name="libc6-dbg"/>
+        <package name="socat"/>
+        <package name="iperf3"/>
+        <package name="tcpdump"/>
+        <package name="traceroute"/>
+        <package name="strace"/>
+        <package name="fdisk"/>
+        <!-- time update -->
+        <package name="ntpdate"/>
+        <!-- resize root to SD card size -->
+        <!-- growpart command -->
+        <package name="cloud-utils"/>
+        <!-- resize2fs command -->
+        <package name="e2fsprogs"/>
+        <!-- system, only for buildtime -->
+        <!-- required for correct partition UUIDs -->
+        <package name="dracut"/>
+        <package name="zstd"/>
     </packages>
 
     <packages type="bootstrap" bootstrap_package="bootstrap-root-ubuntu-jammy">
-        <!-- only exists to make sure obs puts the package into the worker repo -->
         <package name="bootstrap-root-ubuntu-jammy"/>
     </packages>
 

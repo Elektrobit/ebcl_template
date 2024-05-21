@@ -1,3 +1,0 @@
-NAME = enable-tun
-
-COMMAND = /bin/chmod o+rw /dev/net/tun

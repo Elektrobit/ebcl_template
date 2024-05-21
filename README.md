@@ -22,6 +22,8 @@ The workspace is structured in the following way:
     - _qemu-systemd-x86_64_: QEMU example image for Intel x86_64 CPU architecture using systemd init manager
     - _raspberry-pi-crinit_: Raspberry Pi 4 image using crinit init manager
     - _raspberry-pi-systemd_: Raspberry Pi 4 image using systemd init manager
+    - _rdb2-crinit_: RDB2 image using crinit init manager
+    - _rdb2_systemd_: RDB2 image using systemd init manager
 - _result_: build results
     - _app_: app build and packaging results
     - _image_: image build results
@@ -117,6 +119,8 @@ Commands for local apt repository:
 
 - _gen_sign_key.sh_: generate a GPG key later used for Debian repository metadata signing.
   Please update your data in _gpg-keys/env.sh_ before running this command.
+  This script updates environment variables. Please run it as `source gen_sign_key.sh` to apply the
+  changes to the current shell.
 - _prepare_repo_config.sh_: generate apt repository metadata, signed with the available primary GPG key
   This command generates valid apt repository metadata for all Debian packages found in the _result/app_
   workspace folder. It also generates a Berrymill config template and config file containing the current

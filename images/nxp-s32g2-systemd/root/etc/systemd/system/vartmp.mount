@@ -1,9 +1,0 @@
-[Unit]
-Description=Bind Mount /var/tmp to /tmp
-Before=multi-user.target
-
-[Mount]
-What=/var/tmp
-Where=/tmp
-Type=none
-Options=rw,noexec,nosuid,nodev,bind

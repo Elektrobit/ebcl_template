@@ -47,10 +47,9 @@ ln -s /usr/share/zoneinfo/${kiwi_timezone} /etc/localtime
 /usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
 
 #======================================
-# Set hostname and machine-id
+# Set hostname
 #--------------------------------------
 echo "raspberrypi4crinit" > /etc/hostname
-echo "raspberrypi4crinit" > /etc/machine-id
 
 # Work around HDMI connector bug and network issues
 # No HDMI hotplug available

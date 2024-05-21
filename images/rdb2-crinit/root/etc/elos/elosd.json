@@ -7,10 +7,14 @@
       "LogLevel": "Info",
       "EventBlacklist": ".event.messageCode 2000 EQ",
       "authorizedProcesses": [
-        ".process.uid 0 EQ .process.gid 0 EQ .process.exec AND '/bin/elosc' STRCMP AND",
+        ".process.uid 0 EQ .process.gid 0 EQ AND .process.exec '/bin/elosc' STRCMP AND",
         ".process.gid 200 EQ .process.exec '/bin/elosc' STRCMP AND",
         ".process.pid 1 EQ"
       ],
+      "ClientInputs": {
+        "PluginSearchPath": "/usr/local/lib/elos/client",
+        "Plugins": {}
+      },
       "EventLogging": {
         "PluginSearchPath": "/usr/lib/aarch64-linux-gnu/elos/backend",
         "Plugins": {
@@ -51,6 +55,14 @@
               "1102": "1 1 EQ"
             }
           }
+        },
+        "Shmem": {
+          "ShmemFile": "scanner_shmem",
+          "ShmemCreate": true,
+          "ShmemLogEntries": 256,
+          "ShmemOffset": 0,
+          "SemFile": "scanner_shmem_sem",
+          "SemCreate": true
         }
       }
     }
