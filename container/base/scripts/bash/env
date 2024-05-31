@@ -1,0 +1,28 @@
+#!/bin/bash 
+
+# add scripts to path
+export PATH="/build/bin:$PATH"
+
+echo "SDK version $(cat /etc/sdk_version)"
+
+# add workspace bin folder if it exists
+WSBIN="/workspace/bin"
+if [ -d "$WSBIN" ]; then
+    echo "Adding '/build/workspace/bin' to PATH..."    
+    export PATH="/build/workspace/bin:$PATH"
+fi
+
+# source identity if it exists
+IDENTITY="/build/identity/env"
+if [ -f "$IDENTITY" ]; then
+    echo "Sourcing '${IDENTITY}'..."    
+    source $IDENTITY
+else
+    IDENTITY="/workspace/identity/env"
+    if [ -f "$IDENTITY" ]; then
+        echo "Sourcing '${IDENTITY}'..."    
+        source $IDENTITY
+    fi
+fi
+
+overlay_mount /build/images
