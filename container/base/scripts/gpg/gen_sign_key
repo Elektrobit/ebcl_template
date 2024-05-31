@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Ensure env is up-to-date
+source /build/workspace/gpg-keys/env.sh
+GNUPGHOME="/build/workspace/gpg-keys/.gnupg"
+export GNUPGHOME
+
+# prepare folder if not exists
+mkdir -p $GNUPGHOME
+chmod -R 700 $GNUPGHOME
+
+# generate gnupg script
+cp /build/scripts/gen_key_script /build/workspace/gpg-keys/
+sed -i "s/DEBFULLNAME/${DEBFULLNAME}/g" /build/workspace/gpg-keys/gen_key_script
+sed -i "s/DEBEMAIL/${DEBEMAIL}/g" /build/workspace/gpg-keys/gen_key_script
+
+# test if key already exists
+gpg --list-secret-keys $DEBEMAIL
+# get appliance name
+if [ $? -ne 0 ]; then
+    gpg --batch --gen-key /build/workspace/gpg-keys/gen_key_script
+fi
+
+gpg --list-keys
+gpg --list-secret-keys
+
+sudo chown -R ebcl:ebcl $GNUPGHOME
+sudo chmod -R 700 $GNUPGHOME

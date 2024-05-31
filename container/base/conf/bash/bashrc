@@ -1,0 +1,5 @@
+echo "Welcome to the EB corbos Linux SDK"
+
+alias ll="ls -laF"
+
+source /build/bin/env
