@@ -23,7 +23,7 @@ function build_container() {
 
 export BASE_CONTAINER_NAME
 
-FOLDERS="base pbuilder"
+FOLDERS="base pbuilder rust"
 
 for FOLDER in $FOLDERS; do
     CONTAINER_NAME="${REPO}/${BASE_NAME}_${FOLDER}:${VERSION}"
