@@ -25,4 +25,6 @@ else
     fi
 fi
 
-overlay_mount /build/images
+if [ ! -d "/tmp/build/images" ]; then
+    overlay_mount /build/images
+fi
