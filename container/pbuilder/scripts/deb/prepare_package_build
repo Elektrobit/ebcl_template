@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# maintainer
+source /build/identity/env
+
+if [ -z "$APP_NAME" ]; then
+    export APP_NAME="$1"
+fi
+
+if [ -z "$APP_VERSION" ]; then
+    export APP_VERSION="0.0.1"
+fi
+
+# source identity if it exists
+IDENTITY="/build/identity/env"
+if [ -f "$IDENTITY" ]; then
+    echo "Sourcing '${IDENTITY}'..."    
+    source $IDENTITY
+else
+    IDENTITY="/workspace/identity/env"
+    if [ -f "$IDENTITY" ]; then
+        echo "Sourcing '${IDENTITY}'..."    
+        source $IDENTITY
+    fi
+fi
+
+APP_SRC=$1
+
+# complete app folder path
+if [[ "${APP_SRC}" != "/"* ]]; then
+    # handle relative path
+    if [ ! -d "${APP_SRC}" ]; then
+        # relative path from current folder does not exist
+        # use relative path in workspace apps folder
+        APP_SRC="/workspace/apps/${APP_SRC}"
+    else
+        APP_SRC=$(realpath $APP_SRC)
+    fi
+fi
+
+echo "Using app source from: ${APP_SRC}"
+
+# set APP_NAME variable
+if [ -f "debian/control" ]; then
+    APP_NAME=$(cat debian/control  | grep "Source:" | cut -c9-)
+    echo "Update source package name to ${APP_NAME}"
+fi
+
+# folder following Debian naming convention
+BUILD_FOLDER="/tmp/${APP_NAME}-${APP_VERSION}"
+
+# delete old build results and app folder
+sudo rm -rf $BUILD_FOLDER
+sudo rm -rf /tmp/${APP_NAME}*
+
+# prepare new build folder
+mkdir -p $BUILD_FOLDER
+
+cp -R ${APP_SRC}/* "${BUILD_FOLDER}"
+cd $BUILD_FOLDER
+
+export APP_SRC="${APP_SRC}"
+export BUILD_FOLDER="${BUILD_FOLDER}"
+export APP_NAME="${APP_NAME}"
+
+echo "package name: ${APP_NAME}"
+echo "package version: ${APP_VERSION}"

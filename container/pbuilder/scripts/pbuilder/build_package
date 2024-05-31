@@ -1,0 +1,37 @@
+#!/bin/bash
+
+usage(){
+>&2 cat << EOF
+Usage: $0 app_name package_arch
+EOF
+exit 1
+}
+
+if [[ $# -lt 2 ]]; then
+  usage
+  exit 1
+fi
+
+ARCH=$2
+
+# prepare build - source for environment variable update
+source /build/bin/prepare_package_build $@
+
+DATE=$(date '+%Y-%m-%d_%H-%M-%S')
+FOLDER="/build/results/packages/package_${DATE}"
+
+mkdir -p ${FOLDER}
+
+set -e
+
+echo "Preparing pbuilder environment ..."
+if [ ! -f "/var/cache/pbuilder/base.tgz" ]; then
+  sudo pbuilder create
+else
+  echo "/var/cache/pbuilder/base.tgz already exists..."
+fi
+
+echo "Building package for architecture $ARCH ..."
+pdebuild --buildresult $FOLDER -- --host-arch $ARCH
+
+cp /tmp/${APP_NAME}_* "${FOLDER}"
