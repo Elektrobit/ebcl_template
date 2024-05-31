@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# delete old list
+rm "${1}/debian/install"
+
+# find files
+FILES=$(cd $1; find . -type f -not -path "*/.*" -not -path "./debian/*" -not -name "README*")
+
+for FILE in $FILES
+do
+	dir="$(dirname  $FILE)"
+	# find path is ./etc/..., drop first char to get install path
+	install_path="${dir:1}"
+	if [ -z "$install_path" ]
+	then
+		# handle special case of no subfolder
+		install_path="/"
+	fi
+	# add file to list
+	echo "$FILE $install_path" >> "${1}/debian/install"
+done

@@ -1,0 +1,7 @@
+echo "Applying fix for missing arm64 architecture in archive.ubuntu.com"
+echo "Original apt list:"
+cat /etc/apt/sources.list
+echo "Adding architecture tag ..."
+sed -i -e 's/deb http:\/\/archive.ubuntu.com/deb [arch=amd64] http:\/\/archive.ubuntu.com/g' /etc/apt/sources.list
+echo "Modified apt list:"
+cat /etc/apt/sources.list
