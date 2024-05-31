@@ -1,6 +1,10 @@
 #!/bin/bash
 
+# Used feature layers.
+LAYERS="base pbuilder rust kiwi"
+# Container version
 VERSION="testing"
+
 BASE_NAME="sdk"
 REPO="linux.elektrobit.com/ebcl"
 BASE_CONTAINER_NAME="ubuntu:22.04"
@@ -23,9 +27,7 @@ function build_container() {
 
 export BASE_CONTAINER_NAME
 
-FOLDERS="base pbuilder rust"
-
-for FOLDER in $FOLDERS; do
+for FOLDER in $LAYERS; do
     CONTAINER_NAME="${REPO}/${BASE_NAME}_${FOLDER}:${VERSION}"
     build_container
     BASE_CONTAINER_NAME="$REPO/${BASE_NAME}_${FOLDER}:${VERSION}"
