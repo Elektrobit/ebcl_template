@@ -4,13 +4,13 @@ FOLDER=$(realpath $1)
 
 echo "Mounting $FOLDER as rw using overlay."
 
-mkdir -p /tmp/overlay
-mkdir -p /tmp$FOLDER
-
 if [ -d "/tmp$FOLDER" ]; then
     echo "/tmp$FOLDER folder already exists."
     exit 1
 fi
+
+mkdir -p /tmp/overlay
+mkdir -p /tmp$FOLDER
 
 MOUNT=$(sudo mount | grep "/tmp/overlay")
 if [ $? -ne 0 ]; then

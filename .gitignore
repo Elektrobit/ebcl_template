@@ -17,3 +17,4 @@ result/app/*
 images/berrymill*
 
 book
+.venv

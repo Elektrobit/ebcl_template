@@ -86,7 +86,7 @@ RUN chown -R $CONTAINER_USER:$CONTAINER_USER /build/bin && \
 WORKDIR /workspace
 
 # Write version
-RUN echo "1.1.1" > /etc/sdk_version
+RUN echo "1.2" > /etc/sdk_version
 
 USER $CONTAINER_USER
 

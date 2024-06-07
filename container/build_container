@@ -9,14 +9,12 @@ BASE_NAME="sdk"
 REPO="linux.elektrobit.com/ebcl"
 BASE_CONTAINER_NAME="ubuntu:22.04"
 
-if [ ! -z $1 ]; then
-    BUILDER=$1
-else
-    # docker or podman
+if [ -z $BUILDER ]; then
+    # docker or buildah
     BUILDER="docker"
 fi
 
-echo "BUILDER: ${RUNNER}"
+echo "BUILDER: ${BUILDER}"
 
 function build_container() {
     $BUILDER build \
