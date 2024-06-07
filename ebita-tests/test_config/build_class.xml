@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="build_class" module="build" class="Build">
+    <testcases>
+        <testcase uid="build_containers" method="build_containers"/>
+    </testcases>
+</testclass>

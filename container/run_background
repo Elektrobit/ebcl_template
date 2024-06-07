@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./run_container 'sleep infinity' 2>&1 1>/dev/null &

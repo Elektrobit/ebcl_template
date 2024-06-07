@@ -12,8 +12,8 @@ RUN rustup target add aarch64-unknown-linux-gnu
 
 # Add rust binaries to PATH
 USER root
-RUN echo "PATH=$PATH:~/.cargo/bin" >> /home/$CONTAINER_USER/.bashrc
-RUN echo "PATH=$PATH:/home/$CONTAINER_USER/.cargo/bin" >> /root/.bashrc
+RUN echo "export PATH=\$PATH:~/.cargo/bin" >> /home/$CONTAINER_USER/.bashrc
+RUN echo "export PATH=\$PATH:/home/$CONTAINER_USER/.cargo/bin" >> /root/.bashrc
 
 USER $CONTAINER_USER
 

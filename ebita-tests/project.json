@@ -1,0 +1,38 @@
+{
+  "project": {
+    "name": "EBcL SDK Tests",
+    "description": "Tests for the EB corbos Linux SDK",
+    "includes": [],
+    "test_config_folders": [
+      "test_config"
+    ],
+    "python_includes": [
+      "tests"
+    ]
+  },
+  "report": {
+    "report_handlers": [
+      {
+        "name":  "html"
+      },
+      {
+        "name":  "csv"
+      },
+      {
+        "name": "junit"
+      }
+    ]
+  },
+  "execution": {
+    "default_engine": "ita_py",
+    "enable_engine_process": false,
+    "engines": {
+      "ita_py": {
+        "executable": ["${sys.executable}", "${env.EBITA_DEFAULT_ENGINE}"],
+        "python_includes": [
+          "tests"
+        ]
+      }
+    }
+  }
+}

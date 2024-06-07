@@ -1,0 +1,13 @@
+#!/bin/bash
+
+VERSION="testing"
+
+if [ -z $RUNNER ]; then
+    # docker or podman
+    RUNNER="docker"
+fi
+
+echo "RUNNER: ${RUNNER}"
+echo "COMMAND: $1"
+
+$RUNNER exec -it ebcl_sdk bash -c "source ~/.bashrc; $1"

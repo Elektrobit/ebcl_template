@@ -1,0 +1,12 @@
+#!/bin/bash
+
+VERSION="testing"
+
+if [ -z $RUNNER ]; then
+    # docker or podman
+    RUNNER="docker"
+fi
+
+echo "RUNNER: ${RUNNER}"
+
+$RUNNER stop ebcl_sdk

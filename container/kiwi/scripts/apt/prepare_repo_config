@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /build/bin/env
+source /build/bin/ebcl_env
 
 # get IP of Docker container
 IP=$(hostname -I | cut -d " " -f1 -s)
