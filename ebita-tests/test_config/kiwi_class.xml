@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="kiwi_class" module="kiwi" class="Kiwi">
+    <testcases>
+        <testcase uid="kiwi_is_available" method="kiwi_is_available" />
+    </testcases>
+</testclass>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="rust_class" module="rust" class="Rust">
+    <testcases>
+        <testcase uid="rustc_is_available" method="rustc_is_available" />
+        <testcase uid="cargo_is_available" method="cargo_is_available" />
+    </testcases>
+</testclass>

@@ -10,6 +10,9 @@ class Pbuilder(TestClassBase):
         """Stop the Docker SDK container."""
         stop_container()
 
+    def setup(self, arch):
+        self.arch = arch
+
     def package_config_files(self):
         # delete old metadata
         run_command('rm -rf /workspace/apps/my-config/debian')
@@ -44,6 +47,9 @@ class Pbuilder(TestClassBase):
         assert lines[-2] == ('etc/ssh/sshd_config.d/10-root-login.conf: ASCII text')
     
     def package_app(self):
+        #================================
+        # Prepare Debian metadata for app
+        #================================
         # delete old metadata
         run_command('rm -rf /workspace/apps/my-json-app/debian')
         # generate debian metadata
@@ -54,22 +60,21 @@ class Pbuilder(TestClassBase):
         (_lines, stdout, _stderr) = run_command('cat /workspace/apps/my-json-app/debian/control')
         assert 'Architecture: any' in stdout
         # add app build time dependencies        
-        run_command('sed -i \"5s/.*/Build-Depends: debhelper-compat (= 13), cmake, pkg-config, libjsoncpp-dev/\" ../apps/my-json-app/debian/control')
+        run_command('sed -i \'5s@.*@Build-Depends: debhelper-compat (= 13), cmake, pkg-config, libjsoncpp-dev@g\' /workspace/apps/my-json-app/debian/control')
+        
+        #==============
+        # Build the app
+        #==============
         # delete old results
         run_command('rm -rf /workspace/results/packages/my-json-app_*')
         # build Debian packages
-        run_command('build_package my-json-app amd64')
-        run_command('build_package my-json-app arm64')
+        print(f'Building package for arch {self.arch}.')
+        run_command(f'build_package my-json-app {self.arch}')
         # find result folder
         (lines, _stdout, _stderr) = run_command('find /workspace/results/packages -type \"d\" -name \"my-json-app_*\"')
         result_folder = lines[-2]
         print(f'Result folder: {result_folder}')
-        # check amd64 deb exists
-        (lines, _stdout, _stderr) = run_command(f'file {result_folder}/my-json-app_0.0.1_amd64.deb')
+        # check deb exists
+        (lines, _stdout, _stderr) = run_command(f'file {result_folder}/my-json-app_0.0.1_{self.arch}.deb')
         print(f'Line: {lines[-2]}')
-        assert lines[-2].startswith(f'{result_folder}/my-json-app_0.0.1_amd64.deb: Debian binary package (format 2.0)')
-        # check arm64 deb exists
-        (lines, _stdout, _stderr) = run_command(f'file {result_folder}/my-json-app_0.0.1_arm64.deb')
-        print(f'Line: {lines[-2]}')
-        assert lines[-2].startswith(f'{result_folder}/my-json-app_0.0.1_arm64.deb: Debian binary package (format 2.0)')
-
+        assert lines[-2].startswith(f'{result_folder}/my-json-app_0.0.1_{self.arch}.deb: Debian binary package (format 2.0)')

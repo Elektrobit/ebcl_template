@@ -2,6 +2,15 @@
 <testclass uid="pbuilder_class" module="pbuilder" class="Pbuilder">
     <testcases>
         <testcase uid="package_config_files" method="package_config_files" />
-        <testcase uid="package_app" method="package_app" />
+        <testcase uid="package_app_amd64" method="package_app">
+            <parameters>
+                <arch>amd64</arch>
+            </parameters>
+        </testcase>
+        <testcase uid="package_app_arm64" method="package_app">
+            <parameters>
+                <arch>arm64</arch>
+            </parameters>
+        </testcase>
     </testcases>
 </testclass>
