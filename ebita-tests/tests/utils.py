@@ -49,18 +49,22 @@ def run_command(command, check=True, no_error=True):
             f'{runner} exec -it ebcl_sdk bash -c "source ~/.bashrc; {command}"',
             shell=True,
             capture_output=True,
-            check=check
+            check=False
         )
-        
+
         stderr = result.stderr.decode('utf8')
         stdout = result.stdout.decode('utf8')
-        lines = [line.strip() for line in stdout.split('\n')]
 
-        print(f'RESULT: {result}')
+        print(f'COMMAND: {result.args}')
+        print(f'RETURN CODE: {result.returncode}')
         print(f'STDERR: {stderr}')
         print(f'STDOUT: {stdout}')
-        print(f'LINES: {lines}')
 
+        if check:
+            assert result.returncode == 0
+
+        lines = [line.strip() for line in stdout.split('\n')]
+        
         if no_error:
             assert stderr == ''
 
