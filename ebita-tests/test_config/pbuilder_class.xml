@@ -2,5 +2,6 @@
 <testclass uid="pbuilder_class" module="pbuilder" class="Pbuilder">
     <testcases>
         <testcase uid="package_config_files" method="package_config_files" />
+        <testcase uid="package_app" method="package_app" />
     </testcases>
 </testclass>
