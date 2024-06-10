@@ -1,16 +1,14 @@
 sysroot*/**/*
 
 # do not ignore .gitkeep files:
-result*/**
-!result/.gitkeep
-!result/image
-result/image/*
-!result/image/.gitkeep
-!result/app
-result/app/*
-!result/app/.gitkeep
-!sysroot_aarch64/.gitkeep
-!sysroot_x86_64/.gitkeep
+results*/**
+!results/.gitkeep
+!results/images
+results/image/*
+!results/images/.gitkeep
+!results/packages
+results/packages/*
+!results/packages/.gitkeep
 !apt/.gitkeep
 !bin/.gitkeep
 

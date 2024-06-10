@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testclass uid="pbuilder_class" module="pbuilder" class="Pbuilder">
     <testcases>
-        <testcase uid="sdk_version2" method="sdk_version" />
+        <testcase uid="package_config_files" method="package_config_files" />
     </testcases>
 </testclass>
