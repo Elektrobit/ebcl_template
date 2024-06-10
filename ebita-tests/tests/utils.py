@@ -4,7 +4,7 @@ import docker
 import docker.errors
 
 
-def cont_cmd(command):
+def cont_cmd(command, check=True):
     """Run shell command in container folder."""
     workdir = os.path.abspath(os.path.join((os.path.abspath(__file__)), os.path.pardir, os.path.pardir, os.path.pardir, 'container'))
     print(f'WORKDIR: {workdir}')
@@ -12,7 +12,7 @@ def cont_cmd(command):
         command,
         cwd=workdir,
         shell=True,
-        check=True
+        check=check
     ) 
 
 
@@ -34,9 +34,9 @@ def run_container():
 def stop_container():
     """Stop the SDK container."""
     # kill the sleep to stop the container
-    run_command('pkill -9 -f sleep')
+    run_command('pkill -9 -f sleep', check=False, no_error=False)
     # just to ensure it's really stopped
-    cont_cmd('./stop_container')
+    cont_cmd('./stop_container', check=False)
 
 
 def run_command(command, check=True, no_error=True):
@@ -49,7 +49,7 @@ def run_command(command, check=True, no_error=True):
             f'{runner} exec -it ebcl_sdk bash -c "source ~/.bashrc; {command}"',
             shell=True,
             capture_output=True,
-            check=no_error
+            check=check
         )
         
         stderr = result.stderr.decode('utf8')

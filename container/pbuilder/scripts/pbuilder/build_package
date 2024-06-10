@@ -7,18 +7,26 @@ EOF
 exit 1
 }
 
-if [[ $# -lt 2 ]]; then
+if [[ $# -lt 1 ]]; then
   usage
   exit 1
 fi
 
-ARCH=$2
+if [ -z "$2"]; then
+  ARCH="amd64"
+else
+  ARCH=$2
+fi
 
 # prepare build - source for environment variable update
 source /build/bin/prepare_package_build $@
 
 DATE=$(date '+%Y-%m-%d_%H-%M-%S')
-FOLDER="/build/results/packages/package_${DATE}"
+if [ -z "$APP_NAME" ]; then
+  FOLDER="/build/results/packages/package_${DATE}"
+else
+  FOLDER="/build/results/packages/${APP_NAME}_${DATE}"
+fi
 
 mkdir -p ${FOLDER}
 
