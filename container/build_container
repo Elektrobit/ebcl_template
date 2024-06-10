@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # Used feature layers.
-LAYERS="base pbuilder rust kiwi"
+if [ -z "$@" ]; then
+    LAYERS="base pbuilder rust kiwi"
+else
+    LAYERS="$@"
+fi
+
 # Container version
 VERSION="testing"
 
