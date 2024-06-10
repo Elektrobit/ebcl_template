@@ -39,7 +39,7 @@ if [ ! -z "$@" ]; then
         -e "CI_COMMAND=$@" \
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
-        -v ${RESULTS_PACKAGES_DIR}:/build/results/images:rw \
+        -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
@@ -50,7 +50,7 @@ else
         --name ebcl_sdk \
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
-        -v ${RESULTS_PACKAGES_DIR}:/build/results/images:rw \
+        -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
