@@ -2,7 +2,7 @@
 
 # Ensure env is up-to-date
 source /workspace/identity/env
-GNUPGHOME="/build/workspace/gpg-keys/.gnupg"
+GNUPGHOME="/workspace/gpg-keys/.gnupg"
 export GNUPGHOME
 
 # prepare folder if not exists

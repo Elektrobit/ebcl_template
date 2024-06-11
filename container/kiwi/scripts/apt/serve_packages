@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure berrymill conf has correct container IP
+berrymill_local_repo
+
 if [ -z "$APT_PATH" ]; then
     export APT_PATH="/build/results/packages"
 fi

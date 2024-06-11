@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /build/venv/bin/activate
+
 # get appliance name
 if [ $# -eq 0 ]; then
     APPLIANCE="/tmp/build/images/appliance.kiwi"
