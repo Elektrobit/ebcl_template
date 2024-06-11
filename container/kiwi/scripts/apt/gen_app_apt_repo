@@ -1,33 +1,5 @@
 #!/bin/bash
 
-source /build/bin/ebcl_env
-
-# get IP of Docker container
-IP=$(hostname -I | cut -d " " -f1 -s)
-
-if [ -f "/build/img/berrymill.conf" ]; then
-    # if already a berrymill config exists
-    cat /build/img/berrymill.conf | grep "${IP}"
-    if [ $? -ne 0 ]; then
-        # and the config doesn't contain the local IP
-        # backup the config
-        mv /build/img/berrymill.conf /build/img/berrymill_$(date +%s).old
-        if [ ! -f "/build/img/berrymill.template" ]; then
-            # copy the default template
-            cp /etc/berrymill/berrymill_local.conf /build/img/berrymill.template
-        fi
-        # and add the right config
-        cp /build/img/berrymill.template /build/img/berrymill.conf
-        sed -i "s/REPOIP/${IP}/g" /build/img/berrymill.conf
-    fi
-else
-    # copy the default template
-    cp /etc/berrymill/berrymill_local.conf /build/img/berrymill.template
-    # genrate a berrymill config
-    cp /build/img/berrymill.template /build/img/berrymill.conf
-    sed -i "s/REPOIP/${IP}/g" /build/img/berrymill.conf
-fi
-
 # Generate the apt repo metadata
 cd /build/results/packages
 
@@ -83,4 +55,4 @@ gpg --export $DEBMAIL > Release.key
 
 # Update local apt config
 sudo cp Release.key /etc/apt/trusted.gpg.d/local.gpg
-sudo bash -c "echo 'deb http://127.0.0.1:8000 local main' > /etc/apt/sources.list.d/local.list"
+sudo bash -c "echo 'deb file:/build/results/packages local main' > /etc/apt/sources.list.d/local.list"

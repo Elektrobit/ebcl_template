@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -d "/tmp/result_image" ]; then
+    echo "Build failed! No results folder found."
+    exit 1
+fi
+
 # copy result to ouput folder
 sudo chown -R ebcl:ebcl /tmp/result_image
 cp -R /tmp/result_image/* /build/results/images
@@ -11,10 +16,10 @@ if [ -z "$BUILD_RESULT" ]; then
 fi
 
 BUILD_RESULT=$(basename $BUILD_RESULT)
-file="/tmp/result_image/${BUILD_RESULT}/result.log"
+BUILD_LOG="/tmp/result_image/${BUILD_RESULT}/result.log"
 
-if [ -f $file ]; then
-        cat "/build/result_image/${BUILD_RESULT}/result.log" | grep "\[[ ]*ERROR[ ]*\]:"
+if [ -f $BUILD_LOG ]; then
+        cat $BUILD_LOG | grep "\[[ ]*ERROR[ ]*\]:"
         if [ $? -eq 0 ]; then 
             echo "ERROR: Build failed, see result.log!"
             exit 1

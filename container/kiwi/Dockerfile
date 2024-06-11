@@ -20,7 +20,7 @@ USER $CONTAINER_USER
 WORKDIR /build
 
 # Install berrymill
-RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install 'berrymill @ git+https://github.com/isbm/berrymill.git@f4ff87f08edf5f178284a5a689e2b6e301faad35' kiwi kiwi-boxed-plugin"
+RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install 'berrymill @ git+https://github.com/tomirgang/berrymill.git@59dbfd7d022681402ef5d4758e4e146411f1cad6' kiwi kiwi-boxed-plugin"
 
 # copy apt helper scripts
 COPY scripts/apt/* /build/bin
