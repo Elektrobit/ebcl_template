@@ -5,6 +5,12 @@ export PATH="/build/bin:$PATH"
 
 echo "SDK version $(cat /etc/sdk_version)"
 
+# set GPG home
+if [ -d "/workspace/gpg-keys/.gnupg" ]; then
+    echo "Setting GPG home..."
+    export GNUPGHOME="/workspace/gpg-keys/.gnupg"
+fi
+
 # add workspace bin folder if it exists
 WSBIN="/workspace/bin"
 if [ -d "$WSBIN" ]; then
@@ -28,3 +34,4 @@ fi
 if [ ! -d "/tmp/build/images" ]; then
     overlay_mount /build/images
 fi
+
