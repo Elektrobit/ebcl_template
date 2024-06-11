@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="elbe_class" module="elbe" class="Elbe">
+    <testcases>
+        <testcase uid="elbe_is_available" method="elbe_is_available" />
+    </testcases>
+</testclass>
