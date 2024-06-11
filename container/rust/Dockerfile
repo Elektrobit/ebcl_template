@@ -6,7 +6,9 @@ ARG CONTAINER_USER="ebcl"
 USER $CONTAINER_USER
 
 # Setup rust including aarch64 toolchain
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update
+RUN apt -y install rustup
 ENV PATH="/home/$CONTAINER_USER/.cargo/bin:${PATH}"
 RUN rustup target add aarch64-unknown-linux-gnu
 
