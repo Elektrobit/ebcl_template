@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="e2e_class" module="e2e" class="E2e">
+    <testcases>
+        <testcase uid="image_using_local_app" method="image_using_local_app" />
+    </testcases>
+</testclass>

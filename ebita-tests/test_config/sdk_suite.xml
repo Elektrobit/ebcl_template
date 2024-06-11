@@ -2,9 +2,11 @@
 <testsuite uid="sdk_suite">
     <execution>
         <testclass uid="build_class"/>
-        <testclass uid="base_class"/>
-        <!-- <testclass uid="pbuilder_class"/> -->
-        <testclass uid="rust_class"/>
+        <!-- <testclass uid="base_class"/>
+        <testclass uid="pbuilder_class"/>
+        <testclass uid="rust_class"/> -->
         <testclass uid="kiwi_class"/>
+        <testclass uid="elbe_class"/>
+        <testclass uid="e2e_class"/>
     </execution>
 </testsuite>
