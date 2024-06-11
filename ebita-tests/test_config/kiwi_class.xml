@@ -4,8 +4,8 @@
         <testcase uid="kiwi_is_available" method="kiwi_is_available" />
         <testcase uid="berrymill_is_available" method="berrymill_is_available" />
         <!-- <testcase uid="local_apt_repo" method="local_apt_repo" /> -->
-        <!-- <testcase uid="berrymill_box_build" method="berrymill_box_build" /> -->
+        <!-- <testcase uid="berrymill_box_build" method="berrymill_box_build" timeout="5000" /> -->
         <testcase uid="berrymill_cross_build" method="berrymill_cross_build" timeout="10000" />
-        <!-- <testcase uid="berrymill_kvm_build" method="berrymill_kvm_build" /> -->
+        <!-- <testcase uid="berrymill_kvm_build" method="berrymill_kvm_build" timeout="5000" /> -->
     </testcases>
 </testclass>
