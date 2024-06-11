@@ -2,40 +2,12 @@
 
 This repository contains a VS Code workspace template for EB corbos Linux application and image development.
 
-## Content
-
-The workspace is structured in the following way:
-
-- _.devcontainer_: VS Code devcontainer configuration files
-- _.vscode_: VS Code configuration files
-- _apps_: applications and config packages
-    - _my-config_: config package example
-    - _my-json-app_: user app packaging example
-- _apt_: workspace specific apt repository
-- _bin_: workspace specific scripts and binaries
-- _gpg-keys_: workspace keys for repository signing
-    - _env.sh_: user identity for Debian packaging
-- _images_: example image descriptions
-    - _qemu-crinit-aarch64_: QEMU example image for Arm aarch64 CPU architecture using crinit init manager
-    - _qemu-crinit-x86_64_: QEMU example image for Intel x86_64 CPU architecture using crinit init manager
-    - _qemu-systemd-aarch64_: QEMU example image for Arm aarch64 CPU architecture using systemd init manager
-    - _qemu-systemd-x86_64_: QEMU example image for Intel x86_64 CPU architecture using systemd init manager
-    - _raspberry-pi-crinit_: Raspberry Pi 4 image using crinit init manager
-    - _raspberry-pi-systemd_: Raspberry Pi 4 image using systemd init manager
-    - _rdb2-crinit_: RDB2 image using crinit init manager
-    - _rdb2_systemd_: RDB2 image using systemd init manager
-- _result_: build results
-    - _app_: app build and packaging results
-    - _image_: image build results
-- _sysroot_aarch64_: sysroot for cross-compiling for Arm aarch64 CPU architecture
-- _sysroot_x86_64_: sysroot for cross-compiling for Intel x86_64 CPU architecture
-
 ## Usage
 
 The workspace can be used with a VS Code setup with dev containers support.
 For details how to setup this environment, please take a look at https://code.visualstudio.com/docs/devcontainers/containers.
 
-To prepare the sysroots, build the app, and build the images, you can make use of the provided tasks in `.vscode/tasks.json`.
+To build the example apps and the example images, you can make use of the provided tasks in `.vscode/tasks.json`.
 These tasks are considered as a template for your own use case specific tasks.
 To run a task, press "CTRL" + "SHIFT" + "B". This will bring up a menu showing all the available tasks.
 
