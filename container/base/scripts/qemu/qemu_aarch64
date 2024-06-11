@@ -1,0 +1,33 @@
+#!/bin/bash
+
+DISK=$(realpath $1)
+
+if [ ! -f $DISK ]; then
+    echo "No disk image found at ${DISK}!"
+    exit 1
+fi
+
+FOLDER=$(dirname "${DISK}")
+
+INITRD="${FOLDER}/initrd.img"
+
+if [ ! -f $INITRD ]; then
+    echo "No initrd found at ${INITRD}!"
+    exit 1
+fi
+
+KERNEL="${FOLDER}/vmlinuz"
+
+if [ ! -f $KERNEL ]; then
+    echo "No kernel found at ${KERNEL}!"
+    exit 1
+fi
+
+qemu-system-aarch64 \
+    -machine virt -cpu cortex-a72 -machine type=virt -nographic -m 4G \
+    -netdev user,id=mynet0 \
+    -device virtio-net-pci,netdev=mynet0 \
+    -kernel ${KERNEL} \
+    -append "root=LABEL=root rw console=ttyAMA0,115200n8 systemd.machine_id=004711" \
+    -initrd ${INITRD} \
+    -drive format=raw,file=${DISK},if=virtio
