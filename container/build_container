@@ -2,7 +2,7 @@
 
 # Used feature layers.
 if [ -z "$@" ]; then
-    LAYERS="base pbuilder rust kiwi"
+    LAYERS="base pbuilder rust kiwi elbe"
 else
     LAYERS="$@"
 fi
@@ -31,7 +31,7 @@ function build_container() {
 export BASE_CONTAINER_NAME
 
 for FOLDER in $LAYERS; do
-    CONTAINER_NAME="${REPO}/${BASE_NAME}_${FOLDER}:${VERSION}"
+    CONTAINER_NAME="${REPO}/${BASE_NAME}_$(basename ${FOLDER}):${VERSION}"
     build_container
     BASE_CONTAINER_NAME="$REPO/${BASE_NAME}_${FOLDER}:${VERSION}"
 done
