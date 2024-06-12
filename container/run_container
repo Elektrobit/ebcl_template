@@ -6,8 +6,12 @@ if [ -z $RUNNER ]; then
     # docker or podman
     RUNNER="docker"
 fi
-
 echo "RUNNER: ${RUNNER}"
+
+if [ -z $CONTAINER_NAME ]; then
+    CONTAINER_NAME="ebcl_sdk"
+fi
+echo "CONTAINER_NAME: ${CONTAINER_NAME}"
 
 SCRIPT=$(realpath "${BASH_SOURCE[0]}")
 SCRIPT_DIR=$(dirname $SCRIPT)
@@ -51,7 +55,7 @@ fi
 
 if [ ! -z "$@" ]; then
     $RUNNER run --rm \
-        --name ebcl_sdk \
+        --name $CONTAINER_NAME \
         -e "CI_COMMAND=$@" \
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
@@ -68,7 +72,7 @@ if [ ! -z "$@" ]; then
         linux.elektrobit.com/ebcl/sdk:testing
 else
     $RUNNER run --rm -it \
-        --name ebcl_sdk \
+        --name $CONTAINER_NAME \
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
