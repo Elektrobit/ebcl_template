@@ -10,7 +10,7 @@ class Kiwi(TestClassBase):
         """Stop the Docker SDK container."""
         stop_container()
 
-    def setup(self, image_name, image_appliance):
+    def setup(self, image_name = None, image_appliance = None):
         self.image_name = image_name
         self.image_appliance = image_appliance
 

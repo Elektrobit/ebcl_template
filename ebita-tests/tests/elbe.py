@@ -10,7 +10,7 @@ class Elbe(TestClassBase):
         """Stop the Docker SDK container."""
         stop_container()
     
-    def setup(self, image_name, image_description):
+    def setup(self, image_name = None, image_description = None):
         self.image_name = image_name
         self.image_description = image_description
 
