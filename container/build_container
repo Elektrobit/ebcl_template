@@ -10,7 +10,10 @@ else
 fi
 
 # Container version
-VERSION="testing"
+if [ -z $VERSION ]; then
+    VERSION="testing"
+fi
+echo "VERSION: ${VERSION}"
 
 BASE_NAME="sdk"
 REPO="linux.elektrobit.com/ebcl"
