@@ -9,6 +9,9 @@ results/image/*
 !results/packages
 results/packages/*
 !results/packages/.gitkeep
+!results/apps
+results/apps/*
+!results/apps/.gitkeep
 !apt/.gitkeep
 !bin/.gitkeep
 

@@ -22,7 +22,11 @@ IMAGES=$(realpath "$SCRIPT_DIR/../images")
 echo "IMAGES: $IMAGES"
 
 # find identity folder
-IDENTITY=$(realpath "$SCRIPT_DIR/../identity")
+SDKS=$(realpath "$SCRIPT_DIR/../identity")
+echo "SDKS: $SDKS"
+
+# find sdks folder
+IDENTITY=$(realpath "$SCRIPT_DIR/../sdks")
 echo "IDENTITY: $IDENTITY"
 
 # find results folder
@@ -31,7 +35,19 @@ RESULTS_DIR=$(realpath "$SCRIPT_DIR/../results")
 echo "RESULT FOLDER: $RESULTS_DIR"
 RESULTS_IMAGES_DIR=$(realpath "$RESULTS_DIR/images")
 RESULTS_PACKAGES_DIR=$(realpath "$RESULTS_DIR/packages")
+RESULTS_APPS_DIR=$(realpath "$RESULTS_DIR/apps")
 
+# find sysroots
+SYSROOT_X86=$(realpath "$SCRIPT_DIR/../sysroot_x86_64")
+echo "SYSROOT_X86: $SYSROOT_X86"
+SYSROOT_ARM=$(realpath "$SCRIPT_DIR/../sysroot_aarch64")
+echo "SYSROOT_ARM: $SYSROOT_ARM"
+
+lsmod | grep binfmt_misc
+if [ $? -ne 0 ]; then
+    echo "Trying to load binfmt kernel module for cross-builds ..."
+    sudo modprobe binfmt_misc
+fi
 
 if [ ! -z "$@" ]; then
     $RUNNER run --rm \
@@ -40,9 +56,14 @@ if [ ! -z "$@" ]; then
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
+        -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
+        -v ${SDKS}:/build/sdks:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
+        -v ${SYSROOT_X86}:/build/sysroot_x86_64:ro \
+        -v ${SYSROOT_ARM}:/build/sysroot_aarch64:ro \
+        -v /dev:/dev \
         --privileged \
         linux.elektrobit.com/ebcl/sdk:testing
 else
@@ -51,9 +72,14 @@ else
         -v ${HOME}/.ssh:/home/dev/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
+        -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
+        -v ${SDKS}:/build/sdks:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
+        -v ${SYSROOT_X86}:/build/sysroot_x86_64:ro \
+        -v ${SYSROOT_ARM}:/build/sysroot_aarch64:ro \
+        -v /dev:/dev \
         --privileged \
         linux.elektrobit.com/ebcl/sdk:testing
 fi

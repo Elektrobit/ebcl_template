@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testclass uid="appdev_class" module="appdev" class="Appdev">
+    <testcases>
+        <testcase uid="cmake_app_x86_64" method="cmake_app_x86_64" />
+        <testcase uid="cmake_app_aarch64" method="cmake_app_aarch64" />
+    </testcases>
+</testclass>

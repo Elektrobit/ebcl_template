@@ -1,0 +1,26 @@
+#!/bin/bash
+
+APP_FOLDER=$1
+# complete app folder path
+if [[ "${APP_FOLDER}" != "/"* ]]; then
+    # handle relative path
+    if [ ! -d "${APP_FOLDER}" ]; then
+        # relative path from current folder does not exist
+        # use relative path in workspace apps folder
+        APP_FOLDER="/workspace/apps/${APP_FOLDER}"
+    else
+        APP_FOLDER=$(realpath $APP_FOLDER)
+    fi
+fi
+
+APP_NAME=$(basename $APP_FOLDER)
+
+DATE=$(date '+%Y-%m-%d_%H-%M-%S')
+FOLDER="/build/results/apps/${APP_NAME}_aarch64_${DATE}"
+
+mkdir -p ${FOLDER}
+
+# rebuild cmake and build app
+cmake --toolchain /build/cmake/toolchain-aarch64.cmake -B "${FOLDER}" -S "${APP_FOLDER}"
+cd ${FOLDER}
+make

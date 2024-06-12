@@ -1,0 +1,10 @@
+# KIWI - Build configuration file
+
+# Setup access options for the Open BuildService
+obs:
+  # Use linux.elektrobit.com as OBS base url
+  - download_url: http://linux.elektrobit.com/
+  # Specify if the BuildService download server is public or private.
+  # This information is used to verify if the request to populate
+  # the repositories via the imageinclude attribute is possible
+  - public: true
