@@ -10,7 +10,7 @@ class Pbuilder(TestClassBase):
         """Stop the Docker SDK container."""
         stop_container()
 
-    def setup(self, arch):
+    def setup(self, arch = None):
         self.arch = arch
 
     def package_config_files(self):
