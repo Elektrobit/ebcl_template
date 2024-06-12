@@ -45,6 +45,8 @@ def run_command(command, check=True, no_error=True):
         if 'RUNNER' in os.environ:
              runner = os.environ['RUNNER']
 
+        print(f'Running command {command} using runner {runner}.')
+
         result = subprocess.run(
             f'{runner} exec -it ebcl_sdk bash -c "source ~/.bashrc; {command}"',
             shell=True,

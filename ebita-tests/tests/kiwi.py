@@ -10,6 +10,10 @@ class Kiwi(TestClassBase):
         """Stop the Docker SDK container."""
         stop_container()
 
+    def setup(self, image_name, image_appliance):
+        self.image_name = image_name
+        self.image_appliance = image_appliance
+
     def kiwi_is_available(self):
         (lines, _stdout, _stderr) = run_command('source /build/venv/bin/activate; kiwi-ng -v')
         assert lines[-2].startswith('KIWI ')
@@ -65,3 +69,35 @@ class Kiwi(TestClassBase):
         assert 'QEMU QCOW2 Image' in lines[-2]
         (lines, _stdout, _stderr) = run_command('file /workspace/results/images/qemu_crinit_x86_64/qemu_crinit_x86_64.*.qcow2')
         assert 'QEMU QCOW2 Image' in lines[-2]
+
+    def berrymill_kvm_sysroot(self):
+        # delete old result
+        run_command('rm -rf /build/results/images/qemu_crinit_x86_64')
+        # build image
+        run_command('kvm_build_image qemu-crinit-x86_64/appliance_sysroot.kiwi')
+        (lines, _stdout, _stderr) = run_command('file /build/results/images/qemu_crinit_x86_64/qemu_crinit_x86_64.*.tar.xz')
+        assert 'XZ compressed data' in lines[-2]
+        (lines, _stdout, _stderr) = run_command('file /workspace/results/images/qemu_crinit_x86_64/qemu_crinit_x86_64.*.tar.xz')
+        assert 'XZ compressed data' in lines[-2]
+
+    def berrymill_cross_sysroot(self):
+        # delete old result
+        run_command('rm -rf /build/results/images/qemu_crinit_aarch64')
+        # build image
+        run_command('cross_build_image qemu-crinit-aarch64/appliance_sysroot.kiwi')
+        (lines, _stdout, _stderr) = run_command('file /build/results/images/qemu_crinit_aarch64/qemu_crinit_aarch64.*.tar.xz')
+        assert 'XZ compressed data' in lines[-2]
+        (lines, _stdout, _stderr) = run_command('file /workspace/results/images/qemu_crinit_aarch64/qemu_crinit_aarch64.*.tar.xz')
+        assert 'XZ compressed data' in lines[-2]
+
+    def berrymill_cross_build_image(self):
+        # delete old result
+        run_command(f'rm -rf /build/results/images/{self.image_name}')
+        # build image
+        run_command(f'cross_build_image {self.image_appliance}')
+    
+    def berrymill_kvm_build_image(self):
+        # delete old result
+        run_command(f'rm -rf /build/results/images/{self.image_name}')
+        # build image
+        run_command(f'kvm_build_image {self.image_appliance}')

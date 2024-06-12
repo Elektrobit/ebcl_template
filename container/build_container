@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -e
+
 # Used feature layers.
 if [ -z "$@" ]; then
-    LAYERS="base pbuilder rust kiwi elbe"
+    LAYERS="base pbuilder rust kiwi elbe appdev"
 else
     LAYERS="$@"
 fi

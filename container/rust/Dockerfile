@@ -3,17 +3,15 @@ FROM $BASE_CONTAINER_NAME
 
 ARG CONTAINER_USER="ebcl"
 
-USER $CONTAINER_USER
+USER root
 
 # Setup rust including aarch64 toolchain
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt update
-RUN apt -y install rustup
+RUN apt -y install rustc cargo
 ENV PATH="/home/$CONTAINER_USER/.cargo/bin:${PATH}"
-RUN rustup target add aarch64-unknown-linux-gnu
 
 # Add rust binaries to PATH
-USER root
 RUN echo "export PATH=\$PATH:~/.cargo/bin" >> /home/$CONTAINER_USER/.bashrc
 RUN echo "export PATH=\$PATH:/home/$CONTAINER_USER/.cargo/bin" >> /root/.bashrc
 
