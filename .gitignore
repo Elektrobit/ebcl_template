@@ -1,4 +1,6 @@
 sysroot*/**/*
+!sysroot_x86_64/.gitkeep
+!sysroot_aarch64/.gitkeep
 
 # do not ignore .gitkeep files:
 results*/**
