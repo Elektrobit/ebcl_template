@@ -97,6 +97,8 @@ class Kiwi(TestClassBase):
         run_command(f'cross_build_image {self.image_appliance}')
     
     def berrymill_kvm_build_image(self):
+        print(f'Image: {self.image_name}')
+        print(f'Appliance: {self.image_appliance}')
         # delete old result
         run_command(f'rm -rf /build/results/images/{self.image_name}')
         # build image

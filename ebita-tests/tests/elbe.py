@@ -57,6 +57,8 @@ class Elbe(TestClassBase):
         assert 'sdcard.img: DOS/MBR boot sector' in lines[-2]
 
     def elbe_build_image(self):
+        print(f'Image: {self.image_name}')
+        print(f'Description: {self.image_description}')
         # delete old result
         run_command(f'rm -rf /build/results/images/{self.image_name}')
         # build image
