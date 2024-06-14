@@ -3,6 +3,7 @@
 [EB corbos Linux SDK](README.md)
 
 - [Overview](overview.md)
+- [Setup](setup.md)
 - [Developing images](images.md)
 - [Packaging apps](packaging.md)
 - [Developing apps](app_development.md)
