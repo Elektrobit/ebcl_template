@@ -13,7 +13,7 @@ class Appdev(TestClassBase):
     def cmake_app_x86_64(self):
         # prepare sysroot
         # asumption: /build/results/images/qemu_crinit_x86_64/qemu_crinit_x86_64.*.tar.xz is available
-        run_command('rm -rf /workspace/sysroot_x86_64/*')
+        run_command('rm -rf /workspace/sysroot_x86_64/*', check=False, no_error=False)
         run_command('cp /build/results/images/qemu_crinit_x86_64/qemu_crinit_x86_64.*.tar.xz /workspace/sysroot_x86_64/')
         run_command('cd /workspace/sysroot_x86_64/; tar xf qemu_crinit_x86_64.*.tar.xz')
         # delete old result
@@ -28,7 +28,7 @@ class Appdev(TestClassBase):
     def cmake_app_aarch64(self):
         # prepare sysroot
         # asumption: /build/results/images/qemu_crinit_aarch64/qemu_crinit_aarch64.*.tar.xz is available
-        run_command('rm -rf /workspace/sysroot_aarch64/*')
+        run_command('rm -rf /workspace/sysroot_aarch64/*', check=False, no_error=False)
         run_command('cp /build/results/images/qemu_crinit_aarch64/qemu_crinit_aarch64.*.tar.xz /workspace/sysroot_aarch64/')
         run_command('cd /workspace/sysroot_aarch64/; tar xf qemu_crinit_aarch64.*.tar.xz')
         # delete old result

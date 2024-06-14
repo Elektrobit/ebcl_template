@@ -108,8 +108,6 @@
 			<command>systemctl enable systemd-networkd</command>
 			<command>systemctl enable systemd-resolved</command>
 			<command>systemctl enable systemd-timesyncd</command>
-			<!-- enable systemd services -->
-			<command>update-grub</command>
 		</finetuning>
 		<project-finetuning>
 			<set_packer packer="none">sdcard.img</set_packer>

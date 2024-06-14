@@ -11,38 +11,38 @@
         <testcase uid="berrymill_cross_sysroot" method="berrymill_cross_sysroot" timeout="10000" />
         <testcase uid="berrymill_cross_build_image_systemd" method="berrymill_cross_build_image" timeout="5000">
             <parameters>
-                <image_name>qemu-systemd-aarch64/appliance.kiwi</image_name>
-                <image_appliance>qemu_systemd_aarch64</image_appliance>
+                <image_appliance>qemu-systemd-aarch64/appliance.kiwi</image_appliance>
+                <image_name>qemu_systemd_aarch64</image_name>
             </parameters>
         </testcase>
         <testcase uid="berrymill_kvm_build_image_systemd" method="berrymill_kvm_build_image" timeout="5000">
             <parameters>
-                <image_name>qemu-systemd-x86_64/appliance.kiwi</image_name>
-                <image_appliance>qemu_systemd_x86_64</image_appliance>
+                <image_appliance>qemu-systemd-x86_64/appliance.kiwi</image_appliance>
+                <image_name>qemu_systemd_x86_64</image_name>
             </parameters>
         </testcase>
         <testcase uid="berrymill_cross_build_image_pi_crinit" method="berrymill_cross_build_image" timeout="10000">
             <parameters>
-                <image_name>raspberry-pi-crinit/appliance.kiwi</image_name>
-                <image_appliance>raspberry_pi_crinit</image_appliance>
+                <image_appliance>raspberry-pi-crinit/appliance.kiwi</image_appliance>
+                <image_name>raspberry_pi_crinit</image_name>
             </parameters>
         </testcase>
         <testcase uid="berrymill_cross_build_image_pi_systemd" method="berrymill_cross_build_image" timeout="10000">
             <parameters>
-                <image_name>raspberry-pi-systemd/appliance.kiwi</image_name>
-                <image_appliance>raspberry_pi_systemd</image_appliance>
+                <image_appliance>raspberry-pi-systemd/appliance.kiwi</image_appliance>
+                <image_name>raspberry_pi_systemd</image_name>
             </parameters>
         </testcase>
         <testcase uid="berrymill_cross_build_image_rdb2_crinit" method="berrymill_cross_build_image" timeout="10000">
             <parameters>
-                <image_name>rdb2-crinit/appliance.kiwi</image_name>
-                <image_appliance>rdb2_crinit</image_appliance>
+                <image_appliance>rdb2-crinit/appliance.kiwi</image_appliance>
+                <image_name>rdb2_crinit</image_name>
             </parameters>
         </testcase>
         <testcase uid="berrymill_cross_build_image_rdb2_systemd" method="berrymill_cross_build_image" timeout="10000">
             <parameters>
-                <image_name>rdb2-systemd/appliance.kiwi</image_name>
-                <image_appliance>rdb2_systemd</image_appliance>
+                <image_appliance>rdb2-systemd/appliance.kiwi</image_appliance>
+                <image_name>rdb2_systemd</image_name>
             </parameters>
         </testcase>
     </testcases>
