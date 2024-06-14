@@ -15,10 +15,10 @@ WORKDIR /build
 
 # add cmake toolchains
 RUN mkdir -p /build/cmake
-COPY conf/cmake/* /build/cmake
+COPY conf/cmake/* /build/cmake/
 
 # add cmake helper scripts
-COPY scripts/cmake/* /build/bin
+COPY scripts/cmake/* /build/bin/
 
 # Result folder for cmake builds
 RUN mkdir -p /build/results/apps
