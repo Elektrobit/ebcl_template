@@ -1,5 +1,14 @@
 # Changelog for the EBcL VS Code workspace template
 
+## Relesae 1.2 - 2024-07-11
+
+Update for EBcL release 1.2.
+
+Changes:
+- Update URLs to new APT repository for EBcL 1.2
+- Adapt example images to new crinit package split
+- Improve example images
+
 
 ## Relesae 1.1.1 - 2024-04-25
 

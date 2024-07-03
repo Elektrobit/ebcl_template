@@ -32,11 +32,14 @@
         <!-- system -->
         <!-- crinit and related packages -->
         <package name="crinit"/>
-        <package name="crinit-shutdown"/>
+        <package name="crinit-ctl"/>
         <package name="elos"/>
         <package name="elos-coredump"/>
+        <package name="elos-plugin-backend-json"/>
+        <package name="elos-plugin-backend-dummy"/>
+        <package name="elos-plugin-scanner-kmsg"/>
+        <package name="elos-plugin-scanner-syslog"/>
         <package name="netifd"/>
-        <package name="crinit-machine-id-gen"/>
         <package name="udhcpc"/>
         <package name="ubus"/>
         <!-- core tools -->
@@ -50,8 +53,6 @@
         <package name="findutils"/>
         <!-- modprobe - for loading USB drivers -->
         <package name="kmod"/>
-        <!-- licenses tool -->
-        <package name="dpkg-licenses"/>
         <!-- ssh -->
         <package name="openssh-server"/>
         <package name="openssh-client"/>
@@ -59,18 +60,15 @@
         <package name="iproute2"/>
         <package name="iptables"/>
         <package name="iputils-ping"/>
-        <!-- apt support -->
-        <package name="apt-utils"/>
         <!-- required for apt gpg key verification -->
         <package name="gnupg"/>
-        <!-- required for apt update -->
-        <package name="dialog"/>
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
+        <!-- dependency of my-json-app -->
+        <package name="libjsoncpp25"/>
         <!-- debug tools -->
         <package name="gdbserver"/>
-        <package name="libc6-dbg"/>
         <package name="socat"/>
         <package name="iperf3"/>
         <package name="tcpdump"/>

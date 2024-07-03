@@ -50,8 +50,6 @@
         <package name="findutils"/>
         <!-- modprobe - for loading USB drivers -->
         <package name="kmod"/>
-        <!-- licenses tool -->
-        <package name="dpkg-licenses"/>
         <!-- ssh -->
         <package name="openssh-server"/>
         <package name="openssh-client"/>

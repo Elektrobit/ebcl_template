@@ -7,11 +7,6 @@ test -f /.kconfig && . /.kconfig
 
 set -ex
 
-#======================================
-# Create license information
-#--------------------------------------
-/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
-
 #==================================
 # Allow suid tools with busybox
 #----------------------------------

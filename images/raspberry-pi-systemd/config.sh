@@ -12,11 +12,6 @@ set -ex
 #--------------------------------------
 baseSetRunlevel 3
 
-#======================================
-# Create license information
-#--------------------------------------
-/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
-
 #==================================
 # Turn grub-mkconfig into a noop
 #----------------------------------
