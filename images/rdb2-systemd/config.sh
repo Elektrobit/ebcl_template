@@ -11,11 +11,6 @@ set -ex
 #--------------------------------------
 baseSetRunlevel 3
 
-#======================================
-# Create license information
-#--------------------------------------
-/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
-
 #==================================
 # Allow suid tools with busybox
 #----------------------------------

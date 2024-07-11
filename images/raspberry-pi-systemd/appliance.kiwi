@@ -51,8 +51,6 @@
         <package name="findutils"/>
         <!-- modprobe - for loading USB drivers -->
         <package name="kmod"/>
-        <!-- licenses tool -->
-        <package name="dpkg-licenses"/>
         <!-- ssh -->
         <package name="openssh-server"/>
         <package name="openssh-client"/>
@@ -69,6 +67,8 @@
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
+        <!-- dependency of my-json-app -->
+        <package name="libjsoncpp25"/>
         <!-- debug tools -->
         <package name="gdbserver"/>
         <package name="libc6-dbg"/>

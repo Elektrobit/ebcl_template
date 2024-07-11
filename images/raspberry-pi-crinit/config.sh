@@ -7,11 +7,6 @@ test -f /.kconfig && . /.kconfig
 
 set -ex
 
-#======================================
-# Create license information
-#--------------------------------------
-/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
-
 #==================================
 # Turn grub-mkconfig into a noop
 #----------------------------------
@@ -40,11 +35,6 @@ dpkg -i /var/tmp/firmware/linux-firmware-raspi2_6-0ubuntu3_arm64.deb
 #---------------------------------------
 rm -f /etc/localtime
 ln -s /usr/share/zoneinfo/${kiwi_timezone} /etc/localtime
-
-#======================================
-# Create license information
-#--------------------------------------
-/usr/local/bin/dpkg-licenses/dpkg-licenses > /licenses
 
 #======================================
 # Set hostname
