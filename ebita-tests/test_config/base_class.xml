@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testclass uid="base_class" module="base" class="Base">
-    <testcases>
-        <testcase uid="sdk_version" method="sdk_version" />
-        <testcase uid="user" method="user" />
-        <testcase uid="environment" method="environment" />
-    </testcases>
-</testclass>

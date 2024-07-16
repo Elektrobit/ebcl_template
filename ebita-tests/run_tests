@@ -1,5 +1,0 @@
-#!/bin/bash
-
-source ~/ebita/ebita-env/bin/activate
-
-python -m ebita.main -c project.json -s sdk_suite

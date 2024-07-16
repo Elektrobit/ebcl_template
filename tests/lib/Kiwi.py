@@ -1,18 +1,6 @@
-from ebita.api.test_class_base import TestClassBase
-from utils import run_container, run_command, stop_container
+from utils import run_command
 
-class Kiwi(TestClassBase):
-    def setup_class():
-        """Run the Docker SDK container."""
-        run_container()
-
-    def teardown_class():
-        """Stop the Docker SDK container."""
-        stop_container()
-
-    def setup(self, image_name = None, image_appliance = None):
-        self.image_name = image_name
-        self.image_appliance = image_appliance
+class Kiwi:
 
     def kiwi_is_available(self):
         (lines, _stdout, _stderr) = run_command('source /build/venv/bin/activate; kiwi-ng -v')
@@ -90,16 +78,14 @@ class Kiwi(TestClassBase):
         (lines, _stdout, _stderr) = run_command('file /workspace/results/images/qemu_crinit_aarch64/qemu_crinit_aarch64.*.tar.xz')
         assert 'XZ compressed data' in lines[-2]
 
-    def berrymill_cross_build_image(self):
+    def berrymill_cross_build_image(self, image_appliance: str, image_name: str):
         # delete old result
-        run_command(f'rm -rf /build/results/images/{self.image_name}')
+        run_command(f'rm -rf /build/results/images/{image_name}', check=False, no_error=False)
         # build image
-        run_command(f'cross_build_image {self.image_appliance}')
+        run_command(f'cross_build_image {image_appliance}')
     
-    def berrymill_kvm_build_image(self):
-        print(f'Image: {self.image_name}')
-        print(f'Appliance: {self.image_appliance}')
+    def berrymill_kvm_build_image(self, image_appliance: str, image_name: str):
         # delete old result
-        run_command(f'rm -rf /build/results/images/{self.image_name}')
+        run_command(f'rm -rf /build/results/images/{image_name}', check=False, no_error=False)
         # build image
-        run_command(f'kvm_build_image {self.image_appliance}')
+        run_command(f'kvm_build_image {image_appliance}')

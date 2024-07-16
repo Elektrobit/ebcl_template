@@ -1,19 +1,19 @@
 *** Settings ***
 Library    lib/Setup.py
-Library    lib/Rust.py
+Library    lib/Appdev.py
 Suite Setup        Setup
 Suite Teardown    Teardown
-Keyword Tags    rust
+Keyword Tags    appdev    cmake
 
 *** Test Cases ***
 
-SDK shall provide rustc
+SDK shall support building cmake apps for aarch64
     [Tags]    fast
-    Rustc Is Available
+    Cmake App Aarch64
 
-SDK shall provide cargo
+SDK shall support building cmake apps for x86_64
     [Tags]    fast
-    Cargo Is Available
+    Cmake App X86 64
 
 *** Keywords ***
 Setup
