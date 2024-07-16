@@ -1,20 +1,27 @@
 <?xml version="1.0"?>
 
 <mirror>
-    <primary_host>ports.ubuntu.com</primary_host>
-    <primary_path>/ubuntu-ports</primary_path>
+    <primary_host>archive.ubuntu.com</primary_host>
+    <primary_path>/ubuntu</primary_path>
     <primary_proto>http</primary_proto>
     <url-list>
         <url>
-            <binary>http://archive.ubuntu.com/ubuntu jammy main</binary>
-            <source>http://archive.ubuntu.com/ubuntu jammy main</source>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-security main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-security main</source>
             <options>
                 <option>arch=amd64</option>
             </options>
         </url>
         <url>
-            <binary>http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod</binary>
-            <source>http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod</source>
+            <binary>http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl prod</binary>
+            <source>http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl prod</source>
             <raw-key>
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 
@@ -71,8 +78,8 @@ UjlMgiuEQHLDKv8Q+lRHXtHtRN3fR5TsC5XQ3DYVfo3SOPUdpA==
             </raw-key>
         </url>
         <url>
-            <binary>http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl dev</binary>
-            <source>http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl dev</source>
+            <binary>http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl dev</binary>
+            <source>http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl dev</source>
             <raw-key>
 -----BEGIN PGP PUBLIC KEY BLOCK-----
 

@@ -15,7 +15,7 @@
 				-bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd
 		</description>
 		<buildtype>aarch64</buildtype>
-		<xi:include href="../../includes/ebcl_1.1.1_mirrors.xml" />
+		<xi:include href="../../includes/ebcl_1.2_mirrors.xml" />
 		<suite>jammy</suite>
 	</project>
 	<target>

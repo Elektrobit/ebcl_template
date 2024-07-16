@@ -14,7 +14,7 @@
 				-drive format=raw,file=sdcard.img,if=virtio
 		</description>
 		<buildtype>amd64</buildtype>
-		<xi:include href="../../includes/ebcl_1.1.1_x86_64_mirrors.xml" />
+		<xi:include href="../../includes/ebcl_1.2_x86_64_mirrors.xml" />
 		<suite>jammy</suite>
 	</project>
 	<target>
