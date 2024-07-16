@@ -1,20 +1,11 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "EB corbos Linux SDK 1.2",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "linux.elektrobit.com/ebcl/sdk:1.2",
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
-	// Configure tool-specific properties.
+	"name": "EB corbos Linux SDK 1.2.1",
+	"image": "linux.elektrobit.com/ebcl/sdk:testing",
+	"initializeCommand": "${PWD}/tools/init_workspace",
 	"customizations": {
-		// Configure properties specific to VS Code.
 		"vscode": {
-			// Set *default* container specific settings.json values on container create.
 			"settings": {
 				"editor.formatOnSave": true,
 				"files.insertFinalNewline": true,
@@ -26,20 +17,71 @@
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"ms-vscode.makefile-tools",
-				"ms-vscode.cpptools-extension-pack"
+				"ms-vscode.cpptools-extension-pack",
+				"ms-python.python",
+				"robocorp.robotframework-lsp"
 			]
 		}
 	},
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	"remoteUser": "ebcl",
-	"privileged": false,
+	"privileged": true,
 	"mounts": [
 		{
 			"source": "ebcl-build-boxes",
 			"target": "/home/ebcl/.kiwi_boxes",
 			"type": "volume"
+		},
+		{
+			"source": "${localEnv:HOME}${localEnv:USERPROFILE}/.ssh",
+			"target": "/home/ebcl/.ssh",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/results/images",
+			"target": "/build/results/images",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/results/packages",
+			"target": "/build/results/packages",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/sdks",
+			"target": "/build/sdks",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/results/apps",
+			"target": "/build/results/apps",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/images",
+			"target": "/build/images",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/identity",
+			"target": "/build/identity",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/sysroot_x86_64",
+			"target": "/build/sysroot_x86_64",
+			"type": "bind"
+		},
+		{
+			"source": "${localWorkspaceFolder}/sysroot_aarch64",
+			"target": "/build/sysroot_aarch64",
+			"type": "bind"
+		},
+		{
+			"source": "/dev",
+			"target": "/dev",
+			"type": "bind"
 		}
 	],
-	"workspaceMount": "source=${localWorkspaceFolder},target=/build/workspace,type=bind,consistency=cached",
-	"workspaceFolder": "/build/workspace"
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+	"workspaceFolder": "/workspace"
 }

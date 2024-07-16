@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+if [[ ! -d ../.venv ]]; then
+    echo "Preparing venv for container build tool..."
+    cd ..
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    cd container
+fi
+
+echo "Building EBcL SDK dev container..."
+python3 build_container.py

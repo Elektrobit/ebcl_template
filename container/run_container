@@ -57,7 +57,7 @@ if [ ! -z "$@" ]; then
     $RUNNER run --rm \
         --name $CONTAINER_NAME \
         -e "CI_COMMAND=$@" \
-        -v ${HOME}/.ssh:/home/dev/.ssh:ro \
+        -v ${HOME}/.ssh:/home/ebcl/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
@@ -73,7 +73,7 @@ if [ ! -z "$@" ]; then
 else
     $RUNNER run --rm -it \
         --name $CONTAINER_NAME \
-        -v ${HOME}/.ssh:/home/dev/.ssh:ro \
+        -v ${HOME}/.ssh:/home/ebcl/.ssh:ro \
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \

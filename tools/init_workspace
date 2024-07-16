@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo "Setting EBcL workspace up..."
+
+echo $PWD
+cd container
+./build_container
