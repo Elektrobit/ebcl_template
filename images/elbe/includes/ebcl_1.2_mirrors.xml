@@ -20,6 +20,13 @@
             </options>
         </url>
         <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
             <binary>http://ports.ubuntu.com/ubuntu-ports jammy-security main</binary>
             <source>http://ports.ubuntu.com/ubuntu-ports jammy-security main</source>
             <options>

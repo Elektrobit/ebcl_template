@@ -5,12 +5,6 @@ ARG CONTAINER_USER="ebcl"
 
 USER root
 
-# create elbe folder
-RUN mkdir - p /build/elbe
-RUN chown $CONTAINER_USER:$CONTAINER_USER /build/elbe
-
-WORKDIR /build/elbe
-
 # add arm64 arch for cross-building
 RUN dpkg --add-architecture arm64
 RUN apt update

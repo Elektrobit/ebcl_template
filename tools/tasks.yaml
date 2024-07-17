@@ -1,0 +1,11 @@
+kiwi:
+  folders:
+    - images
+  extension: .kiwi
+  sysroot suffix: _sysroot 
+elbe:
+  folders:
+    -  images/elbe/qemu
+  extension: .xml
+  ignore:
+    - jammy-aarch64.xml

@@ -4,6 +4,7 @@
 	"name": "EB corbos Linux SDK 1.2.1",
 	"image": "linux.elektrobit.com/ebcl/sdk:testing",
 	"initializeCommand": "${PWD}/tools/init_workspace",
+	"postCreateCommand": "${PWD}/tools/init_container",
 	"customizations": {
 		"vscode": {
 			"settings": {
@@ -44,11 +45,6 @@
 		{
 			"source": "${localWorkspaceFolder}/results/packages",
 			"target": "/build/results/packages",
-			"type": "bind"
-		},
-		{
-			"source": "${localWorkspaceFolder}/sdks",
-			"target": "/build/sdks",
 			"type": "bind"
 		},
 		{

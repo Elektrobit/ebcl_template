@@ -1,0 +1,148 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "EBcL: App (aarch64)",
+      "command": "cmake_aarch64.sh",
+      "args": [
+        "my-json-app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build CMake App for aarch64."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: App (x86_64)",
+      "command": "cmake_x86_64.sh",
+      "args": [
+        "my-json-app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build CMake App for x86_64."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Generate signing key",
+      "command": "gen_sign_key.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate a signing key for Debian packageing. Please update gpg-keys/env.sh before running this task!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Generate Debian metadata for app",
+      "command": "prepare_deb_metadata.sh",
+      "args": [
+        "my-json-app",
+        "my-json-app",
+        "1.1.0"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the Debian metadata for the app. Please update gpg-keys/env.sh before running this task!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Generate Debian metadata for config",
+      "command": "prepare_deb_all_metadata.sh",
+      "args": [
+        "my-config",
+        "my-config",
+        "1.1.0"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the Debian metadata for the config. Please update gpg-keys/env.sh before running this task!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Package app (x86_64)",
+      "command": "build_package.sh",
+      "args": [
+        "my-json-app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the x86_64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Package app (aarch64)",
+      "command": "cross_build_package.sh",
+      "args": [
+        "my-json-app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate the aarch64 Debian package of the app. Debian metadata and the sysroot must be avaiable!"
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Prepare local repository",
+      "command": "prepare_repo_config.sh",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Generate apt repositry metadata and Berrymill config for generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Serve app packages",
+      "command": "serve_packages.sh",
+      "args": [
+        "result/app"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Serve the apt repository containg the generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Serve workspace apt folder",
+      "command": "serve_packages.sh",
+      "args": [
+        "apt"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Serve the apt repository containg the generated Debian packages."
+    },
+    {
+      "type": "shell",
+      "label": "EBcL: Build config package",
+      "command": "build_config_package.sh",
+      "args": [
+        "my-config"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Build a platform indepent Makefile package."
+    }
+  ]
+}

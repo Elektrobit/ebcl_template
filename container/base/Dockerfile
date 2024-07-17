@@ -82,13 +82,17 @@ COPY scripts/mount/* /build/bin/
 RUN chown -R $CONTAINER_USER:$CONTAINER_USER /build/bin && \
     chmod +x /build/bin/*
 
-# change work dir to workspace mount point
-WORKDIR /workspace
-
 # Write version
 RUN echo "1.2" > /etc/sdk_version
 
 USER $CONTAINER_USER
+
+# Prepare Python env
+WORKDIR /build
+RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml"
+
+# change work dir to workspace mount point
+WORKDIR /workspace
 
 # Set the entry point
 ENTRYPOINT ["/build/bin/init"]

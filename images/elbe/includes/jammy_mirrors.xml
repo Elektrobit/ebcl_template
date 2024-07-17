@@ -6,6 +6,13 @@
     <primary_proto>http</primary_proto>
     <url-list>
         <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy main</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
             <binary>http://ports.ubuntu.com/ubuntu-ports jammy main</binary>
             <source>http://ports.ubuntu.com/ubuntu-ports jammy main</source>
             <options>
