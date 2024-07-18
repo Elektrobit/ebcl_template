@@ -17,3 +17,7 @@ h1 {
     margin-left: 30px;
     display: block;
 }
+
+a {
+    color: green !important;
+}
