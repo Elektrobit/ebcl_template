@@ -3,7 +3,7 @@
 {
 	"name": "EB corbos Linux SDK 1.2.1",
 	"image": "linux.elektrobit.com/ebcl/sdk:testing",
-	"initializeCommand": "${PWD}/tools/init_workspace",
+	"initializeCommand": "${PWD}/init_workspace",
 	"postCreateCommand": "${PWD}/tools/init_container",
 	"customizations": {
 		"vscode": {

@@ -2,5 +2,5 @@
 
 echo "Setting EBcL workspace up..."
 
-cd container
+cd tools/container
 ./build_container
