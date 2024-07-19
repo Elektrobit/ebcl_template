@@ -35,3 +35,4 @@ if [ ! -d "/tmp/build/images" ]; then
     overlay_mount /build/images
 fi
 
+source /build/venv/bin/activate

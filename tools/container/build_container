@@ -2,12 +2,12 @@
 
 set -e
 
-cd "$(dirname "${BASH_SOURCE[0]}"
+cd $(dirname "${BASH_SOURCE[0]}")
 echo "Current directory: $PWD"
 
 if [[ ! -d ../.venv ]]; then
     echo "Preparing venv for container build tool..."
-    cd ..
+    cd ../..
     python3 -m venv .venv
     source .venv/bin/activate
     pip install -r tools/requirements.txt

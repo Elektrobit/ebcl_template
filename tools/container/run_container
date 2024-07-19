@@ -18,33 +18,29 @@ SCRIPT_DIR=$(dirname $SCRIPT)
 echo "SCRIPT FOLDER: ${SCRIPT_DIR}"
 
 # find workspace folder
-WORKSPACE=$(realpath "$SCRIPT_DIR/..")
+WORKSPACE=$(realpath "$SCRIPT_DIR/../..")
 echo "WORKSPACE: $WORKSPACE"
 
 # find images folder
-IMAGES=$(realpath "$SCRIPT_DIR/../images")
+IMAGES=$(realpath "$WORKSPACE/images")
 echo "IMAGES: $IMAGES"
 
 # find identity folder
-SDKS=$(realpath "$SCRIPT_DIR/../identity")
-echo "SDKS: $SDKS"
-
-# find sdks folder
-IDENTITY=$(realpath "$SCRIPT_DIR/../sdks")
+IDENTITY=$(realpath "$WORKSPACE/identity")
 echo "IDENTITY: $IDENTITY"
 
 # find results folder
 mkdir -p /tmp/results/{images,packages} || true
-RESULTS_DIR=$(realpath "$SCRIPT_DIR/../results")
+RESULTS_DIR=$(realpath "$WORKSPACE/results")
 echo "RESULT FOLDER: $RESULTS_DIR"
 RESULTS_IMAGES_DIR=$(realpath "$RESULTS_DIR/images")
 RESULTS_PACKAGES_DIR=$(realpath "$RESULTS_DIR/packages")
 RESULTS_APPS_DIR=$(realpath "$RESULTS_DIR/apps")
 
 # find sysroots
-SYSROOT_X86=$(realpath "$SCRIPT_DIR/../sysroot_x86_64")
+SYSROOT_X86=$(realpath "$WORKSPACE/sysroot_x86_64")
 echo "SYSROOT_X86: $SYSROOT_X86"
-SYSROOT_ARM=$(realpath "$SCRIPT_DIR/../sysroot_aarch64")
+SYSROOT_ARM=$(realpath "$WORKSPACE/sysroot_aarch64")
 echo "SYSROOT_ARM: $SYSROOT_ARM"
 
 lsmod | grep binfmt_misc
@@ -61,7 +57,6 @@ if [ ! -z "$@" ]; then
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
-        -v ${SDKS}:/build/sdks:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
@@ -77,7 +72,6 @@ else
         -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
         -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
         -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
-        -v ${SDKS}:/build/sdks:rw \
         -v ${WORKSPACE}:/workspace:rw \
         -v ${IMAGES}:/build/images:ro \
         -v ${IDENTITY}:/build/identity:ro \
