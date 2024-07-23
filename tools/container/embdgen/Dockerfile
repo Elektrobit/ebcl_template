@@ -10,7 +10,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update
 RUN apt -y install \
     python3 python3-pip python3-venv libparted-dev python3-dev pkg-config \
-    mtools e2fsprogs cryptsetup-bin dosfstools fakeroot fdisk
+    mtools e2fsprogs cryptsetup-bin dosfstools fakeroot fdisk udev
 
 USER $CONTAINER_USER
 
