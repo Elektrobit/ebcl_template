@@ -176,9 +176,9 @@ class TaskGenerator:
                             self._elbe_build_image(file, description)
                             self._elbe_run_image(file)
 
-    def save_tasks(self):
+    def save_tasks(self, target='../../.vscode/tasks.json'):
         """ Update VS Code tasks file. """
-        file = os.path.abspath(os.path.join(os.path.dirname(__file__), '../.vscode/tasks.json'))
+        file = os.path.abspath(os.path.join(os.path.dirname(__file__), target))
         with open(file, 'w', encoding='utf-8') as tasks_file:
             json.dump(self.tasks, tasks_file, indent=4)
 
