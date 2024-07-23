@@ -7,5 +7,6 @@ Layers:
   - pbuilder
   - rust
   - kiwi
+  - elbe
   - appdev
   - embdgen

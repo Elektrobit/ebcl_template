@@ -15,10 +15,8 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt update
 RUN apt -y install \
     openssh-server debootstrap reprepro python3 python3-pip python3-venv \
-    binfmt-support qemu-user-static locales python3-cherrypy3 \
-    python3-gpg python3-lxml python3-mako python3-passlib python3-pycdlib \
-    python3-debian python3-suds python3-libvirt swig cpio patchelf \
-    python3-beaker python3-spyne python3-sqlalchemy python3-parted \
+    binfmt-support qemu-user-static locales libparted-dev \
+    cpio patchelf libgpgme-dev swig libvirt-dev python3-apt \
     tmux dosfstools e2fsprogs xfsprogs file lsof vim busybox-static:arm64
 
 # Prepare the elbe setup
@@ -32,6 +30,7 @@ RUN mkdir -p /etc/ssh
 RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
 
 # fix permissions
+
 RUN chown $CONTAINER_USER:$CONTAINER_USER /var/cache/elbe
 
 # Get elbe
@@ -41,9 +40,7 @@ RUN unzip elbe_docker_container.zip
 RUN rm -f elbe_docker_container.zip
 RUN mv elbe-elbe_docker_container/* .
 RUN rm -rf elbe-elbe_docker_container
-
-# init elbe db
-RUN PATH=$PATH:/var/cache/elbe/devel PYTHONPATH=$PYTHONPATH:/var/cache/elbe/devel elbe db init
+RUN chown $CONTAINER_USER:$CONTAINER_USER /var/cache/elbe/devel
 
 # Copy elbe helper scripts
 COPY scripts/elbe/* /build/bin/
@@ -52,10 +49,6 @@ COPY scripts/binfmt/* /build/bin/
 
 # Add elbe to PATH
 USER root
-RUN echo "export PATH=\$PATH:/var/cache/elbe/devel" >> /home/$CONTAINER_USER/.bashrc
-RUN echo "PYTHONPATH=\$PYTHONPATH:/var/cache/elbe/devel" >> /home/$CONTAINER_USER/.bashrc
-RUN echo "export PATH=\$PATH:/var/cache/elbe/devel" >> /root/.bashrc
-RUN echo "PYTHONPATH=\$PYTHONPATH:/var/cache/elbe/devel" >> /root/.bashrc
 
 # Enable binfmt for cross-building
 RUN echo "sudo /build/bin/register_binfmt --reset -p yes" >> /home/$CONTAINER_USER/.bashrc
@@ -63,6 +56,14 @@ RUN echo "sudo /build/bin/register_binfmt --reset -p yes" >> /home/$CONTAINER_US
 RUN echo "start_elbe_service" >> /home/$CONTAINER_USER/.bashrc
 
 USER $CONTAINER_USER
+
+# Install elbe dependencies
+RUN bash -c "source /build/venv/bin/activate; pip install gpg CherryPy lxml Mako passlib pycdlib python-debian suds libvirt-python Beaker spyne sqlalchemy python-parted"
+RUN bash -c "source /build/venv/bin/activate; pip install -e /var/cache/elbe/devel"
+
+# init elbe db
+# PYTHONPATH is hack to make python3-apt available in the venv. The package is not maintained on Pipy and only avalable as deb
+RUN bash -c "source /build/venv/bin/activate; PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages/ elbe db init"
 
 # Installation folders for SDKs
 RUN mkdir -p /build/sdks

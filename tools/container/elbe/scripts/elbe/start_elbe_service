@@ -7,6 +7,6 @@ if [ $? -eq 0 ]; then
     echo "Elbe port is already in use."
     exit 0
 else
-    sudo bash -c "PATH=$PATH PYTHONPATH=$PYTHONPATH elbe daemon --port=$port --soap > /tmp/elbe_service.log 2>&1" &
+    sudo bash -c "source /build/venv/bin/activate; PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages/ elbe daemon --port=$port --soap > /tmp/elbe_service.log 2>&1" &
     echo "Elbe service started."
 fi
