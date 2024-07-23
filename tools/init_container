@@ -4,5 +4,5 @@ echo "Setting EBcL container up..."
 
 echo "Update VS Code build tasks..."
 source /build/venv/bin/activate
-python3 /workspace/tools/generate_tasks.py
+python3 /workspace/tools/tasks/generate_tasks.py
 
