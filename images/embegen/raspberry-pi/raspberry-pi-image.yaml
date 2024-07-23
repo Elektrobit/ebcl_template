@@ -1,0 +1,21 @@
+image:
+  type: mbr
+  boot_partition: boot
+
+  parts:
+    - name: boot
+      type: partition
+      fstype: fat32
+      size: 100 MB
+      content:
+        type: fat32
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 2 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: files/ubuntu.tar
+

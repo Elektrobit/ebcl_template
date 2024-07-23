@@ -1,0 +1,12 @@
+image:
+  type: mbr
+  parts:
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 2GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: files/archive.tar
