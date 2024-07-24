@@ -7,8 +7,14 @@
     "pylint.args": [
         "--disable=E0015"
     ],
-    "python.testing.pytestArgs": [],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.testing.cwd": "tools/build"
+    "python.testing.cwd": "tools/build/lib",
+    "mypy-type-checker.args": [
+        "--disable-error-code=import-untyped",
+        "--check-untyped-defs"
+    ]
 }

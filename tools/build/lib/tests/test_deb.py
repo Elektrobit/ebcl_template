@@ -21,11 +21,9 @@ class TestDeb:
         assert p is not None
 
         with tempfile.TemporaryDirectory() as d:
-            success = p.download(d)
-            assert success is True
+            deb_path = p.download(d)
+            assert deb_path is not None
 
-            local_filename = p.file_url.split('/')[-1]
-            deb_path = os.path.join(d, local_filename)
             assert os.path.isfile(deb_path)
 
             location = extract_archive(deb_path, d)

@@ -2,7 +2,12 @@
 
 echo "Setting EBcL container up..."
 
+# Generate VS Code build tasks
 echo "Update VS Code build tasks..."
 source /build/venv/bin/activate
-python3 /workspace/tools/tasks/generate_tasks.py
+python /workspace/tools/tasks/generate_tasks.py
 
+# Install EBcL tools
+echo "Install EBcL tools..."
+pip install -e /workspace/tools/build/lib/
+pip install -e /workspace/tools/build/initrd/

@@ -1,0 +1,28 @@
+apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.2
+distro: ebcl
+components:
+  - prod
+  - dev
+modules:
+  - kernel/pfeng/pfeng.ko
+modules_packages: [
+  linux-modules-5.15.0-1023-s32-eb
+]
+arch: 'arm64'
+root_device: /dev/mmcblk0p2
+devices:
+  - name: mmcblk1
+    type: block
+    major: 8
+    minor: 0
+  - name: console
+    type: char
+    major: 5
+    minor: 1
+files:
+  - source: dummy.txt
+    destination: root
+  - source: dummy
+    destination: root
+    mode: 0o777
+kversion: 5.15.0-1023-s32-eb

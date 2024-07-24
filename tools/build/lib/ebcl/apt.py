@@ -18,11 +18,11 @@ class Package:
     def __init__(self, name: str):
         self.name = name
 
-    def download(self, location: str = '/tmp') -> bool:
+    def download(self, location: str = '/tmp') -> str | None:
         """ Download this package. """
         result = requests.get(self.file_url, allow_redirects=True, timeout=10)
         if result.status_code != 200:
-            return False
+            return None
         else:
             local_filename = self.file_url.split('/')[-1]
             local_filename = os.path.join(location, local_filename)
@@ -30,7 +30,7 @@ class Package:
                 for chunk in result.iter_content(chunk_size=512 * 1024):
                     if chunk:  # filter out keep-alive new chunks
                         f.write(chunk)
-        return True
+        return local_filename
 
 
 class Apt:

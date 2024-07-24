@@ -27,8 +27,6 @@ class TestApt:
         assert p is not None
 
         with tempfile.TemporaryDirectory() as d:
-            success = p.download(d)
-            assert success is True
-
-            local_filename = p.file_url.split('/')[-1]
-            assert os.path.isfile(os.path.join(d, local_filename))
+            file = p.download(d)
+            assert file is not None
+            assert os.path.isfile(file)
