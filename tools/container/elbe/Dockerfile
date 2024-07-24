@@ -16,7 +16,7 @@ RUN apt update
 RUN apt -y install \
     openssh-server debootstrap reprepro python3 python3-pip python3-venv \
     binfmt-support qemu-user-static locales libparted-dev \
-    cpio patchelf libgpgme-dev swig libvirt-dev python3-apt \
+    cpio patchelf libgpgme-dev swig libvirt-dev python3-apt python3-parted \
     tmux dosfstools e2fsprogs xfsprogs file lsof vim busybox-static:arm64
 
 # Prepare the elbe setup
@@ -58,7 +58,8 @@ RUN echo "start_elbe_service" >> /home/$CONTAINER_USER/.bashrc
 USER $CONTAINER_USER
 
 # Install elbe dependencies
-RUN bash -c "source /build/venv/bin/activate; pip install gpg CherryPy lxml Mako passlib pycdlib python-debian suds libvirt-python Beaker spyne sqlalchemy python-parted"
+# python-parted conflicts with pyparted (used by embdgen)
+RUN bash -c "source /build/venv/bin/activate; pip install gpg CherryPy lxml Mako passlib pycdlib python-debian suds libvirt-python Beaker spyne sqlalchemy"
 RUN bash -c "source /build/venv/bin/activate; pip install -e /var/cache/elbe/devel"
 
 # init elbe db
