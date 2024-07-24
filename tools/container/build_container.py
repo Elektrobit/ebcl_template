@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """ Script to build the EBcL SDK container. """
 import os
 import logging
