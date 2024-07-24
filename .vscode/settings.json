@@ -1,3 +1,14 @@
 {
-    "cmake.sourceDirectory": "/workspace/apps/my-json-app"
+    "cmake.sourceDirectory": "/workspace/apps/my-json-app",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true
+    },
+    "pylint.args": [
+        "--disable=E0015"
+    ],
+    "python.testing.pytestArgs": [],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "tools/build"
 }

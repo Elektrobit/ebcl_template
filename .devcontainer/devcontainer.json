@@ -20,7 +20,12 @@
 				"ms-vscode.makefile-tools",
 				"ms-vscode.cpptools-extension-pack",
 				"ms-python.python",
-				"robocorp.robotframework-lsp"
+				"robocorp.robotframework-lsp",
+				"ms-python.autopep8",
+				"ms-python.pylint",
+				"ms-python.mypy-type-checker",
+				"WolfiesHorizon.python-auto-venv",
+				"donjayamanne.python-environment-manager"
 			]
 		}
 	},

@@ -89,7 +89,7 @@ USER $CONTAINER_USER
 
 # Prepare Python env
 WORKDIR /build
-RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml"
+RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml mypy pep8 pylint pytest pytest-cov requests types-requests unix-ar"
 
 # change work dir to workspace mount point
 WORKDIR /workspace
