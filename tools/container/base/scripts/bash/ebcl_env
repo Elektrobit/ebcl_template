@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 # add scripts to path
-export PATH="/build/bin:$PATH"
+export PATH="/workspace/tools/bin:/build/bin:$PATH"
 
 echo "SDK version $(cat /etc/sdk_version)"
 

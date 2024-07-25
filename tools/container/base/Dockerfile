@@ -27,7 +27,7 @@ RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     gcc g++ pkg-config locales kmod wget xz-utils sudo git vim python3 \
     python3-pip python3-venv rsync lshw gdisk fdisk parted \
     file crossbuild-essential-arm64 tcpdump iputils-ping iproute2 iptables \
-    gdb-multiarch curl wget
+    gdb-multiarch curl wget fakechroot fakeroot
 
  # Setup locale
 RUN export LC_ALL=en_US.UTF-8 && \
@@ -89,7 +89,7 @@ USER $CONTAINER_USER
 
 # Prepare Python env
 WORKDIR /build
-RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml mypy pep8 pylint pytest pytest-cov requests types-requests unix-ar types-PyYAML"
+RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml mypy pep8 pylint pytest pytest-cov requests types-requests unix-ar types-PyYAML Jinja2 types-Jinja2 robotframework zstandard"
 
 # change work dir to workspace mount point
 WORKDIR /workspace

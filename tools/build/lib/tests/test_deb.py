@@ -8,7 +8,7 @@ from ebcl.deb import extract_archive
 class TestDeb:
     """ Tests for the deb functions. """
 
-    cls: Apt
+    apt: Apt
 
     @classmethod
     def setup_class(cls):
@@ -16,7 +16,7 @@ class TestDeb:
         cls.apt = Apt()
 
     def test_download_and_extract_busybox(self):
-        """ Search busybox package in default apt repository. """
+        """ Extract data content of deb. """
         p = self.apt.find_package('busybox-static')
         assert p is not None
 
@@ -31,5 +31,6 @@ class TestDeb:
 
             location = extract_archive(deb_path, None)
             assert location is not None
-            assert os.path.isdir(location)
-            assert os.path.isfile(os.path.join(location, 'debian-binary'))
+            assert os.path.isdir(os.path.join(location))
+            assert os.path.isfile(os.path.join(
+                location, 'bin', 'busybox'))

@@ -34,7 +34,7 @@ dependencies = [
 Homepage = "https://github.com/Elektrobit/ebcl_template"
 
 [project.scripts]
-embdgen = "ebcl_initrd:cli"
+ebcl_initrd = "ebcl_initrd:cli"
 
 
 [tool.pylint.format]

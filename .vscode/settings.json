@@ -8,11 +8,12 @@
         "--disable=E0015"
     ],
     "python.testing.pytestArgs": [
+        "--no-cov",
         "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.testing.cwd": "tools/build/lib",
+    "python.testing.cwd": "tools/build/initrd",
     "mypy-type-checker.args": [
         "--disable-error-code=import-untyped",
         "--check-untyped-defs"

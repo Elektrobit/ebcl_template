@@ -9,12 +9,15 @@ import tempfile
 
 from pathlib import Path
 
+from ebcl.apt import Apt
+from ebcl.deb import extract_archive
+from jinja2 import Template
 import yaml
-import ebcl
 
 
 class InitrdGenerator:
     """ EBcL initrd generator. """
+    config: Path
     modules: list[str]
     modules_packages: str
     root_device: str
@@ -22,11 +25,10 @@ class InitrdGenerator:
     files: list[dict[str, str]]
     kversion: str
     arch: str
-    apt_repo: str
-    distro: str
-    components: list[str]
+    apt_repos: list[dict[str, str | list[str]]]
     target_dir: str
     image_path: str
+    apts: list[Apt]
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -36,6 +38,9 @@ class InitrdGenerator:
         """
         with open(config_file, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
+
+        self.config = Path(config_file)
+
         self.modules = config.get('modules', [])
         self.modules_packages = config.get('modules_packages', '')
         self.root_device = config.get('root_device', '')
@@ -43,32 +48,45 @@ class InitrdGenerator:
         self.files = config.get('files', [])
         self.kversion = config.get('kversion', '')
         self.arch = config.get('arch', 'arm64')
-        self.apt_repo = config.get(
-            'apt_repo', 'https://linux.elektrobit.com/eb-corbos-linux/1.2')
-        self.distro = config.get('distro', 'ebcl')
-        self.components = config.get('components', ['prod', 'dev'])
+        self.apt_repos = config.get('apt_repos', None)
 
-        if not self.root_device:
-            logging.error('The root_device is mandatory. Please specify it.')
+        if self.apt_repos is None:
+            logging.error(
+                'Providing at least one apt repository is mandatory!')
             exit(-1)
+
+        self.apts = []
+        for repo in self.apt_repos:
+            self.apts.append(
+                Apt(
+                    url=repo['apt_repo'],
+                    distro=repo['distro'],
+                    components=repo['components'],
+                    arch=self.arch
+                )
+            )
+
+    def _chroot_run(self, cmd: str):
+        """ Run command in chroot target environment. """
+        subprocess.run(
+            f'sudo bash -c "chroot {self.target_dir} {cmd}"',
+            check=True,
+            shell=True
+        )
 
     def install_busybox(self):
         """Get busybox and add it to the initrd. """
-        apt = ebcl.apt.Apt(
-            url=self.apt_repo,
-            distro=self.distro,
-            components=self.components,
-            arch=self.arch
-        )
-
-        package = apt.find_package('busybox-static')
+        for apt in self.apts:
+            package = apt.find_package('busybox-static')
+            if package is not None:
+                break
 
         if package is None:
             logging.error('The package busybox-static was not found!')
             exit(1)
 
         file = package.download()
-        temp_dir = ebcl.deb.extract_archive(file)
+        temp_dir = extract_archive(file)
 
         busybox_path = os.path.join(temp_dir, 'bin', 'busybox')
         if not os.path.isfile(busybox_path):
@@ -77,12 +95,16 @@ class InitrdGenerator:
             exit(1)
 
         initrd_bin_dir = os.path.join(self.target_dir, 'bin')
-        initrd_sh_path = os.path.join(initrd_bin_dir, 'sh')
 
         os.makedirs(initrd_bin_dir, exist_ok=True)
         shutil.copy(busybox_path, initrd_bin_dir)
         shutil.rmtree(temp_dir)
-        os.symlink('busybox', initrd_sh_path)
+
+        self._chroot_run('/bin/busybox --install -s /bin')
+        self._chroot_run('ln -s /bin /sbin')
+        self._chroot_run('mkdir -p /usr')
+        self._chroot_run('ln -s /bin /usr/bin')
+        self._chroot_run('ln -s /bin /usr/sbin')
 
     def download_deb_package(self, name: str) -> str:
         """Download a deb package.
@@ -94,14 +116,10 @@ class InitrdGenerator:
         Returns:
             _type_ (str): Path to the downloaded package.
         """
-        apt = ebcl.apt.Apt(
-            url='https://linux.elektrobit.com/eb-corbos-linux/1.2',
-            distro='ebcl',
-            components=['prod', 'dev'],
-            arch=self.arch
-        )
-
-        package = apt.find_package(name)
+        for apt in self.apts:
+            package = apt.find_package(name)
+            if package is not None:
+                break
 
         if package is None:
             logging.error('The package %s was not found!', name)
@@ -109,14 +127,12 @@ class InitrdGenerator:
 
         return package.download()
 
-    def extract_modules_from_deb(self, deb_file: str):
+    def extract_modules_from_deb(self, mods_dir: str):
         """Extract the required kernel modules from the deb package.
 
         Args:
-            deb_file (str): Path to the deb archive.
+            mods_dir (str): Folder containing the modules.
         """
-        temp_dir = ebcl.deb.extract_archive(deb_file)
-
         # Copy the specified modules to the initrd /lib/modules directory
         initrd_modules_dir = os.path.join(
             self.target_dir, 'lib', 'modules', self.kversion)
@@ -125,16 +141,20 @@ class InitrdGenerator:
 
         for module in self.modules:
             module_path = os.path.join(
-                temp_dir, 'lib', 'modules', self.kversion)
-            if os.path.isdir(module_path):
-                target_dir = os.path.join(initrd_modules_dir, module)
-                os.makedirs(target_dir, exist_ok=True)
-                shutil.copy(module_path, target_dir)
-                with open(modulesdeps, 'w', encoding='utf-8') as f:
-                    f.write(f'{module}:\n')
-            else:
-                logging.warning(
-                    'Module %s not found in package %s.', module, os.path.basename(deb_file))
+                mods_dir, 'lib', 'modules', self.kversion, module)
+
+            if not os.path.isfile(module_path):
+                logging.error('Module %s not found.', module)
+                continue
+
+            target_dir = os.path.dirname(
+                os.path.join(initrd_modules_dir, module))
+            os.makedirs(target_dir, exist_ok=True)
+
+            shutil.copy(module_path, target_dir)
+
+            with open(modulesdeps, 'w', encoding='utf-8') as f:
+                f.write(f'{module}:\n')
 
     def add_devices(self):
         """ Create device files. """
@@ -155,7 +175,8 @@ class InitrdGenerator:
     def copy_files(self):
         """ Copy user-specified files in the initrd. """
         for entry in self.files:
-            src = Path(entry['source'])
+            src = Path(os.path.abspath(os.path.join(
+                self.config.parent, entry['source'])))
             dst = Path(self.target_dir) / entry['destination']
             mode: str = entry['mode'] if 'mode' in entry else "0o666"
             if src.is_file():
@@ -181,12 +202,19 @@ class InitrdGenerator:
 
         self.install_busybox()
 
+        mods_dir = tempfile.mkdtemp()
+
         for mod_package in self.modules_packages:
             deb_file = self.download_deb_package(mod_package)
-            # Extract modules directly to the initrd /lib/modules directory
-            self.extract_modules_from_deb(deb_file)
-            # Remove downloaded package and temporary folder
-            shutil.rmtree(os.path.dirname(deb_file))
+            extract_archive(deb_file, location=mods_dir)
+            # Remove downloaded package
+            os.remove(deb_file)
+
+        # Extract modules directly to the initrd /lib/modules directory
+        self.extract_modules_from_deb(mods_dir)
+
+        # Remove mods temporary folder
+        shutil.rmtree(mods_dir)
 
         # Add device nodes
         self.add_devices()
@@ -194,37 +222,17 @@ class InitrdGenerator:
         # Copy files and directories specified in the files
         self.copy_files()
 
-        mods = []
-        for m in self.modules:
-            mods.append(m.split("/")[-1])
-        modulesp: str = "\n".join(
-            [f"modprobe {module}" for module in mods])
         # Create init script
         init_script: Path = Path(self.target_dir) / 'init'
-        init_script_content: str = f"""#!/bin/sh
 
-/bin/busybox --install -s /bin/
-/bin/busybox --install -s /sbin/
+        with open(os.path.join(os.path.dirname(__file__), 'init.sh'), encoding='utf8') as f:
+            tmpl = Template(f.read())
 
-mkdir -p /usr
+        init_script_content = tmpl.render(
+            root=self.root_device,
+            mods=[m.split("/")[-1] for m in self.modules]
+        )
 
-ln -s /bin /usr/bin
-ln -s /sbin /usr/sbin
-
-mount -t proc none /proc
-mount -t sysfs none /sys
-mount -t devtmpfs none /dev
-
-# Load kernel modules
-{modulesp}
-
-
-# Mount root filesystem
-mount {self.root_device} /sysroot
-
-# Switch to the new root filesystem
-exec switch_root /sysroot /sbin/init
-"""
         init_script.write_text(init_script_content)
         os.chmod(init_script, 0o755)
 

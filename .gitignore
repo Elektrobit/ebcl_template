@@ -35,3 +35,6 @@ report.html
 .vscode/tasks.json
 
 .coverage
+htmlcov
+
+initrd.img

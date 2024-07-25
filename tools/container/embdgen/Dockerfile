@@ -16,8 +16,7 @@ USER $CONTAINER_USER
 
 # Install embedgen
 WORKDIR /build
-# RUN git clone --branch v0.1.0 https://github.com/Elektrobit/embdgen.git embdgen
-RUN git clone --branch fix_ext4 https://github.com/Elektrobit/embdgen.git embdgen
+RUN git clone --branch v0.1.1 https://github.com/Elektrobit/embdgen.git embdgen
 WORKDIR /build/embdgen
 RUN bash -c "source /build/venv/bin/activate; pip install -e embdgen-core"
 RUN bash -c "source /build/venv/bin/activate; pip install -e embdgen-cominit"

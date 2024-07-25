@@ -1,6 +1,8 @@
 """ APT helper functions """
+import gzip
 import logging
 import lzma
+import tarfile
 import os
 
 from dataclasses import dataclass
@@ -58,12 +60,13 @@ class Apt:
         response = requests.get(inrelease, allow_redirects=True, timeout=10)
         content = response.content.decode(encoding='utf-8', errors='ignore')
 
-        package_indexes = {}
+        package_indexes: dict[str, str] = {}
 
         for line in content.split('\n'):
             for component in self.components:
                 search = f'{component}/binary-{self.arch}/Packages.xz'
-                if search in line:
+                search2 = f'{component}/binary-{self.arch}/Packages.gz'
+                if search in line or search2 in line:
                     line = line.strip()
                     parts = line.split(' ')
                     package_indexes[component] = parts[-1]
@@ -72,11 +75,16 @@ class Apt:
 
         for component in self.components:
             if component in package_indexes:
-                url = package_indexes[component]
+                url: str = package_indexes[component]
                 packages = f'{self.url}/dists/{self.distro}/{url}'
                 response = requests.get(
                     packages, allow_redirects=True, timeout=10)
-                content = lzma.decompress(response.content)
+
+                if url.endswith('xz'):
+                    content = lzma.decompress(response.content)
+                else:
+                    assert url.endswith('gz')
+                    content = gzip.decompress(response.content)
                 content = content.decode(encoding='utf-8', errors='ignore')
                 content = content.split('\n')
 
@@ -86,6 +94,7 @@ class Apt:
                         parts = line.split(' ')
                         package = Package(parts[-1])
                     if line.startswith('Filename:'):
+                        assert package is not None
                         parts = line.split(' ')
                         package.file_url = f'{self.url}/{parts[-1]}'
                         self.packages[package.name] = package
