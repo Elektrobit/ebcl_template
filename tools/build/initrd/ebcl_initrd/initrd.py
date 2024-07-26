@@ -4,20 +4,23 @@ import argparse
 import logging
 import os
 import shutil
-import subprocess
 import tempfile
 
 from pathlib import Path
+from typing import Tuple
 
 from ebcl.apt import Apt
 from ebcl.deb import extract_archive
+from ebcl.fake import Fake
 from jinja2 import Template
 import yaml
 
 
 class InitrdGenerator:
     """ EBcL initrd generator. """
+    # config file
     config: Path
+    # config values
     modules: list[str]
     modules_packages: str
     root_device: str
@@ -28,7 +31,10 @@ class InitrdGenerator:
     apt_repos: list[dict[str, str | list[str]]]
     target_dir: str
     image_path: str
+    # apt repos
     apts: list[Apt]
+    # fakeroot helper
+    fake: Fake
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -51,9 +57,14 @@ class InitrdGenerator:
         self.apt_repos = config.get('apt_repos', None)
 
         if self.apt_repos is None:
-            logging.error(
-                'Providing at least one apt repository is mandatory!')
-            exit(-1)
+            self.apts.append(
+                Apt(
+                    url='https://linux.elektrobit.com/eb-corbos-linux/1.2',
+                    distro='ebcl',
+                    components=['prod', 'dev'],
+                    arch=self.arch
+                )
+            )
 
         self.apts = []
         for repo in self.apt_repos:
@@ -66,13 +77,11 @@ class InitrdGenerator:
                 )
             )
 
-    def _chroot_run(self, cmd: str):
+        self.fake = Fake()
+
+    def _run_chroot(self, cmd: str) -> Tuple[str, str]:
         """ Run command in chroot target environment. """
-        subprocess.run(
-            f'sudo bash -c "chroot {self.target_dir} {cmd}"',
-            check=True,
-            shell=True
-        )
+        return self.fake.run_sudo_chroot(cmd, self.target_dir)
 
     def install_busybox(self):
         """Get busybox and add it to the initrd. """
@@ -86,25 +95,9 @@ class InitrdGenerator:
             exit(1)
 
         file = package.download()
-        temp_dir = extract_archive(file)
+        extract_archive(file, self.target_dir)
 
-        busybox_path = os.path.join(temp_dir, 'bin', 'busybox')
-        if not os.path.isfile(busybox_path):
-            logging.error(
-                'The busybox binary was not found in %s!', busybox_path)
-            exit(1)
-
-        initrd_bin_dir = os.path.join(self.target_dir, 'bin')
-
-        os.makedirs(initrd_bin_dir, exist_ok=True)
-        shutil.copy(busybox_path, initrd_bin_dir)
-        shutil.rmtree(temp_dir)
-
-        self._chroot_run('/bin/busybox --install -s /bin')
-        self._chroot_run('ln -s /bin /sbin')
-        self._chroot_run('mkdir -p /usr')
-        self._chroot_run('ln -s /bin /usr/bin')
-        self._chroot_run('ln -s /bin /usr/sbin')
+        self._run_chroot('/bin/busybox --install -s /bin')
 
     def download_deb_package(self, name: str) -> str:
         """Download a deb package.
@@ -133,11 +126,11 @@ class InitrdGenerator:
         Args:
             mods_dir (str): Folder containing the modules.
         """
-        # Copy the specified modules to the initrd /lib/modules directory
         initrd_modules_dir = os.path.join(
             self.target_dir, 'lib', 'modules', self.kversion)
         modulesdeps = os.path.join(initrd_modules_dir, 'modules.dep')
-        os.makedirs(initrd_modules_dir, exist_ok=True)
+
+        self._run_chroot(f'mkdir -p /lib/modules/{self.kversion}')
 
         for module in self.modules:
             module_path = os.path.join(
@@ -149,28 +142,37 @@ class InitrdGenerator:
 
             target_dir = os.path.dirname(
                 os.path.join(initrd_modules_dir, module))
-            os.makedirs(target_dir, exist_ok=True)
+            self.fake.run_sudo(f'mkdir -p {target_dir}')
 
-            shutil.copy(module_path, target_dir)
+            self.fake.run_sudo(f'cp {module_path} {target_dir}')
 
-            with open(modulesdeps, 'w', encoding='utf-8') as f:
-                f.write(f'{module}:\n')
+            self.fake.run_sudo(f'echo {module}: >> {modulesdeps}')
+
+        # Fix ownership of modules
+        self._run_chroot('chown -R 0:0 /lib/modules')
 
     def add_devices(self):
         """ Create device files. """
-        dev_dir = os.path.join(self.target_dir, 'dev')
-        os.makedirs(dev_dir, exist_ok=True)
+        self._run_chroot('mkdir -p /dev')
         for device in self.devices:
-            device_path = os.path.join(dev_dir, device['name'])
             major = (int)(device['major'])
             minor = (int)(device['major'])
-            if device['type'] == 'block':
-                os.mknod(device_path, mode=0o600 | os.makedev(major, minor))
-            elif device['type'] == 'char':
-                os.mknod(device_path, mode=0o200 | os.makedev(major, minor))
+            if device['type'] == 'char':
+                dev_type = 'c'
+                mode = '200'
+            elif device['type'] == 'block':
+                dev_type = 'b'
+                mode = '600'
             else:
-                logging.warning('Unsupported device type %s for %s',
-                                device['type'], device['name'])
+                logging.error('Unsupported device type %s for %s',
+                              device['type'], device['name'])
+
+            self._run_chroot(
+                f'mknod -m {mode} /dev/{device["name"]} {dev_type} {major} {minor}')
+
+            uid = device.get('uid', '0')
+            gid = device.get('uid', '0')
+            self._run_chroot(f'chown {uid}:{gid} /dev/{device["name"]}')
 
     def copy_files(self):
         """ Copy user-specified files in the initrd. """
@@ -178,16 +180,24 @@ class InitrdGenerator:
             src = Path(os.path.abspath(os.path.join(
                 self.config.parent, entry['source'])))
             dst = Path(self.target_dir) / entry['destination']
-            mode: str = entry['mode'] if 'mode' in entry else "0o666"
+            mode: str = entry.get('mode', "666")
+
             if src.is_file():
                 os.makedirs(dst.parent, exist_ok=True)
-                shutil.copy(src, dst)
-                os.chmod(dst / src, int(mode, base=8))
+                self._run_chroot(f'mkdir -p /{entry["destination"]}')
+                self.fake.run_sudo(f'cp {src} {dst}')
+                self._run_chroot(f'chmod {mode} /{entry["destination"]}')
+                uid = entry.get('uid', '0')
+                gid = entry.get('uid', '0')
+                self._run_chroot(f'chown {uid}:{gid} /{entry["destination"]}')
             elif src.is_dir():
-                if not os.listdir(src):
-                    os.makedirs(dst / src, exist_ok=True)
-                shutil.copytree(src, dst, dirs_exist_ok=True)
-                os.chmod(dst / src, int(mode, base=8))
+                self._run_chroot(f'mkdir -p /{entry["destination"]}')
+                self.fake.run_sudo(f'cp -R  {src}/* {dst}')
+                self._run_chroot(f'chmod -R {mode} /{entry["destination"]}')
+                uid = entry.get('uid', '0')
+                gid = entry.get('uid', '0')
+                self._run_chroot(
+                    f'chown -R {uid}:{gid} /{entry["destination"]}')
             else:
                 logging.warning('Source %s does not exist', src)
 
@@ -195,12 +205,13 @@ class InitrdGenerator:
         """ Create the initrd image.  """
         self.target_dir = tempfile.mkdtemp()
 
-        # Create necessary directories
-        for dir_name in ['proc', 'sys', 'dev', 'sysroot', 'var',
-                         'tmp', 'run', 'root', 'usr', 'sbin', 'lib', 'etc']:
-            os.makedirs(Path(self.target_dir) / dir_name, exist_ok=True)
-
         self.install_busybox()
+
+        # Create necessary directories
+        for dir_name in ['proc', 'sys', 'dev', 'sysroot', 'var', 'bin',
+                         'tmp', 'run', 'root', 'usr', 'sbin', 'lib', 'etc']:
+            self._run_chroot(f'mkdir -p {dir_name}')
+            self._run_chroot(f'chown -R 0:0 /{dir_name}')
 
         mods_dir = tempfile.mkdtemp()
 
@@ -239,14 +250,11 @@ class InitrdGenerator:
         # Create initrd image
         os.makedirs(os.path.dirname(image_path), exist_ok=True)
         with open(image_path, 'wb') as img:
-            find_proc = subprocess.Popen(
-                ['find', '.', '-print0'], cwd=self.target_dir, stdout=subprocess.PIPE)
-            subprocess.run(['cpio', '--null', '-ov', '--format=newc'],
-                           cwd=self.target_dir, stdin=find_proc.stdout, stdout=img,
-                           check=True)
+            self.fake.run_sudo(
+                'find . -print0 | cpio --null -ov --format=newc', cwd=self.target_dir, stdout=img)
 
         # delete temporary folder
-        shutil.rmtree(self.target_dir)
+        self.fake.run_sudo(f' rm -rf {self.target_dir}')
 
 
 def main() -> None:

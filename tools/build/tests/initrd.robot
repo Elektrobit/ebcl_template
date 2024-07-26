@@ -11,8 +11,8 @@ Root Device is Mounted
     Device should be mounted  /dev/mmcblk0p2    /sysroot
 
 Devices are Created
-    File Should Exist    /dev/console
-    File Should Exist    /dev/mmcblk1
+    File Should Exist    /dev/console    character special file
+    File Should Exist    /dev/mmcblk1    block special file
 
 Modules should be loaded
     File Should Exist    /lib/modules/${KVERSION}/kernel/pfeng/pfeng.ko

@@ -1,6 +1,5 @@
 """ Tests for the fake functions. """
 import os
-import shutil
 import tempfile
 
 from ebcl.apt import Apt

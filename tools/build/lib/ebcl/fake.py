@@ -1,10 +1,13 @@
 """ Fakeroot and Fakechroot helper. """
 import logging
+import os
 import shutil
 import subprocess
 import tempfile
 
+from io import FileIO
 from pathlib import Path
+from subprocess import PIPE
 from typing import Tuple
 
 
@@ -23,32 +26,50 @@ class Fake:
 
     def __del__(self):
         """ Remove state directory. """
-        shutil.rmtree(self.state)
+        if self.state:
+            if os.path.isfile(self.state):
+                os.remove(self.state)
 
-    def run(self, cmd: str, check=True) -> Tuple[str, str]:
+    def run(
+        self,
+        cmd: str,
+        cwd: str | None = None,
+        stdout: FileIO | None = None,
+        check=True
+    ) -> Tuple[None | str, str]:
         """ Run a command using fakeroot. """
         logging.info('Running command: %s', cmd)
+
+        out: int | FileIO
+        if stdout is None:
+            out = PIPE
+        else:
+            out = stdout
 
         p = subprocess.run(
             f'fakeroot -i {self.state} -s {self.state} -- {cmd}',
             check=False,
             shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stdout=out,
+            stderr=PIPE,
+            cwd=cwd
         )
 
-        stdout = p.stdout.decode('utf8')
-        stderr = p.stderr.decode('utf8')
+        if stdout is None:
+            pout = p.stdout.decode('utf8')
+            if pout.strip():
+                logging.info('STDOUT: %s', pout)
+        else:
+            pout = None
 
-        if stdout.strip():
-            logging.info('STDOUT: %s', stdout)
-        if stderr.strip():
-            logging.info('STDERR: %s', stderr)
+        perr = p.stderr.decode('utf8')
+        if perr.strip():
+            logging.info('STDERR: %s', perr)
 
         if check:
             assert p.returncode == 0
 
-        return (stdout, stderr)
+        return (pout, perr)
 
     def run_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str]:
         """ Run a command using fakechroot. """
@@ -100,27 +121,41 @@ class Fake:
 
         return (stdout, stderr)
 
-    def run_sudo(self, cmd: str, check=True) -> Tuple[str, str]:
+    def run_sudo(
+            self, cmd: str,
+            cwd: str | None = None,
+            stdout: FileIO | None = None,
+            check=True
+    ) -> Tuple[str | None, str]:
         """ Run a command using sudo. """
         logging.info('Running command \'%s\' using sudo.', cmd)
 
+        out: int | FileIO
+        if stdout is None:
+            out = PIPE
+        else:
+            out = stdout
+
         p = subprocess.run(
-            f'sudo {cmd}',
+            f'sudo bash -c "{cmd}"',
             check=True,
             shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
+            stdout=out,
+            stderr=subprocess.PIPE,
+            cwd=cwd)
 
-        stdout = p.stdout.decode('utf8')
-        stderr = p.stderr.decode('utf8')
+        if stdout is None:
+            pout = p.stdout.decode('utf8')
+            if pout.strip():
+                logging.info('STDOUT: %s', pout)
+        else:
+            pout = None
 
-        if stdout.strip():
-            logging.info('STDOUT: %s', stdout)
-        if stderr.strip():
-            logging.info('STDERR: %s', stderr)
+        perr = p.stderr.decode('utf8')
+        if perr.strip():
+            logging.info('STDERR: %s', perr)
 
         if check:
             assert p.returncode == 0
 
-        return (stdout, stderr)
+        return (pout, perr)

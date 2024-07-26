@@ -21,7 +21,7 @@ RUN ls -lah /etc/apt/trusted.gpg.d/
 # Update container
 RUN apt update
 # Install updates
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt upgrade -y \
+RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt upgrade -y
 # Install compiler and base tools
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     build-essential cmake gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \

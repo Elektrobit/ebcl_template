@@ -2,9 +2,11 @@
 import logging
 import os
 import shutil
+import subprocess
 import tempfile
 
 from subprocess import Popen, PIPE
+from typing import Tuple
 
 
 class Initrd:
@@ -31,23 +33,47 @@ class Initrd:
         self.target = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target)
 
-        p = Popen(
-            [generator, config, self.target],
-            stdout=PIPE, stderr=PIPE)
-        stdout, stderr = p.communicate()
-        logging.info('build STDOUT: %s', stdout.decode(encoding='utf8'))
-        logging.info('build STDERR: %s', stderr.decode(encoding='utf8'))
-        assert p.returncode == 0
+        cmd = f'{generator} {config} {self.target}'
+        (out, err) = self._run(cmd)
+
+        logging.info('STDOUT: %s', out)
+        logging.info('STDERR: %s', err)
 
     def _unpack(self, arch):
         """ Unpack the initrd image. """
         os.makedirs(self.target, exist_ok=True)
-        p = Popen(["cpio", "-di", "-F", arch, "-D", self.target],
-                  stdout=PIPE, stderr=PIPE)
-        stdout, stderr = p.communicate()
-        logging.info('unpack STDERR: %s', stderr.decode(encoding='utf8'))
-        logging.info('unpack STDOUT: %s', stdout.decode(encoding='utf8'))
-        assert p.returncode == 0
+
+        cmd = f'cpio -di -F {arch} -D {self.target}'
+        (out, err) = self._run_sudo(cmd)
+
+        logging.info('STDOUT: %s', out)
+        logging.info('STDERR: %s', err)
+
+    def _run_sudo(self, cmd: str, check=True) -> Tuple[str, str]:
+        """ Run command using sudo. """
+        return self._run(f'sudo bash -c "{cmd}"', check=check)
+
+    def _run(self, cmd: str, check=True) -> Tuple[str, str]:
+        """ Run command. """
+        logging.info('CMD: %s', cmd)
+
+        p = subprocess.run(
+            cmd,
+            check=True,
+            shell=True,
+            stdout=PIPE,
+            stderr=PIPE)
+
+        pout = p.stdout.decode('utf8')
+        logging.info('STDOUT: %s', pout)
+
+        perr = p.stderr.decode('utf8')
+        logging.info('STDERR: %s', perr)
+
+        if check:
+            assert p.returncode == 0
+
+        return (pout, perr)
 
     def load(self):
         """ Unpack the initrd and read the init script. """
@@ -59,15 +85,24 @@ class Initrd:
 
     def cleanup(self):
         """ Remove generated artefacts. """
-        shutil.rmtree(self.target)
+        return
+        (out, err) = self._run_sudo(f'sudo rm -rf "{self.target}"')
 
-    def file_should_exist(self, path: str):
+        logging.info('STDOUT: %s', out)
+        logging.info('STDERR: %s', err)
+
+    def file_should_exist(self, path: str, file_type: str = 'regular file'):
         """ Check that a file exists. """
         assert self.target is not None
         if path.startswith('/'):
             path = path[1:]
         file = os.path.join(self.target, path)
-        assert os.path.isfile(file)
+
+        # Will return error code != 0 if file not exists.
+        self._run_sudo(f'ls -lah {file}')
+
+        (out, _) = self._run_sudo(f'stat -c \'%F\' {file}')
+        assert out.strip() == file_type
 
     def directory_should_exist(self, path: str):
         """ Check that a folder exists. """
@@ -75,7 +110,12 @@ class Initrd:
         if path.startswith('/'):
             path = path[1:]
         d = os.path.join(self.target, path)
-        assert os.path.isdir(d)
+
+        # Will return error code != 0 if file not exists.
+        self._run_sudo(f'ls -lah {d}')
+
+        (out, _) = self._run_sudo(f'stat -c \'%F\' {d}')
+        assert out.strip() == 'directory'
 
     def module_should_be_loaded(self, module_name: str):
         """ Ensure that the given module is loaded. """

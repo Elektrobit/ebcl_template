@@ -3,7 +3,10 @@ import os
 import shutil
 import tempfile
 
+from pathlib import Path
+
 from ebcl.deb import extract_archive
+from ebcl.fake import Fake
 from ebcl_initrd.initrd import InitrdGenerator
 
 
@@ -78,9 +81,11 @@ class TestInitrd:
             'minor': '1',
         }]
 
+        self.generator.install_busybox()
         self.generator.add_devices()
 
-        assert os.path.isfile(os.path.join(self.temp_dir, 'dev', 'console'))
+        device = Path(self.temp_dir) / 'dev' / 'console'
+        assert device.is_char_device()
 
     def test_copy_files(self):
         """ Test copying of files. """
@@ -97,10 +102,19 @@ class TestInitrd:
 
         os.mkdir(os.path.join(self.temp_dir, 'root'))
 
+        self.generator.install_busybox()
         self.generator.copy_files()
 
-        assert os.path.isfile(os.path.join(self.temp_dir, 'root', 'dummy.txt'))
-        assert os.path.isfile(os.path.join(self.temp_dir, 'root', 'dummy'))
+        fake = Fake()
+        (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy')
+        assert '-rwxr-xr-x' in out
+        assert 'root root' in out
+        assert not err.strip()
+
+        (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy.txt')
+        assert '-rw-r--r-' in out
+        assert 'root root' in out
+        assert not err.strip()
 
     def test_sysroot_is_created(self):
         """ Test that sysroot folder is created. """

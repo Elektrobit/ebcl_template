@@ -20,6 +20,9 @@ devices:
     type: block
     major: 8
     minor: 0
+    mode: 777
+    uid: 234
+    gid: 789
   - name: console
     type: char
     major: 5
@@ -29,5 +32,7 @@ files:
     destination: root
   - source: dummy
     destination: root
-    mode: 0o777
+    mode: 777
+    uid: 123
+    gid: 456
 kversion: 5.15.0-1023-s32-eb
