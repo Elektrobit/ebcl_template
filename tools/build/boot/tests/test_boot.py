@@ -33,7 +33,7 @@ class TestInitrd:
     def test_read_config(self):
         """ Test yaml config loading. """
         generator = BootGenerator(self.yaml)
-        assert generator.arch == 'arm64'
+        assert generator.arch == 'amd64'
 
     def test_build_boot_archive(self):
         """ Test build boot.tar. """

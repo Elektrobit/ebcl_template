@@ -1,9 +1,10 @@
 """ Tests for the fake functions. """
 import os
+import shutil
 import tempfile
 
 from ebcl.apt import Apt
-from ebcl.deb import extract_archive
+from ebcl.deb import extract_archive, download_deb_packages
 from ebcl.fake import Fake
 
 
@@ -22,6 +23,7 @@ class TestFake:
     def test_run(self):
         """ Run a command using fakeroot. """
         (stdout, stderr) = self.fake.run('id')
+        assert stdout is not None
         assert 'uid=0(root)' in stdout
         assert 'gid=0(root)' in stdout
         assert not stderr.strip()
@@ -96,3 +98,37 @@ class TestFake:
         assert not stderr.strip()
 
         self.fake.run_sudo(f'rm -rf {chroot}')
+
+    def test_mix(self):
+        """ Test mix of fakeroot and fakechroot. """
+        apt = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            components=['main', 'universe'],
+            arch='amd64'
+        )
+
+        (debs, contents, missing) = download_deb_packages(
+            apts=[apt],
+            packages=['busybox']
+        )
+
+        assert not missing
+
+        shutil.rmtree(debs)
+
+        (out, err) = self.fake.run_chroot('/bin/busybox id', contents)
+        assert err == ''
+        assert 'uid=0' in out
+        assert 'gid=0' in out
+
+        (out, err) = self.fake.run(cmd=f'file {contents}')
+        assert err == ''
+        assert 'directory' in out
+
+        (out, err) = self.fake.run_chroot(
+            '/bin/busybox ls -lah /bin/busybox', contents)
+        assert err == ''
+        assert '/bin/busybox' in out
+
+        shutil.rmtree(contents)

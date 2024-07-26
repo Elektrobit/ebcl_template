@@ -1,8 +1,11 @@
 """ Tests for the eb functions. """
 import os
 import tempfile
+
+from pathlib import Path
+
 from ebcl.apt import Apt
-from ebcl.deb import extract_archive
+from ebcl.deb import extract_archive, download_deb_packages
 
 
 class TestDeb:
@@ -34,3 +37,24 @@ class TestDeb:
             assert os.path.isdir(os.path.join(location))
             assert os.path.isfile(os.path.join(
                 location, 'bin', 'busybox'))
+
+    def test_download_deb_packages(self):
+        """ Test download busybox and depends. """
+        apt = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            components=['main', 'universe'],
+            arch='amd64'
+        )
+
+        (debs, contents, missing) = download_deb_packages(
+            apts=[apt],
+            packages=['busybox']
+        )
+
+        assert not missing
+        assert os.path.isdir(debs)
+        assert os.path.isdir(contents)
+
+        bb = Path(contents) / 'bin' / 'busybox'
+        assert bb.is_file()

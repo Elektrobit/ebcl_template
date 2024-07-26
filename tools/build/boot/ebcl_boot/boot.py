@@ -3,14 +3,13 @@
 import argparse
 import logging
 import os
-import queue
 import shutil
 import tempfile
 
 from pathlib import Path
 
-from ebcl.apt import Apt, Package
-from ebcl.deb import extract_archive
+from ebcl.apt import Apt
+from ebcl.deb import download_deb_packages
 from ebcl.fake import Fake
 import yaml
 
@@ -78,45 +77,16 @@ class BootGenerator:
 
     def download_deb_packages(self, package_dir: str):
         """ Download all needed deb packages. """
-        pq: queue.Queue[str] = queue.Queue(maxsize=len(self.packages) * 100)
-        local_packages: dict[str, str] = {}
 
-        for p in self.packages:
-            logging.info('Adding package %s to download queue.', p)
-            pq.put_nowait(p)
+        (debs, _contents, missing) = download_deb_packages(
+            apts=self.apts,
+            packages=self.packages,
+            contents=package_dir
+        )
 
-        while not pq.empty():
-            name = pq.get_nowait()
+        assert not missing
 
-            for apt in self.apts:
-                package = apt.find_package(name)
-                if package is not None:
-                    break
-
-            if package is None:
-                logging.error('The package %s was not found!', name)
-                exit(1)
-
-            if name not in local_packages:
-                # Download and extract deb
-                logging.info('Downloading package %s...', package.name)
-                deb_file = package.download(location=package_dir)
-
-                local_packages[name] = deb_file
-                logging.info('Deb file: %s', deb_file)
-
-                extract_archive(deb_file, location=package_dir)
-                # Remove downloaded package
-                os.remove(deb_file)
-
-                # Add deps to queue
-                for p in package.get_depends():
-                    if p not in local_packages:
-                        logging.info(
-                            'Adding package %s to download queue. Len: %d', p, pq.qsize())
-                        pq.put_nowait(p)
-
-        return package_dir
+        shutil.rmtree(debs)
 
     def copy_files(self, package_dir: str):
         """ Copy files to be used. """
