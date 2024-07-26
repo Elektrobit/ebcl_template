@@ -132,8 +132,7 @@ class BootGenerator:
                 continue
 
             logging.info('Running script: %s', script)
-            shutil.copyfile(script, self.target_dir)
-
+            self.fake.run(f'cp {script} {self.target_dir}')
             self.fake.run_chroot(
                 f'./{os.path.basename(script)}', self.target_dir)
 
