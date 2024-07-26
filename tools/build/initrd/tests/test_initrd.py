@@ -30,8 +30,7 @@ class TestInitrd:
     @classmethod
     def teardown_class(cls):
         """ Remove temp_dir. """
-        # shutil.rmtree(cls.temp_dir)
-        print(cls.temp_dir)
+        shutil.rmtree(cls.temp_dir)
 
     def test_read_config(self):
         """ Test yaml config loading. """

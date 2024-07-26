@@ -11,3 +11,4 @@ python /workspace/tools/tasks/generate_tasks.py
 echo "Install EBcL tools..."
 pip install -e /workspace/tools/build/lib/
 pip install -e /workspace/tools/build/initrd/
+pip install -e /workspace/tools/build/boot/

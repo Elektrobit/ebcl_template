@@ -3,19 +3,19 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]
-path = "ebcl_initrd/__init__.py"
+path = "ebcl_boot/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = ["ebcl_initrd"]
+packages = ["ebcl_boot"]
 
 [project]
-name = "ebcl_initrd"
+name = "ebcl_boot"
 dynamic = ["version"]
 
 authors = [
   { name="Elektrobit GmbH", email="info@elektrobit.com" },
 ]
-description = "EBcL initrd generator"
+description = "EBcL boot generator"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -34,7 +34,7 @@ dependencies = [
 Homepage = "https://github.com/Elektrobit/ebcl_template"
 
 [project.scripts]
-ebcl_initrd = "ebcl_initrd:cli"
+ebcl_boot = "ebcl_boot:cli"
 
 
 [tool.pylint.format]
@@ -51,13 +51,13 @@ testpaths = [ "tests" ]
 
 [tool.coverage.paths]
 source = [
-    "ebcl_initrd",
-    "*/site-packages/ebcl_initrd"
+    "ebcl_boot",
+    "*/site-packages/ebcl_boot"
 ]
 
 [tool.coverage.run]
 branch = true
-source = ["ebcl_initrd"]
+source = ["ebcl_boot"]
 
 [tool.coverage.report]
 include_namespace_packages = true
@@ -65,12 +65,12 @@ exclude_also = [
     "@(abc\\.)?abstractmethod",
     "def __repr__"
 ]
-include = ["ebcl_initrd/*"]
+include = ["ebcl_boot/*"]
 
 [tool.coverage.html]
 show_contexts = true
 
 
 [tool.mypy]
-mypy_path = "$MYPY_CONFIG_FILE_DIR/ebcl_initrd"
+mypy_path = "$MYPY_CONFIG_FILE_DIR/ebcl_boot"
 explicit_package_bases = true

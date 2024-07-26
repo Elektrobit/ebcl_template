@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ebcl_boot $1 $2

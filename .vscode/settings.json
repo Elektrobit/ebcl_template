@@ -9,11 +9,12 @@
     ],
     "python.testing.pytestArgs": [
         "--no-cov",
+        "--capture=no",
         "tests"
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.testing.cwd": "tools/build/initrd",
+    "python.testing.cwd": "tools/build/boot",
     "mypy-type-checker.args": [
         "--disable-error-code=import-untyped",
         "--check-untyped-defs"

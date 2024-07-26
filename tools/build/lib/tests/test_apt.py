@@ -44,3 +44,14 @@ class TestApt:
         assert p is not None
         assert p.name == 'busybox-static'
         assert p.file_url is not None
+
+    def test_find_linux_image_generic(self):
+        """ Search busybox package in default apt repository. """
+        p = self.apt.find_package('linux-image-generic')
+        assert p is not None
+        assert p.name == 'linux-image-generic'
+        assert p.file_url is not None
+        assert p.depends is not None
+
+        deps = p.get_depends()
+        assert deps is not []

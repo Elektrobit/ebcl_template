@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 """ EBcL initrd generator. """
 import argparse
 import logging
@@ -56,6 +56,7 @@ class InitrdGenerator:
         self.arch = config.get('arch', 'arm64')
         self.apt_repos = config.get('apt_repos', None)
 
+        self.apts = []
         if self.apt_repos is None:
             self.apts.append(
                 Apt(
@@ -65,17 +66,16 @@ class InitrdGenerator:
                     arch=self.arch
                 )
             )
-
-        self.apts = []
-        for repo in self.apt_repos:
-            self.apts.append(
-                Apt(
-                    url=repo['apt_repo'],
-                    distro=repo['distro'],
-                    components=repo['components'],
-                    arch=self.arch
+        else:
+            for repo in self.apt_repos:
+                self.apts.append(
+                    Apt(
+                        url=repo['apt_repo'],
+                        distro=repo['distro'],
+                        components=repo['components'],
+                        arch=self.arch
+                    )
                 )
-            )
 
         self.fake = Fake()
 
@@ -183,7 +183,6 @@ class InitrdGenerator:
             mode: str = entry.get('mode', "666")
 
             if src.is_file():
-                os.makedirs(dst.parent, exist_ok=True)
                 self._run_chroot(f'mkdir -p /{entry["destination"]}')
                 self.fake.run_sudo(f'cp {src} {dst}')
                 self._run_chroot(f'chmod {mode} /{entry["destination"]}')

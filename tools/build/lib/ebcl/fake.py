@@ -47,7 +47,7 @@ class Fake:
             out = stdout
 
         p = subprocess.run(
-            f'fakeroot -i {self.state} -s {self.state} -- {cmd}',
+            f'fakechroot fakeroot -i {self.state} -s {self.state} -- {cmd}',
             check=False,
             shell=True,
             stdout=out,

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 """ Script to generate the image related tasks. """
 import json
 import os
@@ -103,7 +103,8 @@ class TaskGenerator:
             extension = config['extension']
             sysroot_suffix = f"{config['sysroot suffix']}.kiwi"
             for folder in config['folders']:
-                folder = os.path.abspath(os.path.join(os.path.dirname(__file__), f'../{folder}'))
+                folder = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), f'../{folder}'))
                 for root, _dir, files in os.walk(folder):
                     name = os.path.basename(root)
                     for file in files:
@@ -113,9 +114,11 @@ class TaskGenerator:
                         appliance = f'{name}/{file}'
                         if file.endswith(sysroot_suffix):
                             if 'x86_64' in name:
-                                self._kiwi_build_sysroot(name, appliance, cross=False)
+                                self._kiwi_build_sysroot(
+                                    name, appliance, cross=False)
                             else:
-                                self._kiwi_build_sysroot(name, appliance, cross=True)
+                                self._kiwi_build_sysroot(
+                                    name, appliance, cross=True)
                         elif file.endswith(extension):
                             cross = True
                             if 'x86_64' in name:
@@ -163,10 +166,12 @@ class TaskGenerator:
             config = self.config['elbe']
             extension = config['extension']
             for folder in config['folders']:
-                folder = os.path.abspath(os.path.join(os.path.dirname(__file__), f'../{folder}'))
+                folder = os.path.abspath(os.path.join(
+                    os.path.dirname(__file__), f'../{folder}'))
                 logging.info('Processing elbe folder %s.', folder)
                 for root, _dir, files in os.walk(folder):
-                    path = os.path.abspath(os.path.join('/workspace/images', root))
+                    path = os.path.abspath(
+                        os.path.join('/workspace/images', root))
                     for file in files:
                         if 'ignore' in config and file in config['ignore']:
                             logging.info('Skipping elbe file %s.', file)

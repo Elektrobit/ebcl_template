@@ -1,0 +1,27 @@
+apt_repos:
+  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.2
+    distro: ebcl
+    components:
+      - prod
+      - dev
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy
+    components:
+      - main
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-security
+    components:
+      - main
+packages: 
+  - linux-image-generic
+arch: 'amd64'
+files:
+  - source: boot/vmlinuz-*
+    destination: 
+  - source: boot/config-*
+    destination: 
+    mode: 777
+    uid: 123
+    gid: 456
+scripts:
+  - config_boot.sh

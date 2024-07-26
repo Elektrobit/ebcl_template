@@ -2,23 +2,22 @@
 import gzip
 import logging
 import lzma
-import tarfile
 import os
 
-from dataclasses import dataclass
 from typing import Dict
 
 import requests
 
 
-@dataclass
 class Package:
     """ APT package information. """
     name: str
     file_url: str
+    depends: list[str]
 
     def __init__(self, name: str):
         self.name = name
+        self.depends = []
 
     def download(self, location: str = '/tmp') -> str | None:
         """ Download this package. """
@@ -33,6 +32,10 @@ class Package:
                     if chunk:  # filter out keep-alive new chunks
                         f.write(chunk)
         return local_filename
+
+    def get_depends(self) -> list[str]:
+        """ Get dependencies. """
+        return [dep.split(' ')[0].strip() for dep in self.depends]
 
 
 class Apt:
@@ -98,6 +101,10 @@ class Apt:
                         parts = line.split(' ')
                         package.file_url = f'{self.url}/{parts[-1]}'
                         self.packages[package.name] = package
+                    if line.startswith('Depends:'):
+                        assert package is not None
+                        deps = line[8:].split(',')
+                        package.depends = [dep.strip() for dep in deps]
             else:
                 logging.warning(
                     'No package index for component %s found!', component)
