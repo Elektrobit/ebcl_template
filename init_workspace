@@ -2,5 +2,10 @@
 
 echo "Setting EBcL workspace up..."
 
-cd tools/container
-./build_container
+# check if container exists
+docker image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "testing"
+if [ $? -ne 0 ]; then
+    echo "Container not found. Building container..."
+    cd tools/container
+    ./build_container
+fi
