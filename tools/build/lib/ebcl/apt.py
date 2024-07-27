@@ -4,7 +4,7 @@ import logging
 import lzma
 import os
 
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
 
@@ -19,7 +19,7 @@ class Package:
         self.name = name
         self.depends = []
 
-    def download(self, location: str = '/tmp') -> str | None:
+    def download(self, location: str = '/tmp') -> Optional[str]:
         """ Download this package. """
         result = requests.get(self.file_url, allow_redirects=True, timeout=10)
         if result.status_code != 200:
@@ -45,7 +45,7 @@ class Apt:
         self,
         url: str = "http://archive.ubuntu.com/ubuntu",
         distro: str = "jammy",
-        components: [str] = None,
+        components: Optional[list[str]] = None,
         arch: str = "amd64"
     ) -> None:
         if components is None:
@@ -109,7 +109,7 @@ class Apt:
                 logging.warning(
                     'No package index for component %s found!', component)
 
-    def find_package(self, package_name: str) -> Package | None:
+    def find_package(self, package_name: str) -> Optional[Package]:
         """ Find a binary deb package. """
         if package_name in self.packages:
             return self.packages[package_name]

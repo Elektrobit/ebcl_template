@@ -6,7 +6,7 @@ import tarfile
 import tempfile
 
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 
 import unix_ar
 import zstandard
@@ -14,7 +14,7 @@ import zstandard
 from ebcl.apt import Apt
 
 
-def extract_archive(deb_file: str, location: str | None = None) -> str:
+def extract_archive(deb_file: str, location: Optional[str] = None) -> str:
     """ Extract a deb archive. """
     if location is None:
         location = tempfile.mkdtemp()
@@ -52,8 +52,8 @@ def extract_archive(deb_file: str, location: str | None = None) -> str:
 def download_deb_packages(
     apts: list[Apt],
     packages: list[str],
-    debs: str | None = None,
-    contents: str | None = None,
+    debs: Optional[str] = None,
+    contents: Optional[str] = None,
 ) -> Tuple[str, str, list[str]]:
     """ Download and extract the given packages and its depends. """
     # Queue for package download.

@@ -1,12 +1,11 @@
 """ Test library for the initrd generator. """
 import logging
 import os
-import shutil
 import subprocess
 import tempfile
 
-from subprocess import Popen, PIPE
-from typing import Tuple
+from subprocess import PIPE
+from typing import Tuple, Optional
 
 
 class Initrd:
@@ -20,8 +19,8 @@ class Initrd:
 
     def build_initrd(
         self,
-        config: str | None = None,
-        generator: str | None = None
+        config: Optional[str] = None,
+        generator: Optional[str] = None
     ):
         """ Build the initrd image. """
         if config is None:

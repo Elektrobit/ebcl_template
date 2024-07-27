@@ -1,14 +1,13 @@
 """ Fakeroot and Fakechroot helper. """
 import logging
 import os
-import shutil
 import subprocess
 import tempfile
 
 from io import FileIO
 from pathlib import Path
 from subprocess import PIPE
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 class Fake:
@@ -16,7 +15,7 @@ class Fake:
 
     state: Path
 
-    def __init__(self, state: str | None = None):
+    def __init__(self, state: str = None):
         """ Set state directory. """
         if state is None:
             self.state = Path(tempfile.mktemp())
@@ -33,8 +32,8 @@ class Fake:
     def run(
         self,
         cmd: str,
-        cwd: str | None = None,
-        stdout: FileIO | None = None,
+        cwd: Optional[str] = None,
+        stdout: Optional[FileIO] = None,
         check=True
     ) -> Tuple[None | str, str]:
         """ Run a command using fakeroot. """
@@ -123,10 +122,10 @@ class Fake:
 
     def run_sudo(
             self, cmd: str,
-            cwd: str | None = None,
-            stdout: FileIO | None = None,
+            cwd: Optional[str] = None,
+            stdout: Optional[FileIO] = None,
             check=True
-    ) -> Tuple[str | None, str]:
+    ) -> Tuple[Optional[str], str]:
         """ Run a command using sudo. """
         logging.info('Running command \'%s\' using sudo.', cmd)
 
