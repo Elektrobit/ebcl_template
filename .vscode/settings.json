@@ -14,7 +14,7 @@
     ],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
-    "python.testing.cwd": "tools/build/boot",
+    "python.testing.cwd": "tools/build/lib",
     "mypy-type-checker.args": [
         "--disable-error-code=import-untyped",
         "--check-untyped-defs"
