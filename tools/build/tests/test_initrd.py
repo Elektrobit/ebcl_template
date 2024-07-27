@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ebcl.deb import extract_archive
 from ebcl.fake import Fake
-from ebcl_initrd.initrd import InitrdGenerator
+from ebcl.initrd import InitrdGenerator
 
 
 class TestInitrd:
@@ -106,11 +106,13 @@ class TestInitrd:
 
         fake = Fake()
         (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy')
+        assert out is not None
         assert '-rwxr-xr-x' in out
         assert 'root root' in out
         assert not err.strip()
 
         (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy.txt')
+        assert out is not None
         assert '-rw-r--r-' in out
         assert 'root root' in out
         assert not err.strip()

@@ -15,7 +15,7 @@ dynamic = ["version"]
 authors = [
   { name="Elektrobit GmbH", email="info@elektrobit.com" },
 ]
-description = "EBcL common functions"
+description = "EBcL build helpers."
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -31,6 +31,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/Elektrobit/ebcl_template"
+
+[project.scripts]
+ebcl_boot = "ebcl.boot:main"
+ebcl_initrd = "ebcl.initrd:main"
 
 [tool.pylint.format]
 max-line-length = 120

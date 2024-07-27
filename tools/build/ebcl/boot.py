@@ -5,9 +5,11 @@ import logging
 import os
 import shutil
 import tempfile
-import yaml
 
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 from ebcl.apt import Apt
 from ebcl.cache import Cache
@@ -24,7 +26,7 @@ class BootGenerator:
     files: list[dict[str, str]]
     scripts: list[str]
     arch: str
-    apt_repos: list[dict[str, str | list[str]]]
+    apt_repos: list[dict[str, Any]]
     archive_name: str
     target_dir: str
     archive_path: str

@@ -7,13 +7,15 @@ import shutil
 import tempfile
 
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Any
 
-from ebcl.apt import Apt
-from ebcl.deb import extract_archive
-from ebcl.fake import Fake
-from jinja2 import Template
 import yaml
+
+from jinja2 import Template
+
+from .apt import Apt
+from .deb import extract_archive
+from .fake import Fake
 
 
 class InitrdGenerator:
@@ -28,7 +30,7 @@ class InitrdGenerator:
     files: list[dict[str, str]]
     kversion: str
     arch: str
-    apt_repos: list[dict[str, str | list[str]]]
+    apt_repos: list[dict[str, Any]]
     target_dir: str
     image_path: str
     # apt repos
@@ -95,6 +97,9 @@ class InitrdGenerator:
             exit(1)
 
         file = package.download()
+
+        assert file is not None
+
         extract_archive(file, self.target_dir)
 
         self._run_chroot('/bin/busybox --install -s /bin')
@@ -118,7 +123,9 @@ class InitrdGenerator:
             logging.error('The package %s was not found!', name)
             exit(1)
 
-        return package.download()
+        deb_path = package.download()
+        assert deb_path is not None
+        return deb_path
 
     def extract_modules_from_deb(self, mods_dir: str):
         """Extract the required kernel modules from the deb package.
@@ -258,6 +265,8 @@ class InitrdGenerator:
 
 def main() -> None:
     """ Main entrypoint of EBcL initrd generator. """
+    logging.basicConfig(level=logging.INFO)
+
     parser = argparse.ArgumentParser(
         description='Create an initrd image for Linux.')
     parser.add_argument('config_file', type=str,

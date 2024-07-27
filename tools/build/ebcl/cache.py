@@ -28,10 +28,6 @@ class Cache:
         else:
             self.index = {}
 
-    def __del__(self):
-        """ Save the index on destruction. """
-        self.save()
-
     def save(self):
         """ Save the cached packages as json. """
         with open(self.index_file, 'w', encoding='utf8') as f:
@@ -67,6 +63,8 @@ class Cache:
             logging.warning('Overwriting package %s.', deb)
 
         self.index[arch][name][version] = deb
+
+        self.save()
 
         return True
 
