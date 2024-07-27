@@ -6,12 +6,13 @@ import tarfile
 import tempfile
 
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import unix_ar
 import zstandard
 
 from ebcl.apt import Apt
+from ebcl.cache import Cache
 
 
 def extract_archive(deb_file: str, location: Optional[str] = None) -> str:
@@ -54,17 +55,25 @@ def download_deb_packages(
     packages: list[str],
     debs: Optional[str] = None,
     contents: Optional[str] = None,
+    cache: Optional[Cache] = None
 ) -> Tuple[str, str, list[str]]:
     """ Download and extract the given packages and its depends. """
     # Queue for package download.
     pq: queue.Queue[str] = queue.Queue(maxsize=len(packages) * 100)
+
     # Registry of available packages.
     local_packages: dict[str, str] = {}
+
     # List of not found packages
     missing: list[str] = []
+
     # Folder for debs
     if debs is None:
-        debs = tempfile.mkdtemp()
+        if cache:
+            debs = cache.folder
+        else:
+            debs = tempfile.mkdtemp()
+
     # Folder for package content
     if contents is None:
         contents = tempfile.mkdtemp()
@@ -89,7 +98,7 @@ def download_deb_packages(
         if name not in local_packages:
             # Download and extract deb
             logging.info('Downloading package %s...', package.name)
-            deb_file = package.download(location=debs)
+            deb_file = package.download(location=debs, cache=cache)
 
             assert deb_file is not None
 

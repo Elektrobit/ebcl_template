@@ -76,7 +76,7 @@ class Fake:
 
         p = subprocess.run(
             f'fakechroot fakeroot -i {self.state} -s {self.state} -- chroot {chroot} {cmd}',
-            check=True,
+            check=False,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -101,7 +101,7 @@ class Fake:
 
         p = subprocess.run(
             f'sudo chroot {chroot} {cmd}',
-            check=True,
+            check=False,
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -137,7 +137,7 @@ class Fake:
 
         p = subprocess.run(
             f'sudo bash -c "{cmd}"',
-            check=True,
+            check=False,
             shell=True,
             stdout=out,
             stderr=subprocess.PIPE,

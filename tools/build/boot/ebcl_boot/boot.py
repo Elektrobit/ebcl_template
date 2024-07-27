@@ -5,19 +5,20 @@ import logging
 import os
 import shutil
 import tempfile
+import yaml
 
 from pathlib import Path
 
 from ebcl.apt import Apt
+from ebcl.cache import Cache
 from ebcl.deb import download_deb_packages
 from ebcl.fake import Fake
-import yaml
 
 
 class BootGenerator:
     """ EBcL boot generator. """
     # config file
-    config: Path
+    config: str
     # config values
     packages: list[str]
     files: list[dict[str, str]]
@@ -32,6 +33,8 @@ class BootGenerator:
     apts: list[Apt]
     # fakeroot helper
     fake: Fake
+    # Package cache
+    cache: Cache
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -42,7 +45,9 @@ class BootGenerator:
         with open(config_file, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
 
-        self.config = Path(config_file)
+        self.config = config_file
+
+        self.cache = Cache()
 
         self.packages = config.get('packages', [])
         self.files = config.get('files', [])
@@ -78,15 +83,14 @@ class BootGenerator:
     def download_deb_packages(self, package_dir: str):
         """ Download all needed deb packages. """
 
-        (debs, _contents, missing) = download_deb_packages(
+        (_debs, _contents, missing) = download_deb_packages(
             apts=self.apts,
             packages=self.packages,
-            contents=package_dir
+            contents=package_dir,
+            cache=self.cache
         )
 
         assert not missing
-
-        shutil.rmtree(debs)
 
     def copy_files(self, package_dir: str):
         """ Copy files to be used. """
@@ -95,7 +99,7 @@ class BootGenerator:
             if entry['destination']:
                 dst = dst / entry['destination']
 
-            mode: str = entry.get('mode', "600")
+            mode: str = entry.get('mode', '600')
 
             src = os.path.abspath(os.path.join(package_dir, entry['source']))
             src_parent = Path(os.path.dirname(src))
@@ -108,33 +112,35 @@ class BootGenerator:
                 if file.is_file():
                     self.fake.run(f'mkdir -p {dst}')
                     self.fake.run(f'cp {src} {dst}')
-                    self.fake.run(f'chmod {mode} {dst}')
+                    dst_file = os.path.join(dst, os.path.basename(src))
+                    self.fake.run(f'chmod {mode} {dst_file}')
                     uid = entry.get('uid', '0')
                     gid = entry.get('uid', '0')
-                    self.fake.run(f'chown {uid}:{gid} {dst}')
+                    self.fake.run(f'chown {uid}:{gid} {dst_file}')
                 elif file.is_dir():
                     self.fake.run(f'mkdir -p {dst}')
                     self.fake.run(f'cp -R {src} {dst}')
-                    self.fake.run(f'chmod {mode} {dst}')
+                    dst_folder = os.path.join(dst, os.path.basename(src))
+                    self.fake.run(f'chmod {mode} {dst_folder}')
                     uid = entry.get('uid', '0')
                     gid = entry.get('uid', '0')
-                    self.fake.run(f'chown -R {uid}:{gid} {dst}')
+                    self.fake.run(f'chown -R {uid}:{gid} {dst_folder}')
                 else:
                     logging.warning('Source %s does not exist', src)
 
     def run_scripts(self):
         """ Run scripts. """
         for script in self.scripts:
-            script = os.path.abspath(os.path.join(self.config.parent, script))
+            script = os.path.abspath(os.path.join(
+                os.path.dirname(self.config), script))
+
+            logging.info('Running script: %s', script)
 
             if not os.path.isfile(script):
                 logging.error('Script %s not found!', script)
                 continue
 
-            logging.info('Running script: %s', script)
-            self.fake.run(f'cp {script} {self.target_dir}')
-            self.fake.run_chroot(
-                f'./{os.path.basename(script)}', self.target_dir)
+            self.fake.run(f'{script} {self.target_dir}', cwd=self.target_dir)
 
     def create_boot(self, output_path: str) -> None:
         """ Create the boot.tar.  """

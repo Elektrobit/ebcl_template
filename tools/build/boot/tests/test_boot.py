@@ -8,7 +8,7 @@ from pathlib import Path
 from ebcl_boot.boot import BootGenerator
 
 
-class TestInitrd:
+class TestBoot:
     """ Unit tests for the EBcL boot generator. """
 
     yaml: str
