@@ -1,9 +1,9 @@
 apt_repos:
-  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.2
-    distro: ebcl
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
     components:
-      - prod
-      - dev
+      - main
+      - universe
   - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.2
     distro: ebcl_nxp_public
     components:
@@ -30,7 +30,7 @@ devices:
 files:
   - source: dummy.txt
     destination: root
-  - source: dummy
+  - source: other.txt
     destination: root
     mode: 777
     uid: 123

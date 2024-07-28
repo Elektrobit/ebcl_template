@@ -5,7 +5,8 @@
         "editor.formatOnSave": true
     },
     "pylint.args": [
-        "--disable=E0015"
+        "--disable=E0015",
+        "--disable=E0402"
     ],
     "python.testing.pytestArgs": [
         "--no-cov",

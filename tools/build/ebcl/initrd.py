@@ -6,15 +6,16 @@ import os
 import shutil
 import tempfile
 
+from io import BufferedWriter
 from pathlib import Path
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 
 import yaml
 
 from jinja2 import Template
 
 from .apt import Apt
-from .deb import extract_archive
+from .deb import Package
 from .fake import Fake
 
 
@@ -27,10 +28,14 @@ class InitrdGenerator:
     modules_packages: str
     root_device: str
     devices: list[dict[str, str]]
-    files: list[dict[str, str]]
+    files: list[dict[str, Any]]
     kversion: str
     arch: str
     apt_repos: list[dict[str, Any]]
+    template: Optional[str]
+    fakeroot: bool
+    busybox: str
+    # out and tmp folders
     target_dir: str
     image_path: str
     # apt repos
@@ -57,6 +62,9 @@ class InitrdGenerator:
         self.kversion = config.get('kversion', '')
         self.arch = config.get('arch', 'arm64')
         self.apt_repos = config.get('apt_repos', None)
+        self.template = config.get('template', None)
+        self.fakeroot = config.get('fakeroot', False)
+        self.busybox = config.get('busybox', 'busybox-static')
 
         self.apts = []
         if self.apt_repos is None:
@@ -83,37 +91,45 @@ class InitrdGenerator:
 
     def _run_chroot(self, cmd: str) -> Tuple[str, str]:
         """ Run command in chroot target environment. """
-        return self.fake.run_sudo_chroot(cmd, self.target_dir)
+        if self.fakeroot:
+            return self.fake.run_chroot(cmd, self.target_dir)
+        else:
+            return self.fake.run_sudo_chroot(cmd, self.target_dir)
+
+    def _run_root(
+        self,
+        cmd: str,
+        cwd: Optional[str] = None,
+        stdout: Optional[BufferedWriter] = None,
+        check=True
+    ) -> Tuple[Optional[str], str]:
+        """ Run command as root. """
+        if self.fakeroot:
+            return self.fake.run(cmd=cmd, cwd=cwd, stdout=stdout, check=check)
+        else:
+            return self.fake.run_sudo(cmd=cmd, cwd=cwd, stdout=stdout, check=check)
 
     def install_busybox(self):
         """Get busybox and add it to the initrd. """
         for apt in self.apts:
-            package = apt.find_package('busybox-static')
+            package = apt.find_package(self.busybox)
             if package is not None:
                 break
 
         if package is None:
-            logging.error('The package busybox-static was not found!')
+            logging.error('The package %s was not found!', self.busybox)
             exit(1)
 
         file = package.download()
 
         assert file is not None
 
-        extract_archive(file, self.target_dir)
+        package.extract(self.target_dir)
 
         self._run_chroot('/bin/busybox --install -s /bin')
 
-    def download_deb_package(self, name: str) -> str:
-        """Download a deb package.
-
-        Args:
-            name (str): Name of the deb package.
-            dest_dir (str): Download folder.
-
-        Returns:
-            _type_ (str): Path to the downloaded package.
-        """
+    def find_package(self, name: str) -> Package:
+        """ Find package in apt repos. """
         for apt in self.apts:
             package = apt.find_package(name)
             if package is not None:
@@ -123,9 +139,7 @@ class InitrdGenerator:
             logging.error('The package %s was not found!', name)
             exit(1)
 
-        deb_path = package.download()
-        assert deb_path is not None
-        return deb_path
+        return package
 
     def extract_modules_from_deb(self, mods_dir: str):
         """Extract the required kernel modules from the deb package.
@@ -149,11 +163,11 @@ class InitrdGenerator:
 
             target_dir = os.path.dirname(
                 os.path.join(initrd_modules_dir, module))
-            self.fake.run_sudo(f'mkdir -p {target_dir}')
+            self._run_root(f'mkdir -p {target_dir}')
 
-            self.fake.run_sudo(f'cp {module_path} {target_dir}')
+            self._run_root(f'cp {module_path} {target_dir}')
 
-            self.fake.run_sudo(f'echo {module}: >> {modulesdeps}')
+            self._run_root(f'echo {module}: >> {modulesdeps}')
 
         # Fix ownership of modules
         self._run_chroot('chown -R 0:0 /lib/modules')
@@ -183,27 +197,29 @@ class InitrdGenerator:
 
     def copy_files(self):
         """ Copy user-specified files in the initrd. """
+        logging.debug('Files: %s', self.files)
+
         for entry in self.files:
             src = Path(os.path.abspath(os.path.join(
                 self.config.parent, entry['source'])))
             dst = Path(self.target_dir) / entry['destination']
-            mode: str = entry.get('mode', "666")
+            dst_file = Path(self.target_dir) / entry['destination'] / src.name
+            mode: str = entry.get('mode', '666')
+            uid = entry.get('uid', '0')
+            gid = entry.get('gid', '0')
+
+            logging.info('Copying %s to %s.', src, dst_file)
+
+            self._run_root(f'mkdir -p {dst}')
 
             if src.is_file():
-                self._run_chroot(f'mkdir -p /{entry["destination"]}')
-                self.fake.run_sudo(f'cp {src} {dst}')
-                self._run_chroot(f'chmod {mode} /{entry["destination"]}')
-                uid = entry.get('uid', '0')
-                gid = entry.get('uid', '0')
-                self._run_chroot(f'chown {uid}:{gid} /{entry["destination"]}')
+                self._run_root(f'cp {src} {dst}')
+                self._run_root(f'chmod {mode} {dst_file}')
+                self._run_root(f'chown {uid}:{gid} {dst_file}')
             elif src.is_dir():
-                self._run_chroot(f'mkdir -p /{entry["destination"]}')
-                self.fake.run_sudo(f'cp -R  {src}/* {dst}')
-                self._run_chroot(f'chmod -R {mode} /{entry["destination"]}')
-                uid = entry.get('uid', '0')
-                gid = entry.get('uid', '0')
-                self._run_chroot(
-                    f'chown -R {uid}:{gid} /{entry["destination"]}')
+                self._run_root(f'cp -R  {src}/* {dst}')
+                self._run_chroot(f'chmod -R {mode} {dst_file}')
+                self._run_chroot(f'chown -R {uid}:{gid} {dst_file}')
             else:
                 logging.warning('Source %s does not exist', src)
 
@@ -211,21 +227,30 @@ class InitrdGenerator:
         """ Create the initrd image.  """
         self.target_dir = tempfile.mkdtemp()
 
+        logging.info('Installing busybox...')
+
         self.install_busybox()
 
         # Create necessary directories
         for dir_name in ['proc', 'sys', 'dev', 'sysroot', 'var', 'bin',
                          'tmp', 'run', 'root', 'usr', 'sbin', 'lib', 'etc']:
             self._run_chroot(f'mkdir -p {dir_name}')
-            self._run_chroot(f'chown -R 0:0 /{dir_name}')
+            self._run_chroot(f'chown 0:0 /{dir_name}')
 
         mods_dir = tempfile.mkdtemp()
 
         for mod_package in self.modules_packages:
-            deb_file = self.download_deb_package(mod_package)
-            extract_archive(deb_file, location=mods_dir)
+            package = self.find_package(mod_package)
+
+            local_deb = package.download()
+            if local_deb is None:
+                logging.error('Package %s not found!', mod_package)
+                exit(1)
+
+            package.extract(location=mods_dir)
+
             # Remove downloaded package
-            os.remove(deb_file)
+            os.remove(local_deb)
 
         # Extract modules directly to the initrd /lib/modules directory
         self.extract_modules_from_deb(mods_dir)
@@ -242,7 +267,13 @@ class InitrdGenerator:
         # Create init script
         init_script: Path = Path(self.target_dir) / 'init'
 
-        with open(os.path.join(os.path.dirname(__file__), 'init.sh'), encoding='utf8') as f:
+        if self.template is None:
+            template = os.path.join(os.path.dirname(__file__), 'init.sh')
+        else:
+            template = os.path.join(
+                os.path.dirname(self.config), self.template)
+
+        with open(template, encoding='utf8') as f:
             tmpl = Template(f.read())
 
         init_script_content = tmpl.render(
@@ -256,11 +287,11 @@ class InitrdGenerator:
         # Create initrd image
         os.makedirs(os.path.dirname(image_path), exist_ok=True)
         with open(image_path, 'wb') as img:
-            self.fake.run_sudo(
+            self._run_root(
                 'find . -print0 | cpio --null -ov --format=newc', cwd=self.target_dir, stdout=img)
 
         # delete temporary folder
-        self.fake.run_sudo(f' rm -rf {self.target_dir}')
+        self._run_root(f' rm -rf {self.target_dir}')
 
 
 def main() -> None:

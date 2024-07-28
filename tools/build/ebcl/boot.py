@@ -11,10 +11,9 @@ from typing import Any
 
 import yaml
 
-from ebcl.apt import Apt
-from ebcl.cache import Cache
-from ebcl.deb import download_deb_packages
-from ebcl.fake import Fake
+from .apt import Apt, download_deb_packages
+from .cache import Cache
+from .fake import Fake
 
 
 class BootGenerator:
@@ -86,6 +85,7 @@ class BootGenerator:
         """ Download all needed deb packages. """
 
         (_debs, _contents, missing) = download_deb_packages(
+            arch=self.arch,
             apts=self.apts,
             packages=self.packages,
             contents=package_dir,
@@ -96,39 +96,46 @@ class BootGenerator:
 
     def copy_files(self, package_dir: str):
         """ Copy files to be used. """
+
+        logging.info('Files: %s', self.files)
+
         for entry in self.files:
             dst = Path(self.target_dir)
             if entry['destination']:
                 dst = dst / entry['destination']
+                self.fake.run(f'mkdir -p {dst}')
+
+            src = Path(package_dir) / entry['source']
+
+            dst_file = dst / src.name
 
             mode: str = entry.get('mode', '600')
+            uid = entry.get('uid', '0')
+            gid = entry.get('gid', '0')
 
-            src = os.path.abspath(os.path.join(package_dir, entry['source']))
-            src_parent = Path(os.path.dirname(src))
-            pattern = os.path.basename(entry['source'])
-            files = src_parent.glob(pattern)
+            logging.info('Copying file %s to %s', src, dst_file)
 
-            for file in files:
-                logging.info('Copying file %s to %s', src, dst)
+            # Ensure source file exists.
+            (_out, err) = self.fake.run(f'stat {src}', check=False)
+            if err:
+                logging.error('File %s doesn\'t exist!', src)
+                continue
 
-                if file.is_file():
-                    self.fake.run(f'mkdir -p {dst}')
-                    self.fake.run(f'cp {src} {dst}')
-                    dst_file = os.path.join(dst, os.path.basename(src))
+            glob_files = list(src.parent.glob(src.name))
+            if not glob_files:
+                logging.error('Pattern %s has no matches!', src)
+                continue
+
+            for glob_file in glob_files:
+                logging.info('Copying glob file %s to %s.', glob_file, dst)
+                if src.is_dir():
+                    self.fake.run(f'cp -R {glob_file} {dst}')
                     self.fake.run(f'chmod {mode} {dst_file}')
-                    uid = entry.get('uid', '0')
-                    gid = entry.get('uid', '0')
-                    self.fake.run(f'chown {uid}:{gid} {dst_file}')
-                elif file.is_dir():
-                    self.fake.run(f'mkdir -p {dst}')
-                    self.fake.run(f'cp -R {src} {dst}')
-                    dst_folder = os.path.join(dst, os.path.basename(src))
-                    self.fake.run(f'chmod {mode} {dst_folder}')
-                    uid = entry.get('uid', '0')
-                    gid = entry.get('uid', '0')
-                    self.fake.run(f'chown -R {uid}:{gid} {dst_folder}')
+                    self.fake.run(f'chown -R {uid}:{gid} {dst_file}')
                 else:
-                    logging.warning('Source %s does not exist', src)
+                    self.fake.run(f'cp {glob_file} {dst}')
+                    self.fake.run(f'chmod {mode} {dst_file}')
+                    self.fake.run(f'chown {uid}:{gid} {dst_file}')
 
     def run_scripts(self):
         """ Run scripts. """
@@ -152,9 +159,11 @@ class BootGenerator:
         package_dir = tempfile.mkdtemp()
         logging.info('Package directory: %s', package_dir)
 
+        logging.info('Download deb packages...')
         self.download_deb_packages(package_dir)
 
         # Copy files and directories specified in the files
+        logging.info('Copy files...')
         self.copy_files(package_dir)
 
         # Remove package temporary folder
@@ -168,7 +177,7 @@ class BootGenerator:
         self.fake.run(f'mv {archive} {archive_out}')
 
         # delete temporary folder
-        # shutil.rmtree(self.target_dir)
+        shutil.rmtree(self.target_dir)
 
 
 def main() -> None:

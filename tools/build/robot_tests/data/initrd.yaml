@@ -27,7 +27,9 @@ devices:
 files:
   - source: dummy.txt
     destination: root
-  - source: dummy
+  - source: other.txt
     destination: root
     mode: 777
+    uid: 123
+    gid: 456
 kversion: 5.15.0-1023-s32-eb

@@ -1,7 +1,11 @@
 """ Tests for the apt functions. """
 import os
 import tempfile
-from ebcl.apt import Apt
+
+from pathlib import Path
+
+from ebcl.apt import Apt, download_deb_packages
+from ebcl.cache import Cache
 
 
 class TestApt:
@@ -55,3 +59,25 @@ class TestApt:
 
         deps = p.get_depends()
         assert deps is not []
+
+    def test_download_and_extract_linux_image(self):
+        """ Extract data content of multiple debs. """
+
+        (debs, content, missing) = download_deb_packages(
+            'amd64',
+            [self.apt],
+            ['linux-image-generic'],
+            cache=Cache())
+
+        assert not missing
+
+        deb_path = Path(debs)
+        packages = list(deb_path.glob('*.deb'))
+
+        assert len(packages) > 0
+
+        content_path = Path(content)
+        boot = content_path / 'boot'
+        kernel_images = list(boot.glob('vmlinuz*'))
+
+        assert len(kernel_images) > 0

@@ -4,8 +4,7 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.apt import Apt
-from ebcl.deb import extract_archive, download_deb_packages
+from ebcl.apt import Apt, download_deb_packages
 
 
 class TestDeb:
@@ -29,10 +28,10 @@ class TestDeb:
 
             assert os.path.isfile(deb_path)
 
-            location = extract_archive(deb_path, d)
+            location = p.extract(d)
             assert location == d
 
-            location = extract_archive(deb_path, None)
+            location = p.extract(None)
             assert location is not None
             assert os.path.isdir(os.path.join(location))
             assert os.path.isfile(os.path.join(
@@ -48,6 +47,7 @@ class TestDeb:
         )
 
         (debs, contents, missing) = download_deb_packages(
+            arch='amd64',
             apts=[apt],
             packages=['busybox']
         )

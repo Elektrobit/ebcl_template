@@ -3,8 +3,7 @@ import os
 import shutil
 import tempfile
 
-from ebcl.apt import Apt
-from ebcl.deb import extract_archive, download_deb_packages
+from ebcl.apt import Apt, download_deb_packages
 from ebcl.fake import Fake
 
 
@@ -41,7 +40,7 @@ class TestFake:
         assert deb_path is not None
         assert os.path.isfile(deb_path)
 
-        extract_archive(deb_path, chroot)
+        p.extract(chroot)
 
         # Prepare dev folder
         (_stdout, stderr) = self.fake.run_chroot(
@@ -69,7 +68,7 @@ class TestFake:
         assert deb_path is not None
         assert os.path.isfile(deb_path)
 
-        extract_archive(deb_path, chroot)
+        p.extract(chroot)
 
         # Install busybox
         (_stdout, stderr) = self.fake.run_sudo_chroot(
@@ -109,6 +108,7 @@ class TestFake:
         )
 
         (debs, contents, missing) = download_deb_packages(
+            arch='amd64',
             apts=[apt],
             packages=['busybox']
         )
@@ -122,9 +122,10 @@ class TestFake:
         assert 'uid=0' in out
         assert 'gid=0' in out
 
-        (out, err) = self.fake.run(cmd=f'file {contents}')
+        (out2, err) = self.fake.run(cmd=f'file {contents}')
         assert err == ''
-        assert 'directory' in out
+        assert out2 is not None
+        assert 'directory' in out2
 
         (out, err) = self.fake.run_chroot(
             '/bin/busybox ls -lah /bin/busybox', contents)

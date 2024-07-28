@@ -14,9 +14,9 @@ packages:
 download_deps: true
 arch: 'amd64'
 files:
-  - source: boot/vmlinuz*
+  - source: boot/vmlinuz-*
     destination: 
-  - source: boot/config*
+  - source: boot/config-*
     destination: 
     mode: 777
     uid: 123

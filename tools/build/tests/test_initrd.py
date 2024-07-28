@@ -5,7 +5,6 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.deb import extract_archive
 from ebcl.fake import Fake
 from ebcl.initrd import InitrdGenerator
 
@@ -49,17 +48,21 @@ class TestInitrd:
 
     def test_download_deb_package(self):
         """ Test modules package download. """
-        package = self.generator.download_deb_package(
+        package = self.generator.find_package(
             'linux-modules-5.15.0-1023-s32-eb')
         assert package is not None
-        assert os.path.isfile(package)
+
+        local_deb = package.download()
+        assert local_deb is not None
+        assert os.path.isfile(local_deb)
 
     def test_extract_modules_from_deb(self):
         """ Test modules package download. """
-        package = self.generator.download_deb_package(
+        package = self.generator.find_package(
             'linux-modules-5.15.0-1023-s32-eb')
+        package.download()
         mods_temp = tempfile.mkdtemp()
-        extract_archive(package, mods_temp)
+        package.extract(mods_temp)
 
         module = 'kernel/pfeng/pfeng.ko'
         self.generator.modules = [module]
@@ -94,8 +97,11 @@ class TestInitrd:
                 'destination': 'root'
             },
             {
-                'source': 'dummy',
-                'destination': 'root'
+                'source': 'other.txt',
+                'destination': 'root',
+                'mode': '700',
+                'uid': '123',
+                'gid': '456'
             }
         ]
 
@@ -105,16 +111,32 @@ class TestInitrd:
         self.generator.copy_files()
 
         fake = Fake()
-        (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy')
+
+        (out, err) = fake.run_sudo(
+            f'stat -c \'%a\' {self.temp_dir}/root/dummy.txt')
         assert out is not None
-        assert '-rwxr-xr-x' in out
-        assert 'root root' in out
+        out = out.split('\n')[-2]
+        assert out.strip() == '666'
         assert not err.strip()
 
-        (out, err) = fake.run_sudo(f'ls -lah {self.temp_dir}/root/dummy.txt')
+        (out, err) = fake.run_sudo(
+            f'stat -c \'%u %g\' {self.temp_dir}/root/dummy.txt')
         assert out is not None
-        assert '-rw-r--r-' in out
-        assert 'root root' in out
+        out = out.split('\n')[-2]
+        assert out.strip() == '0 0'
+        assert not err.strip()
+
+        (out, err) = fake.run_sudo(
+            f'stat -c \'%a\' {self.temp_dir}/root/other.txt')
+        assert out is not None
+        out = out.split('\n')[-2]
+        assert out.strip() == '700'
+
+        (out, err) = fake.run_sudo(
+            f'stat -c \'%u %g\' {self.temp_dir}/root/other.txt')
+        assert out is not None
+        out = out.split('\n')[-2]
+        assert out.strip() == '123 456'
         assert not err.strip()
 
     def test_sysroot_is_created(self):

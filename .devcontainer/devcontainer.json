@@ -25,7 +25,8 @@
 				"ms-python.pylint",
 				"ms-python.mypy-type-checker",
 				"WolfiesHorizon.python-auto-venv",
-				"donjayamanne.python-environment-manager"
+				"donjayamanne.python-environment-manager",
+				"Gruntfuggly.todo-tree"
 			]
 		}
 	},

@@ -1,10 +1,12 @@
 *** Settings ***
+Library  lib/Fakeroot.py
 Library  lib/Initrd.py
 Suite Setup  Setup
 Suite Teardown  Teardown
 
 *** Variables ***
 ${KVERSION}  5.15.0-1023-s32-eb
+${CONFIG}    ../data/initrd.yaml
 
 *** Test Cases ***
 Root Device is Mounted
@@ -18,7 +20,7 @@ Modules should be loaded
     File Should Exist    /lib/modules/${KVERSION}/kernel/pfeng/pfeng.ko
     Module Should Be Loaded    pfeng.ko
 
-rootfs should be set up
+Rootfs should be set up
     Directory Should Exist  /proc
     Directory Should Exist  /sys
     Directory Should Exist  /dev
@@ -32,9 +34,17 @@ rootfs should be set up
     Directory Should Exist  /lib
     Directory Should Exist  /etc
 
+File dummy.txt should be OK
+    Should Be Owned By   /root/dummy.txt    0    0
+    Should Have Mode     /root/dummy.txt    666
+
+File dummy should be OK
+    Should Be Owned By   /root/other.txt    123    456
+    Should Have Mode     /root/other.txt    777
+
 *** Keywords ***
 Setup
-    Build Initrd
+    Build Initrd    ${CONFIG}
     Load
 
 Teardown

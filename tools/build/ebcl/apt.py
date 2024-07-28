@@ -2,11 +2,14 @@
 import gzip
 import logging
 import lzma
+import queue
+import tempfile
 
-from typing import Optional
+from typing import Optional, Tuple
 
 import requests
 
+from .cache import Cache
 from .deb import Package
 
 
@@ -85,8 +88,7 @@ class Apt:
                     if line.startswith('Package:'):
                         # new package
                         parts = line.split(' ')
-                        package = Package(parts[-1])
-                        package.arch = self.arch
+                        package = Package(parts[-1], self.arch)
                     elif line.startswith('Filename:'):
                         assert package is not None
                         parts = line.split(' ')
@@ -115,3 +117,84 @@ class Apt:
             return self.packages[package_name]
         else:
             return None
+
+
+def download_deb_packages(
+    arch: str,
+    apts: list[Apt],
+    packages: list[str],
+    debs: Optional[str] = None,
+    contents: Optional[str] = None,
+    cache: Optional[Cache] = None
+) -> Tuple[str, str, list[str]]:
+    """ Download and extract the given packages and its depends. """
+    # Queue for package download.
+    pq: queue.Queue[str] = queue.Queue(maxsize=len(packages) * 100)
+    # Registry of available packages.
+    local_packages: dict[str, str] = {}
+    # List of not found packages
+    missing: list[str] = []
+
+    # Folder for debs
+    if debs is None:
+        if cache:
+            logging.info('Downloading to cache folder %s.', cache.folder)
+            debs = cache.folder
+        else:
+            debs = tempfile.mkdtemp()
+
+    # Folder for package content
+    if contents is None:
+        contents = tempfile.mkdtemp()
+
+    logging.info('Extracting to folder %s.', contents)
+
+    for p in packages:
+        # Adding packages to download queue.
+        logging.info('Adding package %s to download queue.', p)
+        pq.put_nowait(p)
+
+    while not pq.empty():
+        name = pq.get_nowait()
+
+        if name in local_packages:
+            continue
+
+        for apt in apts:
+            package = apt.find_package(name)
+            if package is not None:
+                break
+
+        if package is None:
+            logging.error('The package %s was not found!', name)
+            missing.append(name)
+            continue
+
+        deb_file = None
+        if cache:
+            deb_file = cache.get(arch, name)
+            if deb_file:
+                logging.info('Using %s from cache.', name)
+                package.local_file = deb_file
+
+        if not deb_file:
+            deb_file = package.download(location=debs, cache=cache)
+
+        if not deb_file:
+            logging.error('Download of %s failed!', name)
+            missing.append(name)
+            continue
+
+        package.extract(location=contents)
+
+        local_packages[name] = deb_file
+        logging.info('Deb file: %s', deb_file)
+
+        # Add deps to queue
+        for p in package.get_depends():
+            if p not in local_packages:
+                logging.info(
+                    'Adding package %s to download queue. Len: %d', p, pq.qsize())
+                pq.put_nowait(p)
+
+    return (debs, contents, missing)
