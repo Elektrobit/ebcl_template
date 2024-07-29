@@ -1,12 +1,12 @@
 *** Settings ***
 Library  lib/Fakeroot.py
-Library  lib/Boot.py
+Library  lib/Root.py
 Suite Setup  Setup
 Suite Teardown  Teardown
 
 *** Test Cases ***
 Systemd should exist
-    File Should Exist    /usr/bin/systemd
+    File Should Exist    /usr/bin/systemd    symbolic link
 
 Config was executed
     File Should Exist    /config
@@ -19,7 +19,7 @@ PostDisc was executed
 
 *** Keywords ***
 Setup
-    Build Boot
+    Build Root
     Load
 
 Teardown
