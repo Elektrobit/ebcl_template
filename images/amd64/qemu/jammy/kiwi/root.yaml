@@ -1,0 +1,10 @@
+name: ubuntu
+type: kiwi
+image: jammy.kiwi
+arch: amd64
+kvm: true
+result: '*.tar.xz'
+berrymill_conf: berrymill.conf
+scripts:
+  - name: config_root.sh
+    type: config

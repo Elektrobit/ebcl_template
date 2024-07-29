@@ -244,6 +244,14 @@ class RootGenerator:
         appliance = os.path.join(self.result_dir, image.name)
         shutil.copy(image, appliance)
 
+        scripts = glob.glob(f'{image.parent.absolute()}/*.sh', recursive=True)
+        for script in scripts:
+            shutil.copy(script, os.path.dirname(appliance))
+
+        overlay = os.path.join(os.path.dirname(image), 'root')
+        if os.path.isdir(overlay):
+            shutil.copytree(overlay, os.path.dirname(appliance))
+
         if self.arch == 'amd64':
             if self.kvm:
                 self.fake.run_sudo(
