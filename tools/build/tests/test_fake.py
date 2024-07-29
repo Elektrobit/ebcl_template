@@ -3,8 +3,9 @@ import os
 import shutil
 import tempfile
 
-from ebcl.apt import Apt, download_deb_packages
+from ebcl.apt import Apt
 from ebcl.fake import Fake
+from ebcl.proxy import Proxy
 
 
 class TestFake:
@@ -107,13 +108,16 @@ class TestFake:
             arch='amd64'
         )
 
-        (debs, contents, missing) = download_deb_packages(
+        proxy = Proxy()
+        proxy.add_apt(apt)
+
+        (debs, contents, missing) = proxy.download_deb_packages(
             arch='amd64',
-            apts=[apt],
             packages=['busybox']
         )
 
         assert not missing
+        assert contents
 
         shutil.rmtree(debs)
 

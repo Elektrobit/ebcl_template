@@ -28,6 +28,31 @@ class Package:
         self.name = name
         self.arch = arch
 
+    @classmethod
+    def from_deb(cls, deb: str):
+        """ Create a package form a deb file. """
+        if not deb.endswith('.deb'):
+            return None
+
+        filename = os.path.basename(deb)[:-4]
+        parts = filename.split('_')
+
+        if len(parts) != 3:
+            return None
+
+        name = parts[0].strip()
+        version = parts[1].strip()
+        arch = parts[2].strip()
+
+        p = cls(name, arch)
+
+        p.version = version
+
+        if os.path.isfile(deb):
+            p.local_file = deb
+
+        return p
+
     def download(
         self, location: Optional[str] = None,
         cache: Optional[Cache] = None

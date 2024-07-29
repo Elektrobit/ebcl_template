@@ -15,8 +15,8 @@ import yaml
 from jinja2 import Template
 
 from .apt import Apt
-from .deb import Package
 from .fake import Fake
+from .proxy import Proxy
 
 
 class InitrdGenerator:
@@ -33,13 +33,15 @@ class InitrdGenerator:
     arch: str
     apt_repos: list[dict[str, Any]]
     template: Optional[str]
+    # use fakeroot or sudo
     fakeroot: bool
+    # name of busybox package
     busybox: str
     # out and tmp folders
     target_dir: str
     image_path: str
-    # apt repos
-    apts: list[Apt]
+    # proxy
+    proxy: Proxy
     # fakeroot helper
     fake: Fake
 
@@ -66,9 +68,9 @@ class InitrdGenerator:
         self.fakeroot = config.get('fakeroot', False)
         self.busybox = config.get('busybox', 'busybox-static')
 
-        self.apts = []
+        self.proxy = Proxy()
         if self.apt_repos is None:
-            self.apts.append(
+            self.proxy.add_apt(
                 Apt(
                     url='https://linux.elektrobit.com/eb-corbos-linux/1.2',
                     distro='ebcl',
@@ -78,7 +80,7 @@ class InitrdGenerator:
             )
         else:
             for repo in self.apt_repos:
-                self.apts.append(
+                self.proxy.add_apt(
                     Apt(
                         url=repo['apt_repo'],
                         distro=repo['distro'],
@@ -111,10 +113,7 @@ class InitrdGenerator:
 
     def install_busybox(self):
         """Get busybox and add it to the initrd. """
-        for apt in self.apts:
-            package = apt.find_package(self.busybox)
-            if package is not None:
-                break
+        package = self.proxy.find_package(self.arch, self.busybox)
 
         if package is None:
             logging.error('The package %s was not found!', self.busybox)
@@ -127,19 +126,6 @@ class InitrdGenerator:
         package.extract(self.target_dir)
 
         self._run_chroot('/bin/busybox --install -s /bin')
-
-    def find_package(self, name: str) -> Package:
-        """ Find package in apt repos. """
-        for apt in self.apts:
-            package = apt.find_package(name)
-            if package is not None:
-                break
-
-        if package is None:
-            logging.error('The package %s was not found!', name)
-            exit(1)
-
-        return package
 
     def extract_modules_from_deb(self, mods_dir: str):
         """Extract the required kernel modules from the deb package.
@@ -240,11 +226,14 @@ class InitrdGenerator:
         mods_dir = tempfile.mkdtemp()
 
         for mod_package in self.modules_packages:
-            package = self.find_package(mod_package)
+            package = self.proxy.find_package(self.arch, mod_package)
+            if package is None:
+                logging.error('Package %s not found!', mod_package)
+                exit(1)
 
             local_deb = package.download()
             if local_deb is None:
-                logging.error('Package %s not found!', mod_package)
+                logging.error('Download of %s failed!', mod_package)
                 exit(1)
 
             package.extract(location=mods_dir)

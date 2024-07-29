@@ -4,7 +4,9 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.apt import Apt, download_deb_packages
+from ebcl.apt import Apt
+from ebcl.deb import Package
+from ebcl.proxy import Proxy
 
 
 class TestDeb:
@@ -46,15 +48,33 @@ class TestDeb:
             arch='amd64'
         )
 
-        (debs, contents, missing) = download_deb_packages(
+        proxy = Proxy()
+        proxy.add_apt(apt)
+
+        (debs, contents, missing) = proxy.download_deb_packages(
             arch='amd64',
-            apts=[apt],
             packages=['busybox']
         )
 
         assert not missing
         assert os.path.isdir(debs)
+        assert contents
         assert os.path.isdir(contents)
 
         bb = Path(contents) / 'bin' / 'busybox'
         assert bb.is_file()
+
+    def test_pkg_form_deb(self):
+        """ Test package creation from deb files. """
+        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.deb')
+        assert p is not None
+        assert p.name == 'gcab'
+        assert p.version == '0.7-1'
+        assert p.arch == 'i386'
+        assert p.local_file is None
+
+        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.dsc')
+        assert p is None
+
+        p = Package.from_deb('/path/to/my/gcab_0.7-1.deb')
+        assert p is None

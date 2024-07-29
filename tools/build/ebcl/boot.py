@@ -11,9 +11,10 @@ from typing import Any
 
 import yaml
 
-from .apt import Apt, download_deb_packages
+from .apt import Apt
 from .cache import Cache
 from .fake import Fake
+from .proxy import Proxy
 
 
 class BootGenerator:
@@ -30,12 +31,11 @@ class BootGenerator:
     target_dir: str
     archive_path: str
     download_deps: bool
-    # apt repos
-    apts: list[Apt]
+    tar: bool
+    # proxy
+    proxy: Proxy
     # fakeroot helper
     fake: Fake
-    # Package cache
-    cache: Cache
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -57,10 +57,11 @@ class BootGenerator:
         self.archive_name = config.get('archive_name', 'boot.tar')
         self.apt_repos = config.get('apt_repos', None)
         self.download_deps = config.get('download_deps', True)
+        self.tar = config.get('tar', True)
 
-        self.apts = []
+        self.proxy = Proxy()
         if self.apt_repos is None:
-            self.apts.append(
+            self.proxy.add_apt(
                 Apt(
                     url='https://linux.elektrobit.com/eb-corbos-linux/1.2',
                     distro='ebcl',
@@ -70,7 +71,7 @@ class BootGenerator:
             )
         else:
             for repo in self.apt_repos:
-                self.apts.append(
+                self.proxy.add_apt(
                     Apt(
                         url=repo['apt_repo'],
                         distro=repo['distro'],
@@ -83,13 +84,10 @@ class BootGenerator:
 
     def download_deb_packages(self, package_dir: str):
         """ Download all needed deb packages. """
-
-        (_debs, _contents, missing) = download_deb_packages(
+        (_debs, _contents, missing) = self.proxy.download_deb_packages(
             arch=self.arch,
-            apts=self.apts,
             packages=self.packages,
-            contents=package_dir,
-            cache=self.cache
+            contents=package_dir
         )
 
         assert not missing
@@ -171,10 +169,16 @@ class BootGenerator:
 
         self.run_scripts()
 
-        self.fake.run('tar -cvf boot.tar .', cwd=self.target_dir)
-        archive = f'{self.target_dir}/boot.tar'
-        archive_out = f'{output_path}/{self.archive_name}'
-        self.fake.run(f'mv {archive} {archive_out}')
+        if self.tar:
+            # create tar archive
+            self.fake.run('tar -cvf boot.tar .', cwd=self.target_dir)
+            archive = f'{self.target_dir}/boot.tar'
+            archive_out = f'{output_path}/{self.archive_name}'
+            self.fake.run(f'mv {archive} {archive_out}')
+        else:
+            # copy to output folder
+            self.fake.run(
+                f'cp -R {self.target_dir}/* {output_path}', cwd=self.target_dir)
 
         # delete temporary folder
         shutil.rmtree(self.target_dir)

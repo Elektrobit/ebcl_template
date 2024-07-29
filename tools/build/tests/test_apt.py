@@ -2,10 +2,7 @@
 import os
 import tempfile
 
-from pathlib import Path
-
-from ebcl.apt import Apt, download_deb_packages
-from ebcl.cache import Cache
+from ebcl.apt import Apt
 
 
 class TestApt:
@@ -60,24 +57,59 @@ class TestApt:
         deps = p.get_depends()
         assert deps is not []
 
-    def test_download_and_extract_linux_image(self):
-        """ Extract data content of multiple debs. """
+    def test_equal(self):
+        """ Test the equal check. """
+        a = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            arch='amd64',
+            components=['main', 'universe']
+        )
 
-        (debs, content, missing) = download_deb_packages(
-            'amd64',
-            [self.apt],
-            ['linux-image-generic'],
-            cache=Cache())
+        b = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            arch='amd64',
+            components=['main', 'universe']
+        )
+        assert a == b
 
-        assert not missing
+        b = Apt(
+            url='http://ports.ubuntu.com/ubuntu-ports',
+            distro='jammy',
+            arch='amd64',
+            components=['main', 'universe']
+        )
+        assert a != b
 
-        deb_path = Path(debs)
-        packages = list(deb_path.glob('*.deb'))
+        b = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            arch='amd64',
+            components=['main']
+        )
+        assert a != b
 
-        assert len(packages) > 0
+        b = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            arch='amd64',
+            components=['main', 'other']
+        )
+        assert a != b
 
-        content_path = Path(content)
-        boot = content_path / 'boot'
-        kernel_images = list(boot.glob('vmlinuz*'))
+        b = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='noble',
+            arch='amd64',
+            components=['main', 'universe']
+        )
+        assert a != b
 
-        assert len(kernel_images) > 0
+        b = Apt(
+            url='http://archive.ubuntu.com/ubuntu',
+            distro='jammy',
+            arch='arm64',
+            components=['main', 'universe']
+        )
+        assert a != b
