@@ -1,7 +1,10 @@
-.PHONY = default
-
+.PHONY: default
 default: qemu
 
+.PHONY: image
+image: build/image.raw
+
+.PHONY: qemu
 qemu: build/vmlinuz build/initrd.img build/image.raw
 	@echo "Running build/image.raw in QEMU..."
 	qemu-system-x86_64 \
@@ -34,5 +37,6 @@ build/initrd.img: initrd.yaml init.sh
 	mkdir -p build
 	initrd_generator initrd.yaml ./build
 
+.PHONY: clean
 clean:
 	rm -rf build
