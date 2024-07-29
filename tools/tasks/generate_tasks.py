@@ -5,9 +5,13 @@ import os
 import logging
 import yaml
 
+from typing import Any, Optional
+
 
 class TaskGenerator:
     """ TaskGenerator generates VS Code build tasks for kiwi and elbe images.  """
+
+    tasks: Optional[dict[str, Any]]
 
     def __init__(self):
         self.config = None
@@ -33,7 +37,7 @@ class TaskGenerator:
 
     def _kiwi_build_image(self, name: str, appliance: str, cross=True) -> None:
         """ Add a kiwi image build task to the tasks list. """
-        task = dict()
+        task: dict[str, Any] = dict()
         task['type'] = 'shell'
         task['label'] = f'EBcL: Image {name}'
         if cross:
@@ -47,11 +51,13 @@ class TaskGenerator:
         }
         task['detail'] = f'Build the {name} image with kiwi.'
 
+        assert self.tasks
+
         self.tasks['tasks'].append(task)
 
     def _kiwi_build_sysroot(self, name: str, appliance: str, cross=True) -> None:
         """ Add a kiwi image build task to the tasks list. """
-        task = dict()
+        task: dict[str, Any] = dict()
         task['type'] = 'shell'
         task['label'] = f'EBcL: Sysroot {name}'
         if cross:
@@ -68,11 +74,13 @@ class TaskGenerator:
         else:
             task['detail'] = f'Prepare sysroot x86_64 for the {name} image with kiwi.'
 
+        assert self.tasks
+
         self.tasks['tasks'].append(task)
 
     def _kiwi_run_image(self, name: str, cross=True) -> None:
         """ Add a QEMU task to run the kiwi EFI image. """
-        task = dict()
+        task: dict[str, Any] = dict()
         task['type'] = 'shell'
         task['label'] = f'EBcL: Run QEMU {name}'
         if cross:
@@ -94,17 +102,23 @@ class TaskGenerator:
         }
         task['detail'] = f'Run the {name} image in QEMU.'
 
+        assert self.tasks
+
         self.tasks['tasks'].append(task)
 
     def generate_kiwi_tasks(self):
         """ Generate build tasks for the kiwi images and sysroots. """
+        assert self.config
         if 'kiwi' in self.config:
             config = self.config['kiwi']
             extension = config['extension']
             sysroot_suffix = f"{config['sysroot suffix']}.kiwi"
             for folder in config['folders']:
                 folder = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), f'../{folder}'))
+                    os.path.dirname(__file__), f'../../{folder}'))
+
+                assert os.path.isdir(folder)
+
                 for root, _dir, files in os.walk(folder):
                     name = os.path.basename(root)
                     for file in files:
@@ -128,7 +142,7 @@ class TaskGenerator:
 
     def _elbe_build_image(self, name: str, description: str) -> None:
         """ Add a elbe image build task to the tasks list. """
-        task = dict()
+        task: dict[str, Any] = dict()
         task['type'] = 'shell'
         task['label'] = f'EBcL: Image {name}'
         task['command'] = 'build_image'
@@ -139,11 +153,13 @@ class TaskGenerator:
         }
         task['detail'] = f'Build the {name} image with elbe.'
 
+        assert self.tasks
+
         self.tasks['tasks'].append(task)
 
     def _elbe_run_image(self, file: str) -> None:
         """ Add a QEMU task to run the elbe image. """
-        task = dict()
+        task: dict[str, Any] = dict()
         task['type'] = 'shell'
         task['label'] = f'EBcL: Run QEMU {file}'
         if 'x86_64' in file:
@@ -158,17 +174,24 @@ class TaskGenerator:
         }
         task['detail'] = f'Run the {file} image in QEMU.'
 
+        assert self.tasks
+
         self.tasks['tasks'].append(task)
 
     def generate_elbe_tasks(self):
         """ Generate build tasks for the elbe images. """
+        assert self.config
+
         if 'elbe' in self.config:
             config = self.config['elbe']
             extension = config['extension']
             for folder in config['folders']:
                 folder = os.path.abspath(os.path.join(
-                    os.path.dirname(__file__), f'../{folder}'))
+                    os.path.dirname(__file__), f'../../{folder}'))
                 logging.info('Processing elbe folder %s.', folder)
+
+                assert os.path.isdir(folder)
+
                 for root, _dir, files in os.walk(folder):
                     path = os.path.abspath(
                         os.path.join('/workspace/images', root))
