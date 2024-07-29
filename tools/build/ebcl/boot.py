@@ -48,8 +48,6 @@ class BootGenerator:
 
         self.config = config_file
 
-        self.cache = Cache()
-
         self.packages = config.get('packages', [])
         self.files = config.get('files', [])
         self.scripts = config.get('scripts', [])
@@ -178,7 +176,7 @@ class BootGenerator:
         else:
             # copy to output folder
             self.fake.run(
-                f'cp -R {self.target_dir}/* {output_path}', cwd=self.target_dir)
+                f'cp -R {self.target_dir}/* {output_path}')
 
         # delete temporary folder
         shutil.rmtree(self.target_dir)

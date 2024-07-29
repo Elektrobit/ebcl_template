@@ -35,13 +35,15 @@ Homepage = "https://github.com/Elektrobit/ebcl_template"
 [project.scripts]
 ebcl_boot = "ebcl.boot:main"
 ebcl_initrd = "ebcl.initrd:main"
+ebcl_root = "ebcl.root:main"
 
 [tool.pylint.format]
 max-line-length = 120
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
-    "E0402"
+    "E0402",
+    "W0212"
 ]
 
 [tool.pytest.ini_options]

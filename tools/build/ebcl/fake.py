@@ -29,7 +29,7 @@ class Fake:
             if os.path.isfile(self.state):
                 os.remove(self.state)
 
-    def _run_command(
+    def run_no_fake(
         self,
         cmd: str,
         cwd: Optional[str] = None,
@@ -78,7 +78,7 @@ class Fake:
         check=True
     ) -> Tuple[Optional[str], str]:
         """ Run a command using fakeroot. """
-        return self._run_command(
+        return self.run_no_fake(
             cmd=f'fakechroot fakeroot -i {self.state} -s {self.state} -- {cmd}',
             cwd=cwd,
             stdout=stdout,
@@ -87,7 +87,7 @@ class Fake:
 
     def run_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str]:
         """ Run a command using fakechroot. """
-        (out, err) = self._run_command(
+        (out, err) = self.run_no_fake(
             cmd=f'fakechroot fakeroot -i {self.state} -s {self.state} -- chroot {chroot} {cmd}',
             check=check
         )
@@ -99,7 +99,7 @@ class Fake:
 
     def run_sudo_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str]:
         """ Run a command using sudo and chroot. """
-        (out, err) = self._run_command(
+        (out, err) = self.run_no_fake(
             cmd=f'sudo chroot {chroot} {cmd}',
             check=check
         )
@@ -116,7 +116,7 @@ class Fake:
             check=True
     ) -> Tuple[Optional[str], str]:
         """ Run a command using sudo. """
-        return self._run_command(
+        return self.run_no_fake(
             cmd=f'sudo bash -c "{cmd}"',
             cwd=cwd,
             stdout=stdout,

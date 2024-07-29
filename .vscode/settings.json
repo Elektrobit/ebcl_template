@@ -6,7 +6,8 @@
     },
     "pylint.args": [
         "--disable=E0015",
-        "--disable=E0402"
+        "--disable=E0402",
+        "--disable=W0212"
     ],
     "python.testing.pytestArgs": [
         "--no-cov",
