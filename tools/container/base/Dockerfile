@@ -26,7 +26,7 @@ RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
     gcc g++ pkg-config locales kmod wget xz-utils sudo git vim python3 \
     python3-pip python3-venv rsync lshw gdisk fdisk parted \
     file crossbuild-essential-arm64 tcpdump iputils-ping iproute2 iptables \
-    gdb-multiarch curl wget fakechroot fakeroot
+    gdb-multiarch curl wget fakechroot fakeroot bmap-tools
 
  # Setup locale
 RUN export LC_ALL=en_US.UTF-8 && \
