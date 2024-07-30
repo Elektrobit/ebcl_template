@@ -41,7 +41,7 @@ class Version:
         if not isinstance(value, Version):
             return False
 
-        return value.epoch == self.epoch and \
+        return int(value.epoch) == int(self.epoch) and \
             value.version == self.version and \
             value.revision == self.revision
 
@@ -49,13 +49,22 @@ class Version:
         if not isinstance(other, Version):
             return False
 
-        if self._lt_epoch(other.epoch):
-            return True
+        if int(self.epoch) != int(other.epoch):
+            self._lt_epoch(other.epoch)
 
-        if self._lt_version(other.version):
-            return True
+        if self.version != other.version:
+            return self._lt_version(other.version)
 
         return self._lt_revision(other.revision)
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, Version):
+            return False
+
+        if self == other:
+            return True
+
+        return self < other
 
     def _lt_epoch(self, other: int) -> bool:
         return self.epoch < other
@@ -67,15 +76,20 @@ class Version:
 
         # align length
         while len(a_parts) < len(b_parts):
-            a_parts.append('0')
+            a_parts.append(None)
 
         while len(b_parts) < len(a_parts):
-            b_parts.append('0')
+            b_parts.append(None)
 
         # compare parts
         for x, y in zip(a_parts, b_parts):
             if x == y:
                 continue
+
+            if x is None:
+                return True
+            if y is None:
+                return False
 
             if x.isdigit() and not y.isdigit():
                 return False
@@ -86,9 +100,9 @@ class Version:
             else:
                 # align length
                 while len(x) < len(y):
-                    x += 'a'
+                    x += '~'
                 while len(y) < len(x):
-                    y += 'a'
+                    y += '~'
 
                 # compare letters
                 for u, v in zip([*x], [*y]):
@@ -100,9 +114,9 @@ class Version:
                     if v == '~':
                         return False
 
-                    if u.ischar() and not v.ischar():
+                    if u.isalpha() and not v.isalpha():
                         return True
-                    if v.ischar() and not u.ischar():
+                    if v.isalpha() and not u.isalpha():
                         return False
 
                     return u < v
@@ -119,14 +133,31 @@ class Version:
         if self.version == other:
             return False
 
-        if not self.revision and other:
+        if not self.revision and not other:
+            return False
+        if not self.revision:
             return True
-        elif self.revision and not other:
+        elif not other:
             return False
         else:
-            assert self.revision
             assert other
             return self._lt_parts(self.revision, other)
+
+    def version_for_filename(self) -> str:
+        """ Get a string formatted version for the filename. """
+        if self.revision:
+            return f'{self.version}-{self.revision}'
+        else:
+            return f'{self.version}'
+
+    def __str__(self) -> str:
+        if self.revision:
+            return f'{self.epoch}:{self.version}-{self.revision}'
+        else:
+            return f'{self.epoch}:{self.version}'
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class VersionRealtion(Enum):
@@ -148,7 +179,7 @@ class VersionRealtion(Enum):
             return cls.EXACT
         elif relation == '>=':
             return cls.LARGER
-        elif relation == '<<':
+        elif relation == '>>':
             return cls.STRICT_LARGER
         else:
             return None
@@ -166,6 +197,9 @@ class VersionRealtion(Enum):
             return '>>'
         else:
             return "UNKNOWN"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 class PackageRelation(Enum):
@@ -194,20 +228,42 @@ class PackageRelation(Enum):
         else:
             return "UNKNOWN"
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
 
 @dataclass
 class VersionDepends:
     """ Debian package version dependency. """
     name: str
     package_relation: Optional[PackageRelation]
-    version_relation: Optional[Version]
+    version_relation: Optional[VersionRealtion]
     version: Optional[Version]
+    arch: str
+
+    def __str__(self) -> str:
+        t = f'VersionDepends<{self.name}'
+        if self.package_relation:
+            t += f', pr: {self.package_relation}'
+        if self.version_relation:
+            t += f', vr: {self.version_relation}'
+        if self.version:
+            t += f', v: {self.version}'
+        if self.arch:
+            t += f', arch: {self.arch}'
+
+        return t + '>'
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
 
 def parse_depends(
     entry: str,
+    default_arch: str,
     package_relation: Optional[PackageRelation] = None
 ) -> Optional[list[VersionDepends]]:
+    """ Parse package depends entry. """
     if not entry:
         return None
 
@@ -218,21 +274,34 @@ def parse_depends(
     for package in alternatives:
         package = package.strip()
 
-        if ' ' in package:
-            parts = package.split(' ', maxsplit=1)
-            name = parts[0].strip()
+        parts = package.split(' ', maxsplit=1)
+
+        arch = default_arch
+        name = parts[0].strip()
+        if ':' in name:
+            np = name.split(':')
+            name = np[0]
+            arch = np[1]
+
+        version = None
+        version_relation = None
+        if len(parts) > 1:
             v = parts[1].strip()[1:-1]
-            vp = v.split(' ', maxsplit=1)
-            relation = vp[0].strip()
-            version = vp[1].strip()
+            if ' ' in v:
+                vp = v.split(' ', maxsplit=1)
+                version_relation = VersionRealtion.from_str(vp[0].strip())
+                version = Version(vp[1].strip())
+            else:
+                version = Version(v.strip())
+                version_relation = VersionRealtion.EXACT
 
-            vd = VersionDepends(
-                name,
-                package_relation,
-                VersionRealtion.from_str(relation),
-                Version(version),
-
-            )
-            result.append(vd)
+        vd = VersionDepends(
+            name,
+            package_relation,
+            version_relation,
+            version,
+            arch
+        )
+        result.append(vd)
 
     return result

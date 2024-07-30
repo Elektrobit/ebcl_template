@@ -3,6 +3,8 @@ import shutil
 import tempfile
 
 from ebcl.cache import Cache
+from ebcl.deb import Package
+from ebcl.version import Version, VersionRealtion
 
 
 class TestCache:
@@ -24,34 +26,33 @@ class TestCache:
 
     def test_add(self):
         """ Add a pacakage. """
-        res = self.cache.add(
-            '/my/path/to/busybox-static_1.30.1-7ubuntu3_amd64.deb')
+        res = self.cache.add(Package.from_deb(
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
         assert res
 
-        p = self.cache.get('amd64', 'busybox-static', '1.30.1-7ubuntu3')
-        assert p == '/my/path/to/busybox-static_1.30.1-7ubuntu3_amd64.deb'
+        v = Version('1.36.1-3ubuntu1')
+        p = self.cache.get('amd64', 'busybox-static', v,
+                           relation=VersionRealtion.EXACT)
+        assert p
+        assert p.name == 'busybox-static'
+        assert p.arch == 'amd64'
+        assert p.version == v
 
-        p = self.cache.get('amd64', 'busybox-static', 'anotherversion')
-        assert p is None
-
-    def test_invalid_name(self):
-        """ Test that invalid name is not added. """
-        res = self.cache.add(
-            '/my/path/to/busybox-static_1.30.1-7ubuntu3_amd64.dsc')
-        assert not res
-
-        res = self.cache.add(
-            '/my/path/to/busybox-static_1.30.1-7ubuntu3-amd64.deb')
-        assert not res
+        p = self.cache.get('amd64', 'busybox-static',
+                           Version('anotherversion'), VersionRealtion.EXACT)
+        assert not p
 
     def test_get_no_version(self):
         """ Get any version of a package. """
-        res = self.cache.add(
-            '/my/path/to/busybox-static_1.30.1-7ubuntu3_amd64.deb')
+        res = self.cache.add(Package.from_deb(
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
         assert res
 
         p = self.cache.get('amd64', 'busybox-static')
-        assert p == '/my/path/to/busybox-static_1.30.1-7ubuntu3_amd64.deb'
+        assert p
+        assert p.name == 'busybox-static'
+        assert p.arch == 'amd64'
+        assert p.version == Version('1.36.1-3ubuntu1')
 
     def test_cache_miss(self):
         """ Package does not exist. """
@@ -61,13 +62,15 @@ class TestCache:
         p = self.cache.get('nonearch', 'not-existing')
         assert p is None
 
-        p = self.cache.get('amd64', 'busybox', 'nonversion')
+        p = self.cache.get('amd64', 'busybox', Version('nonversion'),
+                           VersionRealtion.EXACT)
         assert p is None
 
     def test_restore_cache(self):
         """ Test for restoring cache index. """
         cache = Cache()
-        res = cache.add('/my/path/to/busybox_1.30.1-7ubuntu3_amd64.deb')
+        res = cache.add(Package.from_deb(
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
         assert res
 
         cache.save()
@@ -75,5 +78,8 @@ class TestCache:
         del cache
 
         cache = Cache()
-        p = cache.get('amd64', 'busybox')
-        assert p == '/my/path/to/busybox_1.30.1-7ubuntu3_amd64.deb'
+        p = cache.get('amd64', 'busybox-static', Version('1.36.1-3ubuntu1'))
+        assert p
+        assert p.name == 'busybox-static'
+        assert p.arch == 'amd64'
+        assert p.version == Version('1.36.1-3ubuntu1')

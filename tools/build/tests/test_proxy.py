@@ -1,7 +1,7 @@
 """ Unit tests for the EBcL apt proxy. """
 from pathlib import Path
 
-from ebcl.apt import Apt
+from ebcl.apt import Apt, parse_depends
 from ebcl.proxy import Proxy
 
 
@@ -59,7 +59,9 @@ class TestProxy:
 
     def test_find_package_busybox(self):
         """ Test that busybox-static package is found. """
-        p = self.proxy.find_package('amd64', 'busybox-static')
+        vds = parse_depends('busybox-static', 'amd64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
         assert p is not None
         assert p.name == 'busybox-static'
         assert p.arch == 'amd64'
@@ -73,22 +75,25 @@ class TestProxy:
 
         self.proxy.add_apt(a)
 
-        p = self.proxy.find_package('arm64', 'busybox-static')
+        vds = parse_depends('busybox-static', 'arm64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
         assert p is not None
         assert p.name == 'busybox-static'
         assert p.arch == 'arm64'
 
     def test_find_not_existing(self):
         """ Test that tries to find a non-existing package. """
-        p = self.proxy.find_package('amd64', 'some-not-existing-package')
+        vds = parse_depends('some-not-existing-package', 'amd64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
         assert p is None
 
     def test_download_and_extract_linux_image(self):
         """ Extract data content of multiple debs. """
-        (debs, content, missing) = self.proxy.download_deb_packages(
-            'amd64',
-            ['linux-image-generic']
-        )
+        vds = parse_depends('linux-image-generic', 'amd64')
+        assert vds
+        (debs, content, missing) = self.proxy.download_deb_packages(vds)
 
         assert not missing
 

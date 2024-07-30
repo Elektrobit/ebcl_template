@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 
-from ebcl.apt import Apt
+from ebcl.apt import Apt, parse_depends
 from ebcl.fake import Fake
 from ebcl.proxy import Proxy
 
@@ -13,12 +13,15 @@ class TestFake:
 
     fake: Fake
     apt: Apt
+    proxy: Proxy
 
     @classmethod
     def setup_class(cls):
         """ Prepare apt repo object. """
         cls.fake = Fake()
         cls.apt = Apt()
+        cls.proxy = Proxy()
+        cls.proxy.add_apt(cls.apt)
 
     def test_run(self):
         """ Run a command using fakeroot. """
@@ -32,16 +35,18 @@ class TestFake:
         """ Run a command using fakechroot. """
         # Prepare fakeroot
         # Get busybox
-        p = self.apt.find_package('busybox-static')
-        assert p is not None
+        ps = self.apt.find_package('busybox-static')
+        assert ps
+        p = ps[0]
 
         chroot = tempfile.mkdtemp()
 
-        deb_path = p.download(chroot)
-        assert deb_path is not None
-        assert os.path.isfile(deb_path)
+        pkg = self.proxy.download_package(self.apt.arch, p)
+        assert pkg
+        assert pkg.local_file
+        assert os.path.isfile(pkg.local_file)
 
-        p.extract(chroot)
+        pkg.extract(chroot)
 
         # Prepare dev folder
         (_stdout, stderr) = self.fake.run_chroot(
@@ -60,16 +65,18 @@ class TestFake:
         """ Run a command using fakechroot. """
         # Prepare fakeroot
         # Get busybox
-        p = self.apt.find_package('busybox-static')
-        assert p is not None
+        ps = self.apt.find_package('busybox-static')
+        assert ps
+        p = ps[0]
 
         chroot = tempfile.mkdtemp()
 
-        deb_path = p.download(chroot)
-        assert deb_path is not None
-        assert os.path.isfile(deb_path)
+        pkg = self.proxy.download_package(self.apt.arch, p)
+        assert pkg
+        assert pkg.local_file
+        assert os.path.isfile(pkg.local_file)
 
-        p.extract(chroot)
+        pkg.extract(chroot)
 
         # Install busybox
         (_stdout, stderr) = self.fake.run_sudo_chroot(
@@ -111,10 +118,10 @@ class TestFake:
         proxy = Proxy()
         proxy.add_apt(apt)
 
-        (debs, contents, missing) = proxy.download_deb_packages(
-            arch='amd64',
-            packages=['busybox']
-        )
+        packages = parse_depends('busybox', self.apt.arch)
+        assert packages
+
+        (debs, contents, missing) = proxy.download_deb_packages(packages=packages)
 
         assert not missing
         assert contents

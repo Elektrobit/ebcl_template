@@ -11,8 +11,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Optional
 
-import yaml
-
+from .config import load_yaml
 from ebcl.fake import Fake
 
 
@@ -95,8 +94,7 @@ class RootGenerator:
         Args:
             config_file (Path): Path to the yaml config file.
         """
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml(config_file)
 
         self.config = config_file
 

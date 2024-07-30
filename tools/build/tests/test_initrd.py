@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ebcl.fake import Fake
 from ebcl.initrd import InitrdGenerator
-from ebcl.proxy import Proxy
+from ebcl.version import VersionDepends
 
 
 class TestInitrd:
@@ -49,34 +49,55 @@ class TestInitrd:
 
     def test_download_deb_package(self):
         """ Test modules package download. """
-        package = self.generator.proxy.find_package(
-            self.generator.arch,
-            'linux-modules-5.15.0-1023-s32-eb')
-        assert package is not None
+        vd = VersionDepends(
+            name='linux-modules-5.15.0-1023-s32-eb',
+            package_relation=None,
+            version_relation=None,
+            version=None,
+            arch=self.generator.arch
+        )
+        package = self.generator.proxy.find_package(vd)
+        assert package
 
-        local_deb = package.download()
-        assert local_deb is not None
-        assert os.path.isfile(local_deb)
+        pkg = self.generator.proxy.download_package(
+            self.generator.arch, package)
+        assert pkg
+        assert pkg.local_file
+        assert os.path.isfile(pkg.local_file)
 
     def test_extract_modules_from_deb(self):
         """ Test modules package download. """
-        package = self.generator.proxy.find_package(
-            self.generator.arch,
-            'linux-modules-5.15.0-1023-s32-eb')
+        vd = VersionDepends(
+            name='linux-modules-5.15.0-1023-s32-eb',
+            package_relation=None,
+            version_relation=None,
+            version=None,
+            arch=self.generator.arch
+        )
+        package = self.generator.proxy.find_package(vd)
         assert package
-        package.download()
+
+        pkg = self.generator.proxy.download_package(
+            self.generator.arch, package)
+        assert pkg
+        assert pkg.local_file
+        assert os.path.isfile(pkg.local_file)
+
         mods_temp = tempfile.mkdtemp()
-        package.extract(mods_temp)
+
+        pkg.extract(mods_temp)
 
         module = 'kernel/pfeng/pfeng.ko'
         self.generator.modules = [module]
+
+        kversion = self.generator.find_kernel_version(mods_temp)
 
         self.generator.extract_modules_from_deb(mods_temp)
 
         shutil.rmtree(mods_temp)
 
         assert os.path.isfile(os.path.join(
-            self.temp_dir, 'lib', 'modules', self.generator.kversion, module))
+            self.temp_dir, 'lib', 'modules', kversion, module))
 
     def test_add_devices(self):
         """ Test device node creation. """

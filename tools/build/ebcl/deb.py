@@ -8,21 +8,26 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
-import requests
 import unix_ar
 import zstandard
 
-from .cache import Cache
+from .version import Version, VersionDepends, VersionRealtion
 
 
 class Package:
     """ APT package information. """
     name: str
     arch: str
-    version: Optional[str] = None
+    version: Optional[Version] = None
     file_url: Optional[str] = None
     local_file: Optional[str] = None
-    depends: list[str] = []
+    pre_depends: list[list[VersionDepends]] = []
+    depends: list[list[VersionDepends]] = []
+    recommends: list[list[VersionDepends]] = []
+    suggests: list[list[VersionDepends]] = []
+    enhances: list[list[VersionDepends]] = []
+    breaks: list[list[VersionDepends]] = []
+    conflicts: list[list[VersionDepends]] = []
 
     def __init__(self, name: str, arch: str):
         self.name = name
@@ -46,67 +51,25 @@ class Package:
 
         p = cls(name, arch)
 
-        p.version = version
+        p.version = Version(version)
 
         if os.path.isfile(deb):
             p.local_file = deb
 
         return p
 
-    def download(
-        self, location: Optional[str] = None,
-        cache: Optional[Cache] = None
-    ) -> Optional[str]:
-        """ Download this package. """
-        if self.file_url is None:
-            return None
-
-        if location is None:
-            if cache is not None:
-                # If no location is give, but cache, then download to cache.
-                location = cache.folder
-            else:
-                location = '/tmp'
-
-        # Test if package is in cache.
-        if cache is not None:
-            file = cache.get(self.arch, self.name, self.version)
-            if file is not None and os.path.isfile(file):
-                # Use package form cache.
-                logging.info('Cache hit for package %s/%s/%s.',
-                             self.name, self.version, self.arch)
-                dst = os.path.join(location, os.path.basename(file))
-                if file != dst:
-                    shutil.copy(file, dst)
-                return dst
-
-        # Download package.
-        result = requests.get(self.file_url, allow_redirects=True, timeout=10)
-        if result.status_code != 200:
-            return None
-        else:
-            local_filename = self.file_url.split('/')[-1]
-            local_filename = os.path.join(location, local_filename)
-            with open(local_filename, 'wb') as f:
-                for chunk in result.iter_content(chunk_size=512 * 1024):
-                    if chunk:  # filter out keep-alive new chunks
-                        f.write(chunk)
-
-        # Add package to cache.
-        if cache is not None:
-            cache.add(local_filename)
-
-        self.local_file = local_filename
-
-        return local_filename
-
-    def get_depends(self) -> list[str]:
+    def get_depends(self) -> list[list[VersionDepends]]:
         """ Get dependencies. """
-        return [dep.split(' ')[0].strip() for dep in self.depends]
+        return self.depends + self.pre_depends
 
     def extract(self, location: Optional[str] = None) -> Optional[str]:
         """ Extract a deb archive. """
         if not self.local_file:
+            return None
+
+        if not os.path.isfile(self.local_file):
+            logging.error('Deb %s of package %s does not exist!',
+                          self.local_file, self)
             return None
 
         if location is None:
@@ -143,3 +106,74 @@ class Package:
         shutil.rmtree(deb_content_location)
 
         return location
+
+    def __str__(self) -> str:
+        return f'{self.name}:{self.arch} ({self.version})'
+
+    def __repr__(self) -> str:
+        return f'Package<{self.__str__()}>'
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, Package):
+            return False
+
+        return self.arch == o.arch and \
+            self.name == o.name and \
+            self.version == o.version
+
+    def __lt__(self, o: object) -> bool:
+        if not isinstance(o, Package):
+            return False
+
+        if self.name != o.name:
+            return self.name < o.name
+
+        # Use package with existing local file.
+        if self.version is None and o.version is None:
+            if self.local_file and os.path.isfile(self.local_file):
+                return False
+            return True
+
+        if self.version is None:
+            return True
+        if o.version is None:
+            return False
+
+        if self.version == o.version:
+            # Use package with existing local file.
+            if self.version is None and o.version is None:
+                if self.local_file and os.path.isfile(self.local_file):
+                    return False
+                return True
+
+        return self.version < o.version
+
+    def __le__(self, o: object) -> bool:
+        if not isinstance(o, Package):
+            return False
+
+        if self == o:
+            return True
+
+        return self < o
+
+
+def filter_packages(p: Package, v: Version, r: Optional[VersionRealtion]) -> bool:
+    """ Filter for matching packages. """
+    if not p.version:
+        return False
+
+    pv = p.version
+
+    if r == VersionRealtion.STRICT_LARGER:
+        return pv > v
+    elif r == VersionRealtion.LARGER:
+        return pv >= v
+    elif r == VersionRealtion.EXACT:
+        return pv == v
+    elif r == VersionRealtion.SMALLER:
+        return pv <= v
+    elif r == VersionRealtion.STRICT_SMALLER:
+        return pv < v
+
+    return False

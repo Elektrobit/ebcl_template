@@ -38,7 +38,7 @@ class TestRoot:
 
     def test_read_config(self):
         """ Test yaml config loading. """
-        assert self.generator.image == 'ubuntu:22.04'
+        assert self.generator.image == 'jammy.xml'
         assert self.generator.image_type == ImageType.ELBE
 
     def test_build_kiwi_image(self):

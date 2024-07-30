@@ -9,12 +9,11 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from .apt import Apt
-from .cache import Cache
+from .config import load_yaml
 from .fake import Fake
 from .proxy import Proxy
+from .version import VersionDepends, parse_depends
 
 
 class BootGenerator:
@@ -22,7 +21,7 @@ class BootGenerator:
     # config file
     config: str
     # config values
-    packages: list[str]
+    packages: list[VersionDepends]
     files: list[dict[str, str]]
     scripts: list[str]
     arch: str
@@ -43,12 +42,9 @@ class BootGenerator:
         Args:
             config_file (Path): Path to the yaml config file.
         """
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml(config_file)
 
         self.config = config_file
-
-        self.packages = config.get('packages', [])
         self.files = config.get('files', [])
         self.scripts = config.get('scripts', [])
         self.arch = config.get('arch', 'arm64')
@@ -56,6 +52,16 @@ class BootGenerator:
         self.apt_repos = config.get('apt_repos', None)
         self.download_deps = config.get('download_deps', True)
         self.tar = config.get('tar', True)
+
+        self.packages = []
+        packages = config.get('packages', [])
+        for package in packages:
+            vds = parse_depends(package, self.arch)
+            if vds:
+                # TODO: handle alternatives
+                self.packages.append(vds[0])
+            else:
+                logging.error('Parsing of package %s failed!', package)
 
         self.proxy = Proxy()
         if self.apt_repos is None:
@@ -83,12 +89,12 @@ class BootGenerator:
     def download_deb_packages(self, package_dir: str):
         """ Download all needed deb packages. """
         (_debs, _contents, missing) = self.proxy.download_deb_packages(
-            arch=self.arch,
             packages=self.packages,
             contents=package_dir
         )
 
-        assert not missing
+        if missing:
+            logging.critical('Not found packages: %s', missing)
 
     def copy_files(self, package_dir: str):
         """ Copy files to be used. """

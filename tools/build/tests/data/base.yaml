@@ -1,0 +1,12 @@
+a: hello
+b: 123
+c:
+  - a
+  - b
+  - c
+d:
+  e: f
+  j: k
+l:
+  - s: t
+    i: j

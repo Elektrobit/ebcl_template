@@ -8,6 +8,7 @@ from typing import Optional
 import requests
 
 from .deb import Package
+from .version import parse_depends, VersionDepends, PackageRelation, Version
 
 
 class Apt:
@@ -17,7 +18,7 @@ class Apt:
     distro: str
     components: list[str]
     arch: str
-    packages: Optional[dict[str, Package]]
+    packages: Optional[dict[str, list[Package]]]
     index_loaded: bool
 
     def __init__(
@@ -57,7 +58,13 @@ class Apt:
             self.packages = {}
 
         inrelease = f'{self.url}/dists/{self.distro}/InRelease'
-        response = requests.get(inrelease, allow_redirects=True, timeout=10)
+        try:
+            response = requests.get(
+                inrelease, allow_redirects=True, timeout=10)
+        except Exception as e:
+            logging.error('Loading index of %s failed! %s', self, e)
+            return
+
         content = response.content.decode(encoding='utf-8', errors='ignore')
 
         package_indexes: dict[str, str] = {}
@@ -77,8 +84,14 @@ class Apt:
             if component in package_indexes:
                 url: str = package_indexes[component]
                 packages = f'{self.url}/dists/{self.distro}/{url}'
-                response = requests.get(
-                    packages, allow_redirects=True, timeout=10)
+
+                try:
+                    response = requests.get(
+                        packages, allow_redirects=True, timeout=10)
+                except Exception as e:
+                    logging.error(
+                        'Loading component %s of %s failed! %s', component, self, e)
+                    continue
 
                 if url.endswith('xz'):
                     content = lzma.decompress(response.content)
@@ -105,20 +118,70 @@ class Apt:
                         assert package is not None
                         parts = line.split(' ')
                         package.file_url = f'{self.url}/{parts[-1]}'
-                        self.packages[package.name] = package
+                        if package.name not in self.packages:
+                            self.packages[package.name] = [package]
+                        else:
+                            self.packages[package.name].append(package)
                     elif line.startswith('Depends:'):
                         assert package is not None
-                        deps = line[8:].split(',')
-                        package.depends = [dep.strip() for dep in deps]
+                        deps = line[8:].strip()
+                        package.depends = self._process_relation(
+                            package.name, deps, PackageRelation.DEPENDS)
+                    elif line.startswith('Pre-Depends:'):
+                        assert package is not None
+                        deps = line[12:].strip()
+                        package.pre_depends = self._process_relation(
+                            package.name, deps, PackageRelation.PRE_DEPENS)
+                    elif line.startswith('Recommends:'):
+                        assert package is not None
+                        deps = line[11:].strip()
+                        package.recommends = self._process_relation(
+                            package.name, deps, PackageRelation.RECOMMENDS)
+                    elif line.startswith('Suggests:'):
+                        assert package is not None
+                        deps = line[9:].strip()
+                        package.suggests = self._process_relation(
+                            package.name, deps, PackageRelation.SUGGESTS)
+                    elif line.startswith('Enhances:'):
+                        assert package is not None
+                        deps = line[9:].strip()
+                        package.enhances = self._process_relation(
+                            package.name, deps, PackageRelation.ENHANCES)
+                    elif line.startswith('Breaks:'):
+                        assert package is not None
+                        deps = line[7:].strip()
+                        package.breaks = self._process_relation(
+                            package.name, deps, PackageRelation.BREAKS)
+                    elif line.startswith('Conflicts:'):
+                        assert package is not None
+                        deps = line[10:].strip()
+                        package.conflicts = self._process_relation(
+                            package.name, deps, PackageRelation.CONFLICTS)
                     elif line.startswith('Version:'):
                         assert package is not None
-                        package.version = line[8:].strip()
+                        package.version = Version(line[8:].strip())
 
             else:
                 logging.warning(
                     'No package index for component %s found!', component)
 
-    def find_package(self, package_name: str) -> Optional[Package]:
+    def _process_relation(
+        self, name: str, relation: str, package_relation: PackageRelation
+    ) -> list[list[VersionDepends]]:
+        """ Parse relation string from stanza. """
+        deps: list[list[VersionDepends]] = []
+
+        for rel in relation.split(','):
+            dep = parse_depends(rel.strip(), self.arch, package_relation)
+            if dep:
+                deps.append(dep)
+            else:
+                logging.error('Invalid package relation %s to %s for %s.',
+                              rel.strip(), package_relation, name)
+
+        return deps
+
+    def find_package(self, package_name: str) -> Optional[list[Package]]:
         """ Find a binary deb package. """
         if self.packages is None:
             self._load_index()
@@ -129,3 +192,9 @@ class Apt:
             return self.packages[package_name]
         else:
             return None
+
+    def __str__(self) -> str:
+        return f'Apt<{self.url}, {self.distro}, {self.components}>'
+
+    def __repr__(self) -> str:
+        return self.__str__()

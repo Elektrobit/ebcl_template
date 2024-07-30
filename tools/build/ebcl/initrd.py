@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 """ EBcL initrd generator. """
 import argparse
+import glob
 import logging
 import os
+import queue
 import shutil
 import tempfile
 
@@ -10,13 +12,13 @@ from io import BufferedWriter
 from pathlib import Path
 from typing import Tuple, Any, Optional
 
-import yaml
-
 from jinja2 import Template
 
-from .apt import Apt
+from .apt import Apt, parse_depends
+from .config import load_yaml
 from .fake import Fake
 from .proxy import Proxy
+from .version import VersionDepends
 
 
 class InitrdGenerator:
@@ -25,18 +27,18 @@ class InitrdGenerator:
     config: Path
     # config values
     modules: list[str]
-    modules_packages: str
+    modules_packages: list[VersionDepends]
     root_device: str
     devices: list[dict[str, str]]
     files: list[dict[str, Any]]
-    kversion: str
+    kversion: Optional[str]
     arch: str
     apt_repos: list[dict[str, Any]]
     template: Optional[str]
     # use fakeroot or sudo
     fakeroot: bool
     # name of busybox package
-    busybox: str
+    busybox: list[VersionDepends]
     # out and tmp folders
     target_dir: str
     image_path: str
@@ -51,13 +53,11 @@ class InitrdGenerator:
         Args:
             config_file (Path): Path to the yaml config file.
         """
-        with open(config_file, 'r', encoding='utf-8') as f:
-            config = yaml.safe_load(f)
+        config = load_yaml(config_file)
 
         self.config = Path(config_file)
 
         self.modules = config.get('modules', [])
-        self.modules_packages = config.get('modules_packages', '')
         self.root_device = config.get('root_device', '')
         self.devices = config.get('devices', [])
         self.files = config.get('files', [])
@@ -66,7 +66,21 @@ class InitrdGenerator:
         self.apt_repos = config.get('apt_repos', None)
         self.template = config.get('template', None)
         self.fakeroot = config.get('fakeroot', False)
-        self.busybox = config.get('busybox', 'busybox-static')
+
+        self.modules_packages = []
+        modules_packages = config.get('modules_packages', '')
+        for package in modules_packages:
+            vds = parse_depends(package, self.arch)
+            if vds:
+                # TODO: handle alternatives
+                self.modules_packages.append(vds[0])
+            else:
+                logging.error('Parsing of package %s failed!', package)
+
+        busybox = config.get('busybox', 'busybox-static')
+        vds = parse_depends(busybox, self.arch)
+        assert vds
+        self.busybox = vds
 
         self.proxy = Proxy()
         if self.apt_repos is None:
@@ -113,19 +127,69 @@ class InitrdGenerator:
 
     def install_busybox(self):
         """Get busybox and add it to the initrd. """
-        package = self.proxy.find_package(self.arch, self.busybox)
+        versiondep = None
+        package = None
 
-        if package is None:
-            logging.error('The package %s was not found!', self.busybox)
+        for vd in self.busybox:
+            # Find first available package.
+            versiondep = vd
+            package = self.proxy.find_package(vd)
+            if not package:
+                continue
+
+            # Downlaod first available package.
+            package = self.proxy.download_package(
+                arch=versiondep.arch,
+                package=package,
+                version_relation=versiondep.version_relation
+            )
+
+            if package and package.local_file and \
+                    os.path.isfile(package.local_file):
+                # Download was successful.
+                logging.info('Using busybox deb %s.', package.local_file)
+                break
+
+        if package is None or versiondep is None:
+            logging.error('Busybox was not found! %s', self.busybox)
             exit(1)
 
-        file = package.download()
+        if not package.local_file:
+            logging.error('Busybox download failed! %s', self.busybox)
+            exit(1)
 
-        assert file is not None
+        logging.info('Using busybox %s (%s).', package, versiondep)
 
-        package.extract(self.target_dir)
+        res = package.extract(self.target_dir)
+        if res is None:
+            logging.critical(
+                'Extraction of busybox package %s (deb: %s) failed!', package, package.local_file)
+            exit(1)
+
+        logging.info('Busybox extracted to %s.', res)
+
+        if not os.path.isfile(os.path.join(self.target_dir, 'bin', 'busybox')):
+            logging.critical(
+                'Busybox binary is missing! target: %s package: %s', self.target_dir, package)
+            exit(1)
 
         self._run_chroot('/bin/busybox --install -s /bin')
+
+    def find_kernel_version(self, mods_dir: str) -> str:
+        """ Find the right kernel version. """
+        if self.kversion:
+            return self.kversion
+
+        kernel_dirs = os.path.abspath(os.path.join(mods_dir, 'lib', 'modules'))
+        versions = glob.glob(f'{kernel_dirs}/*')
+
+        if not versions:
+            logging.critical(
+                'Kernel version not found! mods_dir: %s, kernel_dirs: %s', mods_dir, kernel_dirs)
+
+        versions.sort()
+
+        return os.path.basename(versions[-1])
 
     def extract_modules_from_deb(self, mods_dir: str):
         """Extract the required kernel modules from the deb package.
@@ -133,37 +197,91 @@ class InitrdGenerator:
         Args:
             mods_dir (str): Folder containing the modules.
         """
-        initrd_modules_dir = os.path.join(
-            self.target_dir, 'lib', 'modules', self.kversion)
-        modulesdeps = os.path.join(initrd_modules_dir, 'modules.dep')
+        logging.info('Modules tmp folder: %s.', mods_dir)
+        logging.info('Target tmp folder: %s.', self.target_dir)
 
-        self._run_chroot(f'mkdir -p /lib/modules/{self.kversion}')
+        kversion = self.find_kernel_version(mods_dir)
+
+        logging.info('Using kernel version %s.', kversion)
+
+        mods_src = os.path.abspath(os.path.join(
+            mods_dir, 'lib', 'modules', kversion))
+
+        mods_dep_src = os.path.join(mods_src, 'modules.dep')
+
+        mods_dst = os.path.abspath(os.path.join(
+            self.target_dir, 'lib', 'modules', kversion))
+
+        mods_dep_dst = os.path.join(mods_dst, 'modules.dep')
+
+        logging.debug('Mods src: %s', mods_src)
+        logging.debug('Mods dst: %s', mods_dst)
+
+        logging.debug('Create modules target...')
+        self._run_root(f'mkdir -p {mods_dst}')
+
+        orig_deps: dict[str, list[str]] = {}
+
+        if os.path.isfile(mods_dep_src):
+            with open(mods_dep_src, encoding='utf8') as f:
+                lines = f.readlines()
+                for line in lines:
+                    parts = line.split(':', maxsplit=1)
+                    key = parts[0].strip()
+                    values = []
+                    if len(parts) > 1:
+                        vs = parts[1].strip()
+                        if vs:
+                            values = [dep.strip()
+                                      for dep in vs.split(' ') if dep != '']
+                    orig_deps[key] = values
+
+        mq: queue.Queue[str] = queue.Queue(maxsize=-1)
 
         for module in self.modules:
-            module_path = os.path.join(
-                mods_dir, 'lib', 'modules', self.kversion, module)
+            mq.put_nowait(module)
 
-            if not os.path.isfile(module_path):
+        while not mq.empty():
+            module = mq.get_nowait()
+
+            logging.info('Processing module %s...', module)
+
+            src = os.path.join(mods_src, module)
+            dst = os.path.join(mods_dst, module)
+            dst_dir = os.path.dirname(dst)
+
+            logging.info('Copying module %s to folder %s.', src, dst)
+
+            if not os.path.isfile(src):
                 logging.error('Module %s not found.', module)
                 continue
 
-            target_dir = os.path.dirname(
-                os.path.join(initrd_modules_dir, module))
-            self._run_root(f'mkdir -p {target_dir}')
+            self._run_root(f'mkdir -p {dst_dir}')
+            self._run_root(f'cp {src} {dst}')
 
-            self._run_root(f'cp {module_path} {target_dir}')
+            # Find module dependencies.
+            deps = ''
+            if module in orig_deps:
+                mdeps = orig_deps[module]
+                deps = ' '.join(mdeps)
+                for mdep in mdeps:
+                    mq.put_nowait(mdep)
 
-            self._run_root(f'echo {module}: >> {modulesdeps}')
+            self._run_root(f'echo {module}: {deps} >> {mods_dep_dst}')
 
         # Fix ownership of modules
-        self._run_chroot('chown -R 0:0 /lib/modules')
+        self._run_root(f'chown -R 0:0 {self.target_dir}/lib/modules')
 
     def add_devices(self):
         """ Create device files. """
-        self._run_chroot('mkdir -p /dev')
+        self._run_root(f'mkdir -p {self.target_dir}/dev')
+
+        dev_folder = os.path.join(self.target_dir, 'dev')
+
         for device in self.devices:
             major = (int)(device['major'])
             minor = (int)(device['major'])
+
             if device['type'] == 'char':
                 dev_type = 'c'
                 mode = '200'
@@ -173,13 +291,14 @@ class InitrdGenerator:
             else:
                 logging.error('Unsupported device type %s for %s',
                               device['type'], device['name'])
+                continue
 
-            self._run_chroot(
-                f'mknod -m {mode} /dev/{device["name"]} {dev_type} {major} {minor}')
+            self._run_root(
+                f'mknod -m {mode} {dev_folder}/{device["name"]} {dev_type} {major} {minor}')
 
             uid = device.get('uid', '0')
             gid = device.get('uid', '0')
-            self._run_chroot(f'chown {uid}:{gid} /dev/{device["name"]}')
+            self._run_root(f'chown {uid}:{gid} {dev_folder}/{device["name"]}')
 
     def copy_files(self):
         """ Copy user-specified files in the initrd. """
@@ -188,9 +307,13 @@ class InitrdGenerator:
         for entry in self.files:
             src = Path(os.path.abspath(os.path.join(
                 self.config.parent, entry['source'])))
+
             dst = Path(self.target_dir) / entry['destination']
+
             dst_file = Path(self.target_dir) / entry['destination'] / src.name
+
             mode: str = entry.get('mode', '666')
+
             uid = entry.get('uid', '0')
             gid = entry.get('gid', '0')
 
@@ -200,12 +323,14 @@ class InitrdGenerator:
 
             if src.is_file():
                 self._run_root(f'cp {src} {dst}')
+
                 self._run_root(f'chmod {mode} {dst_file}')
                 self._run_root(f'chown {uid}:{gid} {dst_file}')
             elif src.is_dir():
                 self._run_root(f'cp -R  {src}/* {dst}')
-                self._run_chroot(f'chmod -R {mode} {dst_file}')
-                self._run_chroot(f'chown -R {uid}:{gid} {dst_file}')
+
+                self._run_root(f'chmod -R {mode} {dst_file}')
+                self._run_root(f'chown -R {uid}:{gid} {dst_file}')
             else:
                 logging.warning('Source %s does not exist', src)
 
@@ -220,26 +345,20 @@ class InitrdGenerator:
         # Create necessary directories
         for dir_name in ['proc', 'sys', 'dev', 'sysroot', 'var', 'bin',
                          'tmp', 'run', 'root', 'usr', 'sbin', 'lib', 'etc']:
-            self._run_chroot(f'mkdir -p {dir_name}')
-            self._run_chroot(f'chown 0:0 /{dir_name}')
+            self._run_root(
+                f'mkdir -p {os.path.join(self.target_dir, dir_name)}')
+            self._run_root(
+                f'chown 0:0 {os.path.join(self.target_dir, dir_name)}')
 
         mods_dir = tempfile.mkdtemp()
 
-        for mod_package in self.modules_packages:
-            package = self.proxy.find_package(self.arch, mod_package)
-            if package is None:
-                logging.error('Package %s not found!', mod_package)
-                exit(1)
+        (_debs, _contents, missing) = self.proxy.download_deb_packages(
+            packages=self.modules_packages,
+            contents=mods_dir
+        )
 
-            local_deb = package.download()
-            if local_deb is None:
-                logging.error('Download of %s failed!', mod_package)
-                exit(1)
-
-            package.extract(location=mods_dir)
-
-            # Remove downloaded package
-            os.remove(local_deb)
+        if missing:
+            logging.critical('Not found packages: %s', missing)
 
         # Extract modules directly to the initrd /lib/modules directory
         self.extract_modules_from_deb(mods_dir)
@@ -285,7 +404,7 @@ class InitrdGenerator:
 
 def main() -> None:
     """ Main entrypoint of EBcL initrd generator. """
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser(
         description='Create an initrd image for Linux.')

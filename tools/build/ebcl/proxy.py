@@ -3,13 +3,17 @@
 import logging
 import os
 import queue
+import shutil
 import tempfile
 
 from typing import Optional, Tuple
 
+import requests
+
 from .apt import Apt
-from .cache import Cache
-from .deb import Package
+from .cache import Cache, AddOp
+from .deb import Package, filter_packages
+from .version import VersionDepends, VersionRealtion
 
 
 class Proxy:
@@ -49,38 +53,182 @@ class Proxy:
 
         return result
 
-    def find_package(self, arch: str, name: str) -> Optional[Package]:
+    def find_package(self, vd: VersionDepends) -> Optional[Package]:
         """ Find package. """
-        package = None
+        # all found packages
+        packages: list[Package] = []
 
-        deb_file = self.cache.get(arch=arch, name=name)
-        if deb_file and os.path.isfile(deb_file):
-            package = Package.from_deb(deb_file)
+        for apt in self.apts:
+            if vd.arch == 'any' or vd.arch == 'all' or vd.arch == apt.arch:
+                ps = apt.find_package(vd.name)
+                if ps:
+                    packages += ps
+                    logging.info('Found %s in apt repo %s %s...',
+                                 ps, apt.url, apt.distro)
 
-        if not package:
-            for apt in self.apts:
-                if apt.arch == arch:
-                    package = apt.find_package(name)
-                    if package:
-                        logging.info('Using %s from apt repo %s %s...',
-                                     name, apt.url, apt.distro)
-                        break
+        if vd.version:
+            packages = [p for p in packages if filter_packages(
+                p, vd.version, vd.version_relation)]
+
+        packages.sort()
+
+        logging.debug('Found packages: %s', packages)
+
+        if packages:
+            # Return latest package
+            lp = packages[-1]
+
+            # Check if package is available in cache.
+            p = self.cache.get(
+                arch=lp.arch,
+                name=lp.name,
+                version=lp.version,
+                relation=VersionRealtion.EXACT)
+            if p:
+                logging.info('Found %s in cache...', p)
+                lp.local_file = p.local_file
+
+            return lp
+
+        return None
+
+    def _download_from_cache(
+        self,
+        vd: VersionDepends,
+        location: Optional[str] = None
+    ) -> Optional[Package]:
+        """ Copy package form cache. """
+        if location is None:
+            location = self.cache.folder
+
+        package = self.cache.get(
+            arch=vd.arch,
+            name=vd.name,
+            version=vd.version,
+            relation=vd.version_relation
+        )
+
+        if package and package.local_file and os.path.isfile(package.local_file):
+            # Use package form cache.
+            logging.info('Cache hit for package %s.', package)
+            dst = os.path.join(
+                location, os.path.basename(package.local_file))
+            if package.local_file != dst:
+                shutil.copy(package.local_file, dst)
+
+            package.local_file = dst
+            return package
+
+        return None
+
+    def download_version(
+        self,
+        vd: VersionDepends,
+        location: Optional[str] = None
+    ) -> Optional[Package]:
+        """ Download a deb package. """
+        p = self._download_from_cache(vd, location)
+        if p and p.local_file \
+                and os.path.isfile(p.local_file):
+            # Package was found in cache.
+            return p
+
+        package = self.find_package(vd)
+        if package:
+            return self.download_package(vd.arch, package, vd.version_relation, location)
+        return None
+
+    def download_package(
+        self,
+        arch: str,
+        package: Package,
+        version_relation: Optional[VersionRealtion] = None,
+        location: Optional[str] = None
+    ) -> Optional[Package]:
+        """ Download a deb package. """
+        if not version_relation:
+            version_relation = VersionRealtion.LARGER
+
+        if location is None:
+            location = self.cache.folder
+
+        p = self._download_from_cache(
+            VersionDepends(
+                name=package.name,
+                package_relation=None,
+                version_relation=version_relation,
+                version=package.version,
+                arch=arch
+            ),
+            location)
+        if p and p.local_file \
+                and os.path.isfile(p.local_file):
+            # Package was found in cache.
+            return p
+
+        if not package.file_url:
+            # Find package URL.
+            p = self.find_package(
+                vd=VersionDepends(
+                    name=package.name,
+                    package_relation=None,
+                    version_relation=version_relation,
+                    version=package.version,
+                    arch=arch
+                )
+            )
+
+            if not p or not p.file_url:
+                logging.error(
+                    'Package download of %s failed! URL not found.', p)
+                return None
+
+            package = p
+
+        if not package.file_url:
+            return None
+
+        # Download package.
+        try:
+            result = requests.get(
+                package.file_url, allow_redirects=True, timeout=10)
+        except Exception as e:
+            logging.error('Downloading package %s of %s failed! %s',
+                          package, package.file_url, e)
+            return None
+
+        if result.status_code != 200:
+            return None
+
+        local_filename = package.file_url.split('/')[-1]
+        local_filename = os.path.join(location, local_filename)
+        with open(local_filename, 'wb') as f:
+            for chunk in result.iter_content(chunk_size=512 * 1024):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
+
+        package.local_file = local_filename
+
+        if location == self.cache.folder:
+            # Add package to cache
+            logging.info('Adding package %s to cache.', package)
+            package.local_file = self.cache.add(package, AddOp.MOVE)
         else:
-            logging.info('Using %s from cache...', deb_file)
+            logging.info(
+                'Download folder is not cache folder. Not caching %s.', local_filename)
 
         return package
 
     def download_deb_packages(
         self,
-        arch: str,
-        packages: list[str],
+        packages: list[VersionDepends],
         extract: bool = True,
         debs: Optional[str] = None,
         contents: Optional[str] = None,
     ) -> Tuple[str, Optional[str], list[str]]:
         """ Download and optionally extract the given packages and its depends. """
         # Queue for package download.
-        pq: queue.Queue[str] = queue.Queue(maxsize=len(packages) * 10)
+        pq: queue.Queue[list[VersionDepends]] = queue.Queue(maxsize=-1)
         # Registry of available packages.
         local_packages: dict[str, str] = {}
         # List of not found packages
@@ -97,18 +245,27 @@ class Proxy:
                 contents = tempfile.mkdtemp()
             logging.info('Extracting to folder %s.', contents)
 
-        for p in packages:
+        for vd in packages:
             # Adding packages to download queue.
-            logging.info('Adding package %s to queue.', p)
-            pq.put_nowait(p)
+            logging.info('Adding package %s to queue.', vd)
+            pq.put_nowait([vd])
 
         while not pq.empty():
-            name = pq.get_nowait()
+            vds = pq.get_nowait()
+            if not vds:
+                # handle empty list
+                continue
+
+            # TODO: handle alternatives
+            # use always first alternative only
+            vd = vds[0]
+
+            name = vd.name
 
             if name in local_packages:
                 continue
 
-            package = self.find_package(arch, name)
+            package = self.find_package(vd)
 
             if package is None:
                 logging.error('The package %s was not found!', name)
@@ -116,9 +273,14 @@ class Proxy:
                 continue
 
             if not package.local_file:
-                package.download(location=debs)
+                package = self.download_package(
+                    arch=vd.arch,
+                    package=package,
+                    version_relation=vd.version_relation,
+                    location=debs)
 
-            if not package.local_file:
+            if not package or not package.local_file or \
+                    (package.local_file and not os.path.isfile(package.local_file)):
                 logging.error('Download of %s failed!', name)
                 missing.append(name)
                 continue
@@ -130,10 +292,17 @@ class Proxy:
             logging.info('Deb file: %s', package.local_file)
 
             # Add deps to queue
-            for p in package.get_depends():
-                if p not in local_packages:
+            for vds in package.get_depends():
+                if not vds:
+                    continue
+
+                # TODO: handle alternatives
+                vd = vds[0]
+
+                name = vd.name
+                if name not in local_packages:
                     logging.info(
-                        'Adding package %s to download queue. Len: %d', p, pq.qsize())
-                    pq.put_nowait(p)
+                        'Adding dependency %s to download queue. Queue size: %d', vd, pq.qsize())
+                    pq.put_nowait([vd])
 
         return (debs, contents, missing)

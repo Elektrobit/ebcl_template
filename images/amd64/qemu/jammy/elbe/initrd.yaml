@@ -15,5 +15,4 @@ template: init.sh
 modules:
   - kernel/drivers/block/virtio_blk.ko
 modules_packages:
-  - linux-modules-5.15.0-25-generic
-kversion: 5.15.0-25-generic
+  - linux-image-generic
