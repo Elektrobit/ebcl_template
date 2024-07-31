@@ -30,7 +30,8 @@ class TestInitrd:
     @classmethod
     def teardown_class(cls):
         """ Remove temp_dir. """
-        shutil.rmtree(cls.temp_dir)
+        fake = Fake()
+        fake.run_sudo(f'rm -rf {cls.temp_dir}')
 
     def test_read_config(self):
         """ Test yaml config loading. """

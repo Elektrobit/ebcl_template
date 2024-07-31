@@ -49,10 +49,12 @@ class TestRoot:
         generator.result_dir = tempfile.mkdtemp()
         generator.target_dir = tempfile.mkdtemp()
 
-        archive = generator._build_kiwi_image()
+        tmp = tempfile.mkdtemp()
+        archive = generator._build_kiwi_image(tmp)
         assert archive
         assert os.path.isfile(archive)
 
+        shutil.rmtree(tmp)
         shutil.rmtree(generator.result_dir)
         shutil.rmtree(generator.target_dir)
 

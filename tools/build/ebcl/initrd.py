@@ -35,6 +35,7 @@ class InitrdGenerator:
     arch: str
     apt_repos: list[dict[str, Any]]
     template: Optional[str]
+    modules_folder: Optional[str]
     # use fakeroot or sudo
     fakeroot: bool
     # name of busybox package
@@ -66,6 +67,7 @@ class InitrdGenerator:
         self.apt_repos = config.get('apt_repos', None)
         self.template = config.get('template', None)
         self.fakeroot = config.get('fakeroot', False)
+        self.modules_folder = config.get('modules_folder', None)
 
         self.modules_packages = []
         modules_packages = config.get('modules_packages', '')
@@ -364,21 +366,30 @@ class InitrdGenerator:
             self._run_root(
                 f'chown 0:0 {os.path.join(self.target_dir, dir_name)}')
 
-        mods_dir = tempfile.mkdtemp()
+        mods_dir = None
 
-        (_debs, _contents, missing) = self.proxy.download_deb_packages(
-            packages=self.modules_packages,
-            contents=mods_dir
-        )
+        if self.modules_folder:
+            mods_dir = os.path.abspath(os.path.join(
+                self.config.parent, self.modules_folder))
+            logging.info('Using modules from folder %s...', mods_dir)
+        else:
+            mods_dir = tempfile.mkdtemp()
 
-        if missing:
-            logging.critical('Not found packages: %s', missing)
+            logging.info('Using modules from deb packages...')
+            (_debs, _contents, missing) = self.proxy.download_deb_packages(
+                packages=self.modules_packages,
+                contents=mods_dir
+            )
+
+            if missing:
+                logging.critical('Not found packages: %s', missing)
 
         # Extract modules directly to the initrd /lib/modules directory
         self.extract_modules_from_deb(mods_dir)
 
-        # Remove mods temporary folder
-        shutil.rmtree(mods_dir)
+        if not self.modules_folder:
+            # Remove mods temporary folder
+            shutil.rmtree(mods_dir)
 
         # Add device nodes
         self.add_devices()
