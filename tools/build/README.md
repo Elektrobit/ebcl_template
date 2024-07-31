@@ -1,15 +1,28 @@
 # EBcL build helpers
 
-## ToDo
+## ToDo 1.3
 
 - [x] versions
 - [x] derived configs
+- [ ] image kernel src
+- [ ] image efi
 - [ ] cached apt indices
 - [ ] templates for root gen
-- [ ] alternatives in dependencies
+- [ ] sysroots
+- [ ] QEMU images
+- [ ] Raspi images
+- [ ] RDB2 images
+- [ ] copy to SD card with bmaptool
+- [ ] docs
+- [ ] cmake presets 
+
+## ToDo 1.4
+
 - [ ] check apt signatures
 - [ ] HTTP apt proxy
 - [ ] proxy add local package
 - [ ] proxy record sessions
 - [ ] restore proxy from sessions
+- [ ] alternatives in dependencies
 - [ ] Yocto-style SDK
+- [ ] HV images

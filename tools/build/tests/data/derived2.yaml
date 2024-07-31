@@ -1,0 +1,13 @@
+base:
+  - base.yaml
+  - base2.yaml
+b: 456
+c:
+  - x
+  - y
+d:
+  e: z
+  u: v
+l:
+  - h: j
+    k: l

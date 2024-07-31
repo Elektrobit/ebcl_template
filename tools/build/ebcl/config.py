@@ -47,17 +47,21 @@ def load_yaml(config_file: str) -> dict[str, Any]:
         config = yaml.safe_load(f)
 
     if 'base' in config:
-        base_yaml = config['base']
-        path = os.path.abspath(os.path.join(
-            os.path.dirname(config_file), base_yaml))
+        base_yamls = config['base']
+        if isinstance(base_yamls, str):
+            base_yamls = [base_yamls]
 
-        # Recursion
-        base_config = load_yaml(path)
+        for base_yaml in base_yamls:
+            path = os.path.abspath(os.path.join(
+                os.path.dirname(config_file), base_yaml))
 
-        if isinstance(base_config, dict):
-            config = _merge(base_config, config)
-        else:
-            logging.critical(
-                'Base config %s has no dict root! Config is ignored.', path)
+            # Recursion
+            base_config = load_yaml(path)
+
+            if isinstance(base_config, dict):
+                config = _merge(base_config, config)
+            else:
+                logging.critical(
+                    'Base config %s has no dict root! Config is ignored.', path)
 
     return config
