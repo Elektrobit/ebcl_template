@@ -19,6 +19,7 @@
 
     <packages type="image">
         <package name="systemd"/>
+        <package name="udev"/>
         <package name="util-linux"/>
     </packages>
 

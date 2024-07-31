@@ -21,7 +21,7 @@ build/image.raw: build/ubuntu.tar.xz image.yaml
 	mkdir -p build
 	embdgen -o ./build/image.raw image.yaml
 
-build/ubuntu.tar.xz: root.yaml config.sh
+build/ubuntu.tar.xz: root.yaml config.sh jammy.kiwi
 	@echo "Build root.tar..."
 	mkdir -p build
 	root_generator root.yaml ./build

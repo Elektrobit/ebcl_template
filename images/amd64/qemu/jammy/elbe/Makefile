@@ -21,7 +21,7 @@ build/image.raw: build/ubuntu.tar image.yaml
 	mkdir -p build
 	embdgen -o ./build/image.raw image.yaml
 
-build/ubuntu.tar: root.yaml
+build/ubuntu.tar: root.yaml jammy.xml
 	@echo "Build root.tar..."
 	mkdir -p build
 	root_generator root.yaml ./build
@@ -40,3 +40,15 @@ build/initrd.img: ../initrd.yaml
 .PHONY: clean
 clean:
 	rm -rf build
+
+.PHONY: edit_root
+edit_root:
+	@echo "Extacting root tarball..."
+	mkdir -p build/root
+	cd build && fakeroot -s fakedit -- tar xf ubuntu.tar -C ./root
+	@echo "Open edit shell..."
+	cd build/root && fakeroot -i fakedit -s fakeedit
+	@echo "Re-packing root tarball..."
+	rm -f ubuntu.old
+	mv ubuntu.tar ubuntu.old
+	cd build/root && fakeroot -s fakedit -- tar cvf ../ubuntu.tar .
