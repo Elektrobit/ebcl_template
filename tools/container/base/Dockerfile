@@ -90,6 +90,11 @@ USER $CONTAINER_USER
 WORKDIR /build
 RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml mypy pep8 pylint pytest pytest-cov requests types-requests unix-ar types-PyYAML Jinja2 types-Jinja2 robotframework zstandard"
 
+# Fix for venv having UID 1000
+USER root
+RUN chown -R $HOST_USER:$HOST_GROUP /build/venv
+USER $CONTAINER_USER
+
 # change work dir to workspace mount point
 WORKDIR /workspace
 

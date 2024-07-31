@@ -5,7 +5,7 @@
 - [x] versions
 - [x] derived configs
 - [ ] fix UID issues
-- [ ] image kernel src
+- [x] image kernel src
 - [ ] image efi
 - [ ] ttyS0
 - [ ] cached apt indices
