@@ -3,6 +3,9 @@
 import os
 import logging
 import subprocess
+
+from typing import Any, Optional
+
 import yaml
 
 
@@ -10,9 +13,9 @@ class ContainerBuilder:
     """ ContainerBuilder builds and EBcL SDK dev container.  """
 
     def __init__(self):
-        self.config = None
-        self.build_tool = None
-        self.base_container_name = None
+        self.config: Optional[dict[str, Any]] = None
+        self.build_tool: Optional[str] = None
+        self.base_container_name: Optional[str] = None
 
     def load_config(self, file="build_config.yaml") -> None:
         """ Load container configuration from config file.
@@ -37,12 +40,16 @@ class ContainerBuilder:
         """ Build a container layer. """
         logging.info('Building layer %s.', name)
         command = f'{self.build_tool} build -t {name} '\
-            f'--build-arg BASE_CONTAINER_NAME="{self.base_container_name}" {path}'
+            f'--build-arg BASE_CONTAINER_NAME="{self.base_container_name}" '\
+            f'--build-arg HOST_USER="{os.getuid()}" '\
+            f'--build-arg HOST_GROUP="{os.getgid()}" '\
+            f'{path}'
         logging.debug('Command: %s', command)
         subprocess.run(command, shell=True, check=True)
 
     def _tag_container(self) -> None:
         """ Tag a container. """
+        assert self.config
         repo = self.config['Repository']
         basename = self.config['Base-Name']
         version = self.config['Version']
@@ -56,6 +63,7 @@ class ContainerBuilder:
 
     def _get_container_name(self, path: str) -> str:
         """ Build the container name. """
+        assert self.config
         repo = self.config['Repository']
         basename = self.config['Base-Name']
         name = os.path.basename(path)
@@ -64,6 +72,7 @@ class ContainerBuilder:
 
     def build_container(self):
         """ Build the dev container. """
+        assert self.config
         self._set_builder()
         self.base_container_name = self.config['Base-Container']
 
