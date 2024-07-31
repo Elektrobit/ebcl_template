@@ -1,9 +1,13 @@
 """ APT helper functions """
+import glob
 import gzip
 import logging
 import lzma
+import os
+import time
+import json
 
-from typing import Optional
+from typing import Optional, Any
 
 import requests
 
@@ -20,13 +24,15 @@ class Apt:
     arch: str
     packages: Optional[dict[str, list[Package]]]
     index_loaded: bool
+    state_folder: str
 
     def __init__(
         self,
         url: str = "http://archive.ubuntu.com/ubuntu",
         distro: str = "jammy",
         components: Optional[list[str]] = None,
-        arch: str = "amd64"
+        arch: str = "amd64",
+        state_folder: str = '/workspace/state/apt'
     ) -> None:
         if components is None:
             components = ['main']
@@ -36,6 +42,13 @@ class Apt:
         self.components = components
         self.arch = arch
         self.packages = None
+        self.state_folder = state_folder
+
+        if os.path.isfile(self.state_folder):
+            self.state_folder = os.path.dirname(self.state_folder)
+
+        if not os.path.exists(self.state_folder):
+            os.makedirs(self.state_folder, exist_ok=True)
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Apt):
@@ -54,18 +67,118 @@ class Apt:
 
     def _load_index(self):
         """ Download repo metadata and parse package indices. """
+        package_indexes = self._download_distro()
+        if not package_indexes:
+            return
+
+        for component in self.components:
+            if component in package_indexes:
+                url: str = package_indexes[component]
+                self._parse_component(url)
+            else:
+                logging.warning(
+                    'No package index for component %s found!', component)
+
+    def _parse_component(self, url: str):
+        """ Parse component package index. """
         if self.packages is None:
             self.packages = {}
 
-        inrelease = f'{self.url}/dists/{self.distro}/InRelease'
-        try:
-            response = requests.get(
-                inrelease, allow_redirects=True, timeout=10)
-        except Exception as e:
-            logging.error('Loading index of %s failed! %s', self, e)
+        packages = f'{self.url}/dists/{self.distro}/{url}'
+
+        data = self._download_url(packages)
+        if not data:
+            logging.error('Download of component %s failed!', url)
             return
 
-        content = response.content.decode(encoding='utf-8', errors='ignore')
+        if url.endswith('xz'):
+            content_bytes = lzma.decompress(data)
+        else:
+            assert url.endswith('gz')
+            content_bytes = gzip.decompress(data)
+        content: str = content_bytes.decode(
+            encoding='utf-8', errors='ignore')
+        lines: list[str] = content.split('\n')
+
+        package = None
+        for line in lines:
+            line = line.strip()
+
+            if not line:
+                # package separator
+                package = None
+                continue
+
+            if line.startswith('Package:'):
+                # new package
+                parts = line.split(' ')
+                package = Package(parts[-1], self.arch)
+
+            elif line.startswith('Filename:'):
+                assert package is not None
+                parts = line.split(' ')
+                package.file_url = f'{self.url}/{parts[-1]}'
+
+                if package.name not in self.packages:
+                    self.packages[package.name] = [package]
+                else:
+                    self.packages[package.name].append(package)
+
+            elif line.startswith('Depends:'):
+                assert package is not None
+                deps = line[8:].strip()
+                package.depends = self._process_relation(
+                    package.name, deps, PackageRelation.DEPENDS)
+
+            elif line.startswith('Pre-Depends:'):
+                assert package is not None
+                deps = line[12:].strip()
+                package.pre_depends = self._process_relation(
+                    package.name, deps, PackageRelation.PRE_DEPENS)
+
+            elif line.startswith('Recommends:'):
+                assert package is not None
+                deps = line[11:].strip()
+                package.recommends = self._process_relation(
+                    package.name, deps, PackageRelation.RECOMMENDS)
+
+            elif line.startswith('Suggests:'):
+                assert package is not None
+                deps = line[9:].strip()
+                package.suggests = self._process_relation(
+                    package.name, deps, PackageRelation.SUGGESTS)
+
+            elif line.startswith('Enhances:'):
+                assert package is not None
+                deps = line[9:].strip()
+                package.enhances = self._process_relation(
+                    package.name, deps, PackageRelation.ENHANCES)
+
+            elif line.startswith('Breaks:'):
+                assert package is not None
+                deps = line[7:].strip()
+                package.breaks = self._process_relation(
+                    package.name, deps, PackageRelation.BREAKS)
+
+            elif line.startswith('Conflicts:'):
+                assert package is not None
+                deps = line[10:].strip()
+                package.conflicts = self._process_relation(
+                    package.name, deps, PackageRelation.CONFLICTS)
+
+            elif line.startswith('Version:'):
+                assert package is not None
+                package.version = Version(line[8:].strip())
+
+    def _download_distro(self) -> Optional[dict[str, str]]:
+        """ Download and parse distro release file. """
+        inrelease = f'{self.url}/dists/{self.distro}/InRelease'
+
+        data = self._download_url(inrelease)
+        if not data:
+            return None
+
+        content = data.decode(encoding='utf-8', errors='ignore')
 
         package_indexes: dict[str, str] = {}
 
@@ -80,90 +193,7 @@ class Apt:
 
         logging.info('Package indexes: %s', package_indexes)
 
-        for component in self.components:
-            if component in package_indexes:
-                url: str = package_indexes[component]
-                packages = f'{self.url}/dists/{self.distro}/{url}'
-
-                try:
-                    response = requests.get(
-                        packages, allow_redirects=True, timeout=10)
-                except Exception as e:
-                    logging.error(
-                        'Loading component %s of %s failed! %s', component, self, e)
-                    continue
-
-                if url.endswith('xz'):
-                    content = lzma.decompress(response.content)
-                else:
-                    assert url.endswith('gz')
-                    content = gzip.decompress(response.content)
-                content = content.decode(encoding='utf-8', errors='ignore')
-                content = content.split('\n')
-
-                package = None
-                for line in content:
-                    line = line.strip()
-
-                    if not line:
-                        # package separator
-                        package = None
-                        continue
-
-                    if line.startswith('Package:'):
-                        # new package
-                        parts = line.split(' ')
-                        package = Package(parts[-1], self.arch)
-                    elif line.startswith('Filename:'):
-                        assert package is not None
-                        parts = line.split(' ')
-                        package.file_url = f'{self.url}/{parts[-1]}'
-                        if package.name not in self.packages:
-                            self.packages[package.name] = [package]
-                        else:
-                            self.packages[package.name].append(package)
-                    elif line.startswith('Depends:'):
-                        assert package is not None
-                        deps = line[8:].strip()
-                        package.depends = self._process_relation(
-                            package.name, deps, PackageRelation.DEPENDS)
-                    elif line.startswith('Pre-Depends:'):
-                        assert package is not None
-                        deps = line[12:].strip()
-                        package.pre_depends = self._process_relation(
-                            package.name, deps, PackageRelation.PRE_DEPENS)
-                    elif line.startswith('Recommends:'):
-                        assert package is not None
-                        deps = line[11:].strip()
-                        package.recommends = self._process_relation(
-                            package.name, deps, PackageRelation.RECOMMENDS)
-                    elif line.startswith('Suggests:'):
-                        assert package is not None
-                        deps = line[9:].strip()
-                        package.suggests = self._process_relation(
-                            package.name, deps, PackageRelation.SUGGESTS)
-                    elif line.startswith('Enhances:'):
-                        assert package is not None
-                        deps = line[9:].strip()
-                        package.enhances = self._process_relation(
-                            package.name, deps, PackageRelation.ENHANCES)
-                    elif line.startswith('Breaks:'):
-                        assert package is not None
-                        deps = line[7:].strip()
-                        package.breaks = self._process_relation(
-                            package.name, deps, PackageRelation.BREAKS)
-                    elif line.startswith('Conflicts:'):
-                        assert package is not None
-                        deps = line[10:].strip()
-                        package.conflicts = self._process_relation(
-                            package.name, deps, PackageRelation.CONFLICTS)
-                    elif line.startswith('Version:'):
-                        assert package is not None
-                        package.version = Version(line[8:].strip())
-
-            else:
-                logging.warning(
-                    'No package index for component %s found!', component)
+        return package_indexes
 
     def _process_relation(
         self, name: str, relation: str, package_relation: PackageRelation
@@ -198,3 +228,113 @@ class Apt:
 
     def __repr__(self) -> str:
         return self.__str__()
+
+    def _download_url(self, url: str) -> Optional[bytes | Any]:
+        """ Download the given url. """
+        # Check for cached data.
+        cache_file_name = url[7:].replace('/', '_')
+        cache_file_path = os.path.join(self.state_folder, cache_file_name)
+
+        cache_files = glob.glob(f'{cache_file_path}_*')
+        if cache_files:
+            cache_files.sort()
+            cache_file = cache_files[-1]
+
+            logging.info('Cache file found for %s: %s', url, cache_file)
+
+            ts_str = cache_file.split('_')[-1]
+            ts = float(ts_str)
+            age = time.time() - ts
+
+            if age > 24 * 60 * 60:
+                # older than one day
+                logging.info('Removing outdated cache file %s', cache_file)
+                try:
+                    os.remove(cache_file)
+                except Exception as e:
+                    logging.error(
+                        'Removing old cache file %s failed! %s', cache_file, e)
+            else:
+                # Read cached data
+                with open(cache_file, 'rb') as f:
+                    logging.info('Reading cached data from %s...', cache_file)
+                    try:
+                        return f.read()
+                    except Exception as e:
+                        logging.error(
+                            'Reading cached data from %s failed! %s', cache_file, e)
+        else:
+            logging.info('No cache file found for %s', url)
+
+        # Download the url
+        try:
+            result = requests.get(url, allow_redirects=True, timeout=10)
+        except Exception as e:
+            logging.error('Downloading %s failed! %s', url, e)
+            return None
+
+        if result.status_code != 200:
+            return None
+
+        # Cache the file
+        save_file = f'{cache_file_path}_{time.time()}'
+
+        file_bytes: bytes = b''
+        with open(save_file, 'wb') as f:
+            for chunk in result.iter_content(chunk_size=512 * 1024):
+                if chunk:  # filter out keep-alive new chunks
+                    file_bytes += chunk
+                    f.write(chunk)
+
+        return file_bytes
+
+    def _cache_url(self, url: str, data: Any):
+        """ Cache the data of an url. """
+        cache_file_name = url[7:].replace('/', '_')
+        cache_file_path = os.path.join(self.state_folder, cache_file_name)
+
+        save_file = f'{cache_file_path}_{time.time()}'
+        with open(save_file, 'w', encoding='utf8') as f:
+            logging.info('Caching package indices as %s', save_file)
+            try:
+                json.dump(data, f)
+            except Exception as e:
+                logging.error(
+                    'Caching package indices as %s failed! %s', save_file, e)
+
+    def _get_data_for_url(self, url: str) -> Optional[Any]:
+        """ Get cache data for url. """
+        cache_file_name = url[7:].replace('/', '_')
+        cache_file_path = os.path.join(self.state_folder, cache_file_name)
+
+        cache_files = glob.glob(f'{cache_file_path}_*')
+        if cache_files:
+            cache_files.sort()
+            cache_file = cache_files[-1]
+            logging.info('Cache file found for %s: %s', url, cache_file)
+            ts_str = cache_file.split('_')[-1]
+            ts = float(ts_str)
+            age = time.time() - ts
+            if age > 24 * 60 * 60:
+                # older than one day
+                logging.info('Removing outdated cache file %s', cache_file)
+                try:
+                    os.remove(cache_file)
+                except Exception as e:
+                    logging.error(
+                        'Removing old cache file %s failed! %s', cache_file, e)
+            else:
+                # Read cached data
+                with open(cache_file, encoding='utf8') as f:
+                    logging.info('Reading cached data from %s...', cache_file)
+                    try:
+                        data = json.load(f)
+                        # Return cached data
+                        return data
+                    except Exception as e:
+                        logging.error(
+                            'Reading cached data from %s failed! %s', cache_file, e)
+        else:
+            logging.info('No cache file found for %s', url)
+
+        return None
