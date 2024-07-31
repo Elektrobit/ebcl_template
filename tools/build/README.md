@@ -13,8 +13,10 @@
 - [ ] Raspi images
 - [ ] RDB2 images
 - [ ] copy to SD card with bmaptool
-- [ ] docs
+- [ ] user docs
 - [ ] cmake presets 
+- [ ] appdev user docs
+- [ ] image test tools
 
 ## ToDo 1.4
 
@@ -26,3 +28,4 @@
 - [ ] alternatives in dependencies
 - [ ] Yocto-style SDK
 - [ ] HV images
+- [ ] SDK dev docs

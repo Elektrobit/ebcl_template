@@ -63,6 +63,15 @@ class BootGenerator:
             else:
                 logging.error('Parsing of package %s failed!', package)
 
+        kernel = config.get('kernel', None)
+        if kernel:
+            vds = parse_depends(kernel, self.arch)
+            if vds:
+                # TODO: handle alternatives
+                self.packages.append(vds[0])
+            else:
+                logging.error('Parsing of kernel %s failed!', kernel)
+
         self.proxy = Proxy()
         if self.apt_repos is None:
             self.proxy.add_apt(
