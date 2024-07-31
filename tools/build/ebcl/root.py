@@ -78,7 +78,7 @@ class RootGenerator:
     image: str
     scripts: list[dict[str, str]]
     arch: str
-    result: str
+    result: Optional[str]
     kvm: bool
     berrymill_conf: Optional[str]
     # fakeroot helper
@@ -100,7 +100,7 @@ class RootGenerator:
 
         self.arch = config.get('arch', 'arm64')
         self.kvm = config.get('kvm', True)
-        self.result = config.get('result', '*.tar')
+        self.result = config.get('result', None)
         self.scripts = config.get('scripts', [])
         self. berrymill_conf = config.get(
             'berrymill_conf', None)
@@ -218,13 +218,17 @@ class RootGenerator:
         results = Path(self.result_dir)
 
         # search for tar
-        images = list(results.glob(self.result))
+        pattern = '*.tar'
+        if self.result:
+            pattern = self.result
+
+        images = list(results.glob(pattern))
         if images:
             return os.path.join(self.result_dir, images[0])
 
         return None
 
-    def _build_kiwi_image(self) -> Optional[str]:
+    def _build_kiwi_image(self, output_path: str) -> Optional[str]:
         """ Run kiwi image build. """
         assert self.result_dir
 
@@ -267,19 +271,43 @@ class RootGenerator:
                 f'berrymill -c {berrymill_conf} -d -a arm64 -i {appliance} --clean build '
                 f'--cross --box-memory 4G --target-dir {self.result_dir}"')
 
-        # search for tar.xz
-        images = list(
-            glob.glob(f'{self.result_dir}/**/*.tar.xz', recursive=True))
-        if images:
-            return os.path.join(self.result_dir, images[0])
+        tar: Optional[str] = None
+        pattern = '*.tar.xz'
+        if self.result:
+            pattern = self.result
 
-        # search for image
+        # search for result
         images = list(
-            glob.glob(f'{self.result_dir}/**/{self.result}', recursive=True))
+            glob.glob(f'{self.result_dir}/**/{pattern}', recursive=True))
         if images:
-            return os.path.join(self.result_dir, images[0])
+            tar = os.path.join(self.result_dir, images[0])
 
-        return None
+        if not tar:
+            logging.critical('Kiwi image build failed!')
+
+            # Copy log
+            logs = glob.glob(
+                f'{self.result_dir}/**/result.log', recursive=True)
+            if logs:
+                log = logs[0]
+                res_dir = os.path.dirname(log)
+                self.fake.run_no_fake(
+                    f'mv -R {res_dir} {output_path}', check=False)
+
+            exit(1)
+
+        # rename result archive
+        ext = pattern.split('.', maxsplit=1)[-1]
+        result_name = f'{self.name}.{ext}'
+
+        logging.info('Using result name %s...', result_name)
+
+        assert self.target_dir
+
+        result_file = os.path.join(self.target_dir, result_name)
+        self.fake.run(f'mv {tar} {result_file}')
+
+        return result_file
 
     def create_root(self, output_path: str) -> None:
         """ Create the root image.  """
@@ -292,7 +320,7 @@ class RootGenerator:
         if self.image_type == ImageType.ELBE:
             image_file = self._build_elbe_image()
         elif self.image_type == ImageType.KIWI:
-            image_file = self._build_kiwi_image()
+            image_file = self._build_kiwi_image(output_path)
 
         if image_file is None:
             logging.critical('Image build failed!')

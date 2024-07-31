@@ -19,16 +19,20 @@
 - [ ] cmake presets 
 - [ ] appdev user docs
 - [ ] image test tools
+- [ ] image tests
 
-## ToDo 1.4
+### Stretch goal
 
-- [ ] cominit
-- [ ] image w. container runtime
 - [ ] check apt signatures
 - [ ] HTTP apt proxy
 - [ ] proxy add local package
 - [ ] proxy record sessions
 - [ ] restore proxy from sessions
+
+## ToDo 1.4
+
+- [ ] cominit
+- [ ] image w. container runtime
 - [ ] alternatives in dependencies
 - [ ] Yocto-style SDK
 - [ ] HV images

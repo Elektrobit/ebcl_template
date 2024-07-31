@@ -16,12 +16,12 @@ qemu: build/vmlinuz build/initrd.img build/image.raw
 		-initrd build/initrd.img \
 		-drive format=raw,file=build/image.raw,if=virtio
 
-build/image.raw: build/ubuntu.tar
+build/image.raw: build/ubuntu.tar.xz image.yaml
 	@echo "Build image..."
 	mkdir -p build
-	embdgen -o ./build/image.raw ../image.yaml
+	embdgen -o ./build/image.raw image.yaml
 
-build/ubuntu.tar: root.yaml config.sh
+build/ubuntu.tar.xz: root.yaml config.sh
 	@echo "Build root.tar..."
 	mkdir -p build
 	root_generator root.yaml ./build
