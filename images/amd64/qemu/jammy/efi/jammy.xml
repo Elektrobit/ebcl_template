@@ -42,6 +42,7 @@
 		</package>
 		<pkg-list>
 			<pkg>systemd</pkg>
+			<pkg>udev</pkg>
 			<pkg>util-linux</pkg>
 		</pkg-list>
 		<finetuning>

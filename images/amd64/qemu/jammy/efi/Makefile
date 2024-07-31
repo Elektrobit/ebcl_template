@@ -4,33 +4,47 @@ default: qemu
 .PHONY: image
 image: build/image.raw
 
+.PHONY: root
+root: build/ubuntu.tar
+
+.PHONY: initrd
+initrd: build/initrd.img
+
+.PHONY: boot
+boot: build/boot.tar
+
+.PHONY: efi
+boot: build/efi.tar
+
 .PHONY: qemu
-qemu: build/vmlinuz build/initrd.img build/image.raw
+qemu: build/image.raw
 	@echo "Running build/image.raw in QEMU..."
 	qemu-system-x86_64 \
-		-nographic -m 4G \
-		-netdev user,id=mynet0 \
-		-device virtio-net-pci,netdev=mynet0 \
-		-kernel build/vmlinuz \
-		-append "console=ttyS0" \
-		-initrd build/initrd.img \
-		-drive format=raw,file=build/image.raw,if=virtio
+		-m 4096 \
+        -nographic \
+        -netdev user,id=mynet0 \
+        -device virtio-net-pci,netdev=mynet0 \
+        -drive file=build/image.raw,if=virtio
 
-build/image.raw: build/ubuntu.tar image.yaml
+build/image.raw: build/efi.tar build/boot.tar build/ubuntu.tar image.yaml
 	@echo "Build image..."
 	mkdir -p build
 	embdgen -o ./build/image.raw image.yaml
 
-build/ubuntu.tar: root.yaml
+build/ubuntu.tar: root.yaml jammy.xml
 	@echo "Build root.tar..."
 	mkdir -p build
 	root_generator root.yaml ./build
 
-build/vmlinuz: ../boot.yaml
-	@echo "Get kernel binary..."
+build/boot.tar: boot.yaml grub.cfg build/initrd.img
+	@echo "Generate boot archive..."
 	mkdir -p build
-	boot_generator ../boot.yaml ./build
-	mv ./build/vmlinuz-* ./build/vmlinuz
+	boot_generator boot.yaml ./build
+
+build/efi.tar: efi.yaml
+	@echo "Generate efi archive..."
+	mkdir -p build
+	boot_generator efi.yaml ./build
 
 build/initrd.img: ../initrd.yaml
 	@echo "Build initrd.img..."

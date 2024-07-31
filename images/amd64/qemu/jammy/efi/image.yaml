@@ -1,8 +1,26 @@
 image:
   type: gpt
-  boot_partition: root
+  boot_partition: efi
 
   parts:
+    - name: efi
+      type: partition
+      fstype: vfat
+      size: 50 MB
+      content:
+        type: vfat
+        content:
+          type: archive
+          archive: build/efi.tar
+    - name: boot
+      type: partition
+      fstype: vfat
+      size: 200 MB
+      content:
+        type: vfat
+        content:
+          type: archive
+          archive: build/boot.tar
     - name: root
       type: partition
       fstype: ext4

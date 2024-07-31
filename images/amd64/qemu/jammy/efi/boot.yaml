@@ -1,0 +1,8 @@
+base: base.yaml
+download_deps: true
+files:
+  - source: boot/vmlinuz*
+    destination: 
+  - source: boot/config*
+    destination: 
+tar: false
