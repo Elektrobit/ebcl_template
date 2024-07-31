@@ -12,30 +12,30 @@ qemu: build/vmlinuz build/initrd.img build/image.raw
 		-netdev user,id=mynet0 \
 		-device virtio-net-pci,netdev=mynet0 \
 		-kernel build/vmlinuz \
-		-append "console=ttyS0 root=LABEL=root" \
+		-append "console=ttyS0" \
 		-initrd build/initrd.img \
 		-drive format=raw,file=build/image.raw,if=virtio
 
 build/image.raw: build/ubuntu.tar
 	@echo "Build image..."
 	mkdir -p build
-	embdgen -o ./build/image.raw image.yaml
+	embdgen -o ./build/image.raw ../image.yaml
 
 build/ubuntu.tar: root.yaml config.sh
 	@echo "Build root.tar..."
 	mkdir -p build
 	root_generator root.yaml ./build
 
-build/vmlinuz: boot.yaml
+build/vmlinuz: ../boot.yaml
 	@echo "Get kernel binary..."
 	mkdir -p build
-	boot_generator boot.yaml ./build
-	mv ./build/vmlinuz* ./build/vmlinuz
+	boot_generator ../boot.yaml ./build
+	mv ./build/vmlinuz-* ./build/vmlinuz
 
-build/initrd.img: initrd.yaml init.sh
+build/initrd.img: ../initrd.yaml
 	@echo "Build initrd.img..."
 	mkdir -p build
-	initrd_generator initrd.yaml ./build
+	initrd_generator ../initrd.yaml ./build
 
 .PHONY: clean
 clean:

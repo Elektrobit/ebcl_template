@@ -1,0 +1,4 @@
+base: base.yaml
+root_device: /dev/vda1
+modules:
+  - kernel/drivers/block/virtio_blk.ko
