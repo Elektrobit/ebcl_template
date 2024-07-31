@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """ EBcL boot generator. """
 import argparse
+import glob
 import logging
 import os
 import shutil
@@ -67,6 +68,7 @@ class BootGenerator:
         if kernel:
             vds = parse_depends(kernel, self.arch)
             if vds:
+                logging.info('Kernel package: %s', vds[0])
                 # TODO: handle alternatives
                 self.packages.append(vds[0])
             else:
@@ -111,6 +113,8 @@ class BootGenerator:
         logging.info('Files: %s', self.files)
 
         for entry in self.files:
+            logging.info('Processing entry: %s', entry)
+
             dst = Path(self.target_dir)
             if entry['destination']:
                 dst = dst / entry['destination']
@@ -118,13 +122,11 @@ class BootGenerator:
 
             src = Path(package_dir) / entry['source']
 
-            dst_file = dst / src.name
-
             mode: str = entry.get('mode', '600')
             uid = entry.get('uid', '0')
             gid = entry.get('gid', '0')
 
-            logging.info('Copying file %s to %s', src, dst_file)
+            logging.info('Copying files %s', src)
 
             # Ensure source file exists.
             (_out, err) = self.fake.run(f'stat {src}', check=False)
@@ -137,16 +139,19 @@ class BootGenerator:
                 logging.error('Pattern %s has no matches!', src)
                 continue
 
+            logging.info('Glob files: %s', glob_files)
+
             for glob_file in glob_files:
-                logging.info('Copying glob file %s to %s.', glob_file, dst)
-                if src.is_dir():
-                    self.fake.run(f'cp -R {glob_file} {dst}')
-                    self.fake.run(f'chmod {mode} {dst_file}')
-                    self.fake.run(f'chown -R {uid}:{gid} {dst_file}')
-                else:
-                    self.fake.run(f'cp {glob_file} {dst}')
-                    self.fake.run(f'chmod {mode} {dst_file}')
-                    self.fake.run(f'chown {uid}:{gid} {dst_file}')
+                dst_file = dst / glob_file.name
+
+                logging.info('Copying glob file %s to %s.',
+                             glob_file, dst_file)
+
+                self.fake.run(f'stat {glob_file}')
+                self.fake.run(f'stat {dst}')
+                self.fake.run(f'cp -R {glob_file} {dst_file}')
+                self.fake.run(f'chmod {mode} {dst_file}')
+                self.fake.run(f'chown -R {uid}:{gid} {dst_file}')
 
     def run_scripts(self):
         """ Run scripts. """
@@ -170,6 +175,12 @@ class BootGenerator:
         package_dir = tempfile.mkdtemp()
         logging.info('Package directory: %s', package_dir)
 
+        output_path = os.path.abspath(output_path)
+        logging.info('Output directory: %s', output_path)
+        if not os.path.isdir(output_path):
+            logging.critical('Output path %s is no folder!', output_path)
+            exit(1)
+
         logging.info('Download deb packages...')
         self.download_deb_packages(package_dir)
 
@@ -178,23 +189,47 @@ class BootGenerator:
         self.copy_files(package_dir)
 
         # Remove package temporary folder
-        shutil.rmtree(package_dir)
+        logging.info('Remove temporary package contents...')
+        self.fake.run(f'rm -rf {package_dir}', check=False)
 
+        logging.info('Running config scripts...')
         self.run_scripts()
 
         if self.tar:
             # create tar archive
+            logging.info('Creating tar...')
+
             self.fake.run('tar -cvf boot.tar .', cwd=self.target_dir)
             archive = f'{self.target_dir}/boot.tar'
             archive_out = f'{output_path}/{self.archive_name}'
+
+            if os.path.isfile(archive_out):
+                logging.info('Deleting old archive %s...', archive_out)
+                self.fake.run(f'rm -f {archive_out}', check=False)
+
+            logging.info('Moving archive to output folder %s...', output_path)
             self.fake.run(f'mv {archive} {archive_out}')
         else:
             # copy to output folder
-            self.fake.run(
-                f'cp -R {self.target_dir}/* {output_path}')
+            files = glob.glob(f'{self.target_dir}/*')
+
+            logging.info('Moving files %s to output folder %s...',
+                         files, output_path)
+
+            for file in files:
+                dst = os.path.join(output_path, os.path.basename(file))
+
+                logging.info('Moving file %s to %s...', file, dst)
+
+                if os.path.exists(dst):
+                    logging.info('Deleting old output file %s...', dst)
+                    self.fake.run(f'rm -rf {dst}', check=False)
+
+                self.fake.run(f'mv {file} {dst}')
 
         # delete temporary folder
-        shutil.rmtree(self.target_dir)
+        logging.info('Remove temporary folder...')
+        self.fake.run(f'rm -rf {self.target_dir}', check=False)
 
 
 def main() -> None:

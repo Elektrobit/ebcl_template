@@ -80,6 +80,7 @@ class InitrdGenerator:
         busybox = config.get('busybox', 'busybox-static')
         vds = parse_depends(busybox, self.arch)
         if vds:
+            logging.info('Busybox packages: %s', vds)
             self.busybox = vds
         else:
             logging.critical('Parsing of busybox %s failed!', busybox)
@@ -89,6 +90,7 @@ class InitrdGenerator:
         if kernel:
             vds = parse_depends(kernel, self.arch)
             if vds:
+                logging.info('Kernel package: %s', vds[0])
                 # TODO: handle alternatives
                 self.modules_packages.append(vds[0])
             else:

@@ -6,7 +6,9 @@
 - [x] derived configs
 - [ ] image kernel src
 - [ ] image efi
+- [ ] ttyS0
 - [ ] cached apt indices
+- [ ] vds compare
 - [ ] templates for root gen
 - [ ] sysroots
 - [ ] QEMU images
@@ -20,6 +22,8 @@
 
 ## ToDo 1.4
 
+- [ ] cominit
+- [ ] image w. container runtime
 - [ ] check apt signatures
 - [ ] HTTP apt proxy
 - [ ] proxy add local package

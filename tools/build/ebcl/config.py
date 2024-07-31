@@ -55,6 +55,8 @@ def load_yaml(config_file: str) -> dict[str, Any]:
             path = os.path.abspath(os.path.join(
                 os.path.dirname(config_file), base_yaml))
 
+            logging.info('Loading base config %s.', path)
+
             # Recursion
             base_config = load_yaml(path)
 

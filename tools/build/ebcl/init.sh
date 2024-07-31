@@ -16,6 +16,19 @@ for param in $(cat /proc/cmdline); do
         root=${param:5}
     fi
 done
+
+stat $root
+if [ $? -ne 0 ]; then
+    # List devices
+    echo "Available devices:"
+    ls -lah /dev/vd*
+    ls -lah /dev/sd*
+    ls -lah /dev/mmc*
+
+    echo "Root device not found! Dropping to shell."
+    /bin/sh
+fi
+
 echo "Using root ${root}."
 mount $root /sysroot
 
