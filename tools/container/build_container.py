@@ -48,7 +48,8 @@ class ContainerBuilder:
         version = self.config['Version']
         tag = f'{repo}/{basename}:{version}'
 
-        logging.info('Tagging container %s as %s.', self.base_container_name, tag)
+        logging.info('Tagging container %s as %s.',
+                     self.base_container_name, tag)
 
         command = f'{self.build_tool} tag {self.base_container_name} {tag}'
         subprocess.run(command, shell=True, check=True)
