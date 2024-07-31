@@ -4,6 +4,7 @@
 
 - [x] versions
 - [x] derived configs
+- [ ] fix UID issues
 - [ ] image kernel src
 - [ ] image efi
 - [ ] ttyS0
@@ -33,7 +34,7 @@
 
 - [ ] cominit
 - [ ] image w. container runtime
-- [ ] alternatives in dependencies
 - [ ] Yocto-style SDK
 - [ ] HV images
 - [ ] SDK dev docs
+- [ ] (alternatives in dependencies)
