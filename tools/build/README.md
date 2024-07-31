@@ -7,7 +7,7 @@
 - [x] fix UID issues
 - [x] image kernel src
 - [ ] image efi
-- [ ] ttyS0
+- [x] ttyS0
 - [x] cached apt indices
 - [x] vds compare
 - [ ] templates for root gen
