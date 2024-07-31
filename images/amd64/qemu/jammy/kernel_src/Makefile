@@ -56,10 +56,10 @@ build/config: ../boot.yaml
 	boot_generator ../boot.yaml ./build
 	mv ./build/config-* ./build/config
 
-build/initrd.img: ../initrd.yaml build/lib
+build/initrd.img: initrd.yaml build/lib
 	@echo "Build initrd.img..."
 	mkdir -p build
-	initrd_generator ../initrd.yaml ./build
+	initrd_generator initrd.yaml ./build
 
 .PHONY: clean
 clean:
