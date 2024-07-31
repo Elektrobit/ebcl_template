@@ -256,16 +256,19 @@ class RootGenerator:
 
         if self.arch == 'amd64':
             if self.kvm:
+                logging.info('Kiwi KVM build of %s', appliance)
                 self.fake.run_sudo(
                     'bash -c "source /build/venv/bin/activate; '
                     f'berrymill -c {berrymill_conf} -d -a amd64 -i {appliance} '
                     f'--clean build --target-dir {self.result_dir}"')
             else:
+                logging.info('Kiwi box build of %s', appliance)
                 self.fake.run_no_fake(
                     'bash -c "source /build/venv/bin/activate; '
                     f'berrymill -c {berrymill_conf} -d -a amd64 -i {appliance} --clean build '
                     f'--box-memory 4G --target-dir {self.result_dir} --no-accel --cpu qemu64-v1"')
         else:
+            logging.info('Kiwi cross build of %s', appliance)
             self.fake.run_no_fake(
                 'bash -c "source /build/venv/bin/activate; '
                 f'berrymill -c {berrymill_conf} -d -a arm64 -i {appliance} --clean build '
