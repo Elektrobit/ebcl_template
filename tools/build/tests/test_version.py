@@ -1,5 +1,5 @@
 """ Unit tests for the version helpers. """
-from ebcl.version import Version
+from ebcl.version import Version, VersionDepends, PackageRelation, VersionRealtion
 
 
 class TestVersion:
@@ -67,3 +67,155 @@ class TestVersion:
         vp = Version('1.66ubuntu1')
         vd = Version('1.66~')
         assert vd < vp
+
+    def test_vd_equal(self):
+        """ Test for VersionDepends equality. """
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        assert a == b
+
+        a = VersionDepends(
+            name='halli',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        assert a != b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.PRE_DEPENS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        assert a != b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.LARGER,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.4'),
+            arch='amd64'
+        )
+        assert a != b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='arm64'
+        )
+        assert a != b
+
+    def test_vd_lt(self):
+        """ Test for VersionDepends equality. """
+        a = VersionDepends(
+            name='aallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        assert a < b
+        assert a <= b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.4'),
+            arch='amd64'
+        )
+        assert a < b
+        assert a <= b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.PRE_DEPENS,
+            version_relation=VersionRealtion.EXACT,
+            version=None,
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        assert a < b
+        assert a <= b
+
+        a = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.LARGER,
+            version=Version('1.2.3'),
+            arch='amd64'
+        )
+        b = VersionDepends(
+            name='hallo',
+            package_relation=PackageRelation.DEPENDS,
+            version_relation=VersionRealtion.EXACT,
+            version=None,
+            arch='amd64'
+        )
+        assert a > b
+        assert a >= b

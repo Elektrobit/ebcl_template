@@ -4,12 +4,12 @@
 
 - [x] versions
 - [x] derived configs
-- [ ] fix UID issues
+- [x] fix UID issues
 - [x] image kernel src
 - [ ] image efi
 - [ ] ttyS0
-- [ ] cached apt indices
-- [ ] vds compare
+- [x] cached apt indices
+- [x] vds compare
 - [ ] templates for root gen
 - [ ] sysroots
 - [ ] QEMU images

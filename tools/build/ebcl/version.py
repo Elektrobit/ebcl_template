@@ -257,6 +257,38 @@ class VersionDepends:
     def __repr__(self) -> str:
         return self.__str__()
 
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, VersionDepends):
+            return False
+
+        return self.name == value.name and \
+            self.package_relation == value.package_relation and \
+            self.version_relation == value.version_relation and \
+            self.arch == value.arch
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, VersionDepends):
+            return False
+
+        if self.name == other.name:
+            if self.version and other.version:
+                return self.version < other.version
+            elif self.version:
+                return False
+            else:
+                return True
+
+        return self.name < other.name
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, VersionDepends):
+            return False
+
+        if self == other:
+            return True
+
+        return self < other
+
 
 def parse_depends(
     entry: str,
