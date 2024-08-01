@@ -3,6 +3,10 @@ FROM $BASE_CONTAINER_NAME
 
 ARG CONTAINER_USER="ebcl"
 
+# "Activate" Python env
+ENV VIRTUAL_ENV=/build/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 USER root
 
 # install elbe dependencies
@@ -13,6 +17,11 @@ RUN apt -y install \
     mtools e2fsprogs cryptsetup-bin dosfstools fakeroot fdisk udev
 
 USER $CONTAINER_USER
+
+RUN pip install pyyaml types-PyYAML \
+    requests types-requests \
+    Jinja2 types-Jinja2 \
+    unix-ar zstandard
 
 # Install embedgen
 WORKDIR /build

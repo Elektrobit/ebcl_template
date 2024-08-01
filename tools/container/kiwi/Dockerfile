@@ -3,6 +3,10 @@ FROM $BASE_CONTAINER_NAME
 
 ARG CONTAINER_USER="ebcl"
 
+# "Activate" Python env
+ENV VIRTUAL_ENV=/build/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 USER root
 
 # Copy berrymill config
@@ -20,7 +24,8 @@ USER $CONTAINER_USER
 WORKDIR /build
 
 # Install berrymill
-RUN bash -c "source /build/venv/bin/activate; pip install 'berrymill @ git+https://github.com/tomirgang/berrymill.git@59dbfd7d022681402ef5d4758e4e146411f1cad6' kiwi kiwi-boxed-plugin"
+RUN pip install kiwi kiwi-boxed-plugin
+RUN pip install 'berrymill @ git+https://github.com/tomirgang/berrymill.git@59dbfd7d022681402ef5d4758e4e146411f1cad6'
 
 # copy apt helper scripts
 COPY scripts/apt/* /build/bin/

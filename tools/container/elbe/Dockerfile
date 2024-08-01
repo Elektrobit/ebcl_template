@@ -1,6 +1,10 @@
 ARG BASE_CONTAINER_NAME="ubuntu:22.04"
 FROM $BASE_CONTAINER_NAME
 
+# "Activate" Python env
+ENV VIRTUAL_ENV=/build/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 ARG CONTAINER_USER="ebcl"
 
 USER root
@@ -30,7 +34,6 @@ RUN mkdir -p /etc/ssh
 RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
 
 # fix permissions
-
 RUN chown $CONTAINER_USER:$CONTAINER_USER /var/cache/elbe
 
 # Get elbe
@@ -51,7 +54,7 @@ COPY scripts/binfmt/* /build/bin/
 USER root
 
 # Enable binfmt for cross-building
-RUN echo "sudo /build/bin/register_binfmt --reset -p yes" >> /home/$CONTAINER_USER/.bashrc
+RUN echo "sudo bash -c \"/build/bin/register_binfmt --reset -p yes\"" >> /home/$CONTAINER_USER/.bashrc
 # Run the elbe service
 RUN echo "start_elbe_service" >> /home/$CONTAINER_USER/.bashrc
 
@@ -59,15 +62,12 @@ USER $CONTAINER_USER
 
 # Install elbe dependencies
 # python-parted conflicts with pyparted (used by embdgen)
-RUN bash -c "source /build/venv/bin/activate; pip install gpg CherryPy lxml Mako passlib pycdlib python-debian suds libvirt-python Beaker spyne sqlalchemy"
-RUN bash -c "source /build/venv/bin/activate; pip install -e /var/cache/elbe/devel"
+RUN bash -c "pip install gpg CherryPy lxml Mako passlib pycdlib python-debian suds libvirt-python Beaker spyne sqlalchemy"
+RUN bash -c "pip install -e /var/cache/elbe/devel"
 
 # init elbe db
 # PYTHONPATH is hack to make python3-apt available in the venv. The package is not maintained on Pipy and only avalable as deb
 RUN bash -c "source /build/venv/bin/activate; PYTHONPATH=$PYTHONPATH:/usr/lib/python3/dist-packages/ elbe db init"
-
-# Installation folders for SDKs
-RUN mkdir -p /build/sdks
 
 WORKDIR /workspace
 

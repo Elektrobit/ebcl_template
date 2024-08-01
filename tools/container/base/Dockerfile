@@ -22,20 +22,18 @@ RUN ls -lah /etc/apt/trusted.gpg.d/
 RUN apt update
 # Install compiler and base tools
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
-    build-essential cmake gcc-aarch64-linux-gnu g++-aarch64-linux-gnu \
-    gcc g++ pkg-config locales kmod wget xz-utils sudo git vim python3 \
-    python3-pip python3-venv rsync lshw gdisk fdisk parted \
-    file crossbuild-essential-arm64 tcpdump iputils-ping iproute2 iptables \
-    gdb-multiarch curl wget fakechroot fakeroot bmap-tools
+    build-essential gcc g++ cmake pkg-config gdb-multiarch \
+    gcc-aarch64-linux-gnu g++-aarch64-linux-gnu crossbuild-essential-arm64 \
+    locales kmod curl wget xz-utils sudo git vim rsync file \
+    python3 python3-pip python3-venv \
+    lshw gdisk fdisk parted fakechroot fakeroot bmap-tools \ 
+    tcpdump iputils-ping iproute2 iptables \
+    qemu-system-arm qemu-system-x86 qemu-kvm
 
  # Setup locale
 RUN export LC_ALL=en_US.UTF-8 && \
     export LANG=en_US.UTF-8 && \
     locale-gen en_US.UTF-8
-
-# Install QEMU
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y \
-    qemu-system-arm qemu-system-x86 qemu-kvm
 
 # Create build user mathching outside UID and GID to avoid ownership issues
 # and allow user to use sudo
@@ -87,13 +85,11 @@ RUN echo "1.2" > /etc/sdk_version
 USER $CONTAINER_USER
 
 # Prepare Python env
-WORKDIR /build
-RUN bash -c "python3 -m venv venv; source ./venv/bin/activate; pip install pyyaml mypy pep8 pylint pytest pytest-cov requests types-requests unix-ar types-PyYAML Jinja2 types-Jinja2 robotframework zstandard"
+ENV VIRTUAL_ENV=/build/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Fix for venv having UID 1000
-USER root
-RUN chown -R $HOST_USER:$HOST_GROUP /build/venv
-USER $CONTAINER_USER
+RUN pip install mypy pep8 pylint pytest pytest-cov robotframework
 
 # change work dir to workspace mount point
 WORKDIR /workspace

@@ -3,6 +3,10 @@ FROM $BASE_CONTAINER_NAME
 
 ARG CONTAINER_USER="ebcl"
 
+# "Activate" Python env
+ENV VIRTUAL_ENV=/build/venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 USER root
 
 # Install Debian tools
