@@ -13,6 +13,7 @@ from .version import VersionDepends
 
 class PackageDownloader:
     """ Download and extract deb packages. """
+    # TODO: test
 
     # proxy
     proxy: Proxy
@@ -91,8 +92,13 @@ def main() -> None:
 
     downloader = PackageDownloader()
 
-    downloader.download_packages(
-        args.packages, args.output, args.arch, args.download_depends)
+    try:
+        # Download and extract the packages
+        downloader.download_packages(
+            args.packages, args.output, args.arch, args.download_depends)
+    except Exception as e:
+        logging.critical('Package download failed with exception! %s', e)
+        exit(1)
 
 
 if __name__ == '__main__':

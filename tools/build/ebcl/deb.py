@@ -16,6 +16,7 @@ from .version import Version, VersionDepends, VersionRealtion
 
 class Package:
     """ APT package information. """
+
     name: str
     arch: str
     version: Optional[Version] = None
@@ -160,6 +161,7 @@ class Package:
 
 def filter_packages(p: Package, v: Version, r: Optional[VersionRealtion]) -> bool:
     """ Filter for matching packages. """
+    # TODO: test
     if not p.version:
         return False
 

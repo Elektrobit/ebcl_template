@@ -61,7 +61,7 @@ class Cache:
         for deb in debs:
             p = Package.from_deb(deb)
             if not self.contains(p):
-                self.add(p, op=AddOp.NONE)
+                self.add(p, op=AddOp.MOVE)
 
     def contains(self, p: Package) -> bool:
         """ Tests if the package is in the cache. """

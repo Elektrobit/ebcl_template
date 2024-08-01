@@ -23,6 +23,9 @@ from .version import VersionDepends
 
 class InitrdGenerator:
     """ EBcL initrd generator. """
+
+    # TODO: use files helper
+
     # config file
     config: Path
     # config values
@@ -349,7 +352,7 @@ class InitrdGenerator:
             else:
                 logging.warning('Source %s does not exist', src)
 
-    def create_initrd(self, image_path: str) -> None:
+    def create_initrd(self, image_path: str) -> Optional[str]:
         """ Create the initrd image.  """
         self.target_dir = tempfile.mkdtemp()
 
@@ -422,6 +425,11 @@ class InitrdGenerator:
             self._run_root(
                 'find . -print0 | cpio --null -ov --format=newc', cwd=self.target_dir, stdout=img)
 
+        return image_path
+
+    def finalize(self):
+        """ Finalize output and cleanup. """
+
         # delete temporary folder
         self._run_root(f' rm -rf {self.target_dir}')
 
@@ -447,8 +455,22 @@ def main() -> None:
     # Define output image path
     output_image_path = os.path.join(args.output, 'initrd.img')
 
-    # Create initrd image with modules extracted from the Debian package
-    generator.create_initrd(output_image_path)
+    image = None
+    try:
+        # Create the initrd.img
+        image = generator.create_initrd(output_image_path)
+    except Exception as e:
+        logging.critical('Image build failed with exception! %s', e)
+
+    try:
+        generator.finalize()
+    except Exception as e:
+        logging.error('Cleanup failed with exception! %s', e)
+
+    if image:
+        print('Image was written to %s.', image)
+    else:
+        exit(1)
 
 
 if __name__ == '__main__':

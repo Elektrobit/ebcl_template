@@ -7,16 +7,19 @@ import os
 import tempfile
 
 from pathlib import Path
+from typing import Optional
 
 from .apt import Apt
 from .config import load_yaml
 from .fake import Fake
+from .files import Files
 from .proxy import Proxy
 from .version import VersionDepends, parse_depends
 
 
 class BootGenerator:
     """ EBcL boot generator. """
+
     # config file
     config: str
     # config values
@@ -29,10 +32,13 @@ class BootGenerator:
     archive_path: str
     download_deps: bool
     tar: bool
+
     # proxy
     proxy: Proxy
     # fakeroot helper
     fake: Fake
+    # files helper
+    files_helper: Files
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -93,6 +99,7 @@ class BootGenerator:
                 )
 
         self.fake = Fake()
+        self.files_helper = Files(self.fake)
 
     def download_deb_packages(self, package_dir: str):
         """ Download all needed deb packages. """
@@ -108,6 +115,8 @@ class BootGenerator:
         """ Copy files to be used. """
 
         logging.info('Files: %s', self.files)
+
+        # TODO: use files helper
 
         for entry in self.files:
             logging.info('Processing entry: %s', entry)
@@ -153,6 +162,7 @@ class BootGenerator:
 
     def run_scripts(self):
         """ Run scripts. """
+        # TODO: use files helper
         for script in self.scripts:
             script = os.path.abspath(os.path.join(
                 os.path.dirname(self.config), script))
@@ -165,8 +175,9 @@ class BootGenerator:
 
             self.fake.run(f'{script} {self.target_dir}', cwd=self.target_dir)
 
-    def create_boot(self, output_path: str) -> None:
+    def create_boot(self, output_path: str) -> Optional[str]:
         """ Create the boot.tar.  """
+        # TODO: use files helper
         self.target_dir = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target_dir)
 
@@ -225,6 +236,11 @@ class BootGenerator:
 
                 self.fake.run(f'mv {file} {dst}')
 
+        return dst
+
+    def finalize(self):
+        """ Finalize output and cleanup. """
+
         # delete temporary folder
         logging.info('Remove temporary folder...')
         self.fake.run(f'rm -rf {self.target_dir}', check=False)
@@ -248,8 +264,22 @@ def main() -> None:
     # Read configuration
     generator = BootGenerator(args.config_file)
 
-    # Create the boot.tar
-    generator.create_boot(args.output)
+    image = None
+    try:
+        # Create the boot.tar
+        image = generator.create_boot(args.output)
+    except Exception as e:
+        logging.critical('Image build failed with exception! %s', e)
+
+    try:
+        generator.finalize()
+    except Exception as e:
+        logging.error('Cleanup failed with exception! %s', e)
+
+    if image:
+        print('Image was written to %s.', image)
+    else:
+        exit(1)
 
 
 if __name__ == '__main__':

@@ -42,6 +42,7 @@ class EnvironmentType(Enum):
 
 class Files:
     """ Files and scripts helpers. """
+    # TODO: test
 
     target_dir: Optional[str]
     fake: Fake
@@ -57,6 +58,7 @@ class Files:
         environment: EnvironmentType = EnvironmentType.FAKEROOT
     ) -> list[str]:
         """ Copy file or dir to target environment"""
+        # TODO: uid, gid and mode
         files: list[str] = []
 
         dst = os.path.abspath(dst)

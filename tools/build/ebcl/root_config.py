@@ -12,6 +12,9 @@ from .files import Files, EnvironmentType
 
 class RootConfig:
     """ EBcL root filesystem config helper. """
+
+    # TODO: test
+
     # config file
     config: str
     # config values

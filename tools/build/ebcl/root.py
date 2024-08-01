@@ -65,6 +65,12 @@ class RootGenerator:
     # kiwi specific parameters
     kvm: bool
     berrymill_conf: Optional[str]
+    use_berrymill: bool
+    bootstrap_package: Optional[str]
+    bootstrap: Optional[list[str]]
+    use_kiwi_defaults: bool
+    kiwi_scripts: list[str]
+    kiwi_root_overlays: list[str]
 
     # elbe specific parameters
     primary_repo: Optional[Apt]
@@ -101,8 +107,13 @@ class RootGenerator:
         self.image = config.get('image', None)
         self.template = config.get('template', None)
 
-        self. berrymill_conf = config.get(
-            'berrymill_conf', None)
+        self.berrymill_conf = config.get('berrymill_conf', None)
+        self.use_berrymill = config.get('use_berrymill', True)
+        self.bootstrap_package = config.get('bootstrap_package', None)
+        self.bootstrap = config.get('bootstrap', None)
+        self.kiwi_scripts = config.get('kiwi_scripts', [])
+        self.kiwi_root_overlays = config.get('kiwi_root_overlays', [])
+        self.use_kiwi_defaults = config.get('use_kiwi_defaults', True)
 
         self.name = config.get('name', 'root')
 
@@ -191,6 +202,8 @@ class RootGenerator:
                         script_file, returncode)
 
     def _generate_elbe_image(self) -> Optional[str]:
+        """ Generate an elbe image description. """
+        # TODO: test
         assert self.result_dir
 
         logging.info('Generating elbe image from template...')
@@ -322,11 +335,47 @@ class RootGenerator:
 
         return None
 
+    def _generate_kiwi_image(self, generate_repos: bool = False) -> Optional[str]:
+        """ Generate a kiwi image description. """
+        if not self.apt_repos:
+            logging.critical('No apt repositories defined!')
+            return None
+
+        bootstrap_package = self.bootstrap_package
+        if len(self.apt_repos) > 1 and not bootstrap_package:
+            bootstrap_package = 'bootstrap-root-ubuntu-jammy'
+            logging.warning('More than one apt repository specified, '
+                            'a boostrap_package is required! '
+                            'Falling back to %s.')
+            return None
+
+        # TODO: implement
+
+        return ''
+
+    def _generate_berrymill_config(self) -> Optional[str]:
+        """ Generate a berrymill.conf. """
+        # TODO: implement
+
+        return ''
+
     def _build_kiwi_image(self, output_path: str) -> Optional[str]:
         """ Run kiwi image build. """
         assert self.result_dir
 
-        # TODO: template
+        use_berrymill = self.use_berrymill
+        berrymill_conf = self.berrymill_conf
+        if use_berrymill and not self.berrymill_conf:
+            logging.info('Generating the berrymill.conf...')
+            berrymill_conf = self._generate_berrymill_config()
+            if not berrymill_conf:
+                logging.error('Generating a berrymill.conf failed! '
+                              'Trying to build without berrymill.')
+                use_berrymill = False
+
+        if not self.image:
+            generate_repos = not use_berrymill
+            self.image = self._generate_kiwi_image(generate_repos)
 
         if not self.image:
             logging.critical('No kiwi image description found!')
@@ -337,38 +386,50 @@ class RootGenerator:
             logging.critical('Image %s not found!', image)
             return None
 
-        berrymill_conf = '/etc/berrymill/berrymill.conf'
-        if self.berrymill_conf:
-            berrymill_conf = self.berrymill_conf
+        if use_berrymill:
+            logging.info('Berrymill.conf: %s', berrymill_conf)
 
-        logging.info('Berrymill.conf: %s', berrymill_conf)
+        appliance = Path(self.result_dir) / image.name
 
-        appliance = os.path.join(self.result_dir, image.name)
-        shutil.copy(image, appliance)
+        if appliance.absolute() != image.absolute():
+            shutil.copy(image, appliance)
 
-        scripts = glob.glob(f'{image.parent.absolute()}/*.sh', recursive=True)
-        for script in scripts:
-            shutil.copy(script, os.path.dirname(appliance))
+        kiwi_scripts = self.kiwi_scripts
+        kiwi_root_overlays = self.kiwi_root_overlays
 
-        overlay = os.path.join(os.path.dirname(image), 'root')
-        if os.path.isdir(overlay):
-            shutil.copytree(overlay, os.path.dirname(appliance))
+        if self.use_kiwi_defaults:
+            conf_dir = Path(self.config).parent
+
+            root_overlay = conf_dir / 'root'
+            if root_overlay.is_dir():
+                logging.info('Adding %s to kiwi root overlays.', root_overlay)
+                kiwi_root_overlays.append(str(root_overlay.absolute()))
+
+            for name in ['config.sh', 'pre_disk_sync.sh',
+                         'post_bootstrap.sh', 'uboot_install.sh']:
+                kiwi_script = conf_dir / name
+                if kiwi_script.is_file():
+                    logging.info('Adding %s to kiwi scripts.', kiwi_script)
+                    kiwi_scripts.append(str(kiwi_script.absolute()))
+
+        # TODO: implement
+        # TODO: implement kiwi only build
 
         if self.arch == 'amd64':
             if self.kvm:
-                logging.info('Kiwi KVM build of %s', appliance)
+                logging.info('Berrymill & Kiwi KVM build of %s', appliance)
                 self.fake.run_sudo(
                     'bash -c "source /build/venv/bin/activate; '
                     f'berrymill -c {berrymill_conf} -d -a amd64 -i {appliance} '
                     f'--clean build --target-dir {self.result_dir}"')
             else:
-                logging.info('Kiwi box build of %s', appliance)
+                logging.info('Berrymill & Kiwi box build of %s', appliance)
                 self.fake.run_no_fake(
                     'bash -c "source /build/venv/bin/activate; '
                     f'berrymill -c {berrymill_conf} -d -a amd64 -i {appliance} --clean build '
                     f'--box-memory 4G --target-dir {self.result_dir} --no-accel --cpu qemu64-v1"')
         else:
-            logging.info('Kiwi cross build of %s', appliance)
+            logging.info('Berrymill & Kiwi cross build of %s', appliance)
             self.fake.run_no_fake(
                 'bash -c "source /build/venv/bin/activate; '
                 f'berrymill -c {berrymill_conf} -d -a arm64 -i {appliance} --clean build '
@@ -489,7 +550,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(
-        description='Create the content of the boot partiton as boot.tar.')
+        description='Create the content of the root partiton as root.tar.')
     parser.add_argument('config_file', type=str,
                         help='Path to the YAML configuration file')
     parser.add_argument('output', type=str,
@@ -504,7 +565,7 @@ def main() -> None:
     # Read configuration
     generator = RootGenerator(args.config_file)
 
-    # Create the boot.tar
+    # Create the root.tar
     image = None
     try:
         run_scripts = not bool(args.no_config)
@@ -514,7 +575,11 @@ def main() -> None:
     except Exception as e:
         logging.critical('Image build failed with exception! %s', e)
 
-    generator.finalize(args.output)
+    try:
+        generator.finalize(args.output)
+    except Exception as e:
+        logging.error('Cleanup failed with exception! %s', e)
+
     if image:
         print('Image was written to %s.', image)
     else:

@@ -237,6 +237,7 @@ class Apt:
 
     def _download_url(self, url: str) -> Optional[bytes | Any]:
         """ Download the given url. """
+        # TODO: cache
         # Check for cached data.
         cache_file_name = url[7:].replace('/', '_')
         cache_file_path = os.path.join(self.state_folder, cache_file_name)
@@ -310,6 +311,7 @@ class Apt:
 
     def _get_data_for_url(self, url: str) -> Optional[Any]:
         """ Get cache data for url. """
+        # TODO: test for fast on second try
         cache_file_name = url[7:].replace('/', '_')
         cache_file_path = os.path.join(self.state_folder, cache_file_name)
 
@@ -347,6 +349,7 @@ class Apt:
 
     def get_key(self) -> Optional[str]:
         """ Get key for this repo. """
+        # TODO: test
         if not self.key_url:
             return None
 
