@@ -42,7 +42,6 @@ class ContainerBuilder:
         command = f'{self.build_tool} build -t {name} '\
             f'--build-arg BASE_CONTAINER_NAME="{self.base_container_name}" '\
             f'--build-arg HOST_USER="{os.getuid()}" '\
-            f'--build-arg HOST_GROUP="{os.getgid()}" '\
             f'{path}'
         logging.debug('Command: %s', command)
         subprocess.run(command, shell=True, check=True)
