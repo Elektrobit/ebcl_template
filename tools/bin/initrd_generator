@@ -1,3 +1,0 @@
-#!/bin/bash
-
-ebcl_initrd $1 $2

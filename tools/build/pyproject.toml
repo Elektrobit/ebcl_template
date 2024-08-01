@@ -33,9 +33,9 @@ dependencies = [
 Homepage = "https://github.com/Elektrobit/ebcl_template"
 
 [project.scripts]
-ebcl_boot = "ebcl.boot:main"
-ebcl_initrd = "ebcl.initrd:main"
-ebcl_root = "ebcl.root:main"
+boot_generator = "ebcl.boot:main"
+initrd_generator = "ebcl.initrd:main"
+root_generator = "ebcl.root:main"
 
 [tool.pylint.format]
 max-line-length = 120
