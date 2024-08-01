@@ -4,11 +4,9 @@ import argparse
 import glob
 import logging
 import os
-import shutil
 import tempfile
 
 from pathlib import Path
-from typing import Any
 
 from .apt import Apt
 from .config import load_yaml
@@ -26,7 +24,6 @@ class BootGenerator:
     files: list[dict[str, str]]
     scripts: list[str]
     arch: str
-    apt_repos: list[dict[str, Any]]
     archive_name: str
     target_dir: str
     archive_path: str
@@ -129,7 +126,8 @@ class BootGenerator:
             logging.info('Copying files %s', src)
 
             # Ensure source file exists.
-            (_out, err) = self.fake.run(f'stat {src}', check=False)
+            (_out, err, _returncode) = self.fake.run(
+                f'stat {src}', check=False)
             if err:
                 logging.error('File %s doesn\'t exist!', src)
                 continue
@@ -244,6 +242,8 @@ def main() -> None:
                         help='Path to the output directory')
 
     args = parser.parse_args()
+
+    logging.info('Running boot_generator with args %s', args)
 
     # Read configuration
     generator = BootGenerator(args.config_file)

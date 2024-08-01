@@ -10,7 +10,7 @@ modprobe {{ mod }}
 {% endfor %}
 
 # Mount root filesystem
-root={{root}}
+root={{ root }}
 for param in $(cat /proc/cmdline); do
     if [[ $param == "root="* ]]; then
         root=${param:5}

@@ -25,12 +25,16 @@ class Apt:
     packages: Optional[dict[str, list[Package]]]
     index_loaded: bool
     state_folder: str
+    key_url: Optional[str]
+    has_sources: bool
 
     def __init__(
         self,
         url: str = "http://archive.ubuntu.com/ubuntu",
         distro: str = "jammy",
         components: Optional[list[str]] = None,
+        key_url: Optional[str] = None,
+        has_sources: bool = True,
         arch: str = "amd64",
         state_folder: str = '/workspace/state/apt'
     ) -> None:
@@ -43,6 +47,8 @@ class Apt:
         self.arch = arch
         self.packages = None
         self.state_folder = state_folder
+        self.key_url = key_url
+        self.has_sources = has_sources
 
         if os.path.isfile(self.state_folder):
             self.state_folder = os.path.dirname(self.state_folder)
@@ -338,3 +344,27 @@ class Apt:
             logging.info('No cache file found for %s', url)
 
         return None
+
+    def get_key(self) -> Optional[str]:
+        """ Get key for this repo. """
+        if not self.key_url:
+            return None
+
+        contents = None
+
+        if os.path.isfile(self.key_url):
+            # handle local file
+            logging.info('Reading key for %s from %s', self, self.key_url)
+            with open(self.key_url, encoding='uft8') as f:
+                contents = f.read()
+        else:
+            # download key
+            logging.info('Downloading key for %s from %s', self, self.key_url)
+            data = self._download_url(self.key_url)
+            if data:
+                contents = data.decode(encoding='utf8', errors='ignore')
+            else:
+                logging.error('Download of key %s for %s failed!',
+                              self.key_url, self)
+
+        return contents

@@ -25,7 +25,7 @@ class TestFake:
 
     def test_run(self):
         """ Run a command using fakeroot. """
-        (stdout, stderr) = self.fake.run('id')
+        (stdout, stderr, _returncode) = self.fake.run('id')
         assert stdout is not None
         assert 'uid=0(root)' in stdout
         assert 'gid=0(root)' in stdout
@@ -49,12 +49,12 @@ class TestFake:
         pkg.extract(chroot)
 
         # Prepare dev folder
-        (_stdout, stderr) = self.fake.run_chroot(
+        (_stdout, stderr, _returncode) = self.fake.run_chroot(
             'busybox mkdir -p dev', chroot)
         assert not stderr.strip()
 
         # Check folder
-        (stdout, stderr) = self.fake.run_chroot(
+        (stdout, stderr, _returncode) = self.fake.run_chroot(
             'busybox stat -c \'%u %g\' /dev', chroot)
         assert stdout.strip() == '0 0'
         assert not stderr.strip()
@@ -79,27 +79,28 @@ class TestFake:
         pkg.extract(chroot)
 
         # Install busybox
-        (_stdout, stderr) = self.fake.run_sudo_chroot(
+        (_stdout, stderr, _returncode) = self.fake.run_sudo_chroot(
             '/bin/busybox --install -s /bin', chroot)
         assert not stderr.strip()
 
         # Prepare dev folder
-        (_stdout, stderr) = self.fake.run_sudo_chroot('mkdir -p dev', chroot)
+        (_stdout, stderr, _returncode) = self.fake.run_sudo_chroot(
+            'mkdir -p dev', chroot)
         assert not stderr.strip()
 
         # Check folder
-        (stdout, stderr) = self.fake.run_sudo_chroot(
+        (stdout, stderr, _returncode) = self.fake.run_sudo_chroot(
             'stat -c \'%u %g\' /dev', chroot)
         assert stdout.strip() == '0 0'
         assert not stderr.strip()
 
         # Create device node
-        (_stdout, stderr) = self.fake.run_sudo_chroot(
+        (_stdout, stderr, _returncode) = self.fake.run_sudo_chroot(
             'mknod -m 777 /dev/console c 1234 1234', chroot)
         assert not stderr.strip()
 
         # Check device node
-        (stdout, stderr) = self.fake.run_sudo_chroot(
+        (stdout, stderr, _returncode) = self.fake.run_sudo_chroot(
             'stat -c \'%A %u %g\' /dev/console', chroot)
         assert stdout.strip() == 'crwxrwxrwx 0 0'
         assert not stderr.strip()
@@ -128,17 +129,18 @@ class TestFake:
 
         shutil.rmtree(debs)
 
-        (out, err) = self.fake.run_chroot('/bin/busybox id', contents)
+        (out, err, _returncode) = self.fake.run_chroot(
+            '/bin/busybox id', contents)
         assert err == ''
         assert 'uid=0' in out
         assert 'gid=0' in out
 
-        (out2, err) = self.fake.run(cmd=f'file {contents}')
+        (out2, err, _returncode) = self.fake.run(cmd=f'file {contents}')
         assert err == ''
         assert out2 is not None
         assert 'directory' in out2
 
-        (out, err) = self.fake.run_chroot(
+        (out, err, _returncode) = self.fake.run_chroot(
             '/bin/busybox ls -lah /bin/busybox', contents)
         assert err == ''
         assert '/bin/busybox' in out

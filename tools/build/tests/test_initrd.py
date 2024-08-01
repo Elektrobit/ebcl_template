@@ -138,27 +138,27 @@ class TestInitrd:
 
         fake = Fake()
 
-        (out, err) = fake.run_sudo(
+        (out, err, _returncode) = fake.run_sudo(
             f'stat -c \'%a\' {self.temp_dir}/root/dummy.txt')
         assert out is not None
         out = out.split('\n')[-2]
         assert out.strip() == '666'
         assert not err.strip()
 
-        (out, err) = fake.run_sudo(
+        (out, err, _returncode) = fake.run_sudo(
             f'stat -c \'%u %g\' {self.temp_dir}/root/dummy.txt')
         assert out is not None
         out = out.split('\n')[-2]
         assert out.strip() == '0 0'
         assert not err.strip()
 
-        (out, err) = fake.run_sudo(
+        (out, err, _returncode) = fake.run_sudo(
             f'stat -c \'%a\' {self.temp_dir}/root/other.txt')
         assert out is not None
         out = out.split('\n')[-2]
         assert out.strip() == '700'
 
-        (out, err) = fake.run_sudo(
+        (out, err, _returncode) = fake.run_sudo(
             f'stat -c \'%u %g\' {self.temp_dir}/root/other.txt')
         assert out is not None
         out = out.split('\n')[-2]

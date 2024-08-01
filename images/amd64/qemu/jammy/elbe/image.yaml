@@ -11,4 +11,4 @@ image:
         type: ext4
         content:
           type: archive
-          archive: build/ubuntu.tar
+          archive: build/ubuntu.config.tar

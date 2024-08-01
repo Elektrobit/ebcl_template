@@ -9,10 +9,15 @@ import tempfile
 
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
+from urllib.parse import urlparse
 
+from jinja2 import Template
+
+from .apt import Apt
 from .config import load_yaml
-from ebcl.fake import Fake
+from .fake import Fake
+from .files import Files, EnvironmentType
 
 
 class ImageType(Enum):
@@ -39,50 +44,40 @@ class ImageType(Enum):
             return "UNKNOWN"
 
 
-class ScriptType(Enum):
-    """ Enum for supported script types. """
-    CONFIG = 1
-    PRE_DISC = 2
-    POST_DISC = 3
-
-    @classmethod
-    def from_str(cls, script_type: str):
-        """ Get ImageType from str. """
-        if script_type == 'config':
-            return cls.CONFIG
-        elif script_type == 'pre_disc':
-            return cls.PRE_DISC
-        elif script_type == 'post_disc':
-            return cls.POST_DISC
-        else:
-            return None
-
-    def __str__(self) -> str:
-        if self.value == 1:
-            return "config"
-        elif self.value == 2:
-            return "pre_disc"
-        elif self.value == 3:
-            return "post_disc"
-        else:
-            return "UNKNOWN"
-
-
 class RootGenerator:
     """ EBcL root filesystem generator. """
     # config file
     config: str
     # config values
+    apt_repos: list[Apt] = []
     name: str
-    image_type: ImageType
-    image: str
-    scripts: list[dict[str, str]]
     arch: str
+    image_type: ImageType
+    image: Optional[str]
+    template: Optional[str]
+    scripts: list[dict[str, str]]
+    # build result filename pattern
     result: Optional[str]
+
+    # packages to install
+    packages: list[str]
+
+    # kiwi specific parameters
     kvm: bool
     berrymill_conf: Optional[str]
+
+    # elbe specific parameters
+    primary_repo: Optional[Apt]
+    hostname: str
+    domain: str
+    root_password: str
+    console: str
+    packer: str
+
     # fakeroot helper
     fake: Fake
+    # files helper
+    files: Files
     # folder for script execution
     target_dir: Optional[str]
     # folder to collect build results
@@ -100,110 +95,209 @@ class RootGenerator:
 
         self.arch = config.get('arch', 'arm64')
         self.kvm = config.get('kvm', True)
-        self.result = config.get('result', None)
+
         self.scripts = config.get('scripts', [])
+
+        self.image = config.get('image', None)
+        self.template = config.get('template', None)
+
         self. berrymill_conf = config.get(
             'berrymill_conf', None)
 
-        self.image = config.get('image', '')
-        if not self.image:
-            logging.critical('Missing mandatory config value \'image\'!')
-            exit(1)
+        self.name = config.get('name', 'root')
 
-        self.name = config.get('name', '')
-        if not self.name:
-            self.name = os.path.basename(self.image)
-
-        self.image_type = ImageType.from_str(config.get('type', 'docker'))
+        self.image_type = ImageType.from_str(config.get('type', 'elbe'))
         logging.info('Using image type: %s', self.image_type)
 
+        if self.image_type == ImageType.ELBE:
+            primary_repo = config.get('primary_repo', None)
+            if not primary_repo:
+                if self.arch == 'amd64':
+                    primary_repo = 'http://archive.ubuntu.com/ubuntu'
+                else:
+                    primary_repo = 'http://ports.ubuntu.com/ubuntu-ports/'
+
+            primary_distro = config.get('primary_repo', 'jammy')
+
+            self.primary_repo = Apt(
+                url=primary_repo,
+                distro=primary_distro,
+                components=['main'],
+                arch=self.arch
+            )
+
+        self.hostname = config.get('hostname', 'ebcl')
+        self.domain = config.get('domain', 'elektrobit.com')
+        self.root_password = config.get('root_password', 'linux')
+        self.console = config.get('console', 'ttyAMA0,115200')
+        self.packer = config.get('packer', 'none')
+
+        self.packages = config.get('packages', [])
+
+        repos: Optional[list[dict[str, Any]]] = config.get('apt_repos', None)
+        if repos:
+            self.apt_repos = []
+            for repo in repos:
+                self.apt_repos.append(
+                    Apt(
+                        url=repo['apt_repo'],
+                        distro=repo['distro'],
+                        components=repo['components'],
+                        arch=self.arch
+                    )
+                )
+
+        if self.primary_repo:
+            self.apt_repos.append(self.primary_repo)
+
         self.fake = Fake()
+        self.files = Files(self.fake)
 
     def _run_scripts(self):
         """ Run scripts. """
-        assert self.target_dir
-
         for script in self.scripts:
             script_path = script['name']
+
+            params = ''
+            if 'params' in script:
+                params = script['params']
+
+            env = EnvironmentType.FAKEROOT
+            if 'env' in script:
+                e = EnvironmentType.from_str(script['env'])
+                if e:
+                    env = e
+                else:
+                    logging.error(
+                        'Unknown environment %s for script %s!', script['env'], script['name'])
+
             script_file = os.path.abspath(os.path.join(
                 os.path.dirname(self.config), script_path))
 
-            script_type = ScriptType.from_str(script.get('type', 'config'))
-
-            logging.info('Running %s script: %s', script_type, script)
+            logging.info('Running script %s in env %s', script, env)
 
             if not os.path.isfile(script_file):
                 logging.error('Script %s not found!', script)
                 continue
 
-            if script_type == ScriptType.CONFIG or script_type == ScriptType.PRE_DISC:
-                script_name = os.path.basename(script_file)
-                target_file = os.path.abspath(
-                    os.path.join(self.target_dir, script_name))
-                self.fake.run(f'cp {script_file} {target_file}')
-                self.fake.run_chroot(f'/{script_name}', self.target_dir)
-                self.fake.run(f'rm {target_file}')
-            elif script_type == ScriptType.POST_DISC:
-                self.fake.run(f'{script_file} {self.target_dir}',
-                              cwd=self.target_dir)
+            res = self.files.run_script(script_file, params, env)
+            if not res:
+                logging.error('Execution of script %s failed!', script_file)
             else:
-                logging.error(
-                    'Skipping script %s with unknown type %s.', script_file, script_type)
+                (_out, _err, returncode) = res
+                if returncode != 0:
+                    logging.error(
+                        'Execution of script %s failed with return code %s!',
+                        script_file, returncode)
 
-    def _extract_image(self, archive: str):
-        """ Extract tar archive to target_dir. """
-        assert self.target_dir
-
-        tar_file = Path(archive)
-        assert tar_file.is_file() or tar_file.is_symlink()
-
-        if tar_file.parent.absolute() != self.target_dir:
-            dst = Path(self.target_dir) / tar_file.name
-            self.fake.run(f'cp {tar_file.absolute()} {dst.absolute()}')
-            tar_file = dst
-
-        self.fake.run(f'tar xf {tar_file.name}', cwd=self.target_dir)
-
-    def _pack_image(self) -> str:
-        """ Create tar archive of target_dir. """
-        assert self.target_dir
+    def _generate_elbe_image(self) -> Optional[str]:
         assert self.result_dir
 
-        archive = os.path.join(self.target_dir, f'{self.name}.tar')
-        if os.path.isfile(archive):
-            logging.info('Archive %s exists. Deleting old archive.', archive)
-            os.remove(archive)
+        logging.info('Generating elbe image from template...')
 
-        self.fake.run(
-            f'tar -cvf {os.path.basename(archive)} .', cwd=self.target_dir)
+        if not self.primary_repo:
+            logging.critical('No primary repo!')
+            return None
 
-        dst = os.path.join(self.result_dir, os.path.basename(archive))
+        if not self.packages:
+            logging.critical('Packages defined!')
+            return None
 
-        if os.path.isfile(dst):
-            os.remove(dst)
+        params: dict[str, Any] = {}
 
-        self.fake.run(f'mv {archive} {dst}')
+        params['name'] = self.name
+        params['arch'] = self.arch
 
-        return dst
+        try:
+            url = urlparse(self.primary_repo.url)
+        except Exception as e:
+            logging.critical(
+                'Invalid primary repo url %s! %s', self.primary_repo.url, e)
+            return None
+
+        params['primary_repo_url'] = url.netloc
+        params['primary_repo_path'] = url.path
+        params['primary_repo_proto'] = url.scheme
+
+        params['distro'] = self.primary_repo.distro
+
+        params['hostname'] = self.hostname
+        params['domain'] = self.domain
+        params['root_password'] = self.root_password
+        params['console'] = self.console
+
+        params['packages'] = self.packages
+
+        params['packer'] = self.packer
+        params['output_archive'] = 'root.tar'
+
+        if self.apt_repos:
+            params['apt_repos'] = []
+            for repo in self.apt_repos:
+                components = ' '.join(repo.components)
+                apt_line = f'{repo.url} {repo.distro} {components}'
+
+                key = repo.get_key()
+
+                if key:
+                    params['apt_repos'].append({
+                        'apt_line': apt_line,
+                        'arch': repo.arch,
+                        'key': key
+                    })
+                else:
+                    params['apt_repos'].append({
+                        'apt_line': apt_line,
+                        'arch': repo.arch,
+                    })
+
+        if self.template is None:
+            template = os.path.join(os.path.dirname(__file__), 'root.xml')
+        else:
+            template = os.path.join(
+                os.path.dirname(self.config), self.template)
+
+        with open(template, encoding='utf8') as f:
+            tmpl = Template(f.read())
+
+        template_content = tmpl.render(**params)
+
+        image_file = os.path.join(self.result_dir, 'image.xml')
+        with open(image_file, 'w', encoding='utf8') as f:
+            f.write(template_content)
+
+        logging.info('Generated image stored as %s', image_file)
+
+        return image_file
 
     def _build_elbe_image(self) -> Optional[str]:
         """ Run elbe image build. """
         assert self.result_dir
+
+        if not self.image:
+            self.image = self._generate_elbe_image()
+
+        if not self.image:
+            logging.critical('No elbe image description found!')
+            return None
 
         image = Path(os.path.join(os.path.dirname(self.config), self.image))
         if not image.is_file():
             logging.critical('Image %s not found!', image)
             return None
 
-        (out, err) = self.fake.run_no_fake('elbe control create_project')
+        (out, err, _returncode) = self.fake.run_no_fake(
+            'elbe control create_project')
         assert not err
         assert out
         prj = out.strip()
 
         pre_xml = os.path.join(self.result_dir, image.name) + '.gz'
+
         self.fake.run_no_fake(
-            f'elbe preprocess --output={pre_xml} {image.absolute()}')
-        self.fake.run_no_fake(f'elbe control set_xml {prj} {pre_xml}')
+            f'elbe preprocess --output={pre_xml} {image.absolute()}', check=False)
+        self.fake.run_no_fake(
+            f'elbe control set_xml {prj} {pre_xml}', check=False)
         self.fake.run_no_fake(f'elbe control build {prj}')
         self.fake.run(f'elbe control wait_busy {prj}')
         self.fake.run(
@@ -231,6 +325,12 @@ class RootGenerator:
     def _build_kiwi_image(self, output_path: str) -> Optional[str]:
         """ Run kiwi image build. """
         assert self.result_dir
+
+        # TODO: template
+
+        if not self.image:
+            logging.critical('No kiwi image description found!')
+            return None
 
         image = Path(os.path.join(os.path.dirname(self.config), self.image))
         if not image.is_file():
@@ -312,10 +412,12 @@ class RootGenerator:
 
         return result_file
 
-    def create_root(self, output_path: str) -> None:
+    def create_root(self, output_path: str, run_scripts: bool = True) -> Optional[str]:
         """ Create the root image.  """
         self.target_dir = tempfile.mkdtemp()
+        self.files.target_dir = self.target_dir
         logging.info('Target directory: %s', self.target_dir)
+
         self.result_dir = tempfile.mkdtemp()
         logging.info('Result directory: %s', self.result_dir)
 
@@ -325,31 +427,65 @@ class RootGenerator:
         elif self.image_type == ImageType.KIWI:
             image_file = self._build_kiwi_image(output_path)
 
-        if image_file is None:
+        if not image_file:
             logging.critical('Image build failed!')
-            return
+            return None
 
-        assert image_file
+        if not run_scripts:
+            logging.info('Skipping the config script execution.')
 
-        if self.scripts:
-            self._extract_image(image_file)
-            self._run_scripts()
-            image_file = self._pack_image()
+        if run_scripts and self.scripts:
+            with tempfile.TemporaryDirectory() as tmp_root_dir:
+                self.files.extract_tarball(image_file, tmp_root_dir)
+                self._run_scripts()
+                image_file = self.files.pack_root_as_tarball(
+                    output_dir=self.target_dir,
+                    archive_name=os.path.basename(image_file),
+                    root_dir=tmp_root_dir
+                )
+
+                if not image_file:
+                    logging.critical('Repacking root failed!')
+                    return None
 
         # Move image tar to output folder
-        ext = os.path.basename(image_file).split('.', maxsplit=1)[-1]
-        out_image = f'{output_path}/{self.name}.{ext}'
+        image_name = os.path.basename(image_file)
+        ext = None
+        if image_name.endswith('.tar'):
+            ext = '.tar'
+        elif '.tar.' in image_name:
+            ext = '.tar.' + image_name.split('.tar.', maxsplit=1)[-1]
+        else:
+            ext = '.' + image_name.split('.', maxsplit=1)[-1]
+
+        out_image = f'{output_path}/{self.name}{ext}'
         self.fake.run(f'mv {image_file} {out_image}')
+
+        return out_image
+
+    def finalize(self, output_path: str):
+        """ Finalize output and cleanup. """
+
+        logging.info('Finalizing image build...')
 
         self.fake.run(f'cp -R {self.result_dir}/* {output_path}')
 
         # delete temporary folders
-        shutil.rmtree(self.target_dir)
-        shutil.rmtree(self.result_dir)
+        try:
+            if self.target_dir:
+                shutil.rmtree(self.target_dir)
+        except Exception as e:
+            logging.error('Removing temp target dir failed! %s', e)
+
+        try:
+            if self.result_dir:
+                shutil.rmtree(self.result_dir)
+        except Exception as e:
+            logging.error('Removing temp result dir failed! %s', e)
 
 
 def main() -> None:
-    """ Main entrypoint of EBcL boot generator. """
+    """ Main entrypoint of EBcL root generator. """
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(
@@ -358,14 +494,31 @@ def main() -> None:
                         help='Path to the YAML configuration file')
     parser.add_argument('output', type=str,
                         help='Path to the output directory')
+    parser.add_argument('-nc', '--no-config', action='store_true',
+                        help='Skip the config script execution.')
 
     args = parser.parse_args()
+
+    logging.info('Running root_generator with args %s', args)
 
     # Read configuration
     generator = RootGenerator(args.config_file)
 
     # Create the boot.tar
-    generator.create_root(args.output)
+    image = None
+    try:
+        run_scripts = not bool(args.no_config)
+        image = generator.create_root(
+            output_path=args.output,
+            run_scripts=run_scripts)
+    except Exception as e:
+        logging.critical('Image build failed with exception! %s', e)
+
+    generator.finalize(args.output)
+    if image:
+        print('Image was written to %s.', image)
+    else:
+        exit(1)
 
 
 if __name__ == '__main__':

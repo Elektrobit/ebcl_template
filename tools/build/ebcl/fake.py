@@ -35,7 +35,7 @@ class Fake:
         cwd: Optional[str] = None,
         stdout: Optional[BufferedWriter] = None,
         check=True
-    ) -> Tuple[Optional[str], str]:
+    ) -> Tuple[Optional[str], str, int]:
         """ Run a command. """
         logging.info('Running command: %s', cmd)
 
@@ -68,7 +68,7 @@ class Fake:
         if check:
             assert p.returncode == 0
 
-        return (pout, perr)
+        return (pout, perr, p.returncode)
 
     def run(
         self,
@@ -76,7 +76,7 @@ class Fake:
         cwd: Optional[str] = None,
         stdout: Optional[BufferedWriter] = None,
         check=True
-    ) -> Tuple[Optional[str], str]:
+    ) -> Tuple[Optional[str], str, int]:
         """ Run a command using fakeroot. """
         return self.run_no_fake(
             cmd=f'fakechroot fakeroot -i {self.state} -s {self.state} -- {cmd}',
@@ -85,9 +85,9 @@ class Fake:
             check=check
         )
 
-    def run_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str]:
+    def run_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str, int]:
         """ Run a command using fakechroot. """
-        (out, err) = self.run_no_fake(
+        (out, err, returncode) = self.run_no_fake(
             cmd=f'fakechroot fakeroot -i {self.state} -s {self.state} -- chroot {chroot} {cmd}',
             check=check
         )
@@ -95,11 +95,11 @@ class Fake:
         if out is None:
             out = ''
 
-        return (out, err)
+        return (out, err, returncode)
 
-    def run_sudo_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str]:
+    def run_sudo_chroot(self, cmd: str, chroot: str, check=True) -> Tuple[str, str, int]:
         """ Run a command using sudo and chroot. """
-        (out, err) = self.run_no_fake(
+        (out, err, returncode) = self.run_no_fake(
             cmd=f'sudo chroot {chroot} {cmd}',
             check=check
         )
@@ -107,14 +107,14 @@ class Fake:
         if out is None:
             out = ''
 
-        return (out, err)
+        return (out, err, returncode)
 
     def run_sudo(
             self, cmd: str,
             cwd: Optional[str] = None,
             stdout: Optional[BufferedWriter] = None,
             check=True
-    ) -> Tuple[Optional[str], str]:
+    ) -> Tuple[Optional[str], str, int]:
         """ Run a command using sudo. """
         return self.run_no_fake(
             cmd=f'sudo bash -c "{cmd}"',

@@ -225,6 +225,7 @@ class Proxy:
         extract: bool = True,
         debs: Optional[str] = None,
         contents: Optional[str] = None,
+        download_depends: bool = True
     ) -> Tuple[str, Optional[str], list[str]]:
         """ Download and optionally extract the given packages and its depends. """
         # Queue for package download.
@@ -290,6 +291,9 @@ class Proxy:
 
             local_packages[name] = package.local_file
             logging.info('Deb file: %s', package.local_file)
+
+            if not download_depends:
+                continue
 
             # Add deps to queue
             for vds in package.get_depends():

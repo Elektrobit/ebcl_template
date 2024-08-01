@@ -36,6 +36,8 @@ Homepage = "https://github.com/Elektrobit/ebcl_template"
 boot_generator = "ebcl.boot:main"
 initrd_generator = "ebcl.initrd:main"
 root_generator = "ebcl.root:main"
+package_downloader = "ebcl.downloader:main"
+root_configurator = "ebcl.root_config:main"
 
 [tool.pylint.format]
 max-line-length = 120

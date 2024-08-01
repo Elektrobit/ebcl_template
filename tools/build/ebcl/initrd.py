@@ -33,7 +33,6 @@ class InitrdGenerator:
     files: list[dict[str, Any]]
     kversion: Optional[str]
     arch: str
-    apt_repos: list[dict[str, Any]]
     template: Optional[str]
     modules_folder: Optional[str]
     # use fakeroot or sudo
@@ -121,7 +120,7 @@ class InitrdGenerator:
 
         self.fake = Fake()
 
-    def _run_chroot(self, cmd: str) -> Tuple[str, str]:
+    def _run_chroot(self, cmd: str) -> Tuple[str, str, int]:
         """ Run command in chroot target environment. """
         if self.fakeroot:
             return self.fake.run_chroot(cmd, self.target_dir)
@@ -134,7 +133,7 @@ class InitrdGenerator:
         cwd: Optional[str] = None,
         stdout: Optional[BufferedWriter] = None,
         check=True
-    ) -> Tuple[Optional[str], str]:
+    ) -> Tuple[Optional[str], str, int]:
         """ Run command as root. """
         if self.fakeroot:
             return self.fake.run(cmd=cmd, cwd=cwd, stdout=stdout, check=check)
@@ -439,6 +438,8 @@ def main() -> None:
                         help='Path to the output directory')
 
     args = parser.parse_args()
+
+    logging.info('Running initrd_generator with args %s', args)
 
     # Read configuration
     generator = InitrdGenerator(args.config_file)
