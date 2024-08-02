@@ -7,24 +7,40 @@ import tempfile
 
 from typing import Optional
 
-from .proxy import Proxy
-from .version import VersionDepends
+from ebcl.common.config import load_yaml
+from ebcl.common.proxy import Proxy
+from ebcl.common.version import VersionDepends
 
 
 class PackageDownloader:
     """ Download and extract deb packages. """
     # TODO: test
 
+    # config file
+    config: str
+    # config values
+    arch: str
     # proxy
     proxy: Proxy
 
-    def __init__(self):
+    def __init__(self, config_file: str):
         """ Parse the yaml config file.
 
         Args:
             config_file (Path): Path to the yaml config file.
         """
+        config = load_yaml(config_file)
+
+        self.config = config_file
+
+        self.arch = config.get('arch', 'arm64')
+
         self.proxy = Proxy()
+        self.proxy.parse_apt_repos(
+            apt_repos=config.get('apt_repos', None),
+            arch=self.arch,
+            ebcl_version=config.get('ebcl_version', None)
+        )
 
     def download_packages(
         self,
@@ -33,7 +49,7 @@ class PackageDownloader:
         arch: Optional[str] = None,
         download_depends: bool = False
     ) -> None:
-        """ Create the root image.  """
+        """ Download the packages.  """
         if not output_path:
             output_path = tempfile.mkdtemp()
             assert output_path
@@ -79,6 +95,8 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(
         description='Download and extract the given packages.')
+    parser.add_argument('config', type=str,
+                        help='Path to the YAML configuration file containing the apt repostory config.')
     parser.add_argument('packages', type=str,
                         help='List of packages separated by space.')
     parser.add_argument('-o', '--output', type=str,
@@ -90,7 +108,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    downloader = PackageDownloader()
+    downloader = PackageDownloader(args.config_file)
 
     try:
         # Download and extract the packages

@@ -5,9 +5,9 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.fake import Fake
-from ebcl.initrd import InitrdGenerator
-from ebcl.version import VersionDepends
+from ebcl.common.fake import Fake
+from ebcl.tools.initrd.initrd import InitrdGenerator
+from ebcl.common.version import VersionDepends
 
 
 class TestInitrd:

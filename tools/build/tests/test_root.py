@@ -5,7 +5,7 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.root import RootGenerator, ImageType
+from ebcl.tools.root.root import RootGenerator, ImageType
 
 
 class TestRoot:

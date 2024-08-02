@@ -44,7 +44,11 @@ RUN addgroup --gid $HOST_GROUP $CONTAINER_USER && \
   chown -R $CONTAINER_USER:$CONTAINER_USER /home/$CONTAINER_USER
 
 # Prepare base structure
-RUN mkdir -p /build/{results/images,results/packages,images,identity,bin} && \
+RUN mkdir -p /build/results/images && \
+    mkdir -p results/packages && \
+    mkdir -p images && \
+    mkdir -p identity && \
+    mkdir -p bin && \
     chown -R $CONTAINER_USER:$CONTAINER_USER /build
 RUN mkdir -p /workspace && \
     chown -R $CONTAINER_USER:$CONTAINER_USER /workspace
@@ -91,7 +95,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install mypy pep8 pylint pytest pytest-cov robotframework
 
-# Fix container user
+# Ensure venv owner
 USER root
 RUN chown -R $CONTAINER_USER:$CONTAINER_USER /build/venv
 

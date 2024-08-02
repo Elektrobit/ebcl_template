@@ -28,6 +28,33 @@ class Apt:
     key_url: Optional[str]
     has_sources: bool
 
+    @classmethod
+    def from_config(cls, repo_config: dict[str, Any], arch: str):
+        """ Get an apt repositry for a config entry. """
+        if 'apt_repo' not in repo_config:
+            return None
+
+        if 'distro' not in repo_config:
+            return None
+
+        return cls(
+            url=repo_config['apt_repo'],
+            distro=repo_config['distro'],
+            components=repo_config.get('components', None),
+            key_url=repo_config.get('key', None),
+            arch=arch
+        )
+
+    @classmethod
+    def ebcl_apt(cls, arch: str, release: str = '1.2'):
+        """ Get the EBcL apt repo. """
+        return cls(
+            url=f'https://linux.elektrobit.com/eb-corbos-linux/{release}',
+            distro='ebcl',
+            components=['prod', 'dev'],
+            arch=arch
+        )
+
     def __init__(
         self,
         url: str = "http://archive.ubuntu.com/ubuntu",
@@ -353,21 +380,29 @@ class Apt:
         if not self.key_url:
             return None
 
+        key_url = self.key_url
+        if key_url.startswith('file://'):
+            key_url = key_url[7:]
+
         contents = None
 
-        if os.path.isfile(self.key_url):
+        if os.path.isfile(key_url):
             # handle local file
-            logging.info('Reading key for %s from %s', self, self.key_url)
-            with open(self.key_url, encoding='uft8') as f:
+            logging.info('Reading key for %s from %s', self, key_url)
+            with open(key_url, encoding='uft8') as f:
                 contents = f.read()
-        else:
+        elif key_url.startswith('http://') or key_url.startswith('https://'):
             # download key
-            logging.info('Downloading key for %s from %s', self, self.key_url)
-            data = self._download_url(self.key_url)
+            logging.info('Downloading key for %s from %s', self, key_url)
+            data = self._download_url(key_url)
             if data:
                 contents = data.decode(encoding='utf8', errors='ignore')
             else:
-                logging.error('Download of key %s for %s failed!',
-                              self.key_url, self)
+                logging.error(
+                    'Download of key %s for %s failed!', key_url, self)
+        else:
+            logging.error(
+                'Unknown key url %s, cannot download key!', self.key_url)
+            return None
 
         return contents

@@ -4,10 +4,10 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.apt import Apt, parse_depends
-from ebcl.deb import Package
-from ebcl.proxy import Proxy
-from ebcl.version import Version
+from ebcl.common.apt import Apt, parse_depends
+from ebcl.common.deb import Package
+from ebcl.common.proxy import Proxy
+from ebcl.common.version import Version
 
 
 class TestDeb:

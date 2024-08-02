@@ -7,7 +7,7 @@
         <specification>Kiwi image template for EBcL root filesystem generator.</specification>
     </description>
 
-    <preferences arch="x86_64 {{ arch }}">
+    <preferences arch="{{ arch }}">
         <version>{{ version }}</version>
         <packagemanager>apt</packagemanager>
         <type image="tbz"></type>

@@ -1,4 +1,5 @@
 """ Debian version helpers. """
+import logging
 import re
 
 from dataclasses import dataclass
@@ -337,3 +338,35 @@ def parse_depends(
         result.append(vd)
 
     return result
+
+
+def parse_package_config(packages: list[str], arch: str) -> list[VersionDepends]:
+    """ Parse packages conifguration. """
+    vd_list: list[VersionDepends] = []
+    for package in packages:
+        vds = parse_depends(package, arch)
+        if vds:
+            # TODO: handle alternatives
+            vd_list.append(vds[0])
+        else:
+            logging.error('Parsing of package %s failed!', package)
+
+    return vd_list
+
+
+def parse_package(package: Optional[str], arch: str) -> Optional[VersionDepends]:
+    """ Parse a single package configuration. """
+    if package:
+        vds = parse_depends(package, arch)
+
+        if vds:
+            if len(vds) > 1:
+                logging.warning(
+                    'Found more than one kerne package! %s', vds)
+
+            logging.info('Kernel package: %s', vds[0])
+            return vds[0]
+        else:
+            logging.error('Parsing of kernel %s failed!', package)
+
+    return None

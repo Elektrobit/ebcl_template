@@ -3,9 +3,9 @@ import os
 import shutil
 import tempfile
 
-from ebcl.apt import Apt, parse_depends
-from ebcl.fake import Fake
-from ebcl.proxy import Proxy
+from ebcl.common.apt import Apt, parse_depends
+from ebcl.common.fake import Fake
+from ebcl.common.proxy import Proxy
 
 
 class TestFake:

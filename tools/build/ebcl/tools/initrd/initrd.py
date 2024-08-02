@@ -14,17 +14,15 @@ from typing import Tuple, Any, Optional
 
 from jinja2 import Template
 
-from .apt import Apt, parse_depends
-from .config import load_yaml
-from .fake import Fake
-from .proxy import Proxy
-from .version import VersionDepends
+from ebcl.common.config import load_yaml
+from ebcl.common.fake import Fake
+from ebcl.common.files import Files, EnvironmentType
+from ebcl.common.proxy import Proxy
+from ebcl.common.version import VersionDepends, parse_package_config, parse_package
 
 
 class InitrdGenerator:
     """ EBcL initrd generator. """
-
-    # TODO: use files helper
 
     # config file
     config: Path
@@ -41,7 +39,7 @@ class InitrdGenerator:
     # use fakeroot or sudo
     fakeroot: bool
     # name of busybox package
-    busybox: list[VersionDepends]
+    busybox: VersionDepends
     # out and tmp folders
     target_dir: str
     image_path: str
@@ -49,6 +47,10 @@ class InitrdGenerator:
     proxy: Proxy
     # fakeroot helper
     fake: Fake
+    # files helper
+    fh: Files
+    # env for files helper
+    env: EnvironmentType
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -65,63 +67,44 @@ class InitrdGenerator:
         self.devices = config.get('devices', [])
         self.files = config.get('files', [])
         self.kversion = config.get('kversion', '')
-        self.arch = config.get('arch', 'arm64')
         self.apt_repos = config.get('apt_repos', None)
         self.template = config.get('template', None)
-        self.fakeroot = config.get('fakeroot', False)
         self.modules_folder = config.get('modules_folder', None)
 
-        self.modules_packages = []
-        modules_packages = config.get('modules_packages', '')
-        for package in modules_packages:
-            vds = parse_depends(package, self.arch)
-            if vds:
-                # TODO: handle alternatives
-                self.modules_packages.append(vds[0])
-            else:
-                logging.error('Parsing of package %s failed!', package)
+        self.fakeroot = config.get('fakeroot', True)
+        self.env = EnvironmentType.FAKEROOT
+        if not self.fakeroot:
+            self.env = EnvironmentType.CHROOT
 
-        busybox = config.get('busybox', 'busybox-static')
-        vds = parse_depends(busybox, self.arch)
-        if vds:
-            logging.info('Busybox packages: %s', vds)
-            self.busybox = vds
+        self.arch = config.get('arch', 'arm64')
+
+        self.modules_packages = parse_package_config(
+            config.get('modules_packages', []), self.arch)
+
+        busybox = parse_package(config.get(
+            'busybox', 'busybox-static'), self.arch)
+        if busybox:
+            logging.info('Busybox package: %s', busybox)
+            self.busybox = busybox
         else:
-            logging.critical('Parsing of busybox %s failed!', busybox)
-            exit(1)
+            logging.critical('Parsing of busybox %s failed!',
+                             config.get('busybox', 'busybox-static'))
+            # raise exception
+            assert busybox
 
-        kernel = config.get('kernel', None)
+        kernel = parse_package(config.get('kernel', None), self.arch)
         if kernel:
-            vds = parse_depends(kernel, self.arch)
-            if vds:
-                logging.info('Kernel package: %s', vds[0])
-                # TODO: handle alternatives
-                self.modules_packages.append(vds[0])
-            else:
-                logging.error('Parsing of kernel %s failed!', kernel)
+            self.modules_packages.append(kernel)
 
         self.proxy = Proxy()
-        if self.apt_repos is None:
-            self.proxy.add_apt(
-                Apt(
-                    url='https://linux.elektrobit.com/eb-corbos-linux/1.2',
-                    distro='ebcl',
-                    components=['prod', 'dev'],
-                    arch=self.arch
-                )
-            )
-        else:
-            for repo in self.apt_repos:
-                self.proxy.add_apt(
-                    Apt(
-                        url=repo['apt_repo'],
-                        distro=repo['distro'],
-                        components=repo['components'],
-                        arch=self.arch
-                    )
-                )
+        self.proxy.parse_apt_repos(
+            apt_repos=config.get('apt_repos', None),
+            arch=self.arch,
+            ebcl_version=config.get('ebcl_version', None)
+        )
 
         self.fake = Fake()
+        self.fh = Files(self.fake)
 
     def _run_chroot(self, cmd: str) -> Tuple[str, str, int]:
         """ Run command in chroot target environment. """
@@ -143,55 +126,58 @@ class InitrdGenerator:
         else:
             return self.fake.run_sudo(cmd=cmd, cwd=cwd, stdout=stdout, check=check)
 
-    def install_busybox(self):
+    def install_busybox(self) -> bool:
         """Get busybox and add it to the initrd. """
-        versiondep = None
         package = None
 
-        for vd in self.busybox:
-            # Find first available package.
-            versiondep = vd
-            package = self.proxy.find_package(vd)
-            if not package:
-                continue
+        if not self.busybox:
+            logging.critical('No busybox!')
+            return False
 
-            # Downlaod first available package.
-            package = self.proxy.download_package(
-                arch=versiondep.arch,
-                package=package,
-                version_relation=versiondep.version_relation
-            )
+        package = self.proxy.find_package(self.busybox)
+        if not package:
+            return False
 
-            if package and package.local_file and \
-                    os.path.isfile(package.local_file):
-                # Download was successful.
-                logging.info('Using busybox deb %s.', package.local_file)
-                break
+        package = self.proxy.download_package(
+            arch=self.busybox.arch,
+            package=package,
+            version_relation=self.busybox.version_relation
+        )
 
-        if package is None or versiondep is None:
+        if not package:
             logging.error('Busybox was not found! %s', self.busybox)
-            exit(1)
+            return False
+
+        if package.local_file and \
+                os.path.isfile(package.local_file):
+            # Download was successful.
+            logging.info('Using busybox deb %s.', package.local_file)
+        else:
+            logging.critical('Busybox download failed!')
+            return False
 
         if not package.local_file:
-            logging.error('Busybox download failed! %s', self.busybox)
-            exit(1)
+            logging.critical('Busybox download failed! %s', self.busybox)
+            return False
 
-        logging.info('Using busybox %s (%s).', package, versiondep)
+        logging.info('Using busybox %s (%s).', package, self.busybox)
 
         res = package.extract(self.target_dir)
         if res is None:
             logging.critical(
                 'Extraction of busybox package %s (deb: %s) failed!', package, package.local_file)
-            exit(1)
+            return False
 
         logging.info('Busybox extracted to %s.', res)
 
         if not os.path.isfile(os.path.join(self.target_dir, 'bin', 'busybox')):
             logging.critical(
                 'Busybox binary is missing! target: %s package: %s', self.target_dir, package)
-            exit(1)
+            return False
 
         self._run_chroot('/bin/busybox --install -s /bin')
+
+        return True
 
     def find_kernel_version(self, mods_dir: str) -> str:
         """ Find the right kernel version. """
@@ -275,7 +261,15 @@ class InitrdGenerator:
                 continue
 
             self._run_root(f'mkdir -p {dst_dir}')
-            self._run_root(f'cp {src} {dst}')
+
+            self.fh.copy_file(
+                src=src,
+                dst=dst,
+                environment=self.env,
+                uid=0,
+                gid=0,
+                mode='644'
+            )
 
             # Find module dependencies.
             deps = ''
@@ -286,9 +280,6 @@ class InitrdGenerator:
                     mq.put_nowait(mdep)
 
             self._run_root(f'echo {module}: {deps} >> {mods_dep_dst}')
-
-        # Fix ownership of modules
-        self._run_root(f'chown -R 0:0 {self.target_dir}/lib/modules')
 
     def add_devices(self):
         """ Create device files. """
@@ -330,27 +321,25 @@ class InitrdGenerator:
 
             dst_file = Path(self.target_dir) / entry['destination'] / src.name
 
-            mode: str = entry.get('mode', '666')
-
             uid = entry.get('uid', '0')
             gid = entry.get('gid', '0')
+            mode: str = entry.get('mode', '666')
 
             logging.info('Copying %s to %s.', src, dst_file)
 
             self._run_root(f'mkdir -p {dst}')
 
-            if src.is_file():
-                self._run_root(f'cp {src} {dst}')
+            fs = self.fh.copy_file(
+                src=str(src),
+                dst=dst,
+                environment=self.env,
+                uid=uid,
+                gid=gid,
+                mode=mode
+            )
 
-                self._run_root(f'chmod {mode} {dst_file}')
-                self._run_root(f'chown {uid}:{gid} {dst_file}')
-            elif src.is_dir():
-                self._run_root(f'cp -R  {src}/* {dst}')
-
-                self._run_root(f'chmod -R {mode} {dst_file}')
-                self._run_root(f'chown -R {uid}:{gid} {dst_file}')
-            else:
-                logging.warning('Source %s does not exist', src)
+            if not fs:
+                logging.error('Copying of %s failed!', src)
 
     def create_initrd(self, image_path: str) -> Optional[str]:
         """ Create the initrd image.  """
@@ -358,7 +347,9 @@ class InitrdGenerator:
 
         logging.info('Installing busybox...')
 
-        self.install_busybox()
+        success = self.install_busybox()
+        if not success:
+            return None
 
         # Create necessary directories
         for dir_name in ['proc', 'sys', 'dev', 'sysroot', 'var', 'bin',
@@ -384,7 +375,7 @@ class InitrdGenerator:
             )
 
             if missing:
-                logging.critical('Not found packages: %s', missing)
+                logging.error('Not found packages: %s', missing)
 
         # Extract modules directly to the initrd /lib/modules directory
         self.extract_modules_from_deb(mods_dir)

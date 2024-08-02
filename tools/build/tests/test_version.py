@@ -1,5 +1,5 @@
 """ Unit tests for the version helpers. """
-from ebcl.version import Version, VersionDepends, PackageRelation, VersionRealtion
+from ebcl.common.version import Version, VersionDepends, PackageRelation, VersionRealtion
 
 
 class TestVersion:

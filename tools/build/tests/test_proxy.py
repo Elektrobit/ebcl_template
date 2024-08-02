@@ -1,8 +1,8 @@
 """ Unit tests for the EBcL apt proxy. """
 from pathlib import Path
 
-from ebcl.apt import Apt, parse_depends
-from ebcl.proxy import Proxy
+from ebcl.common.apt import Apt, parse_depends
+from ebcl.common.proxy import Proxy
 
 
 class TestProxy:

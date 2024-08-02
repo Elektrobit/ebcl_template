@@ -5,7 +5,7 @@ import tempfile
 
 from pathlib import Path
 
-from ebcl.boot import BootGenerator
+from ebcl.tools.boot.boot import BootGenerator
 
 
 class TestBoot:

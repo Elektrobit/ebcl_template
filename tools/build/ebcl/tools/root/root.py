@@ -12,12 +12,16 @@ from pathlib import Path
 from typing import Optional, Any
 from urllib.parse import urlparse
 
+import yaml
+
 from jinja2 import Template
 
-from .apt import Apt
-from .config import load_yaml
-from .fake import Fake
-from .files import Files, EnvironmentType
+from ebcl.common.apt import Apt
+from ebcl.common.config import load_yaml
+from ebcl.common.fake import Fake
+from ebcl.common.files import Files, EnvironmentType, parse_scripts
+from ebcl.common.proxy import Proxy
+from ebcl.common.version import VersionDepends, parse_package_config, parse_package
 
 
 class ImageType(Enum):
@@ -49,41 +53,48 @@ class RootGenerator:
     # config file
     config: str
     # config values
-    apt_repos: list[Apt] = []
     name: str
     arch: str
     image_type: ImageType
     image: Optional[str]
     template: Optional[str]
-    scripts: list[dict[str, str]]
+    scripts: list[dict[str, Any]]
+    apt_repos: list[Apt]
     # build result filename pattern
     result: Optional[str]
-
     # packages to install
-    packages: list[str]
+    packages: list[VersionDepends]
+    # root password
+    root_password: str
+
+    # sysroot
+    sysroot_packages: list[VersionDepends]
+    sysroot_defaults: bool
+    sysroot: bool
 
     # kiwi specific parameters
     kvm: bool
     berrymill_conf: Optional[str]
-    use_berrymill: bool
     bootstrap_package: Optional[str]
     bootstrap: Optional[list[str]]
     use_kiwi_defaults: bool
     kiwi_scripts: list[str]
     kiwi_root_overlays: list[str]
+    image_version: str
 
     # elbe specific parameters
     primary_repo: Optional[Apt]
     hostname: str
     domain: str
-    root_password: str
     console: str
     packer: str
 
     # fakeroot helper
     fake: Fake
+    # proxy
+    proxy: Proxy
     # files helper
-    files: Files
+    fh: Files
     # folder for script execution
     target_dir: Optional[str]
     # folder to collect build results
@@ -100,20 +111,20 @@ class RootGenerator:
         self.config = config_file
 
         self.arch = config.get('arch', 'arm64')
-        self.kvm = config.get('kvm', True)
 
-        self.scripts = config.get('scripts', [])
+        self.scripts = parse_scripts(config.get('scripts', None))
 
         self.image = config.get('image', None)
         self.template = config.get('template', None)
 
         self.berrymill_conf = config.get('berrymill_conf', None)
-        self.use_berrymill = config.get('use_berrymill', True)
         self.bootstrap_package = config.get('bootstrap_package', None)
         self.bootstrap = config.get('bootstrap', None)
         self.kiwi_scripts = config.get('kiwi_scripts', [])
         self.kiwi_root_overlays = config.get('kiwi_root_overlays', [])
         self.use_kiwi_defaults = config.get('use_kiwi_defaults', True)
+        self.kvm = config.get('kvm', True)
+        self.image_version = config.get('image_version', '1.0.0')
 
         self.name = config.get('name', 'root')
 
@@ -137,29 +148,34 @@ class RootGenerator:
                 arch=self.arch
             )
 
+        self.root_password = config.get('root_password', 'linux')
+
         self.hostname = config.get('hostname', 'ebcl')
         self.domain = config.get('domain', 'elektrobit.com')
-        self.root_password = config.get('root_password', 'linux')
         self.console = config.get('console', 'ttyAMA0,115200')
         self.packer = config.get('packer', 'none')
 
-        self.packages = config.get('packages', [])
+        self.packages = parse_package_config(
+            config.get('packages', []), self.arch)
 
-        repos: Optional[list[dict[str, Any]]] = config.get('apt_repos', None)
-        if repos:
-            self.apt_repos = []
-            for repo in repos:
-                self.apt_repos.append(
-                    Apt(
-                        url=repo['apt_repo'],
-                        distro=repo['distro'],
-                        components=repo['components'],
-                        arch=self.arch
-                    )
-                )
+        kernel = parse_package(config.get('kernel', None), self.arch)
+        if kernel:
+            self.packages.append(kernel)
+
+        self.sysroot_packages = parse_package_config(
+            config.get('sysroot_packages', []), self.arch)
+
+        self.sysroot_defaults = config.get('sysroot_defaults', True)
+
+        self.proxy = Proxy()
+        self.apt_repos = self.proxy.parse_apt_repos(
+            apt_repos=config.get('apt_repos', None),
+            arch=self.arch,
+            ebcl_version=config.get('ebcl_version', None)
+        )
 
         if self.primary_repo:
-            self.apt_repos.append(self.primary_repo)
+            self.proxy.add_apt(self.primary_repo)
 
         self.fake = Fake()
         self.files = Files(self.fake)
@@ -167,44 +183,26 @@ class RootGenerator:
     def _run_scripts(self):
         """ Run scripts. """
         for script in self.scripts:
-            script_path = script['name']
+            logging.info('Running script: %s', script)
 
-            params = ''
-            if 'params' in script:
-                params = script['params']
+            for script in self.scripts:
+                logging.info('Running script %s.', script)
 
-            env = EnvironmentType.FAKEROOT
-            if 'env' in script:
-                e = EnvironmentType.from_str(script['env'])
-                if e:
-                    env = e
-                else:
-                    logging.error(
-                        'Unknown environment %s for script %s!', script['env'], script['name'])
+                file = os.path.join(os.path.dirname(
+                    self.config), script['name'])
 
-            script_file = os.path.abspath(os.path.join(
-                os.path.dirname(self.config), script_path))
-
-            logging.info('Running script %s in env %s', script, env)
-
-            if not os.path.isfile(script_file):
-                logging.error('Script %s not found!', script)
-                continue
-
-            res = self.files.run_script(script_file, params, env)
-            if not res:
-                logging.error('Execution of script %s failed!', script_file)
-            else:
-                (_out, _err, returncode) = res
-                if returncode != 0:
-                    logging.error(
-                        'Execution of script %s failed with return code %s!',
-                        script_file, returncode)
+                self.fh.run_script(
+                    file=file,
+                    params=script.get('params', None),
+                    environment=EnvironmentType.from_str(
+                        script.get('env', None))
+                )
 
     def _generate_elbe_image(self) -> Optional[str]:
         """ Generate an elbe image description. """
-        # TODO: test
         assert self.result_dir
+
+        # TODO: test
 
         logging.info('Generating elbe image from template...')
 
@@ -335,8 +333,12 @@ class RootGenerator:
 
         return None
 
-    def _generate_kiwi_image(self, generate_repos: bool = False) -> Optional[str]:
+    def _generate_kiwi_image(self) -> Optional[str]:
         """ Generate a kiwi image description. """
+        assert self.result_dir
+
+        # TODO: test
+
         if not self.apt_repos:
             logging.critical('No apt repositories defined!')
             return None
@@ -349,33 +351,120 @@ class RootGenerator:
                             'Falling back to %s.')
             return None
 
-        # TODO: implement
+        params: dict[str, Any] = {}
 
-        return ''
+        if self.arch == 'arm64':
+            params['arch'] = 'aarch64'
+        else:
+            params['arch'] = 'x86_64'
+
+        params['version'] = self.image_version
+        params['root_password'] = self.root_password
+        params['packages'] = self.packages
+
+        if self.bootstrap_package:
+            params['bootstrap_package'] = self.bootstrap_package
+
+        if self.bootstrap:
+            params['bootstrap'] = self.bootstrap
+
+        if self.template is None:
+            template = os.path.join(os.path.dirname(__file__), 'root.kiwi')
+        else:
+            template = os.path.join(
+                os.path.dirname(self.config), self.template)
+
+        with open(template, encoding='utf8') as f:
+            tmpl = Template(f.read())
+
+        template_content = tmpl.render(**params)
+
+        image_file = os.path.join(self.result_dir, 'image.xml')
+        with open(image_file, 'w', encoding='utf8') as f:
+            f.write(template_content)
+
+        logging.info('Generated image stored as %s', image_file)
+
+        return image_file
 
     def _generate_berrymill_config(self) -> Optional[str]:
         """ Generate a berrymill.conf. """
-        # TODO: implement
+        assert self.result_dir
 
-        return ''
+        # TODO: test
+
+        berrymill_conf: dict[str, Any] = {}
+
+        berrymill_conf['use-global-repos'] = False
+        berrymill_conf['boxed_plugin_conf'] = '/etc/berrymill/kiwi_boxed_plugin.yml'
+        berrymill_conf['repos'] = {}
+        berrymill_conf['repos']['release'] = {}
+
+        for apt in self.apt_repos:
+            try:
+                url = urlparse(apt.url)
+            except Exception as e:
+                logging.error(
+                    'Invalid apt url %s, skippung repo! %s', apt.url, e)
+                continue
+
+            cmp_str = '_'.join(apt.components)
+            repo_key = f'{url.netloc.replace}_{apt.distro}_{cmp_str}'
+
+            if apt.arch not in berrymill_conf['repos']['release']:
+                berrymill_conf['repos']['release'][apt.arch] = {}
+
+            cmp_str = ','.join(apt.components)
+            berrymill_conf['repos']['release'][apt.arch][repo_key] = {
+                'url': apt.url,
+                'type': 'apt-deb',
+                'key': apt.key_url,
+                'name': apt.distro,
+                'components': cmp_str
+            }
+
+        config_file = os.path.join(self.result_dir, 'berrymill.conf')
+
+        try:
+            with open(config_file, 'w', encoding='utf-8') as f:
+                data = yaml.dump(berrymill_conf)
+                f.write(data)
+        except Exception as e:
+            logging.critical('Saving berrymill.conf failed! %s', e)
+            return None
+
+        return config_file
+
+    def _copy_files(self, files: list[str], dst: str):
+        """ Copy files to dst. """
+        logging.info('Files: %s', files)
+
+        for file in files:
+            src = os.path.join(os.path.dirname(self.config), file)
+
+            logging.info('Copying file %s...', file)
+
+            logging.info('Copying files %s', src)
+
+            self.fh.copy_file(
+                src=str(src),
+                dst=str(dst),
+            )
 
     def _build_kiwi_image(self, output_path: str) -> Optional[str]:
         """ Run kiwi image build. """
         assert self.result_dir
 
-        use_berrymill = self.use_berrymill
         berrymill_conf = self.berrymill_conf
-        if use_berrymill and not self.berrymill_conf:
+        if not berrymill_conf:
             logging.info('Generating the berrymill.conf...')
             berrymill_conf = self._generate_berrymill_config()
             if not berrymill_conf:
-                logging.error('Generating a berrymill.conf failed! '
-                              'Trying to build without berrymill.')
-                use_berrymill = False
+                logging.critical('Generating a berrymill.conf failed!')
+                return None
 
         if not self.image:
-            generate_repos = not use_berrymill
-            self.image = self._generate_kiwi_image(generate_repos)
+            self.image = self._generate_kiwi_image()
 
         if not self.image:
             logging.critical('No kiwi image description found!')
@@ -386,8 +475,7 @@ class RootGenerator:
             logging.critical('Image %s not found!', image)
             return None
 
-        if use_berrymill:
-            logging.info('Berrymill.conf: %s', berrymill_conf)
+        logging.info('Berrymill.conf: %s', berrymill_conf)
 
         appliance = Path(self.result_dir) / image.name
 
@@ -412,9 +500,19 @@ class RootGenerator:
                     logging.info('Adding %s to kiwi scripts.', kiwi_script)
                     kiwi_scripts.append(str(kiwi_script.absolute()))
 
-        # TODO: implement
-        # TODO: implement kiwi only build
+        # Copy kiwi image dependencies
+        self._copy_files(kiwi_scripts, os.path.dirname(appliance))
 
+        root_folder = os.path.join(os.path.dirname(appliance), 'root')
+        self.fake.run_no_fake(f'mkdir -P {root_folder}')
+
+        for overlay in kiwi_root_overlays:
+            self.fh.copy_file(
+                f'{overlay}/*',
+                f'{root_folder}',
+                environment=None)
+
+        # Run berrymill build
         if self.arch == 'amd64':
             if self.kvm:
                 logging.info('Berrymill & Kiwi KVM build of %s', appliance)
@@ -458,7 +556,7 @@ class RootGenerator:
                 self.fake.run_no_fake(
                     f'mv -R {res_dir} {output_path}', check=False)
 
-            exit(1)
+            return None
 
         # rename result archive
         ext = pattern.split('.', maxsplit=1)[-1]
@@ -473,8 +571,39 @@ class RootGenerator:
 
         return result_file
 
-    def create_root(self, output_path: str, run_scripts: bool = True) -> Optional[str]:
+    def create_root(
+        self,
+        output_path: str,
+        run_scripts: bool = True,
+        sysroot: bool = False
+    ) -> Optional[str]:
         """ Create the root image.  """
+        self.sysroot = sysroot
+
+        if sysroot:
+            logging.info('Running build in sysroot mode.')
+
+            # TODO: test
+
+            if self.sysroot_defaults:
+                sysroot_default_packages = parse_package_config(
+                    ['build-essential', 'g++'],
+                    self.arch
+                )
+                logging.info('Adding sysroot default packages %s.',
+                             sysroot_default_packages)
+                self.sysroot_packages += sysroot_default_packages
+
+            if self.sysroot_packages:
+                logging.info(
+                    'Adding sysroot packages %s to package list.', self.sysroot_packages)
+                self.packages += self.sysroot_packages
+
+            sysroot_image_name = f'{self.name}_sysroot'
+            logging.info('Adding sysroot suffix to image name %s: %s',
+                         self.name, sysroot_image_name)
+            self.name = sysroot_image_name
+
         self.target_dir = tempfile.mkdtemp()
         self.files.target_dir = self.target_dir
         logging.info('Target directory: %s', self.target_dir)
@@ -555,7 +684,9 @@ def main() -> None:
                         help='Path to the YAML configuration file')
     parser.add_argument('output', type=str,
                         help='Path to the output directory')
-    parser.add_argument('-nc', '--no-config', action='store_true',
+    parser.add_argument('-n', '--no-config', action='store_true',
+                        help='Skip the config script execution.')
+    parser.add_argument('-s', '--sysroot', action='store_true',
                         help='Skip the config script execution.')
 
     args = parser.parse_args()
@@ -571,7 +702,8 @@ def main() -> None:
         run_scripts = not bool(args.no_config)
         image = generator.create_root(
             output_path=args.output,
-            run_scripts=run_scripts)
+            run_scripts=run_scripts,
+            sysroot=args.sysroot)
     except Exception as e:
         logging.critical('Image build failed with exception! %s', e)
 

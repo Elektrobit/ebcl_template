@@ -1,9 +1,7 @@
 """ Tests for config helpers. """
 import os
 
-from typing import Any
-
-from ebcl.config import load_yaml
+from ebcl.common.config import load_yaml
 
 
 class TestApt:

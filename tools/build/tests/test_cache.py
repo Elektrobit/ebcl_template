@@ -2,9 +2,9 @@
 import shutil
 import tempfile
 
-from ebcl.cache import Cache
-from ebcl.deb import Package
-from ebcl.version import Version, VersionRealtion
+from ebcl.common.cache import Cache
+from ebcl.common.deb import Package
+from ebcl.common.version import Version, VersionRealtion
 
 
 class TestCache:

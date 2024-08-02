@@ -5,9 +5,9 @@ import logging
 import os
 import tempfile
 
-from .config import load_yaml
-from .fake import Fake
-from .files import Files, EnvironmentType
+from ebcl.common.config import load_yaml
+from ebcl.common.fake import Fake
+from ebcl.common.files import Files, EnvironmentType, parse_scripts
 
 
 class RootConfig:
@@ -22,7 +22,7 @@ class RootConfig:
     # fakeroot helper
     fake: Fake
     # files helper
-    files: Files
+    fh: Files
 
     def __init__(self, config_file: str):
         """ Parse the yaml config file.
@@ -35,6 +35,7 @@ class RootConfig:
         self.config = config_file
 
         self.scripts = config.get('scripts', [])
+        self.scripts = parse_scripts(config.get('scripts', None))
 
         self.fake = Fake()
         self.files = Files(self.fake)
@@ -42,33 +43,20 @@ class RootConfig:
     def _run_scripts(self):
         """ Run scripts. """
         for script in self.scripts:
-            script_path = script['name']
+            logging.info('Running script: %s', script)
 
-            params = ''
-            if 'params' in script:
-                params = script['params']
+            for script in self.scripts:
+                logging.info('Running script %s.', script)
 
-            env = EnvironmentType.FAKEROOT
-            if 'env' in script:
-                e = EnvironmentType.from_str(script['env'])
-                if e:
-                    env = e
-                else:
-                    logging.error(
-                        'Unknown environment %s for script %s!', script['env'], script['name'])
+                file = os.path.join(os.path.dirname(
+                    self.config), script['name'])
 
-            script_file = os.path.abspath(os.path.join(
-                os.path.dirname(self.config), script_path))
-
-            logging.info('Running script %s in env %s', script, env)
-
-            if not os.path.isfile(script_file):
-                logging.error('Script %s not found!', script)
-                continue
-
-            res = self.files.run_script(script_file, params, env)
-            if not res:
-                logging.error('Execution of script %s failed!', script_file)
+                self.fh.run_script(
+                    file=file,
+                    params=script.get('params', None),
+                    environment=EnvironmentType.from_str(
+                        script.get('env', None))
+                )
 
     def config_root(self, archive_in: str, archive_out: str) -> None:
         """ Config the tarball.  """

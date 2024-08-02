@@ -5,20 +5,30 @@
 - [x] versions
 - [x] derived configs
 - [x] fix UID issues
-- [x] image kernel src
-- [ ] image efi
 - [x] ttyS0
 - [x] cached apt indices
 - [x] vds compare
 - [ ] templates for root gen
 - [ ] sysroots
+
+- [x] image kernel src
+- [ ] image efi
+
 - [ ] QEMU images
 - [ ] Raspi images
 - [ ] RDB2 images
+
 - [ ] copy to SD card with bmaptool
+
 - [ ] user docs
+
+### App dev
+
 - [ ] cmake presets 
 - [ ] appdev user docs
+
+### Tests
+
 - [ ] image test tools
 - [ ] image tests
 

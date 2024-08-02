@@ -2,9 +2,9 @@
 import os
 import tempfile
 
-from ebcl.apt import Apt, parse_depends
-from ebcl.proxy import Proxy
-from ebcl.version import Version, VersionRealtion
+from ebcl.common.apt import Apt, parse_depends
+from ebcl.common.proxy import Proxy
+from ebcl.common.version import Version, VersionRealtion
 
 
 class TestApt:

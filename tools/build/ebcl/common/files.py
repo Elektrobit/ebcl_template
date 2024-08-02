@@ -6,7 +6,7 @@ import os
 from enum import Enum
 from io import BufferedWriter
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 from .fake import Fake
 
@@ -18,8 +18,11 @@ class EnvironmentType(Enum):
     CHROOT = 3
 
     @classmethod
-    def from_str(cls, script_type: str):
+    def from_str(cls, script_type: Optional[str]):
         """ Get ImageType from str. """
+        if not script_type:
+            return cls.FAKEROOT
+
         if script_type == 'fake':
             return cls.FAKEROOT
         elif script_type == 'chfake':
@@ -55,10 +58,14 @@ class Files:
         self,
         src: str,
         dst: str,
-        environment: EnvironmentType = EnvironmentType.FAKEROOT
+        environment: Optional[EnvironmentType] = EnvironmentType.FAKEROOT,
+        uid: Optional[int] = None,
+        gid: Optional[int] = None,
+        mode: Optional[str] = None,
+        move: bool = False,
+        delete_if_exists: bool = False
     ) -> list[str]:
         """ Copy file or dir to target environment"""
-        # TODO: uid, gid and mode
         files: list[str] = []
 
         dst = os.path.abspath(dst)
@@ -73,11 +80,35 @@ class Files:
             else:
                 target = dst
 
+            # TODO: test
+
             if file != target:
+                fn_run = self.fake.run
                 if environment == EnvironmentType.CHROOT:
-                    self.fake.run_sudo(f'cp -R {file} {target}')
+                    fn_run = self.fake.run_sudo
+                elif environment is None:
+                    fn_run = self.fake.run_no_fake
+
+                if os.path.isfile(file):
+                    parent_dir = os.path.dirname(file)
+                    fn_run(f'mkdir -p {parent_dir}')
+
+                if delete_if_exists:
+                    if os.path.exists(target):
+                        fn_run(f'rm -rf {target}')
+
+                if move:
+                    fn_run(f'mv {file} {target}')
                 else:
-                    self.fake.run(f'cp -R {file} {target}')
+                    fn_run(f'cp -R {file} {target}')
+
+                if uid:
+                    fn_run(f'chown {uid} {target}')
+                if gid:
+                    fn_run(f'chown :{gid} {target}')
+                if mode:
+                    fn_run(f'chmod {mode} {target}')
+
             else:
                 logging.info(
                     'Not copying %s, source and destionation are identical.')
@@ -109,38 +140,40 @@ class Files:
             target_dir = self.target_dir
 
         if environment == EnvironmentType.FAKEROOT:
-            (out, err, returncode) = self.fake.run(
+            return self.fake.run(
                 cmd=cmd,
                 cwd=cwd,
                 stdout=stdout,
                 check=check
             )
 
-        elif environment == EnvironmentType.FAKECHROOT:
-            (out, err, returncode) = self.fake.run_chroot(
-                cmd=cmd,
-                chroot=target_dir,
-                check=check
-            )
+        fn_run = None
 
+        if environment == EnvironmentType.FAKECHROOT:
+            fn_run = self.fake.run_chroot
         elif environment == EnvironmentType.CHROOT:
-            (out, err, returncode) = self.fake.run_sudo_chroot(
-                cmd=cmd,
-                chroot=target_dir,
-                check=check
-            )
+            fn_run = self.fake.run_sudo_chroot
 
-        return (out, err, returncode)
+        assert fn_run is not None
+
+        return fn_run(
+            cmd=cmd,
+            chroot=target_dir,
+            check=check
+        )
 
     def run_script(
         self,
         file: str,
         params: Optional[str] = None,
-        environment: EnvironmentType = EnvironmentType.FAKEROOT
+        environment: Optional[EnvironmentType] = None
     ) -> Optional[Tuple[Optional[str], str, int]]:
         """ Run scripts. """
         if not params:
             params = ''
+
+        if not environment:
+            environment = EnvironmentType.FAKEROOT
 
         if not self.target_dir:
             logging.error('Target dir not set!')
@@ -176,14 +209,13 @@ class Files:
 
             if os.path.abspath(script_file) != os.path.abspath(file):
                 # delete copied file
+                fn_run = self.fake.run
                 if environment == EnvironmentType.CHROOT:
-                    self.fake.run_sudo(f'rm -f {script_file}',
-                                       cwd=self.target_dir,
-                                       check=False)
-                else:
-                    self.fake.run(f'rm -f {script_file}',
-                                  cwd=self.target_dir,
-                                  check=False)
+                    fn_run = self.fake.run_sudo
+
+                fn_run(f'rm -f {script_file}',
+                       cwd=self.target_dir,
+                       check=False)
 
         return res
 
@@ -250,3 +282,41 @@ class Files:
         self.fake.run(f'mv {tmp_archive} {archive}')
 
         return archive
+
+
+def parse_scripts(
+    scripts: Optional[list[Any]],
+    env: EnvironmentType = EnvironmentType.FAKEROOT
+) -> list[dict[str, Any]]:
+    """ Parse scripts config entry. """
+    if not scripts:
+        return []
+
+    result: list[dict[str, Any]] = []
+
+    for script in scripts:
+        if isinstance(script, dict):
+            if 'name' not in script:
+                logging.error('Script %s has no name!', script)
+
+            if 'env' not in script:
+                script['env'] = env
+            else:
+                se = EnvironmentType.from_str(script['env'])
+                if se:
+                    script['env'] = se
+                else:
+                    logging.error('Unknown environment type %s! '
+                                  'Falling back to %s.', script, env)
+                    script['env'] = env
+
+            result.append(script)
+        elif isinstance(script, str):
+            result.append({
+                'name': script,
+                'env': env
+            })
+        else:
+            logging.error('Unkown script entry type: %s', script)
+
+    return result

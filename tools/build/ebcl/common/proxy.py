@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 """ EBcL apt proxy. """
+import argparse
 import logging
 import os
 import queue
 import shutil
 import tempfile
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any
 
 import requests
 
@@ -310,3 +311,32 @@ class Proxy:
                     pq.put_nowait([vd])
 
         return (debs, contents, missing)
+
+    def parse_apt_repos(
+        self,
+        apt_repos: Optional[list[dict[str, Any]]],
+        arch: str,
+        ebcl_version: Optional[str] = None
+    ) -> list[Apt]:
+        """ Parse and add apt repositories. """
+        # TODO: test
+
+        if not ebcl_version:
+            ebcl_version = '1.2'
+
+        result: list[Apt] = []
+
+        if apt_repos is None:
+            ebcl = Apt.ebcl_apt(arch, ebcl_version)
+            result.append(ebcl)
+            self.add_apt(ebcl)
+        else:
+            for repo in apt_repos:
+                apt = Apt.from_config(repo, arch)
+                if apt:
+                    result.append(apt)
+                    self.add_apt(apt)
+                else:
+                    logging.error('Invalid apt repo config: %s', repo)
+
+        return result
