@@ -91,6 +91,12 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install mypy pep8 pylint pytest pytest-cov robotframework
 
+# Fix container user
+USER root
+RUN chown -R $CONTAINER_USER:$CONTAINER_USER /build/venv
+
+USER $CONTAINER_USER
+
 # change work dir to workspace mount point
 WORKDIR /workspace
 
