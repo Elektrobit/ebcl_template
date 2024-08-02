@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Generate the apt repo metadata
+cd /build/results/packages
+
+mkdir -p dists/local/main/{binary-arm64,binary-amd64}
+
+dpkg-scanpackages -m -a amd64 . /dev/null > dists/local/main/binary-amd64/Packages
+dpkg-scanpackages -m -a arm64 . /dev/null > dists/local/main/binary-arm64/Packages
+dpkg-scanpackages -m -a amd64 . /dev/null | gzip -9c > dists/local/main/binary-amd64/Packages.gz
+dpkg-scanpackages -m -a arm64 . /dev/null | gzip -9c > dists/local/main/binary-arm64/Packages.gz
+dpkg-scanpackages -m -a amd64 . /dev/null | xz -9 > dists/local/main/binary-amd64/Packages.xz
+dpkg-scanpackages -m -a arm64 . /dev/null | xz -9 > dists/local/main/binary-arm64/Packages.xz
+
+# generate the release file
+cd dists/local
+
+do_hash() {
+    HASH_NAME=$1
+    HASH_CMD=$2
+    echo "${HASH_NAME}:"
+    for f in $(find -type f -name "Packages*"); do
+        f=$(echo $f | cut -c3-) # remove ./ prefix
+        if [ "$f" = "Release" ]; then
+            continue
+        fi
+        echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f)"
+    done
+}
+
+cat > Release << EOF
+Origin: EBcL workspace local repository
+Label: LocalRepo
+Suite: local
+Codename: local
+Version: 1.0
+Architectures: amd64 arm64
+Description: An example software repository
+Components: main
+Date: $(date -Ru)
+EOF
+
+do_hash "MD5Sum" "md5sum" >> Release
+do_hash "SHA1" "sha1sum" >> Release
+do_hash "SHA256" "sha256sum" >> Release
+
+# Generate Release signature
+gpg -b --output Release.gpg  --armor Release
+
+# Generate InRelease file
+gpg --clearsign -o InRelease Release
+
+# Export signing key
+gpg --export $DEBMAIL > Release.key
+
+# Update local apt config
+sudo cp Release.key /etc/apt/trusted.gpg.d/local.gpg
+sudo bash -c "echo 'deb file:/build/results/packages local main' > /etc/apt/sources.list.d/local.list"

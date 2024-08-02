@@ -1,0 +1,6 @@
+echo "Welcome to the EB corbos Linux SDK"
+
+alias ll="ls -laF"
+
+source /build/bin/ebcl_env
+export PATH=$PATH

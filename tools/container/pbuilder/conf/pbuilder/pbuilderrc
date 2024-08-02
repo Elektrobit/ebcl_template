@@ -1,0 +1,9 @@
+HOOKDIR="/home/ebcl/.pbuilder/hooks/"
+DISTRIBUTION=jammy
+MIRRORSITE=http://archive.ubuntu.com/ubuntu
+OTHERMIRROR="deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main universe | deb [arch=amd64] http://archive.ubuntu.com/ubuntu jammy-security main universe | deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main universe | deb http://linux.elektrobit.com/eb-corbos-linux/1.1.1 ebcl prod dev"
+PBUILDERSATISFYDEPENDSCMD="/usr/lib/pbuilder/pbuilder-satisfydepends-apt"
+BUILDRESULT=/build/result_app
+COMPONENTS="main universe"
+DEBOOTSTRAPOPTS=( '--variant=minbase' '--keyring' '/home/ebcl/.gnupg/trustedkeys.gpg' )
+APTKEYRINGS=( '/etc/apt/trusted.gpg.d/elektrobit.gpg' )

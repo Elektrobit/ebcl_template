@@ -1,0 +1,83 @@
+#!/bin/bash
+
+VERSION="testing"
+
+if [ -z $RUNNER ]; then
+    # docker or podman
+    RUNNER="docker"
+fi
+echo "RUNNER: ${RUNNER}"
+
+if [ -z $CONTAINER_NAME ]; then
+    CONTAINER_NAME="ebcl_sdk"
+fi
+echo "CONTAINER_NAME: ${CONTAINER_NAME}"
+
+SCRIPT=$(realpath "${BASH_SOURCE[0]}")
+SCRIPT_DIR=$(dirname $SCRIPT)
+echo "SCRIPT FOLDER: ${SCRIPT_DIR}"
+
+# find workspace folder
+WORKSPACE=$(realpath "$SCRIPT_DIR/../..")
+echo "WORKSPACE: $WORKSPACE"
+
+# find images folder
+IMAGES=$(realpath "$WORKSPACE/images")
+echo "IMAGES: $IMAGES"
+
+# find identity folder
+IDENTITY=$(realpath "$WORKSPACE/identity")
+echo "IDENTITY: $IDENTITY"
+
+# find results folder
+mkdir -p /tmp/results/{images,packages} || true
+RESULTS_DIR=$(realpath "$WORKSPACE/results")
+echo "RESULT FOLDER: $RESULTS_DIR"
+RESULTS_IMAGES_DIR=$(realpath "$RESULTS_DIR/images")
+RESULTS_PACKAGES_DIR=$(realpath "$RESULTS_DIR/packages")
+RESULTS_APPS_DIR=$(realpath "$RESULTS_DIR/apps")
+
+# find sysroots
+SYSROOT_X86=$(realpath "$WORKSPACE/sysroot_x86_64")
+echo "SYSROOT_X86: $SYSROOT_X86"
+SYSROOT_ARM=$(realpath "$WORKSPACE/sysroot_aarch64")
+echo "SYSROOT_ARM: $SYSROOT_ARM"
+
+lsmod | grep binfmt_misc
+if [ $? -ne 0 ]; then
+    echo "Trying to load binfmt kernel module for cross-builds ..."
+    sudo modprobe binfmt_misc
+fi
+
+if [ ! -z "$@" ]; then
+    $RUNNER run --rm \
+        --name $CONTAINER_NAME \
+        -e "CI_COMMAND=$@" \
+        -v ${HOME}/.ssh:/home/ebcl/.ssh:ro \
+        -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
+        -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
+        -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
+        -v ${WORKSPACE}:/workspace:rw \
+        -v ${IMAGES}:/build/images:ro \
+        -v ${IDENTITY}:/build/identity:ro \
+        -v ${SYSROOT_X86}:/build/sysroot_x86_64:ro \
+        -v ${SYSROOT_ARM}:/build/sysroot_aarch64:ro \
+        -v /dev:/dev \
+        --privileged \
+        linux.elektrobit.com/ebcl/sdk:testing
+else
+    $RUNNER run --rm -it \
+        --name $CONTAINER_NAME \
+        -v ${HOME}/.ssh:/home/ebcl/.ssh:ro \
+        -v ${RESULTS_IMAGES_DIR}:/build/results/images:rw \
+        -v ${RESULTS_PACKAGES_DIR}:/build/results/packages:rw \
+        -v ${RESULTS_APPS_DIR}:/build/results/apps:rw \
+        -v ${WORKSPACE}:/workspace:rw \
+        -v ${IMAGES}:/build/images:ro \
+        -v ${IDENTITY}:/build/identity:ro \
+        -v ${SYSROOT_X86}:/build/sysroot_x86_64:ro \
+        -v ${SYSROOT_ARM}:/build/sysroot_aarch64:ro \
+        -v /dev:/dev \
+        --privileged \
+        linux.elektrobit.com/ebcl/sdk:testing
+fi

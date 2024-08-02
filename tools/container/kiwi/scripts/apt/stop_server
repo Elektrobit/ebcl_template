@@ -1,0 +1,8 @@
+#!/bin/bash
+
+PROC=$(lsof -i :8000 | grep LISTEN)
+if [ $? -eq 0 ]; then
+    echo "Killing process ${PROC}."
+    PID=$(lsof -i :8000 | grep LISTEN | awk '{print $2}')
+    kill $PID
+fi

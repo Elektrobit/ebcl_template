@@ -1,0 +1,3 @@
+deb http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl prod dev
+
+deb-src http://linux.elektrobit.com/eb-corbos-linux/1.2 ebcl prod dev

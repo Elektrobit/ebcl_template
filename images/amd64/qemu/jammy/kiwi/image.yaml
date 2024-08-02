@@ -1,0 +1,14 @@
+image:
+  type: gpt
+  boot_partition: root
+
+  parts:
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 2 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/ubuntu.tar.xz

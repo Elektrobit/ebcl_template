@@ -1,0 +1,14 @@
+name: ubuntu
+type: kiwi
+image: jammy.kiwi
+arch: amd64
+kvm: true
+result: '*.tar.xz'
+berrymill_conf: berrymill.conf
+scripts:
+  - name: config_root.sh
+    type: config
+  - name: pre_disc_root.sh
+    type: pre_disc
+  - name: post_disc_root.sh
+    type: post_disc

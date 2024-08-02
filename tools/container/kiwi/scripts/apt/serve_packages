@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Ensure berrymill conf has correct container IP
+berrymill_local_repo
+
+if [ -z "$APT_PATH" ]; then
+    export APT_PATH="/build/results/packages"
+fi
+
+if [ -n "$1" ]; then
+    APT_PATH=$1
+    # complete apt path
+    if [[ "${APT_PATH}" != "/"* ]]; then
+        # handle relative path
+        if [ ! -d "${APT_PATH}" ]; then
+            # relative path from current folder does not exist
+            # use relative path in workspace apps folder
+            APT_PATH="/build/workspace/${APT_PATH}"
+        else
+            APT_PATH=$(realpath $APT_PATH)
+        fi
+    fi
+    export APT_PATH=${APT_PATH}
+fi
+
+# serve the apt repo
+echo "Now serving the local apt repository from ${APT_PATH}."
+echo "Press Strg + C to stop the server."
+python3 -m http.server --directory ${APT_PATH}

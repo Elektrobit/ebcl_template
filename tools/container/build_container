@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+cd $(dirname "${BASH_SOURCE[0]}")
+echo "Current directory: $PWD"
+
+if [[ ! -d ../.venv ]]; then
+    echo "Preparing venv for container build tool..."
+    pushd ..
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    popd
+fi
+
+echo "Building EBcL SDK dev container..."
+bash -c "source ../.venv/bin/activate; python build_container.py"

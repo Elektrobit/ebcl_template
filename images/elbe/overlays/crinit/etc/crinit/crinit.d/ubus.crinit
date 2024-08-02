@@ -1,0 +1,7 @@
+# !LINKSTO ireq.network.manager, 1
+NAME = ubus
+
+COMMAND = /sbin/ubusd
+
+DEPENDS = @provided:tmpdir @provided:net
+RESPAWN = YES

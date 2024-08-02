@@ -1,0 +1,54 @@
+<ns0:RootFileSystem xmlns:ns0="https://www.linutronix.de/projects/Elbe" xmlns:xi="http://www.w3.org/2003/XInclude" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" created="2009-05-20T08:50:56" revision="6" xsi:schemaLocation="https://www.linutronix.de/projects/Elbe dbsfed.xsd">
+	<project>
+		<name>{{ name }}</name>
+		<version>1.0</version>
+		<description>Elbe image template for EBcL root filesystem generator.</description>
+		<buildtype>{{ arch }}</buildtype>
+		<mirror>
+			<primary_host>{{ primary_repo_url }}</primary_host>
+			<primary_path>{{ primary_repo_path }}</primary_path>
+			<primary_proto>{{ primary_repo_proto }}</primary_proto>
+{% if apt_repos %}
+			<url-list>
+{% for repo in apt_repos %}
+				<url>
+					<binary>{{ repo.apt_line }}</binary>
+					<source>{{ repo.apt_line }}</source>
+					<options>
+						<option>arch={{ repo.arch }}</option>
+					</options>
+{% if repo.key %}
+					<raw-key>
+{{ repo.key }}
+					</raw-key>
+{% endif %}
+				</url>
+{% endfor %}
+			</url-list>
+{% endif %}
+		</mirror>
+		<suite>{{ distro }}</suite>
+	</project>
+	<target>
+		<hostname>{{ hostname }}</hostname>
+		<domain>{{ domain }}</domain>
+		<passwd>{{ root_password }}</passwd>
+		<console>{{ console }}</console>
+		<debootstrap>
+			<variant>minbase</variant>
+		</debootstrap>
+		<package>
+			<tar>
+				<name>{{ output_archive }}</name>
+			</tar>
+		</package>
+		<pkg-list>
+{% for package in packages %}
+			<pkg>{{ package }}</pkg>
+{% endfor %}
+		</pkg-list>
+		<project-finetuning>
+			<set_packer packer="{{ packer }}">{{ output_archive }}</set_packer>
+		</project-finetuning>
+	</target>
+</ns0:RootFileSystem>

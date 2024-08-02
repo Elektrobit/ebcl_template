@@ -1,0 +1,12 @@
+Base-Name: sdk
+Repository: linux.elektrobit.com/ebcl
+Base-Container: ubuntu:22.04
+Version: testing
+Layers:
+  - base
+  - pbuilder
+  - rust
+  - kiwi
+  - elbe
+  - appdev
+  - embdgen

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# copy image to tmp
+source prepare_image_build $@
+
+# run berrymill
+berrymill -c $BERRYMILL_CFG -d -a amd64 -i $APPLIANCE --clean build --box-memory 4G --target-dir /tmp/result_image --no-accel --cpu qemu64-v1
+
+set -e
+check_image_build

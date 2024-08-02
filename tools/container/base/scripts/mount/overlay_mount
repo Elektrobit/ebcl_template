@@ -1,0 +1,26 @@
+#!/bin/bash
+
+FOLDER=$(realpath $1)
+
+echo "Mounting $FOLDER as rw using overlay."
+
+if [ -d "/tmp$FOLDER" ]; then
+    echo "/tmp$FOLDER folder already exists."
+    exit 1
+fi
+
+mkdir -p /tmp/overlay
+mkdir -p /tmp$FOLDER
+
+MOUNT=$(sudo mount | grep "/tmp/overlay")
+if [ $? -ne 0 ]; then
+    sudo mount -t tmpfs tmpfs /tmp/overlay
+fi
+
+mkdir -p /tmp/overlay${FOLDER}/{work,upper}
+
+sudo mount -t overlay overlay \
+    -o lowerdir=$FOLDER,upperdir=/tmp/overlay${FOLDER}/upper,workdir=/tmp/overlay${FOLDER}/work \
+    /tmp$FOLDER
+
+echo $FOLDER is now RW available as /tmp$FOLDER

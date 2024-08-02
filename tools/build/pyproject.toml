@@ -1,0 +1,81 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "ebcl/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ebcl"]
+
+[project]
+name = "ebcl"
+dynamic = ["version"]
+
+authors = [
+  { name="Elektrobit GmbH", email="info@elektrobit.com" },
+]
+description = "EBcL build helpers."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Software Development :: Embedded Systems",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "requests"
+]
+
+[project.urls]
+Homepage = "https://github.com/Elektrobit/ebcl_template"
+
+[project.scripts]
+boot_generator = "ebcl.boot:main"
+initrd_generator = "ebcl.initrd:main"
+root_generator = "ebcl.root:main"
+package_downloader = "ebcl.downloader:main"
+root_configurator = "ebcl.root_config:main"
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    "E0402",
+    "W0212",
+    "W0718"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.2.5"
+addopts = "--cov --cov-context=test --cov-report html -rP"
+testpaths = [ "tests" ]
+
+[tool.coverage.paths]
+source = [
+    "ebcl",
+    "*/site-packages/ebcl"
+]
+
+[tool.coverage.run]
+branch = true
+source = ["ebcl"]
+
+[tool.coverage.report]
+include_namespace_packages = true
+exclude_also = [
+    "@(abc\\.)?abstractmethod",
+    "def __repr__"
+]
+include = ["ebcl/*"]
+
+[tool.coverage.html]
+show_contexts = true
+
+
+[tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/ebcl"
+explicit_package_bases = true
