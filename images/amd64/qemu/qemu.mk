@@ -109,7 +109,7 @@ $(kernel): $(boot_spec)
 	@echo "Get kernel binary..."
 	mkdir -p build
 	boot_generator $(boot_spec) ./build
-	mv ./$(kernel)-* ./$(kernel)
+	mv ./$(kernel)-* ./$(kernel) || true
 
 $(initrd_img): $(initrd_spec)
 	@echo "Build initrd.img..."

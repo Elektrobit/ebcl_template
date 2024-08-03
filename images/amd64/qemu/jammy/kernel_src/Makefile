@@ -7,9 +7,9 @@
 # Specificaiton of the partition layout of the image.raw
 partition_layout = ../image.yaml
 # Specificaiton of the root filesystem content and configuration
-root_filesystem_spec = root.yaml
+root_filesystem_spec = ../root.yaml
 # Specificaiton of the initrd.img
-initrd_spec = ../initrd.yaml
+initrd_spec = initrd.yaml
 # Specificaiton of the kernel
 boot_spec = ../boot.yaml
 
@@ -65,3 +65,8 @@ $(kconfig): $(boot_spec)
 	mkdir -p build
 	boot_generator ../boot.yaml ./build
 	mv ./build/config-* ./build/config
+
+$(initrd_img): $(initrd_spec) $(modules)
+	@echo "Build initrd.img..."
+	mkdir -p build
+	initrd_generator $(initrd_spec) ./build
