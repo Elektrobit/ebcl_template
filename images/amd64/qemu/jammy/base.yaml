@@ -1,4 +1,6 @@
+# Kernel package to use
 kernel: linux-image-generic
+# Apt repositories to use
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
     distro: jammy
@@ -10,4 +12,5 @@ apt_repos:
     components:
       - main
       - universe
+# CPU architecture
 arch: 'amd64'

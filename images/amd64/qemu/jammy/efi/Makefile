@@ -1,56 +1,72 @@
-.PHONY: default
-default: qemu
+# Makefile for Jammy QEMU amd64 image using grub efi bootloader
 
-.PHONY: image
-image: build/image.raw
+#---------------------
+# Image specifications
+#---------------------
 
-.PHONY: root
-root: build/ubuntu.tar
+# Specificaiton of the partition layout of the image.raw
+partition_layout = image.yaml
+# Specificaiton of the root filesystem content and configuration
+root_filesystem_spec = ../root.yaml
+# Specificaiton of the initrd.img
+initrd_spec = ../initrd.yaml
+# Specificaiton of the boot partition
+boot_spec = boot.yaml
+# Specificaiton of the efi partition
+efi_spec = efi.yaml
 
-.PHONY: initrd
-initrd: build/initrd.img
+#-------------------------
+# Additional configuration
+#-------------------------
 
-.PHONY: boot
-boot: build/boot.tar
+# Config script for root filesystem
+config_root = ../config_root.sh
 
-.PHONY: efi
-boot: build/efi.tar
+# Configuration for the grub bootloader
+grub = grub.cfg
 
+include ../../qemu.mk
+
+#--------------------
+# Generated artefacts
+#--------------------
+
+# Boot partition tarball
+boot = build/boot.tar
+# EFI partition tarball
+efi = build/efi.tar
+
+#-------------------
+# Run the QEMU image
+#-------------------
 .PHONY: qemu
-qemu: build/image.raw
-	@echo "Running build/image.raw in QEMU..."
+qemu: $(kernel) $(initrd_img) $(disc_image)
+	@echo "Running $(disc_image) in QEMU..."
 	qemu-system-x86_64 \
-		-m 4096 \
-        -nographic \
-        -netdev user,id=mynet0 \
-        -device virtio-net-pci,netdev=mynet0 \
-        -drive file=build/image.raw,if=virtio
+		-nographic -m 4G \
+		-netdev user,id=mynet0 \
+		-device virtio-net-pci,netdev=mynet0 \
+		-kernel $(kernel) \
+		-append "console=ttyS0" \
+		-initrd $(initrd_img) \
+		-drive format=raw,file=$(disc_image),if=virtio
 
-build/image.raw: build/efi.tar build/boot.tar build/ubuntu.tar image.yaml
+
+#--------------------------
+# Image build configuration
+#--------------------------
+
+$(disc_image): $(root_tarball) $(boot) $(efi) $(partition_layout)
 	@echo "Build image..."
 	mkdir -p build
-	embdgen -o ./build/image.raw image.yaml
+	embdgen -o ./$(disc_image) $(partition_layout)
 
-build/ubuntu.tar: root.yaml jammy.xml
-	@echo "Build root.tar..."
+$(boot): $(boot_spec)
+	@echo "Generate boot partition content..."
 	mkdir -p build
-	root_generator root.yaml ./build
+	boot_generator $(boot_spec) ./build
 
-build/boot.tar: boot.yaml grub.cfg build/initrd.img
-	@echo "Generate boot archive..."
+$(efi): $(efi_spec)
+	@echo "Generate boot partition content..."
 	mkdir -p build
-	boot_generator boot.yaml ./build
-
-build/efi.tar: efi.yaml
-	@echo "Generate efi archive..."
-	mkdir -p build
-	boot_generator efi.yaml ./build
-
-build/initrd.img: ../initrd.yaml
-	@echo "Build initrd.img..."
-	mkdir -p build
-	initrd_generator ../initrd.yaml ./build
-
-.PHONY: clean
-clean:
-	rm -rf build
+	boot_generator $(boot_spec) ./build

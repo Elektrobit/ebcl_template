@@ -1,42 +1,23 @@
-.PHONY: default
-default: qemu
+# Makefile for ammy QEMU amd64 image using kiwi
 
-.PHONY: image
-image: build/image.raw
+#---------------------
+# Image specifications
+#---------------------
 
-.PHONY: qemu
-qemu: build/vmlinuz build/initrd.img build/image.raw
-	@echo "Running build/image.raw in QEMU..."
-	qemu-system-x86_64 \
-		-nographic -m 4G \
-		-netdev user,id=mynet0 \
-		-device virtio-net-pci,netdev=mynet0 \
-		-kernel build/vmlinuz \
-		-append "console=ttyS0" \
-		-initrd build/initrd.img \
-		-drive format=raw,file=build/image.raw,if=virtio
+# Specificaiton of the partition layout of the image.raw
+partition_layout = ../image.yaml
+# Specificaiton of the root filesystem content and configuration
+root_filesystem_spec = root.yaml
+# Specificaiton of the initrd.img
+initrd_spec = ../initrd.yaml
+# Specificaiton of the kernel
+boot_spec = ../boot.yaml
 
-build/image.raw: build/ubuntu.tar.xz image.yaml
-	@echo "Build image..."
-	mkdir -p build
-	embdgen -o ./build/image.raw image.yaml
+#-------------------------
+# Additional configuration
+#-------------------------
 
-build/ubuntu.tar.xz: root.yaml config.sh jammy.kiwi
-	@echo "Build root.tar..."
-	mkdir -p build
-	root_generator root.yaml ./build
+# Config script for root filesystem
+config_root = ../config_root.sh
 
-build/vmlinuz: ../boot.yaml
-	@echo "Get kernel binary..."
-	mkdir -p build
-	boot_generator ../boot.yaml ./build
-	mv ./build/vmlinuz-* ./build/vmlinuz
-
-build/initrd.img: ../initrd.yaml
-	@echo "Build initrd.img..."
-	mkdir -p build
-	initrd_generator ../initrd.yaml ./build
-
-.PHONY: clean
-clean:
-	rm -rf build
+include ../../qemu.mk

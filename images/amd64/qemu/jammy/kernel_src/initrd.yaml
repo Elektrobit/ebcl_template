@@ -1,3 +1,0 @@
-base: ../initrd.yaml
-kversion: 5.15.158
-modules_folder: build

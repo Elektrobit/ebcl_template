@@ -1,10 +1,14 @@
+# not type -> use default image builder
+# Name of the archive.
 name: ubuntu
-type: elbe
+# CPU architecture
 arch: amd64
+# Packages to install in the root tarball
 packages:
   - systemd
-  - udev
+  - udev        # udev will create the device node for ttyS0
   - util-linux
+# Scripts to configure the root tarball
 scripts:
-  - name: config_root.sh
-    env: chfake
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chfake # Type of execution environment - chfake means fakechroot

@@ -1,4 +1,0 @@
-name: ubuntu
-type: elbe
-image: jammy.xml
-arch: amd64
