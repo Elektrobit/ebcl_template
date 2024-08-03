@@ -82,6 +82,7 @@ class RootGenerator:
     kiwi_scripts: list[str]
     kiwi_root_overlays: list[str]
     image_version: str
+    box_debug: bool
 
     # elbe specific parameters
     primary_repo: Optional[Apt] = None
@@ -132,6 +133,7 @@ class RootGenerator:
         self.use_kiwi_defaults = config.get('use_kiwi_defaults', True)
         self.kvm = config.get('kvm', True)
         self.image_version = config.get('image_version', '1.0.0')
+        self.box_debug = config.get('box_debug', False)
 
         self.name = config.get('name', 'root')
 
@@ -605,15 +607,14 @@ class RootGenerator:
             if self.arch == 'arm64':
                 box_arch = '--aarch64'
 
-            # use blank default config
-            kiwi_conf = Path(self.result_dir) / 'kiwi.yaml'
-            kiwi_conf.touch()
+            box_debug = ''
+            if self.box_debug:
+                box_debug = '--box-debug'
 
             cmd = f'kiwi-ng --target-arch={self.arch} ' \
                 f'--kiwi-file={os.path.basename(appliance)} ' \
-                f'--config={kiwi_conf} ' \
-                'system boxbuild ' \
-                f'--box ubuntu --box-memory=4G --cpu=qemu64-v1 {accel} {box_arch} -- ' \
+                f'system boxbuild {box_debug} {box_arch} ' \
+                f'--box ubuntu --box-memory=4G --cpu=qemu64-v1 {accel} -- ' \
                 f'--description={os.path.dirname(appliance)} ' \
                 f'--target-dir={self.result_dir}'
 

@@ -14,6 +14,5 @@ use_bootstrap_package: false
 # Select required bootstrap packages
 bootstrap:
   - apt
-  - ubuntu-keyring
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi

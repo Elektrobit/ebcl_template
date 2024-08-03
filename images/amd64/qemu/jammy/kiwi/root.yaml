@@ -10,5 +10,5 @@ apt_repos:
     gpg: /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
-# Do not use berrymill
-use_berrymill: false
+# Stay in box after build
+box_debug: true

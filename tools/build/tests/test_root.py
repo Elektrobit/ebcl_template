@@ -103,3 +103,35 @@ class TestRoot:
         assert os.path.isfile(archive)
 
         # shutil.rmtree(out)
+
+    def test_build_sysroot_kiwi(self):
+        """ Test kiwi image build. """
+        out = tempfile.mkdtemp()
+
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml = os.path.join(test_dir, 'data', 'sysroot_kiwi.yaml')
+        generator = RootGenerator(yaml)
+
+        generator.apt_repos = [Apt.ebcl_apt('amd64')]
+
+        archive = generator.create_root(out)
+        assert archive
+        assert os.path.isfile(archive)
+
+        shutil.rmtree(out)
+
+    def test_build_sysroot_elbe(self):
+        """ Test build root.tar. """
+        out = tempfile.mkdtemp()
+
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml = os.path.join(test_dir, 'data', 'sysroot_elbe.yaml')
+        generator = RootGenerator(yaml)
+
+        generator.apt_repos = [Apt.ebcl_apt('amd64')]
+
+        archive = generator.create_root(out)
+        assert archive
+        assert os.path.isfile(archive)
+
+        shutil.rmtree(out)

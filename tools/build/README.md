@@ -8,16 +8,20 @@
 - [x] ttyS0
 - [x] cached apt indices
 - [x] vds compare
-- [ ] templates for root gen
-- [ ] sysroots
-- [ ] copy templates to out, copy generated files to out
+- [x] sysroots
+- [x] copy templates to out, copy generated files to out
+- [x] templates for root gen
 
 - [x] image kernel src
 - [ ] image efi
+- [ ] image ro root fs
 
 - [ ] QEMU images
-- [ ] Raspi images
 - [ ] RDB2 images
+- [ ] Raspi images
+
+- [ ] fix kiwi-only build
+- [ ] fix robot tests
 
 - [ ] copy to SD card with bmaptool
 
@@ -32,6 +36,7 @@
 
 - [ ] image test tools
 - [ ] image tests
+- [ ] improve and complete tests
 
 ### Stretch goal
 
