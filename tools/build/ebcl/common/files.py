@@ -248,7 +248,8 @@ class Files:
         self,
         output_dir: str,
         archive_name: str = 'root.tar',
-        root_dir: Optional[str] = None
+        root_dir: Optional[str] = None,
+        use_fake_chroot: bool = True
     ) -> Optional[str]:
         """ Create tar archive of target_dir. """
         target_dir = self.target_dir
@@ -267,7 +268,11 @@ class Files:
                 'Archive %s exists. Deleting old archive.', tmp_archive)
             os.remove(tmp_archive)
 
-        self.fake.run_chroot(
+        fn_run: Any = self.fake.run
+        if use_fake_chroot:
+            fn_run = self.fake.run_chroot
+
+        fn_run(
             'tar --exclude=\'./proc\' --exclude=\'./sys\' --exclude=\'./dev\' '
             f'-cf {archive_name} .',
             target_dir
@@ -303,6 +308,7 @@ def parse_scripts(
                 script['env'] = env
             else:
                 se = EnvironmentType.from_str(script['env'])
+                logging.debug('Using env %s for script %s.', se, script)
                 if se:
                     script['env'] = se
                 else:
@@ -312,6 +318,7 @@ def parse_scripts(
 
             result.append(script)
         elif isinstance(script, str):
+            logging.debug('Using default env %s for script %s.', env, script)
             result.append({
                 'name': script,
                 'env': env

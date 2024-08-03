@@ -76,15 +76,15 @@ class TestDeb:
 
     def test_pkg_form_deb(self):
         """ Test package creation from deb files. """
-        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.deb')
+        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.deb', [])
         assert p is not None
         assert p.name == 'gcab'
         assert p.version == Version('0.7-1')
         assert p.arch == 'i386'
         assert p.local_file is None
 
-        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.dsc')
+        p = Package.from_deb('/path/to/my/gcab_0.7-1_i386.dsc', [])
         assert p is None
 
-        p = Package.from_deb('/path/to/my/gcab_0.7-1.deb')
+        p = Package.from_deb('/path/to/my/gcab_0.7-1.deb', [])
         assert p is None

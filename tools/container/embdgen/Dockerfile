@@ -27,9 +27,16 @@ RUN pip install pyyaml types-PyYAML \
 WORKDIR /build
 RUN git clone --branch v0.1.1 https://github.com/Elektrobit/embdgen.git embdgen
 WORKDIR /build/embdgen
-RUN bash -c "source /build/venv/bin/activate; pip install -e embdgen-core"
-RUN bash -c "source /build/venv/bin/activate; pip install -e embdgen-cominit"
-RUN bash -c "source /build/venv/bin/activate; pip install -e embdgen-config-yaml"
+RUN pip install -e embdgen-core
+RUN pip install -e embdgen-cominit
+RUN pip install -e embdgen-config-yaml
+
+# Install EBcL build helpers
+RUN pip install jsonpickle
+
+# Add apt keys
+RUN mkdir -p /build/keys
+COPY conf/elektrobit.pub /build/keys/
 
 WORKDIR /workspace
 

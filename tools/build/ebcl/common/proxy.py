@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 """ EBcL apt proxy. """
-import argparse
 import logging
 import os
 import queue
@@ -29,7 +28,7 @@ class Proxy:
         cache: Optional[Cache] = None
     ) -> None:
         if apts is None:
-            self.apts = [Apt()]
+            self.apts = []
         else:
             self.apts = apts
 
@@ -41,6 +40,7 @@ class Proxy:
     def add_apt(self, apt: Apt) -> bool:
         """ Adds an apt repo to the list of apt repos. """
         if apt not in self.apts:
+            logging.info('Adding %s to proxy.', apt)
             self.apts.append(apt)
             return True
         return False
@@ -50,6 +50,7 @@ class Proxy:
         result = apt in self.apts
 
         while apt in self.apts:
+            logging.info('Removing %s from proxy.', apt)
             self.apts.remove(apt)
 
         return result
@@ -238,8 +239,8 @@ class Proxy:
 
         # Folder for debs
         if debs is None:
-            logging.info('Downloading to cache folder %s.', self.cache.folder)
-            debs = self.cache.folder
+            debs = tempfile.mkdtemp()
+            logging.info('Downloading to temp folder %s.', debs)
 
         # Folder for package content
         if extract:
@@ -281,11 +282,15 @@ class Proxy:
                     version_relation=vd.version_relation,
                     location=debs)
 
-            if not package or not package.local_file or \
-                    (package.local_file and not os.path.isfile(package.local_file)):
+            if not package or \
+                    not package.local_file or \
+                    not os.path.isfile(package.local_file):
                 logging.error('Download of %s failed!', name)
                 missing.append(name)
                 continue
+
+            if debs != os.path.dirname(package.local_file):
+                shutil.copy(package.local_file, debs)
 
             if extract:
                 package.extract(location=contents)

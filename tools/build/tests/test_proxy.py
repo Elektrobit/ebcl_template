@@ -17,7 +17,7 @@ class TestProxy:
 
     def test_init(self):
         """ Test proxy initalization. """
-        assert self.proxy.apts == [Apt()]
+        assert self.proxy.apts == []
         assert self.proxy.cache is not None
 
     def test_apt_repos(self):
@@ -35,6 +35,10 @@ class TestProxy:
             components=['prod', 'dev']
         )
 
+        assert len(self.proxy.apts) == 0
+
+        res = self.proxy.add_apt(Apt())
+        assert res
         assert len(self.proxy.apts) == 1
 
         res = self.proxy.add_apt(Apt())
@@ -59,6 +63,8 @@ class TestProxy:
 
     def test_find_package_busybox(self):
         """ Test that busybox-static package is found. """
+        self.proxy.add_apt(Apt())
+
         vds = parse_depends('busybox-static', 'amd64')
         assert vds
         p = self.proxy.find_package(vds[0])
@@ -82,6 +88,38 @@ class TestProxy:
         assert p.name == 'busybox-static'
         assert p.arch == 'arm64'
 
+    def test_find_linux_image_generic(self):
+        """ Test that busybox-static package is found. """
+        self.proxy.add_apt(Apt())
+
+        vds = parse_depends('linux-image-generic', 'amd64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
+        assert p is not None
+        assert p.name == 'linux-image-generic'
+        assert p.arch == 'amd64'
+        assert p.depends
+
+    def test_find_bootstrap_package(self):
+        """ Test that bootstrap-root-ubuntu-jammy package is found. """
+        self.proxy.add_apt(Apt.ebcl_apt('amd64', '1.2'))
+
+        vds = parse_depends('bootstrap-root-ubuntu-jammy', 'amd64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
+        assert p is not None
+        assert p.name == 'bootstrap-root-ubuntu-jammy'
+        assert p.arch == 'amd64'
+
+        self.proxy.add_apt(Apt.ebcl_apt('arm64', '1.2'))
+
+        vds = parse_depends('bootstrap-root-ubuntu-jammy', 'arm64')
+        assert vds
+        p = self.proxy.find_package(vds[0])
+        assert p is not None
+        assert p.name == 'bootstrap-root-ubuntu-jammy'
+        assert p.arch == 'arm64'
+
     def test_find_not_existing(self):
         """ Test that tries to find a non-existing package. """
         vds = parse_depends('some-not-existing-package', 'amd64')
@@ -91,6 +129,8 @@ class TestProxy:
 
     def test_download_and_extract_linux_image(self):
         """ Extract data content of multiple debs. """
+        self.proxy.add_apt(Apt())
+
         vds = parse_depends('linux-image-generic', 'amd64')
         assert vds
         (debs, content, missing) = self.proxy.download_deb_packages(vds)

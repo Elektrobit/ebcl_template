@@ -15,9 +15,6 @@ RUN rm -rf /etc/apt/sources.list && \
 RUN mkdir -p /etc/apt/trusted.gpg.d
 COPY conf/apt-keys/elektrobit.gpg /etc/apt/trusted.gpg.d/
 
-RUN ls -lah /etc/apt/sources.list.d/
-RUN ls -lah /etc/apt/trusted.gpg.d/
-
 # Update container
 RUN apt update
 # Install compiler and base tools

@@ -65,6 +65,9 @@ class Fake:
         if perr.strip():
             logging.info('STDERR: %s', perr)
 
+        if p.returncode != 0:
+            logging.info('Returncode: %s', p.returncode)
+
         if check:
             assert p.returncode == 0
 

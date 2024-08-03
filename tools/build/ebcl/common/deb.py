@@ -19,23 +19,23 @@ class Package:
 
     name: str
     arch: str
+    repo: str
     version: Optional[Version] = None
     file_url: Optional[str] = None
     local_file: Optional[str] = None
+
     pre_depends: list[list[VersionDepends]] = []
     depends: list[list[VersionDepends]] = []
-    recommends: list[list[VersionDepends]] = []
-    suggests: list[list[VersionDepends]] = []
-    enhances: list[list[VersionDepends]] = []
+
     breaks: list[list[VersionDepends]] = []
     conflicts: list[list[VersionDepends]] = []
 
-    def __init__(self, name: str, arch: str):
-        self.name = name
-        self.arch = arch
+    recommends: list[list[VersionDepends]] = []
+    suggests: list[list[VersionDepends]] = []
+    enhances: list[list[VersionDepends]] = []
 
     @classmethod
-    def from_deb(cls, deb: str):
+    def from_deb(cls, deb: str, depends: list[list[VersionDepends]]):
         """ Create a package form a deb file. """
         if not deb.endswith('.deb'):
             return None
@@ -50,14 +50,20 @@ class Package:
         version = parts[1].strip()
         arch = parts[2].strip()
 
-        p = cls(name, arch)
+        p = cls(name, arch, 'local_deb')
 
         p.version = Version(version)
+        p.depends = depends
 
         if os.path.isfile(deb):
             p.local_file = deb
 
         return p
+
+    def __init__(self, name: str, arch: str, repo: str):
+        self.name = name
+        self.arch = arch
+        self.repo = repo
 
     def get_depends(self) -> list[list[VersionDepends]]:
         """ Get dependencies. """

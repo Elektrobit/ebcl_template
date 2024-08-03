@@ -1,11 +1,26 @@
 #!/bin/bash
 
+CONTAINER_TOOL="docker"
+LOCAL_CONTAINER_TAG="local"
+
 echo "Setting EBcL workspace up..."
 
-# check if container exists
-docker image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "testing"
-if [ $? -ne 0 ]; then
-    echo "Container not found. Building container..."
+source .env
+
+if [ ${BUILD_CONTAINER} -eq 1 ]; then
+    echo "Building container..."
     cd tools/container
     ./build_container
+elif [ ${PULL_CONTAINER} -eq 1 ]; then
+    echo "Pulling container..."
+    ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
+fi
+
+${CONTAINER_TOOL} tag "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" "linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}"
+
+# check if container exists
+${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
+if [ $? -ne 0 ]; then
+    echo "Container not found."
+    exit 1
 fi

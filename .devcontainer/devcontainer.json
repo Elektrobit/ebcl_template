@@ -2,32 +2,18 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
 	"name": "EB corbos Linux SDK 1.2.1",
-	"image": "linux.elektrobit.com/ebcl/sdk:testing",
+	// DO NOT MODIFY THE TAG!!!
+	// The local container tag and used upstream container version is defined in .env.
+	"image": "linux.elektrobit.com/ebcl/sdk:local",
+	// This script will get the container and tag it with the local container tag. 
 	"initializeCommand": "${PWD}/init_workspace",
 	"postCreateCommand": "${PWD}/tools/init_container",
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"editor.formatOnSave": true,
-				"files.insertFinalNewline": true,
-				"[makefile]": {
-					"editor.insertSpaces": false,
-					"editor.detectIndentation": false
-				}
+				"cmake.sourceDirectory": "/workspace/apps/my-json-app"
 			},
-			// Add the IDs of extensions you want installed when the container is created.
-			"extensions": [
-				"ms-vscode.makefile-tools",
-				"ms-vscode.cpptools-extension-pack",
-				"ms-python.python",
-				"robocorp.robotframework-lsp",
-				"ms-python.autopep8",
-				"ms-python.pylint",
-				"ms-python.mypy-type-checker",
-				"WolfiesHorizon.python-auto-venv",
-				"donjayamanne.python-environment-manager",
-				"Gruntfuggly.todo-tree"
-			]
+			"extensions": []
 		}
 	},
 	"remoteUser": "ebcl",

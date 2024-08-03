@@ -1,0 +1,10 @@
+base: root_kiwi.yaml
+type: kiwi
+kvm: false # not using KVM acceleration
+result: '*.tar.xz'
+# Use debootstrap instead of bootstrap package
+# This allows to use only one apt repo.
+use_bootstrap_package: false
+# Select required bootstrap packages
+bootstrap:
+  - apt

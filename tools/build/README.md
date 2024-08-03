@@ -10,6 +10,7 @@
 - [x] vds compare
 - [ ] templates for root gen
 - [ ] sysroots
+- [ ] copy templates to out, copy generated files to out
 
 - [x] image kernel src
 - [ ] image efi

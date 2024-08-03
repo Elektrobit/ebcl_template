@@ -12,12 +12,11 @@ from io import BufferedWriter
 from pathlib import Path
 from typing import Tuple, Any, Optional
 
-from jinja2 import Template
-
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
 from ebcl.common.files import Files, EnvironmentType
 from ebcl.common.proxy import Proxy
+from ebcl.common.templates import render_template
 from ebcl.common.version import VersionDepends, parse_package_config, parse_package
 
 
@@ -40,6 +39,10 @@ class InitrdGenerator:
     fakeroot: bool
     # name of busybox package
     busybox: VersionDepends
+    # name of the initrd image file
+    initrd_name: str
+    # name of the initrd image
+    name: str
     # out and tmp folders
     target_dir: str
     image_path: str
@@ -71,7 +74,10 @@ class InitrdGenerator:
         self.template = config.get('template', None)
         self.modules_folder = config.get('modules_folder', None)
 
-        self.fakeroot = config.get('fakeroot', True)
+        self.initrd_name = config.get('initrd_name', 'initrd.img')
+        self.name = config.get('name', '')
+
+        self.fakeroot = config.get('fakeroot', False)
         self.env = EnvironmentType.FAKEROOT
         if not self.fakeroot:
             self.env = EnvironmentType.CHROOT
@@ -341,9 +347,11 @@ class InitrdGenerator:
             if not fs:
                 logging.error('Copying of %s failed!', src)
 
-    def create_initrd(self, image_path: str) -> Optional[str]:
+    def create_initrd(self, output_path: str) -> Optional[str]:
         """ Create the initrd image.  """
         self.target_dir = tempfile.mkdtemp()
+
+        image_path = os.path.join(output_path, self.initrd_name)
 
         logging.info('Installing busybox...')
 
@@ -399,13 +407,22 @@ class InitrdGenerator:
             template = os.path.join(
                 os.path.dirname(self.config), self.template)
 
-        with open(template, encoding='utf8') as f:
-            tmpl = Template(f.read())
+        params = {
+            'root': self.root_device,
+            'mods': [m.split("/")[-1] for m in self.modules]
+        }
 
-        init_script_content = tmpl.render(
-            root=self.root_device,
-            mods=[m.split("/")[-1] for m in self.modules]
+        (_init_file, init_script_content) = render_template(
+            template_file=template,
+            params=params,
+            generated_file_name=f'{self.name}.init.sh',
+            results_folder=output_path,
+            template_copy_folder=output_path
         )
+
+        if not init_script_content:
+            logging.critical('Rendering init script failed!')
+            return None
 
         init_script.write_text(init_script_content)
         os.chmod(init_script, 0o755)
@@ -443,13 +460,10 @@ def main() -> None:
     # Read configuration
     generator = InitrdGenerator(args.config_file)
 
-    # Define output image path
-    output_image_path = os.path.join(args.output, 'initrd.img')
-
     image = None
     try:
         # Create the initrd.img
-        image = generator.create_initrd(output_image_path)
+        image = generator.create_initrd(args.output)
     except Exception as e:
         logging.critical('Image build failed with exception! %s', e)
 

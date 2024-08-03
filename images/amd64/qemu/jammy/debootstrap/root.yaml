@@ -8,7 +8,12 @@ apt_repos:
       - main
       - universe
     gpg: /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
+# Use debootstrap instead of bootstrap package
+# This allows to use only one apt repo.
+use_bootstrap_package: false
+# Select required bootstrap packages
+bootstrap:
+  - apt
+  - ubuntu-keyring
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
-# Do not use berrymill
-use_berrymill: false

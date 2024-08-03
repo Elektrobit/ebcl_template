@@ -20,7 +20,7 @@ boot_spec = ../boot.yaml
 # Config script for root filesystem
 config_root = ../config_root.sh
 
-include ../../qemu.mk
+include ../../../../qemu.mk
 
 #--------------------
 # Generated artefacts

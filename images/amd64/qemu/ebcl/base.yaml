@@ -1,0 +1,13 @@
+# Kernel package to use
+kernel: linux-image-generic
+# Apt repositories to use
+apt_repos:
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+    distro: ebcl
+    components:
+      - prod
+      - dev
+    key: file:///build/keys/elektrobit.pub
+    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
+# CPU architecture
+arch: 'amd64'

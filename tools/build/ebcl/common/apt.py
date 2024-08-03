@@ -4,28 +4,33 @@ import gzip
 import logging
 import lzma
 import os
+import tempfile
 import time
 import json
 
-from typing import Optional, Any
+from typing import Optional, Any, Tuple
+from urllib.parse import urlparse
 
 import requests
 
 from .deb import Package
+from .fake import Fake
 from .version import parse_depends, VersionDepends, PackageRelation, Version
 
 
 class Apt:
     """ Get packages from apt repositories. """
 
+    id: str
     url: str
     distro: str
     components: list[str]
     arch: str
-    packages: Optional[dict[str, list[Package]]]
+    packages: Optional[dict[str, list[Package]]] = {}
     index_loaded: bool
     state_folder: str
     key_url: Optional[str]
+    key_gpg: Optional[str]
     has_sources: bool
 
     @classmethod
@@ -42,6 +47,7 @@ class Apt:
             distro=repo_config['distro'],
             components=repo_config.get('components', None),
             key_url=repo_config.get('key', None),
+            key_gpg=repo_config.get('gpg', None),
             arch=arch
         )
 
@@ -49,10 +55,12 @@ class Apt:
     def ebcl_apt(cls, arch: str, release: str = '1.2'):
         """ Get the EBcL apt repo. """
         return cls(
-            url=f'https://linux.elektrobit.com/eb-corbos-linux/{release}',
+            url=f'http://linux.elektrobit.com/eb-corbos-linux/{release}',
             distro='ebcl',
             components=['prod', 'dev'],
-            arch=arch
+            arch=arch,
+            key_url='file:///build/keys/elektrobit.pub',
+            key_gpg='/etc/berrymill/keyrings.d/elektrobit.gpg'
         )
 
     def __init__(
@@ -61,6 +69,7 @@ class Apt:
         distro: str = "jammy",
         components: Optional[list[str]] = None,
         key_url: Optional[str] = None,
+        key_gpg: Optional[str] = None,
         has_sources: bool = True,
         arch: str = "amd64",
         state_folder: str = '/workspace/state/apt'
@@ -75,13 +84,31 @@ class Apt:
         self.packages = None
         self.state_folder = state_folder
         self.key_url = key_url
+        self.key_gpg = key_gpg
         self.has_sources = has_sources
+
+        if not key_gpg and 'ubuntu.com/ubuntu' in url:
+            self.key_gpg = '/etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg'
+            logging.info('Using default Ubuntu key %s for %s.',
+                         self.key_gpg, self.url)
 
         if os.path.isfile(self.state_folder):
             self.state_folder = os.path.dirname(self.state_folder)
 
         if not os.path.exists(self.state_folder):
             os.makedirs(self.state_folder, exist_ok=True)
+
+        # Generate repo id
+        try:
+            uo = urlparse(self.url)
+        except Exception as e:
+            logging.error(
+                'Invalid apt url %s, cannot geneate id! %s', self.url, e)
+            return None
+
+        cmp_str = '_'.join(self.components)
+
+        self.id = f'{uo.netloc}_{self.distro}_{cmp_str}'
 
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Apt):
@@ -104,7 +131,12 @@ class Apt:
         if not package_indexes:
             return
 
+        if self.packages is None:
+            self.packages = {}
+
         for component in self.components:
+            pkg_cnt = len(self.packages)
+
             if component in package_indexes:
                 url: str = package_indexes[component]
                 self._parse_component(url)
@@ -112,10 +144,16 @@ class Apt:
                 logging.warning(
                     'No package index for component %s found!', component)
 
+            new_pkgs = len(self.packages) - pkg_cnt
+            logging.info('Found %s packages in component %s of %s',
+                         new_pkgs, component, self)
+
+        logging.info('Repo %s provides %s packages.',
+                     self, len(self.packages))
+
     def _parse_component(self, url: str):
         """ Parse component package index. """
-        if self.packages is None:
-            self.packages = {}
+        assert self.packages is not None
 
         packages = f'{self.url}/dists/{self.distro}/{url}'
 
@@ -145,7 +183,7 @@ class Apt:
             if line.startswith('Package:'):
                 # new package
                 parts = line.split(' ')
-                package = Package(parts[-1], self.arch)
+                package = Package(parts[-1], self.arch, self.id)
 
             elif line.startswith('Filename:'):
                 assert package is not None
@@ -389,7 +427,7 @@ class Apt:
         if os.path.isfile(key_url):
             # handle local file
             logging.info('Reading key for %s from %s', self, key_url)
-            with open(key_url, encoding='uft8') as f:
+            with open(key_url, encoding='utf8') as f:
                 contents = f.read()
         elif key_url.startswith('http://') or key_url.startswith('https://'):
             # download key
@@ -406,3 +444,50 @@ class Apt:
             return None
 
         return contents
+
+    def get_id(self) -> Optional[str]:
+        """ Get identifier for this repo. """
+        return self.id
+
+    def get_key_files(
+            self, output_folder: Optional[str] = None
+    ) -> Tuple[Optional[str], Optional[str]]:
+        """ Get gpg key file for repo key. """
+        # TODO: test
+        if not self.key_url:
+            return (None, self.key_gpg)
+
+        contents = self.get_key()
+        if not contents:
+            return (None, self.key_gpg)
+
+        key_pub_file = None
+        key_gpg_file = None
+        if output_folder:
+            key_pub_file = os.path.join(output_folder, f'{self.get_id()}.pub')
+            key_gpg_file = os.path.join(output_folder, f'{self.get_id()}.gpg')
+        else:
+            key_pub_file = tempfile.mktemp()
+            key_gpg_file = tempfile.mktemp()
+
+        try:
+            with open(key_pub_file, 'w', encoding='utf8') as f:
+                f.write(contents)
+        except Exception as e:
+            logging.error('Writing pub key of %s to %s failed! %s',
+                          self, key_pub_file, e)
+            return (None, self.key_gpg)
+
+        if not self.key_gpg:
+            fake = Fake()
+            try:
+                fake.run_no_fake(
+                    f'cat {key_pub_file} | gpg --dearmor > {key_gpg_file}')
+            except Exception as e:
+                logging.error('Dearmoring key %s of %s as %s failed! %s',
+                              key_pub_file, self, key_gpg_file, e)
+                return (key_pub_file, None)
+        else:
+            key_gpg_file = self.key_gpg
+
+        return (key_pub_file, key_gpg_file)

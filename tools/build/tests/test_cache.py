@@ -27,7 +27,7 @@ class TestCache:
     def test_add(self):
         """ Add a pacakage. """
         res = self.cache.add(Package.from_deb(
-            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb', []))
         assert res
 
         v = Version('1.36.1-3ubuntu1')
@@ -45,7 +45,7 @@ class TestCache:
     def test_get_no_version(self):
         """ Get any version of a package. """
         res = self.cache.add(Package.from_deb(
-            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb', []))
         assert res
 
         p = self.cache.get('amd64', 'busybox-static')
@@ -70,10 +70,8 @@ class TestCache:
         """ Test for restoring cache index. """
         cache = Cache()
         res = cache.add(Package.from_deb(
-            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb'))
+            '/workspace/tools/build/tests/data/busybox-static_1.36.1-3ubuntu1_amd64.deb', []))
         assert res
-
-        cache.save()
 
         del cache
 

@@ -168,9 +168,10 @@ class TestInitrd:
     def test_sysroot_is_created(self):
         """ Test that sysroot folder is created. """
         temp_dir = tempfile.mkdtemp()
-        out = os.path.join(temp_dir, 'initrd.img')
-        self.generator.create_initrd(out)
 
+        self.generator.create_initrd(temp_dir)
+
+        out = os.path.join(temp_dir, 'initrd.img')
         assert os.path.isfile(out)
 
         shutil.rmtree(temp_dir)

@@ -1,0 +1,32 @@
+{
+    "cmake.sourceDirectory": "/workspace/apps/my-json-app",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true
+    },
+    "pylint.args": [
+        "--disable=E0015",
+        "--disable=E0402",
+        "--disable=W0212",
+        "--disable=W0718"
+    ],
+    "python.testing.pytestArgs": [
+        "--no-cov",
+        "--capture=no",
+        "--log-level=DEBUG",
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.cwd": "tools/build",
+    "mypy-type-checker.args": [
+        "--disable-error-code=import-untyped",
+        "--check-untyped-defs"
+    ],
+    "editor.formatOnSave": true,
+    "files.insertFinalNewline": true,
+    "[makefile]": {
+        "editor.insertSpaces": false,
+        "editor.detectIndentation": false
+    }
+}

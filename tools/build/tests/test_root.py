@@ -3,8 +3,7 @@ import os
 import shutil
 import tempfile
 
-from pathlib import Path
-
+from ebcl.common.apt import Apt
 from ebcl.tools.root.root import RootGenerator, ImageType
 
 
@@ -38,30 +37,69 @@ class TestRoot:
 
     def test_read_config(self):
         """ Test yaml config loading. """
-        assert self.generator.image == 'jammy.xml'
+        assert self.generator.image is None
         assert self.generator.image_type == ImageType.ELBE
 
     def test_build_kiwi_image(self):
         """ Test kiwi image build. """
+        out = tempfile.mkdtemp()
+
         test_dir = os.path.dirname(os.path.abspath(__file__))
         yaml = os.path.join(test_dir, 'data', 'root_kiwi.yaml')
         generator = RootGenerator(yaml)
-        generator.result_dir = tempfile.mkdtemp()
-        generator.target_dir = tempfile.mkdtemp()
 
-        tmp = tempfile.mkdtemp()
-        archive = generator._build_kiwi_image(tmp)
+        generator.apt_repos = [Apt.ebcl_apt('amd64')]
+
+        archive = generator.create_root(out)
         assert archive
         assert os.path.isfile(archive)
 
-        shutil.rmtree(tmp)
-        shutil.rmtree(generator.result_dir)
-        shutil.rmtree(generator.target_dir)
+        shutil.rmtree(out)
 
     def test_build_root_archive(self):
         """ Test build root.tar. """
         out = tempfile.mkdtemp()
-        self.generator.create_root(out)
 
-        archive = Path(out) / 'ubuntu.tar'
-        assert archive.is_file()
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml = os.path.join(test_dir, 'data', 'root_elbe.yaml')
+        generator = RootGenerator(yaml)
+
+        generator.apt_repos = [Apt.ebcl_apt('amd64')]
+
+        archive = generator.create_root(out)
+        assert archive
+        assert os.path.isfile(archive)
+
+        shutil.rmtree(out)
+
+    def test_build_kiwi_no_berry(self):
+        """ Test kiwi image build without berrymill. """
+        out = tempfile.mkdtemp()
+
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml = os.path.join(test_dir, 'data', 'root_kiwi_berry.yaml')
+        generator = RootGenerator(yaml)
+
+        generator.apt_repos = [Apt.ebcl_apt('amd64')]
+
+        archive = generator.create_root(out)
+        assert archive
+        assert os.path.isfile(archive)
+
+        shutil.rmtree(out)
+
+    def test_build_kiwi_no_bootstrap(self):
+        """ Test kiwi image build without bootstrap package. """
+        out = tempfile.mkdtemp()
+
+        test_dir = os.path.dirname(os.path.abspath(__file__))
+        yaml = os.path.join(test_dir, 'data', 'root_kiwi_debo.yaml')
+        generator = RootGenerator(yaml)
+
+        generator.apt_repos = [Apt()]
+
+        archive = generator.create_root(out)
+        assert archive
+        assert os.path.isfile(archive)
+
+        # shutil.rmtree(out)

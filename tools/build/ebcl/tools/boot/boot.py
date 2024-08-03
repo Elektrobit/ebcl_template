@@ -70,6 +70,8 @@ class BootGenerator:
             ebcl_version=config.get('ebcl_version', None)
         )
 
+        logging.info('Using apt repos: %s', self.proxy.apts)
+
         self.fake = Fake()
         self.fh = Files(self.fake)
 
@@ -165,16 +167,21 @@ class BootGenerator:
             return self.fh.pack_root_as_tarball(
                 output_dir=output_path,
                 archive_name=self.archive_name,
-                root_dir=self.target_dir
+                root_dir=self.target_dir,
+                use_fake_chroot=False
             )
         else:
             # copy to output folder
+            logging.info('Copying files...')
             files = self.fh.copy_file(f'{self.target_dir}/*',
                                       output_path,
                                       move=True,
                                       delete_if_exists=True)
             if files:
                 return output_path
+            else:
+                logging.error(
+                    'Build faild, no files found in %s.', self.target_dir)
 
         return None
 
@@ -183,7 +190,7 @@ class BootGenerator:
 
         # delete temporary folder
         logging.info('Remove temporary folder...')
-        self.fake.run(f'rm -rf {self.target_dir}', check=False)
+        # self.fake.run(f'rm -rf {self.target_dir}', check=False)
 
 
 def main() -> None:
@@ -209,7 +216,7 @@ def main() -> None:
         # Create the boot.tar
         image = generator.create_boot(args.output)
     except Exception as e:
-        logging.critical('Image build failed with exception! %s', e)
+        logging.critical('Boot build failed with exception: %s', e)
 
     try:
         generator.finalize()

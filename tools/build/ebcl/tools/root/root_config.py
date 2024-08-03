@@ -5,6 +5,8 @@ import logging
 import os
 import tempfile
 
+from typing import Optional, Any
+
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
 from ebcl.common.files import Files, EnvironmentType, parse_scripts
@@ -18,7 +20,9 @@ class RootConfig:
     # config file
     config: str
     # config values
-    scripts: list[dict[str, str]]
+    scripts: list[dict[str, Any]]
+    # Tar the root tarball in the chroot env
+    pack_in_chroot: bool
     # fakeroot helper
     fake: Fake
     # files helper
@@ -37,26 +41,28 @@ class RootConfig:
         self.scripts = config.get('scripts', [])
         self.scripts = parse_scripts(config.get('scripts', None))
 
+        self.pack_in_chroot = config.get('pack_in_chroot', True)
+
         self.fake = Fake()
-        self.files = Files(self.fake)
+        self.fh = Files(self.fake)
 
     def _run_scripts(self):
         """ Run scripts. """
         for script in self.scripts:
             logging.info('Running script: %s', script)
 
-            for script in self.scripts:
-                logging.info('Running script %s.', script)
+            file = os.path.join(os.path.dirname(
+                self.config), script['name'])
 
-                file = os.path.join(os.path.dirname(
-                    self.config), script['name'])
+            env: Optional[EnvironmentType] = None
+            if 'env' in script:
+                env = script['env']
 
-                self.fh.run_script(
-                    file=file,
-                    params=script.get('params', None),
-                    environment=EnvironmentType.from_str(
-                        script.get('env', None))
-                )
+            self.fh.run_script(
+                file=file,
+                params=script.get('params', None),
+                environment=env
+            )
 
     def config_root(self, archive_in: str, archive_out: str) -> None:
         """ Config the tarball.  """
@@ -66,13 +72,14 @@ class RootConfig:
 
         if self.scripts:
             with tempfile.TemporaryDirectory() as tmp_root_dir:
-                self.files.target_dir = tmp_root_dir
-                self.files.extract_tarball(archive_in, tmp_root_dir)
+                self.fh.target_dir = tmp_root_dir
+                self.fh.extract_tarball(archive_in, tmp_root_dir)
                 self._run_scripts()
-                ao = self.files.pack_root_as_tarball(
+                ao = self.fh.pack_root_as_tarball(
                     output_dir=os.path.dirname(archive_out),
                     archive_name=os.path.basename(archive_out),
-                    root_dir=tmp_root_dir
+                    root_dir=tmp_root_dir,
+                    use_fake_chroot=self.pack_in_chroot
                 )
 
                 if not ao:
