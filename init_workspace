@@ -10,6 +10,15 @@ echo "Setting EBcL workspace up..."
 
 source .env
 
+# Copy user config
+if [ -d "${HOME}/.ebcl_config" ]; then
+    echo "Copying user config..."
+    mkdir -p tools/user_config
+    cp -R ~/.ebcl_config/* tools/user_config
+else
+    echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
+fi
+
 if [ ${BUILD_CONTAINER} -eq 1 ]; then
     echo "Building container..."
     cd tools/container
@@ -17,7 +26,11 @@ if [ ${BUILD_CONTAINER} -eq 1 ]; then
 elif [ ${PULL_CONTAINER} -eq 1 ]; then
     echo "Pulling container..."
     ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
+else
+    echo "Expecting container to exist..."
 fi
+
+echo "Tagging linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG} as linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}..."
 
 ${CONTAINER_TOOL} tag "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" "linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}"
 
@@ -26,10 +39,4 @@ ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOC
 if [ $? -ne 0 ]; then
     echo "Container not found."
     exit 1
-fi
-
-if [ -d "~/.ebcl_config" ]; then
-    echo "Copying user config..."
-    mkdir -p tools/user_config
-    cp -R ~/.ebcl_config/* tools/user_config
 fi

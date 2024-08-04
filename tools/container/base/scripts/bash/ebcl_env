@@ -50,3 +50,13 @@ if [ ! -d "/tmp/build/images" ]; then
 fi
 
 source /build/venv/bin/activate
+
+
+# Run user setup
+if [ -d "/workspace/tools/user_config" ]; then
+    echo "Running user extensions..."
+    if [ -x "/workspace/tools/user_config/user_extensions" ]; then
+        echo "Running user extensions script..."
+        /workspace/tools/user_config/user_extensions
+    fi
+fi

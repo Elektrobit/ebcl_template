@@ -94,10 +94,10 @@ $(source):
 $(kconfig): $(boot_spec)
 	@echo "Get kernel config..."
 	mkdir -p build
-	boot_generator ../boot.yaml ./build 2>&1 | tee build/$(kconfig).log
+	set -o pipefail && boot_generator ../boot.yaml ./build 2>&1 | tee build/$(kconfig).log
 	mv ./build/config-* ./build/config
 
 $(initrd_img): $(initrd_spec) $(modules)
 	@echo "Build initrd.img..."
 	mkdir -p build
-	initrd_generator $(initrd_spec) ./build 2>&1 | tee build/$(initrd_img).log
+	set -o pipefail && initrd_generator $(initrd_spec) ./build 2>&1 | tee build/$(initrd_img).log

@@ -12,12 +12,11 @@ if [ -d "/workspace/tools/user_config" ]; then
         echo "Overwriting VS Code settings..."
         rm -f /workspace/.vscode/settings.json
         cp /workspace/tools/user_config/settings.json /workspace/.vscode/settings.json
+    else
+        echo "No settings.json provided."
     fi
-
-    if [ -x "/workspace/tools/user_config/setup_code" ]; then
-        echo "Running setup code script..."
-        /workspace/tools/user_config/setup_code
-    fi
+else
+    echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
 fi
 
 # Generate VS Code build tasks

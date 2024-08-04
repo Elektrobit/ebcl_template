@@ -66,6 +66,7 @@ class RootGenerator:
     packages: list[VersionDepends]
     # root password
     root_password: str
+
     use_ebcl_apt: bool
 
     # sysroot
@@ -762,6 +763,13 @@ class RootGenerator:
             self.fake.run(f'cp -R {self.result_dir}/* {output_path}')
         except Exception as e:
             logging.error('Copying all artefacts failed! %s', e)
+
+        if logging.root.level == logging.DEBUG:
+            logging.info(
+                'Log level set to debug, skipping cleanup of build artefacts.')
+            logging.info('Target folder: %s', self.target_dir)
+            logging.info('Results folder: %s', self.result_dir)
+            return
 
         # delete temporary folders
         try:

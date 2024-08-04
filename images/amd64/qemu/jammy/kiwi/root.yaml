@@ -12,3 +12,5 @@ apt_repos:
 type: kiwi
 # Add the EB corbos Linux apt repo to provide the boostrap package
 use_ebcl_apt: true
+# Do not use berrymill
+use_berrymill: false
