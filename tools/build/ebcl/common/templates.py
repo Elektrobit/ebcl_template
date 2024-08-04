@@ -22,7 +22,7 @@ def render_template(
     """ Render the given template. """
     template_file = os.path.abspath(template_file)
 
-    logging.info('Rendering template %s', template_file)
+    logging.debug('Rendering template %s', template_file)
 
     with open(template_file, encoding='utf8') as f:
         tmpl = Template(f.read())
@@ -33,7 +33,7 @@ def render_template(
     if write_generated_file:
         out_file = os.path.join(results_folder, generated_file_name)
 
-        logging.info('Rendering result: %s', out_file)
+        logging.debug('Rendering result: %s', out_file)
 
         with open(out_file, 'w', encoding='utf8') as f:
             f.write(template_content)
@@ -44,7 +44,7 @@ def render_template(
             template_copy_folder, f'template.{generated_file_name}'))
 
         if template_file != template_copy:
-            logging.info('Copying template file as %s', template_copy)
+            logging.debug('Copying template file as %s', template_copy)
             try:
                 shutil.copy(template_file, template_copy)
             except Exception as e:

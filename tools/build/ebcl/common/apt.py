@@ -262,7 +262,7 @@ class Apt:
                     parts = line.split(' ')
                     package_indexes[component] = parts[-1]
 
-        logging.info('Package indexes: %s', package_indexes)
+        logging.debug('Package indexes: %s', package_indexes)
 
         return package_indexes
 
@@ -295,14 +295,14 @@ class Apt:
             return None
 
     def __str__(self) -> str:
-        return f'Apt<{self.url}, {self.distro}, {self.components}>'
+        return f'Apt<{self.url}, {self.distro}, {self.components}, ' \
+            f'key: {self.key_url}, gpg: {self.key_gpg}>'
 
     def __repr__(self) -> str:
         return self.__str__()
 
     def _download_url(self, url: str) -> Optional[bytes | Any]:
         """ Download the given url. """
-        # TODO: cache
         # Check for cached data.
         cache_file_name = url[7:].replace('/', '_')
         cache_file_path = os.path.join(self.state_folder, cache_file_name)
@@ -312,7 +312,7 @@ class Apt:
             cache_files.sort()
             cache_file = cache_files[-1]
 
-            logging.info('Cache file found for %s: %s', url, cache_file)
+            logging.debug('Cache file found for %s: %s', url, cache_file)
 
             ts_str = cache_file.split('_')[-1]
             ts = float(ts_str)
@@ -320,7 +320,7 @@ class Apt:
 
             if age > 24 * 60 * 60:
                 # older than one day
-                logging.info('Removing outdated cache file %s', cache_file)
+                logging.debug('Removing outdated cache file %s', cache_file)
                 try:
                     os.remove(cache_file)
                 except Exception as e:
@@ -329,7 +329,7 @@ class Apt:
             else:
                 # Read cached data
                 with open(cache_file, 'rb') as f:
-                    logging.info('Reading cached data from %s...', cache_file)
+                    logging.debug('Reading cached data from %s...', cache_file)
                     try:
                         return f.read()
                     except Exception as e:
@@ -390,7 +390,7 @@ class Apt:
             age = time.time() - ts
             if age > 24 * 60 * 60:
                 # older than one day
-                logging.info('Removing outdated cache file %s', cache_file)
+                logging.debug('Removing outdated cache file %s', cache_file)
                 try:
                     os.remove(cache_file)
                 except Exception as e:
@@ -399,7 +399,7 @@ class Apt:
             else:
                 # Read cached data
                 with open(cache_file, encoding='utf8') as f:
-                    logging.info('Reading cached data from %s...', cache_file)
+                    logging.debug('Reading cached data from %s...', cache_file)
                     try:
                         data = json.load(f)
                         # Return cached data

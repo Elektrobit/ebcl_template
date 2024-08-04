@@ -362,11 +362,11 @@ def parse_package(package: Optional[str], arch: str) -> Optional[VersionDepends]
         if vds:
             if len(vds) > 1:
                 logging.warning(
-                    'Found more than one kerne package! %s', vds)
+                    'Found more than one package: %s. Using %s', vds, vds[0])
 
-            logging.info('Kernel package: %s', vds[0])
+            logging.debug('Package: %s', vds[0])
             return vds[0]
         else:
-            logging.error('Parsing of kernel %s failed!', package)
+            logging.error('Parsing of package %s failed!', package)
 
     return None

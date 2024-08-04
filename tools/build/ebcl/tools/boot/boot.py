@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Any
 
+from ebcl.common import init_logging, bug, promo
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
 from ebcl.common.files import Files, parse_scripts, EnvironmentType
@@ -70,7 +71,7 @@ class BootGenerator:
             ebcl_version=config.get('ebcl_version', None)
         )
 
-        logging.info('Using apt repos: %s', self.proxy.apts)
+        logging.debug('Using apt repos: %s', self.proxy.apts)
 
         self.fake = Fake()
         self.fh = Files(self.fake)
@@ -88,7 +89,7 @@ class BootGenerator:
     def copy_files(self, package_dir: str):
         """ Copy files to be used. """
 
-        logging.info('Files: %s', self.files)
+        logging.debug('Files: %s', self.files)
 
         for entry in self.files:
             logging.info('Processing entry: %s', entry)
@@ -103,7 +104,7 @@ class BootGenerator:
             uid: int = int(entry.get('uid', '0'))
             gid: int = int(entry.get('gid', '0'))
 
-            logging.info('Copying files %s', src)
+            logging.debug('Copying files %s', src)
 
             self.fh.copy_file(
                 src=str(src),
@@ -116,32 +117,31 @@ class BootGenerator:
     def run_scripts(self):
         """ Run scripts. """
         for script in self.scripts:
-            logging.info('Running script: %s', script)
+            logging.info('Running script %s.', script)
 
-            for script in self.scripts:
-                logging.info('Running script %s.', script)
+            file = os.path.join(os.path.dirname(
+                self.config), script['name'])
 
-                file = os.path.join(os.path.dirname(
-                    self.config), script['name'])
-
-                self.fh.run_script(
-                    file=file,
-                    params=script.get('params', None),
-                    environment=EnvironmentType.from_str(
-                        script.get('env', None))
-                )
+            self.fh.run_script(
+                file=file,
+                params=script.get('params', None),
+                environment=EnvironmentType.from_str(
+                    script.get('env', None))
+            )
 
     def create_boot(self, output_path: str) -> Optional[str]:
         """ Create the boot.tar.  """
 
         self.target_dir = tempfile.mkdtemp()
-        logging.info('Target directory: %s', self.target_dir)
+        logging.debug('Target directory: %s', self.target_dir)
+
+        self.fh.target_dir = self.target_dir
 
         package_dir = tempfile.mkdtemp()
-        logging.info('Package directory: %s', package_dir)
+        logging.debug('Package directory: %s', package_dir)
 
         output_path = os.path.abspath(output_path)
-        logging.info('Output directory: %s', output_path)
+        logging.debug('Output directory: %s', output_path)
         if not os.path.isdir(output_path):
             logging.critical('Output path %s is no folder!', output_path)
             exit(1)
@@ -189,13 +189,13 @@ class BootGenerator:
         """ Finalize output and cleanup. """
 
         # delete temporary folder
-        logging.info('Remove temporary folder...')
-        # self.fake.run(f'rm -rf {self.target_dir}', check=False)
+        logging.debug('Remove temporary folder...')
+        self.fake.run(f'rm -rf {self.target_dir}', check=False)
 
 
 def main() -> None:
     """ Main entrypoint of EBcL boot generator. """
-    logging.basicConfig(level=logging.INFO)
+    init_logging()
 
     parser = argparse.ArgumentParser(
         description='Create the content of the boot partiton as boot.tar.')
@@ -206,7 +206,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    logging.info('Running boot_generator with args %s', args)
+    logging.debug('Running boot_generator with args %s', args)
 
     # Read configuration
     generator = BootGenerator(args.config_file)
@@ -217,14 +217,17 @@ def main() -> None:
         image = generator.create_boot(args.output)
     except Exception as e:
         logging.critical('Boot build failed with exception: %s', e)
+        bug()
 
     try:
         generator.finalize()
     except Exception as e:
         logging.error('Cleanup failed with exception! %s', e)
+        bug()
 
     if image:
         print('Image was written to %s.', image)
+        promo()
     else:
         exit(1)
 

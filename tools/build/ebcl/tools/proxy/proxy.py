@@ -3,12 +3,14 @@
 import argparse
 import logging
 
+from ebcl.common import init_logging
+
 # TODO: implmement
 
 
 def main() -> None:
     """ Main entrypoint of EBcL apt proxy. """
-    logging.basicConfig(level=logging.INFO)
+    init_logging()
 
     parser = argparse.ArgumentParser(
         description='EBcL apt proxy.')

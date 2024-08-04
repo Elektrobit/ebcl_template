@@ -63,7 +63,7 @@ class Fake:
 
         perr = p.stderr.decode('utf8')
         if perr.strip():
-            logging.info('STDERR: %s', perr)
+            logging.error('%s has stderr output.\nSTDERR: %s', cmd, perr)
 
         if p.returncode != 0:
             logging.info('Returncode: %s', p.returncode)

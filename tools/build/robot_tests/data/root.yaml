@@ -1,11 +1,13 @@
 name: ubuntu
-type: elbe
-image: jammy.xml
 arch: amd64
+packages:
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
 scripts:
-  - name: config_root.sh
-    type: config
-  - name: pre_disc_root.sh
-    type: pre_disc
-  - name: post_disc_root.sh
-    type: post_disc
+  - name: root_config_chfake.sh
+    env: chfake
+  - name: root_config_fake.sh
+    env: fake
+  - name: root_config_chroot.sh
+    env: chroot

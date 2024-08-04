@@ -110,7 +110,7 @@ class Files:
                     fn_run(f'chmod {mode} {target}')
 
             else:
-                logging.info(
+                logging.debug(
                     'Not copying %s, source and destionation are identical.')
 
             files.append(target)
@@ -179,12 +179,12 @@ class Files:
             logging.error('Target dir not set!')
             return None
 
-        logging.info('Copying scripts %s', file)
+        logging.debug('Copying scripts %s', file)
 
         script_files = self.copy_file(file, self.target_dir)
 
-        logging.info('Running script %s in environment %s',
-                     script_files, environment)
+        logging.debug('Running scripts %s in environment %s',
+                      script_files, environment)
 
         res = None
 
@@ -199,6 +199,27 @@ class Files:
             if environment == EnvironmentType.FAKECHROOT or \
                     environment == EnvironmentType.CHROOT:
                 script_file = f'./{os.path.basename(script_file)}'
+
+            if logging.root.level == logging.DEBUG:
+                # Generate some more infos
+                self.run_command(
+                    cmd='echo $PWD',
+                    cwd=self.target_dir,
+                    environment=environment,
+                    check=False
+                )
+                self.run_command(
+                    cmd='ls -lah .',
+                    cwd=self.target_dir,
+                    environment=environment,
+                    check=False
+                )
+                self.run_command(
+                    cmd=f'ls -lah {script_file}',
+                    cwd=self.target_dir,
+                    environment=environment,
+                    check=False
+                )
 
             res = self.run_command(
                 cmd=f'{script_file} {params}',
@@ -273,7 +294,7 @@ class Files:
             fn_run = self.fake.run_chroot
 
         fn_run(
-            'tar --exclude=\'./proc\' --exclude=\'./sys\' --exclude=\'./dev\' '
+            'tar --exclude=\'./proc/*\' --exclude=\'./sys/*\' --exclude=\'./dev/*\' '
             f'-cf {archive_name} .',
             target_dir
         )

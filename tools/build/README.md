@@ -11,17 +11,17 @@
 - [x] sysroots
 - [x] copy templates to out, copy generated files to out
 - [x] templates for root gen
-
 - [x] image kernel src
+- [x] image ro root fs
+- [x] fix kiwi-only build
+
 - [ ] image efi
-- [ ] image ro root fs
+- [ ] fix robot tests
 
 - [ ] QEMU images
 - [ ] RDB2 images
 - [ ] Raspi images
 
-- [ ] fix kiwi-only build
-- [ ] fix robot tests
 
 - [ ] copy to SD card with bmaptool
 

@@ -7,6 +7,7 @@ import tempfile
 
 from typing import Optional, Any
 
+from ebcl.common import init_logging, bug, promo
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
 from ebcl.common.files import Files, EnvironmentType, parse_scripts
@@ -64,12 +65,13 @@ class RootConfig:
                 environment=env
             )
 
-    def config_root(self, archive_in: str, archive_out: str) -> None:
+    def config_root(self, archive_in: str, archive_out: str) -> Optional[str]:
         """ Config the tarball.  """
         if not os.path.exists(archive_in):
             logging.critical('Archive %s does not exist!', archive_in)
-            return
+            return None
 
+        ao = None
         if self.scripts:
             with tempfile.TemporaryDirectory() as tmp_root_dir:
                 self.fh.target_dir = tmp_root_dir
@@ -84,12 +86,14 @@ class RootConfig:
 
                 if not ao:
                     logging.critical('Repacking root failed!')
-                    return
+                    return None
+
+        return ao
 
 
 def main() -> None:
     """ Main entrypoint of EBcL root filesystem config helper. """
-    logging.basicConfig(level=logging.INFO)
+    init_logging()
 
     parser = argparse.ArgumentParser(
         description='Configure the given root tarball.')
@@ -100,13 +104,23 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    logging.info('Running root_configurator with args %s', args)
+    logging.debug('Running root_configurator with args %s', args)
 
     # Read configuration
     generator = RootConfig(args.config_file)
 
     # Create the boot.tar
-    generator.config_root(args.archive_in, args.archive_out)
+    try:
+        archive = generator.config_root(args.archive_in, args.archive_out)
+    except Exception as e:
+        logging.critical('Image build failed with exception! %s', e)
+        bug()
+
+    if archive:
+        print('Archive was written to %s.', archive)
+        promo()
+    else:
+        exit(1)
 
 
 if __name__ == '__main__':

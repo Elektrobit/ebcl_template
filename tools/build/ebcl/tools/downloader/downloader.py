@@ -7,6 +7,7 @@ import tempfile
 
 from typing import Optional
 
+from ebcl.common import init_logging, bug, promo
 from ebcl.common.config import load_yaml
 from ebcl.common.proxy import Proxy
 from ebcl.common.version import VersionDepends
@@ -91,7 +92,7 @@ class PackageDownloader:
 
 def main() -> None:
     """ Main entrypoint of EBcL boot generator. """
-    logging.basicConfig(level=logging.INFO)
+    init_logging()
 
     parser = argparse.ArgumentParser(
         description='Download and extract the given packages.')
@@ -116,7 +117,10 @@ def main() -> None:
             args.packages, args.output, args.arch, args.download_depends)
     except Exception as e:
         logging.critical('Package download failed with exception! %s', e)
+        bug()
         exit(1)
+
+    promo()
 
 
 if __name__ == '__main__':

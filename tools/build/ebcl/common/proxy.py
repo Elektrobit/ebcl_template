@@ -65,8 +65,8 @@ class Proxy:
                 ps = apt.find_package(vd.name)
                 if ps:
                     packages += ps
-                    logging.info('Found %s in apt repo %s %s...',
-                                 ps, apt.url, apt.distro)
+                    logging.debug('Found %s in apt repo %s %s...',
+                                  ps, apt.url, apt.distro)
 
         if vd.version:
             packages = [p for p in packages if filter_packages(
@@ -112,7 +112,7 @@ class Proxy:
 
         if package and package.local_file and os.path.isfile(package.local_file):
             # Use package form cache.
-            logging.info('Cache hit for package %s.', package)
+            logging.debug('Cache hit for package %s.', package)
             dst = os.path.join(
                 location, os.path.basename(package.local_file))
             if package.local_file != dst:
@@ -163,10 +163,21 @@ class Proxy:
                 arch=arch
             ),
             location)
-        if p and p.local_file \
-                and os.path.isfile(p.local_file):
-            # Package was found in cache.
-            return p
+
+        if p:
+            logging.debug('Got %s for package %s from cache.', p, package)
+            if p.local_file:
+                logging.debug('Local file of cache package: %s', p.local_file)
+                if os.path.isfile(p.local_file):
+                    logging.info(
+                        'Using %s of cache package %s.', p.local_file, p)
+                    return p
+                else:
+                    logging.debug(
+                        'File %s of cache package %s does not exist!', p.local_file, p)
+
+        else:
+            logging.debug('Package %s not found in cache.', package)
 
         if not package.file_url:
             # Find package URL.
@@ -191,6 +202,8 @@ class Proxy:
             return None
 
         # Download package.
+        logging.info('Downloading package %s from %s...',
+                     package, package.file_url)
         try:
             result = requests.get(
                 package.file_url, allow_redirects=True, timeout=10)
@@ -213,11 +226,12 @@ class Proxy:
 
         if location == self.cache.folder:
             # Add package to cache
-            logging.info('Adding package %s to cache.', package)
+            logging.debug('Adding package %s to cache.', package)
             package.local_file = self.cache.add(package, AddOp.MOVE)
         else:
             logging.info(
-                'Download folder is not cache folder. Not caching %s.', local_filename)
+                'Download folder is not cache folder. Copying %s to cache.', package)
+            package.local_file = self.cache.add(package, AddOp.COPY)
 
         return package
 
@@ -240,13 +254,13 @@ class Proxy:
         # Folder for debs
         if debs is None:
             debs = tempfile.mkdtemp()
-            logging.info('Downloading to temp folder %s.', debs)
+            logging.debug('Downloading to temp folder %s.', debs)
 
         # Folder for package content
         if extract:
             if contents is None:
                 contents = tempfile.mkdtemp()
-            logging.info('Extracting to folder %s.', contents)
+            logging.debug('Extracting to folder %s.', contents)
 
         for vd in packages:
             # Adding packages to download queue.
@@ -296,7 +310,7 @@ class Proxy:
                 package.extract(location=contents)
 
             local_packages[name] = package.local_file
-            logging.info('Deb file: %s', package.local_file)
+            logging.debug('Deb file: %s', package.local_file)
 
             if not download_depends:
                 continue

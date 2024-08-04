@@ -85,8 +85,8 @@ class Package:
         deb_content_location = tempfile.mkdtemp()
 
         # extract deb
-        logging.info('Extracting deb content of %s to %s.',
-                     self.name, deb_content_location)
+        logging.debug('Extracting deb content of %s to %s.',
+                      self.name, deb_content_location)
         file = unix_ar.open(self.local_file)
         file.extractall(deb_content_location)
 
@@ -104,8 +104,8 @@ class Package:
             tar_file = output_path
 
         # extract data.tar
-        logging.info('Extracting data content of %s to %s.',
-                     tar_file.absolute(), location)
+        logging.debug('Extracting data content of %s to %s.',
+                      tar_file.absolute(), location)
         tar = tarfile.open(tar_file.absolute())
         tar.extractall(path=location)
         tar.close()

@@ -56,7 +56,7 @@ class Cache:
 
     def add(self, package: Package, op: AddOp = AddOp.NONE) -> Optional[str]:
         """ Add a package to the cache. """
-        logging.info('Add package %s to cache.', package)
+        logging.debug('Add package %s to cache.', package)
 
         if not package.version:
             logging.warning(
@@ -99,7 +99,7 @@ class Cache:
         relation: Optional[VersionRealtion] = None,
     ) -> Optional[Package]:
         """ Get a deb file from the cache. """
-        logging.info('Get package %s/%s/%s from cache.', name, version, arch)
+        logging.debug('Get package %s/%s/%s from cache.', name, version, arch)
 
         packages = [p for p in self.index if p.name == name and p.arch == arch]
 

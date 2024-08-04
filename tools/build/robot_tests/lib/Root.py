@@ -32,12 +32,12 @@ class Root:
             config = os.path.abspath(os.path.join(
                 os.path.dirname(__file__), '..', 'data', 'root.yaml'))
         if generator is None:
-            generator = "/workspace/tools/bin/root_generator"
+            generator = "root_generator"
 
         self.target = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target)
 
-        cmd = f'{generator} {config} {self.target}'
+        cmd = f'bash -c "source /build/venv; {generator} {config} {self.target}"'
         self.fake.run_no_fake(cmd)
 
     def _unpack(self):

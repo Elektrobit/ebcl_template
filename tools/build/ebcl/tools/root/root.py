@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 import yaml
 
+from ebcl.common import init_logging, bug, promo
 from ebcl.common.apt import Apt
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
@@ -65,6 +66,7 @@ class RootGenerator:
     packages: list[VersionDepends]
     # root password
     root_password: str
+    use_ebcl_apt: bool
 
     # sysroot
     sysroot_packages: list[VersionDepends]
@@ -82,7 +84,6 @@ class RootGenerator:
     kiwi_scripts: list[str]
     kiwi_root_overlays: list[str]
     image_version: str
-    box_debug: bool
 
     # elbe specific parameters
     primary_repo: Optional[Apt] = None
@@ -133,7 +134,6 @@ class RootGenerator:
         self.use_kiwi_defaults = config.get('use_kiwi_defaults', True)
         self.kvm = config.get('kvm', True)
         self.image_version = config.get('image_version', '1.0.0')
-        self.box_debug = config.get('box_debug', False)
 
         self.name = config.get('name', 'root')
 
@@ -182,6 +182,12 @@ class RootGenerator:
             ebcl_version=config.get('ebcl_version', None)
         )
 
+        self.use_ebcl_apt = config.get('use_ebcl_apt', False)
+        if self.use_ebcl_apt:
+            ebcl_apt = Apt.ebcl_apt(self.arch)
+            self.proxy.add_apt(ebcl_apt)
+            self.apt_repos.append(ebcl_apt)
+
         if self.primary_repo:
             self.proxy.add_apt(self.primary_repo)
 
@@ -225,7 +231,11 @@ class RootGenerator:
         params: dict[str, Any] = {}
 
         params['name'] = self.name
-        params['arch'] = self.arch
+
+        if self.arch == 'arm64':
+            params['arch'] = 'aarch64'
+        else:
+            params['arch'] = self.arch
 
         try:
             url = urlparse(self.primary_repo.url)
@@ -292,7 +302,7 @@ class RootGenerator:
             logging.critical('Rendering image description failed!')
             return None
 
-        logging.info('Generated image stored as %s', image_file)
+        logging.debug('Generated image stored as %s', image_file)
 
         return image_file
 
@@ -414,7 +424,7 @@ class RootGenerator:
             logging.critical('Rendering image description failed!')
             return None
 
-        logging.info('Generated image stored as %s', image_file)
+        logging.debug('Generated image stored as %s', image_file)
 
         return image_file
 
@@ -497,14 +507,12 @@ class RootGenerator:
 
     def _copy_files(self, files: list[str], dst: str):
         """ Copy files to dst. """
-        logging.info('Files: %s', files)
+        logging.debug('Files: %s', files)
 
         for file in files:
             src = os.path.join(os.path.dirname(self.config), file)
 
             logging.info('Copying file %s...', file)
-
-            logging.info('Copying files %s', src)
 
             self.fh.copy_file(
                 src=str(src),
@@ -548,7 +556,7 @@ class RootGenerator:
             logging.critical('Image %s not found!', image)
             return None
 
-        logging.info('Berrymill.conf: %s', berrymill_conf)
+        logging.debug('Berrymill.conf: %s', berrymill_conf)
 
         appliance = Path(self.result_dir) / image.name
 
@@ -607,13 +615,9 @@ class RootGenerator:
             if self.arch == 'arm64':
                 box_arch = '--aarch64'
 
-            box_debug = ''
-            if self.box_debug:
-                box_debug = '--box-debug'
-
-            cmd = f'kiwi-ng --target-arch={self.arch} ' \
+            cmd = f'kiwi-ng --debug --target-arch={self.arch} ' \
                 f'--kiwi-file={os.path.basename(appliance)} ' \
-                f'system boxbuild {box_debug} {box_arch} ' \
+                f'system boxbuild {box_arch} ' \
                 f'--box ubuntu --box-memory=4G --cpu=qemu64-v1 {accel} -- ' \
                 f'--description={os.path.dirname(appliance)} ' \
                 f'--target-dir={self.result_dir}'
@@ -643,13 +647,14 @@ class RootGenerator:
 
         if not tar:
             logging.critical('Kiwi image build failed!')
+            logging.debug('Apt repos: %s', self.apt_repos)
             return None
 
         # rename result archive
         ext = pattern.split('.', maxsplit=1)[-1]
         result_name = f'{self.name}.{ext}'
 
-        logging.info('Using result name %s...', result_name)
+        logging.debug('Using result name %s...', result_name)
 
         assert self.target_dir
 
@@ -693,10 +698,10 @@ class RootGenerator:
 
         self.target_dir = tempfile.mkdtemp()
         self.fh.target_dir = self.target_dir
-        logging.info('Target directory: %s', self.target_dir)
+        logging.debug('Target directory: %s', self.target_dir)
 
         self.result_dir = tempfile.mkdtemp()
-        logging.info('Result directory: %s', self.result_dir)
+        logging.debug('Result directory: %s', self.result_dir)
 
         image_file = None
         if self.image_type == ImageType.ELBE:
@@ -774,7 +779,7 @@ class RootGenerator:
 
 def main() -> None:
     """ Main entrypoint of EBcL root generator. """
-    logging.basicConfig(level=logging.INFO)
+    init_logging('DEBUG')
 
     parser = argparse.ArgumentParser(
         description='Create the content of the root partiton as root.tar.')
@@ -789,7 +794,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    logging.info('Running root_generator with args %s', args)
+    logging.debug('Running root_generator with args %s', args)
 
     # Read configuration
     generator = RootGenerator(args.config_file)
@@ -804,14 +809,17 @@ def main() -> None:
             sysroot=args.sysroot)
     except Exception as e:
         logging.critical('Image build failed with exception! %s', e)
+        bug()
 
     try:
         generator.finalize(args.output)
     except Exception as e:
         logging.error('Cleanup failed with exception! %s', e)
+        bug()
 
     if image:
         print('Image was written to %s.', image)
+        promo()
     else:
         exit(1)
 

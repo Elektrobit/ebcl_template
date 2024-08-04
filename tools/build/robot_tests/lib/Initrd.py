@@ -38,12 +38,12 @@ class Initrd:
                 os.path.dirname(__file__), config))
 
         if generator is None:
-            generator = "/workspace/tools/bin/initrd_generator"
+            generator = "initrd_generator"
 
         self.target = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target)
 
-        cmd = f'{generator} {config} {self.target}'
+        cmd = f'bash -c "source /build/venv; {generator} {config} {self.target}"'
         self.fake.run_no_fake(cmd)
 
     def _unpack(self, arch):

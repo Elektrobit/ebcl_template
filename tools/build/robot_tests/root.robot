@@ -8,14 +8,14 @@ Suite Teardown  Teardown
 Systemd should exist
     File Should Exist    /usr/bin/systemd    symbolic link
 
-Config was executed
-    File Should Exist    /config
+Fakeoot config executed
+    File Should Exist    /fake
 
-PreDisc was executed
-    File Should Exist    /pre_disc_root
+Fakechroot config was executed
+    File Should Exist    /chfake
 
-PostDisc was executed
-    File Should Exist    /post_disc_root
+Chroot config was executed
+    File Should Exist    /chroot
 
 *** Keywords ***
 Setup

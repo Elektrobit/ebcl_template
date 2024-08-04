@@ -12,6 +12,7 @@ from io import BufferedWriter
 from pathlib import Path
 from typing import Tuple, Any, Optional
 
+from ebcl.common import init_logging, bug, promo
 from ebcl.common.config import load_yaml
 from ebcl.common.fake import Fake
 from ebcl.common.files import Files, EnvironmentType
@@ -90,7 +91,7 @@ class InitrdGenerator:
         busybox = parse_package(config.get(
             'busybox', 'busybox-static'), self.arch)
         if busybox:
-            logging.info('Busybox package: %s', busybox)
+            logging.debug('Busybox package: %s', busybox)
             self.busybox = busybox
         else:
             logging.critical('Parsing of busybox %s failed!',
@@ -157,7 +158,7 @@ class InitrdGenerator:
         if package.local_file and \
                 os.path.isfile(package.local_file):
             # Download was successful.
-            logging.info('Using busybox deb %s.', package.local_file)
+            logging.debug('Using busybox deb %s.', package.local_file)
         else:
             logging.critical('Busybox download failed!')
             return False
@@ -174,7 +175,7 @@ class InitrdGenerator:
                 'Extraction of busybox package %s (deb: %s) failed!', package, package.local_file)
             return False
 
-        logging.info('Busybox extracted to %s.', res)
+        logging.debug('Busybox extracted to %s.', res)
 
         if not os.path.isfile(os.path.join(self.target_dir, 'bin', 'busybox')):
             logging.critical(
@@ -207,8 +208,8 @@ class InitrdGenerator:
         Args:
             mods_dir (str): Folder containing the modules.
         """
-        logging.info('Modules tmp folder: %s.', mods_dir)
-        logging.info('Target tmp folder: %s.', self.target_dir)
+        logging.debug('Modules tmp folder: %s.', mods_dir)
+        logging.debug('Target tmp folder: %s.', self.target_dir)
 
         kversion = self.find_kernel_version(mods_dir)
 
@@ -260,7 +261,7 @@ class InitrdGenerator:
             dst = os.path.join(mods_dst, module)
             dst_dir = os.path.dirname(dst)
 
-            logging.info('Copying module %s to folder %s.', src, dst)
+            logging.debug('Copying module %s to folder %s.', src, dst)
 
             if not os.path.isfile(src):
                 logging.error('Module %s not found.', module)
@@ -331,7 +332,7 @@ class InitrdGenerator:
             gid = entry.get('gid', '0')
             mode: str = entry.get('mode', '666')
 
-            logging.info('Copying %s to %s.', src, dst_file)
+            logging.debug('Copying %s to %s.', src, dst_file)
 
             self._run_root(f'mkdir -p {dst}')
 
@@ -350,6 +351,8 @@ class InitrdGenerator:
     def create_initrd(self, output_path: str) -> Optional[str]:
         """ Create the initrd image.  """
         self.target_dir = tempfile.mkdtemp()
+
+        self.fh.target_dir = self.target_dir
 
         image_path = os.path.join(output_path, self.initrd_name)
 
@@ -444,7 +447,7 @@ class InitrdGenerator:
 
 def main() -> None:
     """ Main entrypoint of EBcL initrd generator. """
-    logging.basicConfig(level=logging.DEBUG)
+    init_logging()
 
     parser = argparse.ArgumentParser(
         description='Create an initrd image for Linux.')
@@ -455,7 +458,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    logging.info('Running initrd_generator with args %s', args)
+    logging.debug('Running initrd_generator with args %s', args)
 
     # Read configuration
     generator = InitrdGenerator(args.config_file)
@@ -466,14 +469,17 @@ def main() -> None:
         image = generator.create_initrd(args.output)
     except Exception as e:
         logging.critical('Image build failed with exception! %s', e)
+        bug()
 
     try:
         generator.finalize()
     except Exception as e:
         logging.error('Cleanup failed with exception! %s', e)
+        bug()
 
     if image:
         print('Image was written to %s.', image)
+        promo()
     else:
         exit(1)
 
