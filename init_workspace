@@ -22,12 +22,14 @@ else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
 fi
 
-if [ ${BUILD_CONTAINER} -eq 1 ]; then
+if [ $BUILD_CONTAINER -eq 1 ]; then
     if [ ! -d tools/container ]; then
-        echo "Donloading container sources..."
+        echo "Downloading container sources..."
+        echo "Using container from branch ${CONTAINER_BRANCH}."
 
         if [ -z "${CONTAINER_BRANCH}" ]; then
             CONTAINER_BRANCH="main"
+            echo "Using default branch ${CONTAINER_BRANCH}."
         fi
 
         if [ -z "${GET_CONTAINER}" ]; then
@@ -36,6 +38,10 @@ if [ ${BUILD_CONTAINER} -eq 1 ]; then
 
         $GET_CONTAINER 
     fi
+
+    python3 -m venv tools/.venv
+    source tools/.venv/bin/activate
+    pip install -r tools/container/requirements.txt
 
     echo "Building container..."
     cd tools/container

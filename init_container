@@ -19,15 +19,7 @@ else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
 fi
 
-# Generate VS Code build tasks
-echo "Update VS Code build tasks..."
-source /build/venv/bin/activate
-python /workspace/tools/tasks/generate_tasks.py
-
-# Install EBcL tools
-echo "Install EBcL tools..."
-pip install -e /workspace/tools/build
-
-# Add Fakeroot to Python library path
-# Hack to make mypy, pylint, ... work for robot libs
-ln -s /workspace/tools/build/robot_tests/lib/Fakeroot.py /build/venv/lib/python3.10/site-packages
+mkdir -p /workspace/tools
+ln -s /build/embdgen /workspace/tools/embdgen
+ln -s /build/ebcl_build_tools /workspace/tools/ebcl_build_tools
+ln -s /build/ebcl_vscode_tools /workspace/tools/ebcl_vscode_tools
