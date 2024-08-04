@@ -25,7 +25,11 @@ config_root = ../config_root.sh
 # Configuration for the grub bootloader
 grub = grub.cfg
 
+# for building
 include ../../../../qemu.mk
+
+# for running QEMU
+include ../../../../qemu_x86_64.mk
 
 #--------------------
 # Generated artefacts

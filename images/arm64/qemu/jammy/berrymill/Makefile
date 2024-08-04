@@ -27,8 +27,15 @@ config_root = ../config_root.sh
 # Base root tarball
 base_tarball = build/ubuntu.tar.xz
 
+#-------------------
+# Run the QEMU image
+#-------------------
+
+# QEMU kernel commandline
+kernel_cmdline_append = "rw"
+
 # for building
 include ../../../../qemu.mk
 
 # for running QEMU
-include ../../../../qemu_x86_64.mk
+include ../../../../qemu_aarch64.mk

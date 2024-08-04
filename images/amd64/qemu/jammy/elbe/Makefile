@@ -20,4 +20,8 @@ boot_spec = ../boot.yaml
 # Config script for root filesystem
 config_root = ../config_root.sh
 
+# for building
 include ../../../../qemu.mk
+
+# for running QEMU
+include ../../../../qemu_x86_64.mk

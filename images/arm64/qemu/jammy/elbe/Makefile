@@ -1,4 +1,4 @@
-# Makefile for ammy QEMU amd64 image using kiwi
+# Makefile for ammy QEMU amd64 image using elbe
 
 #---------------------
 # Image specifications
@@ -20,15 +20,8 @@ boot_spec = ../boot.yaml
 # Config script for root filesystem
 config_root = ../config_root.sh
 
-#--------------------
-# Generated artefacts
-#--------------------
-
-# Base root tarball
-base_tarball = build/ubuntu.tar.xz
-
 # for building
 include ../../../../qemu.mk
 
 # for running QEMU
-include ../../../../qemu_x86_64.mk
+include ../../../../qemu_aarch64.mk
