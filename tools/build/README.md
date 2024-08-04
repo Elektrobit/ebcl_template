@@ -13,19 +13,19 @@
 - [x] templates for root gen
 - [x] image kernel src
 - [x] image ro root fs
-- [x] fix kiwi-only build
 
 - [ ] image efi
+- [ ] QEMU images
+
 - [ ] fix robot tests
 
-- [ ] QEMU images
 - [ ] RDB2 images
 - [ ] Raspi images
-
 
 - [ ] copy to SD card with bmaptool
 
 - [ ] user docs
+
 
 ### App dev
 
@@ -45,6 +45,10 @@
 - [ ] proxy add local package
 - [ ] proxy record sessions
 - [ ] restore proxy from sessions
+
+- [ ] fix kiwi-only build
+- [ ] deboostrap builder
+- [ ] busybox builder
 
 ## ToDo 1.4
 

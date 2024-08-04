@@ -4,6 +4,7 @@
 # before the VS Code dev-container build.
 
 CONTAINER_TOOL="docker"
+CONTAINER_TAG="testing"
 LOCAL_CONTAINER_TAG="local"
 
 echo "Setting EBcL workspace up..."
@@ -20,9 +21,24 @@ else
 fi
 
 if [ ${BUILD_CONTAINER} -eq 1 ]; then
+    if [ ! -d tools/container ]; then
+        echo "Donloading container sources..."
+
+        if [ -z "${CONTAINER_BRANCH}" ]; then
+            CONTAINER_BRANCH="main"
+        fi
+
+        if [ -z "${GET_CONTAINER}" ]; then
+            GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
+        fi
+
+        $GET_CONTAINER 
+    fi
+
     echo "Building container..."
     cd tools/container
     ./build_container
+
 elif [ ${PULL_CONTAINER} -eq 1 ]; then
     echo "Pulling container..."
     ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"

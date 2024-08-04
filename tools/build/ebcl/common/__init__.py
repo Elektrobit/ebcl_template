@@ -26,10 +26,10 @@ def init_logging(level: str = 'INFO'):
         f'Setting log level to {used_level}. (default: {level}, env: {env_level})')
 
 
-def bug():
+def bug(bug_url: str = 'https://github.com/Elektrobit/ebcl_build_tools/issues'):
     """ Print bug hint. """
     text = "Seems you hit a bug!\n"
-    text += "Please provide a bug ticket at https://github.com/Elektrobit/ebcl_build_tools/issues."
+    text += f"Please provide a bug ticket at {bug_url}."
     text += f"You are using EBcl build tooling version {ebcl.__version__},"
     text += f"and EB corbos Linux workspace version {os.getenv('RELEASE_VERSION', None)}"
 

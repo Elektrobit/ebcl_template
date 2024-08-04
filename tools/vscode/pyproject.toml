@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "ebcl_vscode/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ebcl_vscode"]
+
+[project]
+name = "ebcl_vscode"
+dynamic = ["version"]
+
+authors = [
+  { name="Elektrobit GmbH", email="info@elektrobit.com" },
+]
+description = "EBcL vscode helpers."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Software Development :: Embedded Systems",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pyyaml",
+    "ebcl"
+]
+
+[project.urls]
+Homepage = "https://github.com/Elektrobit/ebcl_vscode_tools"
+
+[project.scripts]
+generate_build_tasks = "ebcl_vscode.tools.tasks.tasks:main"
+
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    "E0402",
+    "W0212",
+    "W0718"
+]
+
+[tool.pytest.ini_options]
+minversion = "6.2.5"
+addopts = "--cov --cov-context=test --cov-report html -rP"
+testpaths = [ "tests" ]
+
+[tool.coverage.paths]
+source = [
+    "ebcl_vscode",
+    "*/site-packages/ebcl_vscode"
+]
+
+[tool.coverage.run]
+branch = true
+source = ["ebcl_vscode"]
+
+[tool.coverage.report]
+include_namespace_packages = true
+exclude_also = [
+    "@(abc\\.)?abstractmethod",
+    "def __repr__"
+]
+include = ["ebcl_vscode/*"]
+
+[tool.coverage.html]
+show_contexts = true
+
+
+[tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/ebcl_vscode"
+explicit_package_bases = true

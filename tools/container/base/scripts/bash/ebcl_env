@@ -33,16 +33,16 @@ fi
 
 # source workspace env, if it exists
 ENV="/workspace/.env"
-if [ -f "$IDENTITY" ]; then
-    echo "Sourcing '${IDENTITY}'..."    
-    source $IDENTITY
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
 fi
 
 # source user env, if it exists
 ENV="/workspace/tools/user_config/.env"
-if [ -f "$IDENTITY" ]; then
-    echo "Sourcing '${IDENTITY}'..."    
-    source $IDENTITY
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
 fi
 
 if [ ! -d "/tmp/build/images" ]; then
