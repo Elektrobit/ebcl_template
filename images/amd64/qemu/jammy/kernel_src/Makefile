@@ -1,5 +1,8 @@
 # Makefile for ammy QEMU amd64 image using a local build kernel
 
+# Arch for sysroot extraction
+arch = x86_64
+
 #---------------------
 # Image specifications
 #---------------------

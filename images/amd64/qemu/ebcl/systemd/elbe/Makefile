@@ -1,5 +1,8 @@
 # Makefile for ammy QEMU amd64 image using elbe
 
+# Arch for sysroot extraction
+arch = x86_64
+
 #---------------------
 # Image specifications
 #---------------------

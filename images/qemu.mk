@@ -43,6 +43,11 @@ ifeq ($(kernel),)
 kernel = build/vmlinuz
 endif
 
+# Sysroot tarball
+ifeq ($(sysroot_tarball),)
+sysroot_tarball = build/ubuntu_sysroot.tar
+endif
+
 #--------------------------------
 # Default make targets for images
 #--------------------------------
@@ -70,6 +75,17 @@ boot: $(kernel)
 # config the root tarball
 .PHONY: config
 config: $(root_tarball)
+
+# build the sysroot tarball
+.PHONY: sysroot
+sysroot: $(sysroot_tarball)
+
+# install the sysroot tarball
+.PHONY: sysroot_install
+sysroot_install: $(sysroot_tarball)
+	rm -rf /workspace/sysroot_$(arch)/*
+	cp build/$(sysroot_tarball) /workspace/sysroot_$(arch)/
+	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
 
 # clean - delete the generated artefacts
 .PHONY: clean
@@ -120,3 +136,8 @@ $(initrd_img): $(initrd_spec)
 	@echo "Build initrd.img..."
 	mkdir -p build
 	set -o pipefail && initrd_generator $(initrd_spec) ./build 2>&1 | tee $(initrd_img).log
+
+$(sysroot_tarball): $(root_filesystem_spec)
+	@echo "Build sysroot.tar..."
+	mkdir -p build
+	set -o pipefail && root_generator --sysroot --no-config $(root_filesystem_spec) ./build 2>&1 | tee $(base_tarball).log

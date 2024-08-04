@@ -1,5 +1,8 @@
 # Makefile for Jammy QEMU amd64 image using grub efi bootloader
 
+# Arch for sysroot extraction
+arch = x86_64
+
 #---------------------
 # Image specifications
 #---------------------

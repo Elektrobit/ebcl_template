@@ -1,5 +1,8 @@
 # Makefile for ammy QEMU amd64 image using kiwi
 
+# Arch for sysroot extraction
+arch = aarch64
+
 #---------------------
 # Image specifications
 #---------------------
