@@ -41,6 +41,6 @@ htmlcov
 
 initrd.img
 
-state
+state/
 
-tools/user_config
+tools/

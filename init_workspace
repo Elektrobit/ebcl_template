@@ -18,8 +18,16 @@ if [ -d "${HOME}/.ebcl_config" ]; then
     echo "Copying user config..."
     mkdir -p tools/user_config
     cp -R ~/.ebcl_config/* tools/user_config
+    cp -R ~/.ebcl_config/.* tools/user_config
 else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
+fi
+
+# source user env, if it exists
+ENV="tools/user_config/.env"
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
 fi
 
 if [ $BUILD_CONTAINER -eq 1 ]; then

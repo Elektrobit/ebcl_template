@@ -5,6 +5,13 @@
 
 echo "Setting EBcL container up..."
 
+# source user env, if it exists
+ENV="tools/user_config/.env"
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
+fi
+
 # Run user setup
 if [ -d "/workspace/tools/user_config" ]; then
     echo "Running user setup..."
@@ -23,3 +30,5 @@ mkdir -p /workspace/tools
 ln -s /build/embdgen /workspace/tools/embdgen
 ln -s /build/ebcl_build_tools /workspace/tools/ebcl_build_tools
 ln -s /build/ebcl_vscode_tools /workspace/tools/ebcl_vscode_tools
+
+generate_build_tasks
