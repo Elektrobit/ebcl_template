@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# This script is exectued in the container environment,
+# after the VS Code dev-container build.
+
+echo "Setting EBcL container up..."
+
+# Run user setup
+if [ -d "/workspace/tools/user_config" ]; then
+    echo "Running user setup..."
+    if [ -f "/workspace/tools/user_config/settings.json" ]; then
+        echo "Overwriting VS Code settings..."
+        rm -f /workspace/.vscode/settings.json
+        cp /workspace/tools/user_config/settings.json /workspace/.vscode/settings.json
+    fi
+
+    if [ -x "/workspace/tools/user_config/setup_code" ]; then
+        echo "Running setup code script..."
+        /workspace/tools/user_config/setup_code
+    fi
+fi
+
+# Generate VS Code build tasks
+echo "Update VS Code build tasks..."
+source /build/venv/bin/activate
+python /workspace/tools/tasks/generate_tasks.py
+
+# Install EBcL tools
+echo "Install EBcL tools..."
+pip install -e /workspace/tools/build
+
+# Add Fakeroot to Python library path
+# Hack to make mypy, pylint, ... work for robot libs
+ln -s /workspace/tools/build/robot_tests/lib/Fakeroot.py /build/venv/lib/python3.10/site-packages

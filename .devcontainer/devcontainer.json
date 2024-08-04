@@ -7,7 +7,8 @@
 	"image": "linux.elektrobit.com/ebcl/sdk:local",
 	// This script will get the container and tag it with the local container tag. 
 	"initializeCommand": "${PWD}/init_workspace",
-	"postCreateCommand": "${PWD}/tools/init_container",
+	"postCreateCommand": "${PWD}/init_container",
+	"postStartCommand": "${PWD}/enter_container",
 	"customizations": {
 		"vscode": {
 			"settings": {

@@ -31,6 +31,20 @@ else
     fi
 fi
 
+# source workspace env, if it exists
+ENV="/workspace/.env"
+if [ -f "$IDENTITY" ]; then
+    echo "Sourcing '${IDENTITY}'..."    
+    source $IDENTITY
+fi
+
+# source user env, if it exists
+ENV="/workspace/tools/user_config/.env"
+if [ -f "$IDENTITY" ]; then
+    echo "Sourcing '${IDENTITY}'..."    
+    source $IDENTITY
+fi
+
 if [ ! -d "/tmp/build/images" ]; then
     bash -c "overlay_mount /build/images"
 fi

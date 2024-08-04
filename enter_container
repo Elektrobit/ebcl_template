@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# This script is exectued in the container environment,
+# when the container is entered.
+
+echo "Prepare EBcL container..."

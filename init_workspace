@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# This script is exectued in the host environment,
+# before the VS Code dev-container build.
+
 CONTAINER_TOOL="docker"
 LOCAL_CONTAINER_TAG="local"
 
@@ -23,4 +26,10 @@ ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOC
 if [ $? -ne 0 ]; then
     echo "Container not found."
     exit 1
+fi
+
+if [ -d "~/.ebcl_config" ]; then
+    echo "Copying user config..."
+    mkdir -p tools/user_config
+    cp -R ~/.ebcl_config/* tools/user_config
 fi
