@@ -1,5 +1,0 @@
-base: root_kiwi.yaml
-sysroot: true
-sysroot_packages:
-  - libc6-dev
-  - libjsoncpp-dev

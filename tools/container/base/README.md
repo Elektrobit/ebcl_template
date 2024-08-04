@@ -1,1 +1,0 @@
-# EBcL SDK base layer

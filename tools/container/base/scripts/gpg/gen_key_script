@@ -1,9 +1,0 @@
-Key-Type: 1
-Key-Length: 4096
-Subkey-Type: 1
-Subkey-Length: 4096
-Name-Real: DEBFULLNAME
-Name-Email: DEBEMAIL
-Expire-Date: 0
-%no-ask-passphrase
-%no-protection

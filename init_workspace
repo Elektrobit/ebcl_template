@@ -9,6 +9,8 @@ LOCAL_CONTAINER_TAG="local"
 
 echo "Setting EBcL workspace up..."
 
+mkdir -p tools
+
 source .env
 
 # Copy user config

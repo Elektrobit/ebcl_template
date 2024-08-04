@@ -1,5 +1,0 @@
-base: root_elbe.yaml
-sysroot: true
-sysroot_packages:
-  - libc6-dev
-  - libjsoncpp-dev
