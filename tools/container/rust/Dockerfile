@@ -5,9 +5,6 @@ ARG CONTAINER_USER="ebcl"
 
 USER root
 
-# Install Ubuntu Rust
-RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt install -y rust-all
-
 # Add rust binaries to PATH
 ENV PATH="/home/$CONTAINER_USER/.cargo/bin:${PATH}"
 RUN echo "export PATH=\$PATH:~/.cargo/bin" >> /home/$CONTAINER_USER/.bashrc
