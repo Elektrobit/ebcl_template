@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="6.8" name="Ubuntu-22.04_appliance">
+    <inherit path="appliance.kiwi"/>
+    <!--
+        Delete original image type.
+    -->
+    <set xpath="//preferences/type">
+        image: old
+    </set>
+    <remove_any>
+        <type image="old"/>
+    </remove_any>
+
+    <!--
+        Add image type "tbz" to get root filesytem archive.
+    -->
+    <add>
+        <preferences>
+            <type image="tbz"/>
+        </preferences>
+    </add>
+
+    <!--
+        Add required dev packages.
+    -->
+    <add>
+        <packages type="image">
+            <package name="libc6-dev"/>
+            <package name="libjsoncpp-dev"/>
+        </packages>
+    </add>
+</image>

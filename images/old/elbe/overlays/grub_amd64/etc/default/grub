@@ -8,7 +8,7 @@ GRUB_TIMEOUT_STYLE=hidden
 GRUB_TIMEOUT=2
 GRUB_DISTRIBUTOR="EB corbos Linux"
 GRUB_CMDLINE_LINUX_DEFAULT=""
-GRUB_CMDLINE_LINUX="systemd.machine_id=004711 console=ttyS0"
+GRUB_CMDLINE_LINUX="systemd.machine_id=004711 console=ttyAMA0"
 
 # Uncomment to enable BadRAM filtering, modify to suit your needs
 # This works with Linux (no patch required) and with any kernel that obtains

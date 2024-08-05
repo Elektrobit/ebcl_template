@@ -1,0 +1,121 @@
+<?xml version="1.0"?>
+
+<mirror>
+    <primary_host>archive.ubuntu.com</primary_host>
+    <primary_path>/ubuntu</primary_path>
+    <primary_proto>http</primary_proto>
+    <url-list>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy main</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-security main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-security main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-updates main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-updates main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-backports main</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-backports main</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-security main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-security main</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-updates main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-updates main</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-backports main</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-backports main</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy universe</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy universe</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-security universe</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-security universe</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-updates universe</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-updates universe</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://archive.ubuntu.com/ubuntu jammy-backports universe</binary>
+            <source>http://archive.ubuntu.com/ubuntu jammy-backports universe</source>
+            <options>
+                <option>arch=amd64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy universe</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy universe</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-security universe</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-security universe</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-updates universe</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-updates universe</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+        <url>
+            <binary>http://ports.ubuntu.com/ubuntu-ports jammy-backports universe</binary>
+            <source>http://ports.ubuntu.com/ubuntu-ports jammy-backports universe</source>
+            <options>
+                <option>arch=arm64</option>
+            </options>
+        </url>
+    </url-list>
+</mirror>

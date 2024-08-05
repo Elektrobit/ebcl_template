@@ -1,0 +1,61 @@
+{
+  "root": {
+    "elos": {
+      "UseEnv": true,
+      "Port": 54321,
+      "Interface": "0.0.0.0",
+      "LogLevel": "Info",
+      "EventBlacklist": ".event.messageCode 2000 EQ",
+      "authorizedProcesses": [
+        ".process.uid 0 EQ .process.gid 0 EQ AND .process.exec '/bin/elosc' STRCMP AND",
+        ".process.gid 200 EQ .process.exec '/bin/elosc' STRCMP AND",
+        ".process.pid 1 EQ"
+      ],
+      "ClientInputs": {
+        "PluginSearchPath": "/usr/local/lib/elos/client",
+        "Plugins": {
+          
+        }
+      },
+      "EventLogging": {
+        "PluginSearchPath": "/usr/lib/x86_64-linux-gnu/elos/backend",
+        "Plugins": {
+          "everythingElse": {
+            "File": "backend_json.so",
+            "Run": "always",
+            "Filter": [
+              ".e.messageCode 5005 NE"
+            ],
+            "Config": {
+              "StoragePath": "/var/log/elosd_%host%_%date%_%count%.log"
+            }
+          }
+        }
+      },
+      "Scanner": {
+        "Path": "/usr/lib/x86_64-linux-gnu/elos/scanner",
+        "KmsgScanner": {
+          "KmsgFile": "/dev/kmsg"
+        },
+        "SyslogScanner": {
+          "SyslogPath": "/dev/log",
+          "MappingRules": {
+            "MessageCodes": {
+              "1000": ".event.source.appName 'login' STRCMP",
+              "1102": "1 1 EQ",
+              "2000": ".event.source.appName 'crinit' STRCMP"
+            }
+          }
+        },
+        "Shmem": {
+          "ShmemFile": "scanner_shmem",
+          "ShmemCreate": true,
+          "ShmemLogEntries": 256,
+          "ShmemOffset": 0,
+          "SemFile": "scanner_shmem_sem",
+          "SemCreate": true
+        }
+      }
+    }
+  }
+}
