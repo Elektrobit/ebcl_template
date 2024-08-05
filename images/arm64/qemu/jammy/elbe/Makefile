@@ -28,3 +28,7 @@ include ../../../../qemu.mk
 
 # for running QEMU
 include ../../../../qemu_aarch64.mk
+
+# default action
+.PHONY: default
+default: qemu

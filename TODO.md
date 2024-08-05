@@ -1,7 +1,5 @@
 ## ToDo 1.3
 
-- [ ] PoC Jammy efi image
-
 - [ ] EBcL RDB2 crinit
 
 
@@ -15,6 +13,8 @@
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd
 - [ ] EBcL RDB2 systemd
+
+- [ ] test and complete sysroot build
 
 - [ ] copy to SD card with bmaptool
 
@@ -54,3 +54,7 @@
 - [ ] HV images
 - [ ] SDK dev docs
 - [ ] (alternatives in dependencies)
+- [ ] arm build host support
+- [ ] install grub from deb
+- [ ] PoC Jammy efi image arm64
+- [ ] PoC Jammy efi image amd64

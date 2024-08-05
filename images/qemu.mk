@@ -52,10 +52,6 @@ endif
 # Default make targets for images
 #--------------------------------
 
-# default action
-.PHONY: default
-default: qemu
-
 # build of the disc image
 .PHONY: image
 image: $(disc_image)

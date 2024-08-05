@@ -37,8 +37,13 @@ base_tarball = build/ubuntu.tar.xz
 # QEMU kernel commandline
 kernel_cmdline_append = "rw"
 
+
 # for building
 include ../../../../qemu.mk
 
 # for running QEMU
 include ../../../../qemu_x86_64.mk
+
+# default action
+.PHONY: default
+default: qemu
