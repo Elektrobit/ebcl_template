@@ -23,6 +23,13 @@ boot_spec = ../boot.yaml
 # Config script for root filesystem
 config_root = ../config_root.sh
 
+#-------------------
+# Run the QEMU image
+#-------------------
+
+# QEMU kernel commandline
+kernel_cmdline_append = "rw"
+
 # for building
 include ../../../../qemu.mk
 

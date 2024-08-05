@@ -3,7 +3,7 @@
 - [x] Jammy QEMU amd64
 - [x] Jammy QEMU arm64
 - [x] EBcL QEMU arm64 systemd
-- [ ] EBcL QEMU amd64 systemd
+- [x] EBcL QEMU amd64 systemd
 
 - [ ] EBcL RDB2 systemd
 
@@ -49,6 +49,7 @@
 - [ ] fix kiwi-only build
 - [ ] deboostrap builder
 - [ ] busybox builder
+- [ ] relative root CLI option for build tools
 
 ## ToDo 1.4
 

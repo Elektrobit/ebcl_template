@@ -1,6 +1,6 @@
 # not type -> use default image builder
 # Name of the archive.
-name: ubuntu
+name: ebcl
 # CPU architecture
 arch: amd64
 # Packages to install in the root tarball

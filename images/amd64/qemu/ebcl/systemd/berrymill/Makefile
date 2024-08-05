@@ -8,13 +8,13 @@ arch = x86_64
 #---------------------
 
 # Specificaiton of the partition layout of the image.raw
-partition_layout = ../image.yaml
+partition_layout = ../../image.yaml
 # Specificaiton of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
 # Specificaiton of the initrd.img
-initrd_spec = ../initrd.yaml
+initrd_spec = ../../initrd.yaml
 # Specificaiton of the kernel
-boot_spec = ../boot.yaml
+boot_spec = ../../boot.yaml
 
 #-------------------------
 # Additional configuration
@@ -28,7 +28,13 @@ config_root = ../config_root.sh
 #--------------------
 
 # Base root tarball
-base_tarball = build/ubuntu.tar.xz
+base_tarball = build/ebcl.tar.xz
+
+# Configured root tarball
+root_tarball = build/ebcl.config.tar
+
+# Sysroot tarball
+sysroot_tarball = build/ebcl_sysroot.tar
 
 #-------------------
 # Run the QEMU image
@@ -37,9 +43,8 @@ base_tarball = build/ubuntu.tar.xz
 # QEMU kernel commandline
 kernel_cmdline_append = "rw"
 
-
 # for building
-include ../../../../qemu.mk
+include ../../../../../qemu.mk
 
 # for running QEMU
-include ../../../../qemu_x86_64.mk
+include ../../../../../qemu_x86_64.mk
