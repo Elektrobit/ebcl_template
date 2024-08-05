@@ -8,6 +8,10 @@
 # The initrd image is needed because the Canonical kernel has no
 # built-in support for virtio block devices.
 
+# default action
+.PHONY: default
+default: qemu
+
 #---------------------
 # Select bash as shell
 #---------------------
