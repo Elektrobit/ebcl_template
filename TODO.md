@@ -1,18 +1,22 @@
 ## ToDo 1.3
 
-- [ ] EBcL RDB2 crinit
+- [x] Jammy QEMU amd64
+- [x] Jammy QEMU arm64
+- [x] EBcL QEMU arm64 systemd
+- [ ] EBcL QEMU amd64 systemd
 
+- [ ] EBcL RDB2 systemd
 
 - [ ] image test tools
 - [ ] image tests
 
-- [ ] EBcL QEMU arm64 systemd
-- [ ] EBcL QEMU arm64 crinit
-- [ ] EBcL QEMU amd64 systemd
 - [ ] EBcL QEMU amd64 crinit
+- [ ] EBcL QEMU arm64 crinit
+- [ ] EBcL RDB2 crinit
+
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd
-- [ ] EBcL RDB2 systemd
+
 
 - [ ] test and complete sysroot build
 

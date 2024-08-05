@@ -1,7 +1,7 @@
-# Makefile for ammy QEMU amd64 image using kiwi
+# Makefile for ammy QEMU amd64 image using elbe
 
 # Arch for sysroot extraction
-arch = x86_64
+arch = aarch64
 
 #---------------------
 # Image specifications
@@ -28,11 +28,16 @@ config_root = ../config_root.sh
 #--------------------
 
 # Base root tarball
-base_tarball = build/ubuntu.tar.xz
+base_tarball = build/ebcl.tar
 
+# Configured root tarball
+root_tarball = build/ebcl.config.tar
+
+# Sysroot tarball
+sysroot_tarball = build/ebcl_sysroot.tar
 
 # for building
-include ../../../../qemu.mk
+include ../../../../../qemu.mk
 
 # for running QEMU
-include ../../../../qemu_x86_64.mk
+include ../../../../../qemu_aarch64.mk

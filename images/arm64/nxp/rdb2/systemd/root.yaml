@@ -1,0 +1,18 @@
+base: base.yaml
+name: ebcl_rdb2
+type: elbe
+packages:
+  - linux-image-unsigned-5.15.0-1023-s32-eb
+  - linux-modules-5.15.0-1023-s32-eb
+  - linux-modules-extra-5.15.0-1023-s32-eb
+  - u-boot-s32-tools
+  - arm-trusted-firmware-s32g
+  - device-tree-compiler
+  - nautilos-uboot-tools
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: fake

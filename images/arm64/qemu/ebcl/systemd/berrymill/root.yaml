@@ -1,0 +1,4 @@
+# Config to use as a base
+base: ../root.yaml
+# Overwrite the image builder type - ensure kiwi is used
+type: kiwi

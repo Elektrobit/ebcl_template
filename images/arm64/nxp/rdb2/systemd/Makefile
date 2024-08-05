@@ -1,3 +1,28 @@
+# Makefile for NXP RDB2
+
+# Arch for sysroot extraction
+arch = aarch64
+
+#---------------------
+# Image specifications
+#---------------------
+
+# Specificaiton of the partition layout of the image.raw
+partition_layout = image.yaml
+# Specificaiton of the root filesystem content and configuration
+root_filesystem_spec = root.yaml
+# Specificaiton of the initrd.img
+initrd_spec = initrd.yaml
+# Specificaiton of the kernel
+boot_spec = boot.yaml
+
+#-------------------------
+# Additional configuration
+#-------------------------
+
+# Config script for root filesystem
+config_root = config_root.sh
+
 # Makefile for QEMU amd64 images
 
 # QEMU images require three artefacts:
@@ -10,7 +35,7 @@
 
 # default action
 .PHONY: default
-default: qemu
+default: image
 
 #---------------------
 # Select bash as shell
@@ -29,12 +54,12 @@ endif
 
 # Base root tarball
 ifeq ($(base_tarball),)
-base_tarball = build/ubuntu.tar
+base_tarball = build/ebcl_rdb2.tar
 endif
 
 # Configured root tarball
 ifeq ($(root_tarball),)
-root_tarball = build/ubuntu.config.tar
+root_tarball = build/ebcl_rdb2.config.tar
 endif
 
 # Generated initrd.img
@@ -42,14 +67,14 @@ ifeq ($(initrd_img),)
 initrd_img = build/initrd.img
 endif
 
-# Kernel image
-ifeq ($(kernel),)
-kernel = build/vmlinuz
+# Generated boot tarball
+ifeq ($(boot_tarball),)
+boot_tarball = build/boot.tar
 endif
 
 # Sysroot tarball
 ifeq ($(sysroot_tarball),)
-sysroot_tarball = build/ubuntu_sysroot.tar
+sysroot_tarball = build/ebcl_rdb2_sysroot.tar
 endif
 
 #--------------------------------
@@ -70,7 +95,7 @@ initrd: $(initrd_img)
 
 # build of the kernel(s)
 .PHONY: boot
-boot: $(kernel)
+boot: $(boot_tarball)
 
 # config the root tarball
 .PHONY: config
@@ -126,15 +151,16 @@ $(root_tarball): $(base_tarball) $(config_root)
 	mkdir -p build
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
 
-$(kernel): $(boot_spec)
-	@echo "Get kernel binary..."
+$(boot_tarball): $(boot_spec)
+	@echo "Build the boot tarball..."
 	mkdir -p build
-	set -o pipefail && boot_generator $(boot_spec) ./build 2>&1 | tee $(kernel).log
-	mv ./$(kernel)-* ./$(kernel) || true
+	echo "Not implemented!"; exit 1
+	set -o pipefail && boot_generator $(boot_spec) ./build 2>&1 | tee $(boot_tarball).log
 
 $(initrd_img): $(initrd_spec)
 	@echo "Build initrd.img..."
 	mkdir -p build
+	echo "Not implemented!"; exit 1
 	set -o pipefail && initrd_generator $(initrd_spec) ./build 2>&1 | tee $(initrd_img).log
 
 $(sysroot_tarball): $(root_filesystem_spec)
