@@ -1,29 +1,28 @@
 ## ToDo 1.3
 
-- [x] versions
-- [x] derived configs
-- [x] fix UID issues
-- [x] ttyS0
-- [x] cached apt indices
-- [x] vds compare
-- [x] sysroots
-- [x] copy templates to out, copy generated files to out
-- [x] templates for root gen
-- [x] image kernel src
-- [x] image ro root fs
+- [ ] PoC Jammy efi image
 
-- [ ] image efi
-- [ ] QEMU images
+- [ ] EBcL RDB2 crinit
 
-- [ ] fix robot tests
 
-- [ ] RDB2 images
-- [ ] Raspi images
+- [ ] image test tools
+- [ ] image tests
+
+- [ ] EBcL QEMU arm64 systemd
+- [ ] EBcL QEMU arm64 crinit
+- [ ] EBcL QEMU amd64 systemd
+- [ ] EBcL QEMU amd64 crinit
+- [ ] EBcL Raspi crinit
+- [ ] EBcL Raspi systemd
+- [ ] EBcL RDB2 systemd
 
 - [ ] copy to SD card with bmaptool
 
+- [ ] Makefile for building old image descriptions
+
 - [ ] user docs
 
+- [ ] generate devcontainer.json
 
 ### App dev
 
@@ -32,9 +31,8 @@
 
 ### Tests
 
-- [ ] image test tools
-- [ ] image tests
 - [ ] improve and complete tests
+- [ ] fix robot tests
 
 ### Stretch goal
 
