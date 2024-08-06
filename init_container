@@ -5,6 +5,31 @@
 
 echo "Setting EBcL container up..."
 
+# Move SSH keys
+if [ -d "tools/.ssh" ]; then
+    echo "SSH keys found."
+
+    if [ ! -d "~/.ssh" ]; then
+        mkdir -p ~/.ssh
+    fi
+
+    echo "Moving ssh keys to ~/.ssh"
+    mv tools/.ssh/* ~/.ssh/
+    chmod -R 600 tools/.ssh
+
+    echo "Deleting copied SSH keys from tools."
+    rm -rf tools/.ssh
+else
+    echo "No SSH keys found."
+fi
+
+# Setup /build folder
+for folder in results/images results/packages results/apps images identity sysroot_x86_64 sysroot_aarch64
+do
+    rm -rf /build/${folder}
+    ln -s /workspace/${folder} /build/${folder}
+done
+
 # source user env, if it exists
 ENV="tools/user_config/.env"
 if [ -f "$ENV" ]; then
@@ -26,9 +51,35 @@ else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
 fi
 
+# Link tools to tools folder
 mkdir -p /workspace/tools
 ln -s /build/embdgen /workspace/tools/embdgen
 ln -s /build/ebcl_build_tools /workspace/tools/ebcl_build_tools
 ln -s /build/ebcl_vscode_tools /workspace/tools/ebcl_vscode_tools
 
+# Clone additional images
+if [ ! -z "$IMAGE_REPO" ]; then
+    echo "Cloning additional image repo..."
+    git submodule add $USER_IMAGE_REPO /workspace/images/extra
+fi
+
+# Clone additional apps
+if [ ! -z "$APP_REPO" ]; then
+    echo "Cloning additional apps repo..."
+    git submodule add $USER_IMAGE_REPO /workspace/apps/extra
+fi
+
+# Clone user images
+if [ ! -z "$USER_IMAGE_REPO" ]; then
+    echo "Cloning user image repo..."
+    git submodule add $USER_IMAGE_REPO /workspace/images/user
+fi
+
+# Clone user apps
+if [ ! -z "$USER_APP_REPO" ]; then
+    echo "Cloning user apps repo..."
+    git submodule add $USER_IMAGE_REPO /workspace/apps/user
+fi
+
+# Generate VS Code build tasks
 generate_build_tasks

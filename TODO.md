@@ -46,7 +46,6 @@
 - [ ] proxy record sessions
 - [ ] restore proxy from sessions
 
-- [ ] fix kiwi-only build
 - [ ] deboostrap builder
 - [ ] busybox builder
 - [ ] relative root CLI option for build tools

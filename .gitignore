@@ -49,3 +49,9 @@ tools/
 
 **/temp/
 
+# Ignore additional images and apps and created submodules
+.gitmodules
+/images/user
+/apps/user
+/images/extra
+/apps/extra

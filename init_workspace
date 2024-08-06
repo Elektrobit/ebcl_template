@@ -30,34 +30,47 @@ if [ -f "$ENV" ]; then
     source $ENV
 fi
 
-if [ $BUILD_CONTAINER -eq 1 ]; then
-    if [ ! -d tools/container ]; then
-        echo "Downloading container sources..."
-        echo "Using container from branch ${CONTAINER_BRANCH}."
-
-        if [ -z "${CONTAINER_BRANCH}" ]; then
-            CONTAINER_BRANCH="main"
-            echo "Using default branch ${CONTAINER_BRANCH}."
-        fi
-
-        if [ -z "${GET_CONTAINER}" ]; then
-            GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
-        fi
-
-        $GET_CONTAINER 
-    fi
-
-    python3 -m venv tools/.venv
-    source tools/.venv/bin/activate
-    pip install -r tools/container/requirements.txt
-
-    echo "Building container..."
-    cd tools/container
-    ./build_container
-
-elif [ ${PULL_CONTAINER} -eq 1 ]; then
+if [ ${PULL_CONTAINER} -eq 1 ]; then
     echo "Pulling container..."
     ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
+
+elif [ $BUILD_CONTAINER -eq 1 ]; then
+    echo "Checking if container exists..."
+    ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
+    if [ $? -ne 0 ]; then
+        CONTAINER_EXISTS=0
+    else
+        CONTAINER_EXISTS=1
+    fi
+
+    if [ $REBUILD_CONTAINER -eq 0 ] && [ $CONTAINER_EXISTS -eq 1 ]; then
+        echo "Container exists, not rebuilding..."
+    else
+        if [ ! -d tools/container ]; then
+            echo "Downloading container sources..."
+            echo "Using container from branch ${CONTAINER_BRANCH}."
+
+            if [ -z "${CONTAINER_BRANCH}" ]; then
+                CONTAINER_BRANCH="main"
+                echo "Using default branch ${CONTAINER_BRANCH}."
+            fi
+
+            if [ -z "${GET_CONTAINER}" ]; then
+                GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
+            fi
+
+            $GET_CONTAINER 
+        fi
+
+        python3 -m venv tools/.venv
+        source tools/.venv/bin/activate
+        pip install -r tools/container/requirements.txt
+
+        echo "Building container..."
+        cd tools/container
+        ./build_container
+    fi
+
 else
     echo "Expecting container to exist..."
 fi
@@ -67,8 +80,24 @@ echo "Tagging linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG} as linux.elektrobit
 ${CONTAINER_TOOL} tag "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" "linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}"
 
 # check if container exists
+echo "Checking if container exists..."
 ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
 if [ $? -ne 0 ]; then
     echo "Container not found."
     exit 1
+fi
+
+
+# Copy SSH keys
+if [ ${COPY_SSH} -eq 1 ]; then
+    echo "Copying SSH keys from host..."
+    if [ -d ${HOME}/.ssh ]; then
+        cp -R ${HOME}/.ssh tools/
+        echo "Copied keys:"
+        ls -lah tools/.ssh/*
+    else
+        echo "No .ssh folder found!"
+    fi
+else
+    echo "Not copying SSH keys from host."
 fi
