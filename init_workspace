@@ -16,6 +16,7 @@ source .env
 # Copy user config
 if [ -d "${HOME}/.ebcl_config" ]; then
     echo "Copying user config..."
+    rm -rf tools/user_config
     mkdir -p tools/user_config
     cp -R ~/.ebcl_config/* tools/user_config
     cp -R ~/.ebcl_config/.* tools/user_config
@@ -92,6 +93,7 @@ fi
 if [ ${COPY_SSH} -eq 1 ]; then
     echo "Copying SSH keys from host..."
     if [ -d ${HOME}/.ssh ]; then
+        cp -R tools/.ssh
         cp -R ${HOME}/.ssh tools/
         echo "Copied keys:"
         ls -lah tools/.ssh/*
