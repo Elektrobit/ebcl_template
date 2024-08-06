@@ -1,8 +1,0 @@
-# Derive values from base.yaml - relative path
-base: base.yaml
-# Root device to mount
-root_device: /dev/vda1
-# List of kernel modules
-modules_packages:
-  - linux-modules-5.15.0-1023-s32-eb
-  - linux-modules-extra-5.15.0-1023-s32-eb

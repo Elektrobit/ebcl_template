@@ -1,0 +1,14 @@
+# Kernel package to use
+kernel: linux-image-unsigned-5.15.0-1023-s32-eb
+# CPU architecture
+arch: arm64
+# Add the EB corbos Linux apt repo
+use_ebcl_apt: true
+# Add repo with NXP RDB2 packages
+apt_repos:
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+    distro: ebcl_nxp_public
+    components:
+      - nxp_public
+    key: file:///build/keys/elektrobit.pub
+    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg

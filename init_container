@@ -53,9 +53,13 @@ fi
 
 # Link tools to tools folder
 mkdir -p /workspace/tools
-ln -s /build/embdgen /workspace/tools/embdgen
-ln -s /build/ebcl_build_tools /workspace/tools/ebcl_build_tools
-ln -s /build/ebcl_vscode_tools /workspace/tools/ebcl_vscode_tools
+for tool in embdgen ebcl_build_tools ebcl_vscode_tools
+do
+    if [ ! -L /workspace/tools/${tool} ]; then
+        echo "Symlinking ${tool} as tools/${tool}..."
+        ln -s /build/${tool} /workspace/tools/${tool}
+    fi
+done
 
 # Clone additional images
 if [ ! -z "$IMAGE_REPO" ]; then

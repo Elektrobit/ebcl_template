@@ -1,0 +1,13 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Name of the boot root archive
+name: boot_root
+# Packages for boot_root.tar
+packages:
+  - linux-image-unsigned-5.15.0-1023-s32-eb
+  - linux-modules-5.15.0-1023-s32-eb
+  - linux-modules-extra-5.15.0-1023-s32-eb
+  - u-boot-s32-tools
+  - arm-trusted-firmware-s32g
+  - device-tree-compiler
+  - nautilos-uboot-tools
