@@ -26,7 +26,7 @@ root_filesystem_spec = root.yaml
 #--------------------
 
 # Disc image
-disc_image = $(result_folder)/sdcard.img
+disc_image = $(result_folder)/root.img
 
 #--------------------------------
 # Default make targets for images
