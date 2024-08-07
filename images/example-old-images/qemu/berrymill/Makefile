@@ -51,13 +51,13 @@ sysroot_tarball = $(result_folder)/qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-
 $(disc_image): $(root_filesystem_spec)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(disc_image).log
+	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(result_folder)/image.log
 
 # Build the sysroot tarball
 $(sysroot_tarball): $(sysroot_spec)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --sysroot --no-config $(sysroot_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
+	set -o pipefail && root_generator --sysroot --no-config $(sysroot_spec) $(result_folder) 2>&1 | tee $(result_folder)/sysroot.log
 
 #-------------------
 # Run the QEMU image

@@ -101,7 +101,7 @@ fi
 if [ ${COPY_SSH} -eq 1 ]; then
     echo "Copying SSH keys from host..."
     if [ -d ${HOME}/.ssh ]; then
-        cp -R tools/.ssh
+        rm -rf tools/.ssh
         cp -R ${HOME}/.ssh tools/
         echo "Copied keys:"
         ls -lah tools/.ssh/*

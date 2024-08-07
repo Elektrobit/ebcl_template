@@ -101,7 +101,7 @@ $(source):
 	sudo apt -y build-dep linux
 	cd kernel/linux-5.15.0 && chmod +x scripts/*.sh
 
-$(kconfig): $(boot_spec)
+$(kconfig): $(boot_spec) $(source):
 	@echo "Get kernel config..."
 	mkdir -p build
 	set -o pipefail && boot_generator ../boot.yaml ./build 2>&1 | tee build/$(kconfig).log
