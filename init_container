@@ -64,13 +64,13 @@ done
 # Clone additional images
 if [ ! -z "$IMAGE_REPO" ]; then
     echo "Cloning additional image repo..."
-    git submodule add $USER_IMAGE_REPO /workspace/images/extra
+    git submodule add $IMAGE_REPO /workspace/images/extra
 fi
 
 # Clone additional apps
 if [ ! -z "$APP_REPO" ]; then
     echo "Cloning additional apps repo..."
-    git submodule add $USER_IMAGE_REPO /workspace/apps/extra
+    git submodule add $APP_REPO /workspace/apps/extra
 fi
 
 # Clone user images
@@ -82,7 +82,7 @@ fi
 # Clone user apps
 if [ ! -z "$USER_APP_REPO" ]; then
     echo "Cloning user apps repo..."
-    git submodule add $USER_IMAGE_REPO /workspace/apps/user
+    git submodule add $USER_APP_REPO /workspace/apps/user
 fi
 
 # Generate VS Code build tasks

@@ -1,0 +1,10 @@
+# Use Berrymill and Kiwi as image builder
+type: kiwi
+# Use KVM accelerated bulding - turn of if not supported on your host
+kvm: true
+# CPU architecture of the target
+arch: 'amd64'
+# Relative path to the kiwi appliancd
+image: appliance_sysroot.kiwi
+# Relative path to the berrymill.conf
+berrymill_conf: ../berrymill.conf

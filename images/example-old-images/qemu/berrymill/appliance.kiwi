@@ -21,7 +21,6 @@
 
     <users>
         <user password="linux" pwdformat="plain" home="/root" name="root" groups="root"/>
-        <user password="linux" pwdformat="plain" home="/home/ebcl" name="ebcl" groups="users,kvm" shell="/bin/bash"/>
     </users>
 
     <packages type="image">

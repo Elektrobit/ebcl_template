@@ -67,9 +67,17 @@ elif [ $BUILD_CONTAINER -eq 1 ]; then
         source tools/.venv/bin/activate
         pip install -r tools/container/requirements.txt
 
+        if [ -z "${CONTAINER_CONF}" ]; then
+            CONTAINER_CONF="build_config.yaml"
+        fi
+
+        if [ -z "${CONTAINER_BUILD_PATH}" ]; then
+            CONTAINER_BUILD_PATH="tools/container"
+        fi
+
         echo "Building container..."
-        cd tools/container
-        ./build_container
+        cd ${CONTAINER_BUILD_PATH}
+        python3 build_container.py -c ${CONTAINER_CONF}
     fi
 
 else

@@ -147,6 +147,11 @@ $(modules): $(kernel)
 # Helper make targets
 #--------------------
 
+# Configure the kernel binary
+.PHONY: config_kernel
+config_kernel:
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) menuconfig
+
 # Rebuild the kernel binary
 .PHONY: rebuild_kernel
 rebuild_kernel:

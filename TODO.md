@@ -6,7 +6,7 @@
 - [x] EBcL QEMU amd64 systemd
 - [x] EBcL RDB2 systemd
 
-- [ ] EBcL RDB2 kernel src
+- [x] EBcL RDB2 kernel src
 - [x] build folder arg for tools
 
 - [ ] image test tools

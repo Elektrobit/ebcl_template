@@ -1,0 +1,6 @@
+# Use elbe as image builder
+type: elbe
+# CPU architecture of the target
+arch: 'amd64'
+# Relative path to the kiwi appliancd
+image: systemd-grub-amd64.xml
