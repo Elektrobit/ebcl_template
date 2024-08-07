@@ -26,6 +26,7 @@ book
 log.html
 output.xml
 report.html
+interactive_console_output.xml
 
 **/__pycache__
 **/__pycache__/**/*
@@ -59,4 +60,4 @@ tools/
 fakedit
 /work*
 
-
+.mypy_cache

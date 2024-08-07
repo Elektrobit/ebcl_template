@@ -5,11 +5,10 @@
 - [x] EBcL QEMU arm64 systemd
 - [x] EBcL QEMU amd64 systemd
 - [x] EBcL RDB2 systemd
-
 - [x] EBcL RDB2 kernel src
 - [x] build folder arg for tools
+- [x] image test tools
 
-- [ ] image test tools
 - [ ] image tests
 
 - [ ] EBcL QEMU amd64 crinit

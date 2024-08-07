@@ -1,9 +1,16 @@
+# pylint: disable=C0103
 """
 Allows Robot to communicate with a physical or virtual target
 while abstracting away the concrete communication channel
 """
+import os
 import re
+import socket
+import time
+
+from typing import Any
 from uuid import uuid4
+
 from interfaces.ssh import SshInterface
 from interfaces.tmux import TmuxConsole
 
@@ -18,6 +25,8 @@ class CommManager:
     """
 
     ROBOT_LIBRARY_SCOPE = 'SUITE'
+
+    interface: Any
 
     # pylint: disable=W1113
     # Robot requires default values for all args
@@ -110,15 +119,19 @@ class CommManager:
         """
         Check if qemu is running, if no, run it
         """
-        qcmd = f"test/run-qemu {image} {fmt} {arch} \n"
-        p = self.execute("hostname")
-        if 'ebclstandard' in p:
+        script = os.path.join(os.path.dirname(__file__), 'run_qemu.sh')
+        qcmd = f"{script} {image} {fmt} {arch} \n"
+
+        hostname = socket.gethostname()
+        output = self.execute("hostname")
+
+        if hostname not in output:
             print("qemu is up and running")
         else:
             self.send_key(qcmd)
-            self.wait_for_regex("ebclstandard login:.*")
+            self.wait_for_regex(".*login:.*")
             self.send_key("root\n")
-            self.wait_for_regex("Password:.*")
+            time.sleep(0.5)
             self.send_key("linux\n")
 
     def create_session(self, session_name: str):

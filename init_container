@@ -86,4 +86,7 @@ if [ ! -z "$USER_APP_REPO" ]; then
 fi
 
 # Generate VS Code build tasks
-# generate_build_tasks
+generate_build_tasks
+
+# Workaround for robot tests
+echo "/workspace/robot_tests/lib" > /build/venv/lib/python3.10/site-packages/_Fakeroot.pth

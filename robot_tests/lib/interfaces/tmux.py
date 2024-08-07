@@ -2,8 +2,16 @@
 tmux implementation of CommunicationInterface
 """
 import libtmux
-from libtmux._internal.query_list import ObjectDoesNotExist
+
 from . import CommunicationInterface
+
+
+class TmuxSessionDoesNotExist(Exception):
+    """ Raised if the expected tmux session is not found. """
+
+
+class TmuxPaneNotInitialized(Exception):
+    """ Raised if the tmux pane is none. """
 
 
 class TmuxConsole(CommunicationInterface):
@@ -26,22 +34,22 @@ class TmuxConsole(CommunicationInterface):
         Select session and window by names
         """
         if not self.session:
-            try:
-                self.session = self.server.sessions.get(
-                    session_name=self.session_name)
-            except ObjectDoesNotExist as e:
-                print(e)
+            self.session = self.server.sessions.get(
+                session_name=self.session_name)
+
+        if not self.session:
+            raise TmuxSessionDoesNotExist(
+                f'Tmux session {self.session_name} not found!')
 
         if not self.window:
-            try:
-                self.window = self.session.select_window(
-                    target_window=self.window_name)
-            except ObjectDoesNotExist as e:
-                print(e)
+            self.window = self.session.select_window(
+                target_window=self.window_name)
 
         self.pane = self.window.active_pane
 
     def send_message(self, message: str):
+        if not self.pane:
+            raise TmuxPaneNotInitialized()
 
         self.connect()
         self.pane.clear()
@@ -49,11 +57,17 @@ class TmuxConsole(CommunicationInterface):
         self.l = 0
 
     def send_key(self, key: str):
+        if not self.pane:
+            raise TmuxPaneNotInitialized()
+
         self.connect()
         self.pane.send_keys(key, enter=False)
         self.l = 0
 
     def read_line(self):
+        if not self.pane:
+            raise TmuxPaneNotInitialized()
+
         self.connect()
         self.l += 1
         if self.l == 100:

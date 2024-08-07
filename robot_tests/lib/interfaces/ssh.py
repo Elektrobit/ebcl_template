@@ -2,6 +2,8 @@
 SSH implementation of CommunicationInterface
 """
 from subprocess import Popen, PIPE, STDOUT
+from typing import Any
+
 from . import CommunicationInterface
 
 
@@ -14,7 +16,7 @@ class SshInterface(CommunicationInterface):
         super().__init__()
         self.host = host
         self.port = port
-        self.connection = None
+        self.connection: Any = None
 
     # pylint: disable=R1732
     # The Process needs to keep running

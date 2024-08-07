@@ -1,22 +1,20 @@
 # pylint: disable=C0103
-""" Test library for the initrd generator. """
+""" Test library for the root generator. """
 import logging
-import tempfile
 import os
+import tempfile
 
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 # pylint: disable=E0401
 from Fakeroot import Fakeroot
 
 
-class Initrd:
-    """ Test library for the initrd generator. """
+class Root:
+    """ Test library for the root generator. """
 
     ROBOT_LIBRARY_SCOPE = 'SUITE'
 
-    # content of init script
-    init: str
     # directory for initrd build output
     target: str
     # helper
@@ -26,21 +24,17 @@ class Initrd:
         """ Init Python logging. """
         logging.basicConfig(level=logging.DEBUG)
 
-    def build_initrd(
+    def build_root(
         self,
         config: Optional[str] = None,
         generator: Optional[str] = None
     ):
-        """ Build the initrd imastat -c '%F' /tmp/tmphvx3j23p/root/dummyge. """
+        """ Build the root archive. """
         if config is None:
             config = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), '..', 'data', 'initrd.yaml'))
-        elif not config.startswith('/'):
-            config = os.path.abspath(os.path.join(
-                os.path.dirname(__file__), config))
-
+                os.path.dirname(__file__), '..', 'data', 'root.yaml'))
         if generator is None:
-            generator = "initrd_generator"
+            generator = "root_generator"
 
         self.target = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target)
@@ -48,15 +42,21 @@ class Initrd:
         cmd = f'bash -c "source /build/venv; {generator} {config} {self.target}"'
         self.fake.run_no_fake(cmd)
 
-    def _unpack(self, arch):
-        """ Unpack the initrd image. """
-        os.makedirs(self.target, exist_ok=True)
+    def _unpack(self):
+        """ Unpack the boot tar. """
+        archive = os.path.join(self.target, 'ubuntu.tar')
 
-        cmd = f'cpio -di -F {arch} -D {self.target}'
-        self._run(cmd)
+        logging.info('Root archive: %s', archive)
+        logging.info('Work folder: %s', self.target)
+
+        assert os.path.isfile(archive)
+
+        self._run(f'tar xf {archive}')
+        self._run('ls -lah')
 
     def _run(self, cmd: str, check=True) -> Tuple[str, str]:
         """ Run command using fakeroot. """
+
         return self.fake.run(
             cmd=cmd,
             cwd=self.target,
@@ -65,15 +65,11 @@ class Initrd:
 
     def load(self):
         """ Unpack the initrd and read the init script. """
-        path = os.path.join(self.target, 'initrd.img')
-        self._unpack(path)
-        self.init = open(os.path.join(
-            self.target, 'init'), encoding='utf8').read()
-        logging.info('Init: %s', self.init)
+        self._unpack()
 
     def cleanup(self):
         """ Remove generated artefacts. """
-        self._run(f'rm -rf {self.target}')
+        # self._run(f'rm -rf {self.target}')
 
     def file_should_exist(self, path: str, file_type: str = 'regular file'):
         """ Check that a file exists. """
@@ -92,17 +88,6 @@ class Initrd:
         d = os.path.join(self.target, path)
 
         self.fake.abs_directory_should_exist(d)
-
-    def module_should_be_loaded(self, module_name: str):
-        """ Ensure that the given module is loaded. """
-        assert self.init is not None
-        assert f'modprobe {module_name}' in self.init
-
-    def device_should_be_mounted(self, device: str, mountpoint: str):
-        """ Ensure that the given device is the default as root. """
-        assert self.init is not None
-        assert f'root={device}' in self.init
-        assert f'mount $root {mountpoint}' in self.init
 
     def should_have_mode(self, path: str, mode: str):
         """ Check that a file exists. """
