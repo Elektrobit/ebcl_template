@@ -18,10 +18,10 @@
 		<images>
 			<gpthd>
 				<name>sdcard.img</name>
-				<size>2GiB</size>
+				<size>4GiB</size>
 				<grub-install />
 				<partition>
-					<size>128MiB</size>
+					<size>256MiB</size>
 					<label>uefi</label>
 					<bootable />
 				</partition>
