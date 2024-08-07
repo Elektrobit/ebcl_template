@@ -61,9 +61,12 @@ $(disc_image): $(root_filesystem_spec)
 .PHONY: qemu
 qemu: $(disc_image)
 	@echo "Running $(disc_image) in QEMU x86_64 using EFI loader..."
-	qemu-system-x86_64 \
+	qemu-system-aarch64 \
+        -machine virt \
+        -cpu cortex-a72 \
         -m 4096 \
         -nographic \
         -netdev user,id=mynet0 \
         -device virtio-net-pci,netdev=mynet0 \
         -drive format=raw,file=$(disc_image),if=virtio
+		-bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd

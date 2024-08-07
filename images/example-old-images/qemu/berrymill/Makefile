@@ -13,7 +13,7 @@ SHELL := /bin/bash
 # Result folder
 #--------------
 
-result_folder = ./build
+result_folder ?= ./build
 
 #---------------------
 # Image specifications
