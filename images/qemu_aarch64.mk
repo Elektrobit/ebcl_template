@@ -5,17 +5,9 @@
 #-------------------
 
 # QEMU kernel commandline
-ifeq ($(kernel_cmdline),)
-kernel_cmdline = console=ttyAMA0
-endif
-
-ifeq ($(kernel_cmdline_append),)
-kernel_cmdline_append = 
-endif
-
-ifeq ($(qemu_net_append),)
-qemu_net_append = ,hostfwd=tcp::2222-:22
-endif
+kernel_cmdline ?= console=ttyAMA0
+kernel_cmdline_append ?= ""
+qemu_net_append ?= ,hostfwd=tcp::2222-:22
 
 .PHONY: qemu
 qemu: $(kernel) $(initrd_img) $(disc_image)

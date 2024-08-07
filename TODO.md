@@ -7,6 +7,8 @@
 
 - [ ] EBcL RDB2 systemd
 
+- [ ] build folder arg for tools
+
 - [ ] image test tools
 - [ ] image tests
 
@@ -24,9 +26,19 @@
 
 - [ ] Makefile for building old image descriptions
 
-- [ ] user docs
+### Docs
 
-- [ ] generate devcontainer.json
+- [ ] Overview
+- [ ] Setup
+- [ ] Develop images
+- [ ] Packaging apps
+- [ ] Developing apps
+- [ ] The example images
+- [ ] Building old kiwi or elbe images
+- [ ] Workspace in detail
+- [ ] Dev Container overview
+- [ ] Embdgen overview
+- [ ] EBcL build tools overview
 
 ### App dev
 
