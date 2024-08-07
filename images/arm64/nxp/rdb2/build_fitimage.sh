@@ -6,7 +6,10 @@ set -e
 # Rename kernel
 #---------------------------------------
 echo "Rename kernel..."
-mv /boot/vmlinuz-* boot/Image
+if [ ! -f /boot/vmlinuz ]; then
+    mv /boot/vmlinuz-* /boot/Image
+fi
+mv /boot/vmlinuz /boot/Image
 mv /boot/initrd.img /boot/initrd
 
 

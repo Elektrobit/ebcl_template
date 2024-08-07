@@ -99,7 +99,7 @@ sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
 # Image build configuration
 #--------------------------
 
-# Boot flow:
+# Build flow:
 #
 # root_filesystem_spec -[root gen]-> base_tarball -\
 #                                                   \

@@ -6,7 +6,7 @@
 
 # QEMU kernel commandline
 kernel_cmdline ?= console=ttyAMA0
-kernel_cmdline_append ?= ""
+kernel_cmdline_append ?= 
 qemu_net_append ?= ,hostfwd=tcp::2222-:22
 
 .PHONY: qemu

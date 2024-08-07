@@ -1,5 +1,12 @@
 # Makefile for NXP RDB2 with kernel build form source
 
+#--------------
+# Output folder
+#--------------
+
+# Folder for generated artefacts
+result_folder ?= ./build
+
 #---------------------
 # Image specifications
 #---------------------
@@ -9,11 +16,16 @@ partition_layout = ../image.yaml
 # Specificaiton of the initrd.img
 initrd_spec = ../initrd.yaml
 # Specificaiton of the fitimage
-boot_spec = ../boot.yaml
+boot_spec = boot.yaml
 # Specificaiton of the root environment for fitimage building
 boot_root_spec = ../boot_root.yaml
 # Specificaiton of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
+
+# Specification how to get the kernel config
+kernel_config = kernel_config.yaml
+# Kernel source package name
+kernel_package = linux-buildinfo-5.15.0-1034-s32-eb
 
 #-------------------------
 # Additional configuration
@@ -36,13 +48,100 @@ include ../rdb2.mk
 #--------------------
 
 # Kernel image
-kernel = build/vmlinux
+kernel = $(result_folder)/vmlinuz
 # Kernel modules
-modules = build/lib
+modules = $(result_folder)/lib
 # Kernel config
-kconfig = build/config
+kconfig = $(result_folder)/config
 # Kernel source
 source = kernel
+# Path of the kernel sources
+kernel_dir = $(source)/linux-s32-eb-5.15.0
+# Kernel make arguments
+kernel_make_args = ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+
+#--------------------------
+# Image build configuration
+#--------------------------
+
+# Build flow of the kernel binary:
+# --------------------------------
+#
+# [make $modules]-> $result_folder/lib (not use, could be picked up by initrd gen
+#
+# kernel_package -[make $source]-> /kernel -\
+#                                            \
+# kernel_config -[boot gen]-> kconfig --------- [make $kernel]-> kernel
+#
+#
+# Adapte build flow of the base makefile:
+# ---------------------------------------
+#
+# root_filesystem_spec -[root gen]-> base_tarball -\
+#                                                   \
+# config_root ----------------------------------------[root conf]-> root_tarball -\
+#                                                                                  \
+# boot_root_spec -[root gen]-> boot_root -------\                                   \
+#                                                \                                   \
+# (adapted) boot_spec ----------------------------[boot gen]-> fitimage (and fip.s32) -[embdgen]-> disc_image
+#                                                /                                   /
+# fitimage_config ------------------------------/                                   /
+#                                              /                                   /
+# bootloader_config --------------------------/                                   /
+#                                            /                                   /
+# build_fitimage ---------------------------/                                   /
+#                                          /                                   /
+# initrd_spec -[initrd gen]-> initrd_img -/                                   /
+#                                        /                                   /
+# (kernel build flow) kernel -----------/                                   /
+#                                                                          /
+# partition_layout -------------------------------------------------------/
+
+# Download the kernel source form the apt repo
+# and install the build dependencies.
+$(source):
+	@echo "Get kernel sources..."
+	mkdir -p $(source)
+	cd $(source) && apt -y source $(kernel_package)
+	sudo apt -y build-dep $(kernel_package)
+	cd $(kernel_dir) && chmod +x scripts/*.sh
+
+# Get the kernel config form the configured kernel binary package.
+$(kconfig): $(kernel_config) $(source)
+	@echo "Get kernel config..."
+	mkdir -p $(result_folder)
+	set -o pipefail && boot_generator $(kernel_config) $(result_folder) 2>&1 | tee $(kconfig).log
+	@echo "Renaming $(result_folder)/config-* as $(kconfig)..."
+	mv $(result_folder)/config-* $(kconfig)
+	@echo "Copying $(kconfig) to $(kernel_dir)..."
+	cp $(result_folder)/config $(kernel_dir)/.config
+	@echo "Set all not defined values of the kernel config to defaults..."
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) olddefconfig
+	@echo "Copying modified config as olddefconfig..."
+	cp $(kernel_dir)/.config $(result_folder)/olddefconfig
+
+# Build the kernel binary
+$(kernel): $(kconfig) $(source)
+	@echo "Compile kernel..."
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
+	@echo "Get kernel binary..."
+	cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
+
+# Adpate build spec for the fitimage
+# Additional dependency to the kernel binary
+# Please not that another boot_spec is used, see ./boot.yaml.
+$(fitimage): $(boot_spec) $(boot_root) $(build_fitimage) $(fitimage_config) $(fitimage_config) $(initrd_img) $(kernel)
+	@echo "Build $(fitimage)..."
+	mkdir -p $(result_folder)
+	set -o pipefail && boot_generator $(boot_spec) $(result_folder) 2>&1 | tee $(fitimage).log
+
+# Make the modules and install them in the results folder
+$(modules): $(kernel)
+	@echo "Get virtio driver..."
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) modules -j 16
+	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
+	mkdir -p $(result_folder)
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) $(kernel_make_args) modules_install
 
 #--------------------
 # Helper make targets
@@ -51,58 +150,26 @@ source = kernel
 # Rebuild the kernel binary
 .PHONY: rebuild_kernel
 rebuild_kernel:
-	mkdir -p build
-	cd kernel/linux-5.15.0 && $(MAKE) -j 16
-	rm -f build/vmlinux
-	cp kernel/linux-5.15.0/vmlinux build/vmlinux
+	mkdir -p $(result_folder)
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
+	@echo "Delete the old kernel binary..."
+	rm -f $(kernel)
+	@echo "Get the new kernel binary..."
+	cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
 
 # Rebuild the kernel modules
 .PHONY: rebuild_modules 
 rebuild_modules: kernel
-	mkdir -p build
-	cd kernel/linux-5.15.0 && $(MAKE) modules -j 16
-	cd kernel/linux-5.15.0 && chmod +x debian/scripts/sign-module
-	rm -rf build/lib
-	cd kernel/linux-5.15.0 && INSTALL_MOD_PATH=../../build $(MAKE) modules_install
+	mkdir -p $(result_folder)
+	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) modules -j 16
+	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
+	@echo "Delete the old kernel modules..."
+	rm -rf $(modules)
+	@echo "Install the new kernel modules..."
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) $(kernel_make_args) modules_install
 
 # clean - delete the generated artefacts
 .PHONY: clean
 clean:
-	rm -rf kernel
-	rm -rf build
-
-
-#--------------------------
-# Image build configuration
-#--------------------------
-
-$(kernel): $(kconfig) $(source)
-	@echo "Get kernel binary..."
-	cp build/config kernel/linux-5.15.0/.config
-	cd kernel/linux-5.15.0 && $(MAKE) -j 16
-	cp kernel/linux-5.15.0/vmlinux build/vmlinux
-
-$(modules): $(kernel)
-	@echo "Get virtio driver..."
-	cd kernel/linux-5.15.0 && $(MAKE) modules -j 16
-	cd kernel/linux-5.15.0 && chmod +x debian/scripts/sign-module
-	mkdir -p build
-	cd kernel/linux-5.15.0 && INSTALL_MOD_PATH=../../build $(MAKE) modules_install
-
-$(source):
-	@echo "Get kernel sources..."
-	mkdir -p kernel
-	cd kernel && apt -y source linux
-	sudo apt -y build-dep linux
-	cd kernel/linux-5.15.0 && chmod +x scripts/*.sh
-
-$(kconfig): $(boot_spec)
-	@echo "Get kernel config..."
-	mkdir -p build
-	set -o pipefail && boot_generator ../boot.yaml ./build 2>&1 | tee build/$(kconfig).log
-	mv ./build/config-* ./build/config
-
-$(initrd_img): $(initrd_spec) $(modules)
-	@echo "Build initrd.img..."
-	mkdir -p build
-	set -o pipefail && initrd_generator $(initrd_spec) ./build 2>&1 | tee build/$(initrd_img).log
+	rm -rf $(source)
+	rm -rf $(result_folder)
