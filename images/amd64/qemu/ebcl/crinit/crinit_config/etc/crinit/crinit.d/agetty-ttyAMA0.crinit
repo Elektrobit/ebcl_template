@@ -1,0 +1,3 @@
+NAME = agetty-ttyAMA0
+COMMAND = /bin/setsid /sbin/agetty 115200 ttyAMA0
+RESPAWN = YES
