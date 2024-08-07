@@ -16,8 +16,6 @@ if [ -d "tools/.ssh" ]; then
     echo "Moving ssh keys to ~/.ssh"
     rm -rf ~/.ssh/*
     mv tools/.ssh/* ~/.ssh/
-    sudo chmod -R ebcl:ebcl ~/.ssh
-    sudo chmod -R 600 ~/.ssh
 
     echo "Deleting copied SSH keys from tools."
     rm -rf tools/.ssh
