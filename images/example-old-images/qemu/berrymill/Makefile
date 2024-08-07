@@ -1,6 +1,7 @@
 # Makefile for old Berrymill images
 
-# QEMU EFI images require only a qcow-image
+# Arch for sysroot extraction
+arch = x86_64
 
 #---------------------
 # Select bash as shell
@@ -21,38 +22,42 @@ result_folder = ./build
 # Specificaiton of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
 
+# Specificaiton of the sysroot
+sysroot_spec = sysroot.yaml
+
 #--------------------
 # Generated artefacts
 #--------------------
 
+# QEMU EFI images require only a qcow-image
+
 # Disc image
-disc_image = $(result_folder)/image.qcow2
+disc_image = $(result_folder)/qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-1.1.0-0.qcow2
+
+# Sysroot tarball
+sysroot_tarball = $(result_folder)/qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-1.1.0-0.tar.xz
 
 #--------------------------------
 # Default make targets for images
 #--------------------------------
 
-# default action
-.PHONY: default
-default: qemu
 
-# build of the disc image
-.PHONY: image
-image: $(disc_image)
-
-# clean - delete the generated artefacts
-.PHONY: clean
-clean:
-	rm -rf build
 
 #--------------------------
 # Image build configuration
 #--------------------------
 
+# Build the qcow2 image
 $(disc_image): $(root_filesystem_spec)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(disc_image).log
+
+# Build the sysroot tarball
+$(sysroot_tarball): $(sysroot_spec)
+	@echo "Build image..."
+	mkdir -p $(result_folder)
+	set -o pipefail && root_generator --sysroot --no-config $(sysroot_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
 
 #-------------------
 # Run the QEMU image
@@ -66,4 +71,32 @@ qemu: $(disc_image)
         -nographic \
         -netdev user,id=mynet0$(qemu_net_append) \
         -device virtio-net-pci,netdev=mynet0 \
-        -drive format=raw,file=$(disc_image),if=virtio
+        -drive file=$(disc_image),if=virtio
+
+#--------------------------------
+# Default make targets for images
+#--------------------------------
+
+# default action
+.PHONY: default
+default: qemu
+
+# build of the disc image
+.PHONY: image
+image: $(disc_image)
+
+# build of the sysroot tarball
+.PHONY: sysroot
+sysroot: $(sysroot_tarball)
+
+# clean - delete the generated artefacts
+.PHONY: clean
+clean:
+	rm -rf build
+
+# install the sysroot tarball
+.PHONY: sysroot_install
+sysroot_install: $(sysroot_tarball)
+	rm -rf /workspace/sysroot_$(arch)/*
+	cp $(sysroot_tarball) /workspace/sysroot_$(arch)/
+	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)

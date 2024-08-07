@@ -50,7 +50,9 @@
 		<install-recommends />
 		<pkg-list>
 			<!-- grub bootloader -->
-			<pkg>grub-efi-arm64</pkg>
+			<pkg>grub-common</pkg>
+			<pkg>grub2-common</pkg>
+			<pkg>grub-pc-bin</pkg>
 			<pkg>linux-image-generic</pkg>
 			<!-- required to allow the kernel package to generate an initrd.img -->
 			<pkg>initramfs-tools</pkg>

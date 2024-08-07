@@ -1,0 +1,3 @@
+base: root.yaml
+# Relative path to the kiwi appliancd
+image: appliance_sysroot.kiwi
