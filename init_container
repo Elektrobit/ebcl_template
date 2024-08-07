@@ -14,8 +14,10 @@ if [ -d "tools/.ssh" ]; then
     fi
 
     echo "Moving ssh keys to ~/.ssh"
+    rm -rf ~/.ssh/*
     mv tools/.ssh/* ~/.ssh/
-    chmod -R 600 tools/.ssh
+    sudo chmod -R ebcl:ebcl ~/.ssh
+    sudo chmod -R 600 ~/.ssh
 
     echo "Deleting copied SSH keys from tools."
     rm -rf tools/.ssh
@@ -86,4 +88,4 @@ if [ ! -z "$USER_APP_REPO" ]; then
 fi
 
 # Generate VS Code build tasks
-generate_build_tasks
+# generate_build_tasks

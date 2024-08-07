@@ -76,8 +76,10 @@ elif [ $BUILD_CONTAINER -eq 1 ]; then
         fi
 
         echo "Building container..."
+        pushd .
         cd ${CONTAINER_BUILD_PATH}
         python3 build_container.py -c ${CONTAINER_CONF}
+        popd
     fi
 
 else
@@ -101,6 +103,7 @@ fi
 if [ ${COPY_SSH} -eq 1 ]; then
     echo "Copying SSH keys from host..."
     if [ -d ${HOME}/.ssh ]; then
+        echo "Copying SSH folder to tools..."
         rm -rf tools/.ssh
         cp -R ${HOME}/.ssh tools/
         echo "Copied keys:"
