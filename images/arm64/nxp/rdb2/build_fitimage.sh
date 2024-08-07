@@ -12,7 +12,6 @@ fi
 mv /boot/vmlinuz /boot/Image
 mv /boot/initrd.img /boot/initrd
 
-
 #=======================================
 # Get NXP S32G device tree
 #---------------------------------------
