@@ -2,3 +2,5 @@
 base: ../root.yaml
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
+# Pattern to match the result file
+result: '*.tar.xz'

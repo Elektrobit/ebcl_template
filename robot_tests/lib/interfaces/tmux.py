@@ -1,6 +1,8 @@
 """
 tmux implementation of CommunicationInterface
 """
+import logging
+
 import libtmux
 
 from . import CommunicationInterface
@@ -33,19 +35,27 @@ class TmuxConsole(CommunicationInterface):
         """
         Select session and window by names
         """
-        if not self.session:
-            self.session = self.server.sessions.get(
-                session_name=self.session_name)
+        self.session = self.server.sessions.get(
+            session_name=self.session_name)
 
         if not self.session:
             raise TmuxSessionDoesNotExist(
                 f'Tmux session {self.session_name} not found!')
 
+        self.window = self.session.active_window
+
         if not self.window:
-            self.window = self.session.select_window(
-                target_window=self.window_name)
+            raise TmuxSessionDoesNotExist(
+                f'Tmux window {self.window_name} not found!')
 
         self.pane = self.window.active_pane
+
+        if not self.pane:
+            raise TmuxSessionDoesNotExist('No active pane found!')
+
+    def disconnect(self):
+        # Combine stderr and stdout to match serial interface
+        pass
 
     def send_message(self, message: str):
         if not self.pane:
@@ -64,15 +74,20 @@ class TmuxConsole(CommunicationInterface):
         self.pane.send_keys(key, enter=False)
         self.l = 0
 
-    def read_line(self):
+    def read_line(self, timeout: int = -1):
         if not self.pane:
             raise TmuxPaneNotInitialized()
 
+        # TODO: improve line handling
         self.connect()
         self.l += 1
         if self.l == 100:
             self.l = 0
-        return " ".join(self.pane.capture_pane(start=self.l, end=self.l))
+        line = " ".join(self.pane.capture_pane(start=self.l, end=self.l))
+
+        logging.info('Line: %s', line)
+
+        return line
 
     def create_session(self, session_name: str):
         """
@@ -83,5 +98,8 @@ class TmuxConsole(CommunicationInterface):
             window_name (str): window name
         """
         s = self.server.has_session(session_name)
+
         if not s:
+            logging.info('Creating new tmux session...')
             self.session = self.server.new_session(session_name=session_name)
+            logging.info('New session: %s', self.session)

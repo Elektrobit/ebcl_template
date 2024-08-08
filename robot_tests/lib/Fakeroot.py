@@ -28,13 +28,13 @@ class Fakeroot:
             # os.remove(self.fakestate)
             pass
 
-    def run_no_fake(
+    def run(
         self,
         cmd: str,
         cwd: Optional[str] = None,
         check=True
     ) -> Tuple[str, str]:
-        """ Run command using fakeroot. """
+        """ Run command. """
         logging.info('CMD: %s', cmd)
 
         p = subprocess.run(
@@ -62,7 +62,7 @@ class Fakeroot:
 
         return (pout, perr)
 
-    def run(
+    def run_fake(
         self,
         cmd: str,
         cwd: Optional[str] = None,
@@ -70,7 +70,7 @@ class Fakeroot:
     ) -> Tuple[str, str]:
         """ Run command using fakeroot. """
         cmd = f'fakechroot fakeroot -i {self.fakestate} -s {self.fakestate} -- {cmd}'
-        return self.run_no_fake(
+        return self.run(
             cmd=cmd,
             cwd=cwd,
             check=check
@@ -85,8 +85,22 @@ class Fakeroot:
         """ Run command using fakechroot. """
         cmd = f'fakechroot fakeroot -i {self.fakestate} -s {self.fakestate}' \
             f' -- chroot {chroot} {cmd}'
-        return self.run_no_fake(
+        return self.run(
             cmd=cmd,
+            check=check
+        )
+
+    def run_sudo(
+        self,
+        cmd: str,
+        cwd: Optional[str] = None,
+        check=True
+    ) -> Tuple[str, str]:
+        """ Run command using fakechroot. """
+        cmd = f'sudo {cmd}'
+        return self.run(
+            cmd=cmd,
+            cwd=cwd,
             check=check
         )
 

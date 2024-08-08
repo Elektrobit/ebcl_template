@@ -5,9 +5,9 @@
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline ?= "console=ttyS0"
+kernel_cmdline ?= console=ttyS0
 kernel_cmdline_append ?= 
-qemu_net_append ?= ",hostfwd=tcp::2222-:22"
+qemu_net_append ?= 
 
 .PHONY: qemu
 qemu: $(kernel) $(initrd_img) $(disc_image)

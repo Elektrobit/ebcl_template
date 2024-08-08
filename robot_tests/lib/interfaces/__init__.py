@@ -3,6 +3,7 @@ This module contains the base class for all CommunicationInterfaces
 as well as the concrete implementations.
 """
 from abc import ABC, abstractmethod
+from typing import Optional
 
 
 class CommunicationInterface(ABC):
@@ -19,6 +20,12 @@ class CommunicationInterface(ABC):
     def connect(self):
         """
         Perform any actions needed to establish the actual connection to the target
+        """
+
+    @abstractmethod
+    def disconnect(self):
+        """
+        Perform any actions needed to stop the actual connection to the target
         """
 
     @abstractmethod
@@ -39,7 +46,7 @@ class CommunicationInterface(ABC):
         Override this for your implementation
         """
 
-    def send_keys(self, keys):
+    def send_keys(self, keys: str):
         """
         Send multiple keys over the interface. 
 
@@ -52,20 +59,21 @@ class CommunicationInterface(ABC):
             self.send_key(key)
 
     @abstractmethod
-    def read_line(self) -> str:
+    def read_line(self, timeout: int = 1) -> Optional[str]:
         """
         Read one line (including the line break) from the interface
 
         Override this for your implementation
         """
 
-    def next_line(self) -> str:
+    def next_line(self, timeout: int = 1) -> Optional[str]:
         """
         Read one line (including the line break) from the interface
         and append it to the internal log.
 
         Do NOT override
         """
-        line = self.read_line()
-        self.lines += line
+        line = self.read_line(timeout=timeout)
+        if line:
+            self.lines += line
         return line

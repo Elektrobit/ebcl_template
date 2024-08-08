@@ -3,16 +3,16 @@
 Allows Robot to communicate with a physical or virtual target
 while abstracting away the concrete communication channel
 """
-import os
+import logging
 import re
-import socket
 import time
 
-from typing import Any
+from typing import Any, Optional
 from uuid import uuid4
 
 from interfaces.ssh import SshInterface
 from interfaces.tmux import TmuxConsole
+from interfaces.process import ShellSubprocess
 
 
 class CommManager:
@@ -31,12 +31,18 @@ class CommManager:
     # pylint: disable=W1113
     # Robot requires default values for all args
     def __init__(self, mode="SSH", *args) -> None:
+        logging.basicConfig(level=logging.DEBUG)
+
+        logging.info('Setting up CommManager with interface %s...', mode)
+
         self.mode = mode
         match mode:
             case "SSH":
                 self.interface = SshInterface(*args)
             case "Serial":
                 self.interface = TmuxConsole(*args)
+            case "Process":
+                self.interface = ShellSubprocess(*args)
             case x:
                 raise ValueError(
                     f"Unknown communication interface '{x}' specified")
@@ -45,7 +51,15 @@ class CommManager:
         """
         Perform any actions needed to establish the actual connection to the target
         """
+        logging.info('Connect to interface %s...', self.interface)
         self.interface.connect()
+
+    def disconnect(self):
+        """
+        Perform any actions needed to stop the actual connection to the target
+        """
+        logging.info('Disconnect from interface %s...', self.interface)
+        self.interface.disconnect()
 
     def send_message(self, message: str):
         """
@@ -53,38 +67,86 @@ class CommManager:
 
         Appends a newline to the end iff none is present
         """
-
+        logging.info('Send message %s to interface %s...',
+                     message, self.interface)
         self.interface.send_message(message)
 
     def send_key(self, key: str):
         """
         Send a keystroke over the interface
         """
+        logging.info('Send key %s to interface %s...',
+                     key, self.interface)
         self.interface.send_key(key)
 
-    def wait_for_line(self, line: str):
+    def send_keys(self, keys: str):
+        """
+        Send the given keys over the inverface.
+        """
+        logging.info('Send keys %s to interface %s...',
+                     keys, self.interface)
+        self.interface.send_keys(keys)
+
+    def wait_for_line_containing(self, search: str, timeout: int = -1) -> bool:
+        """
+        Ingest lines until a matching line is found
+        """
+        logging.info('Waiting for line containing %s on interface %s...',
+                     search, self.interface)
+
+        start_time = time.time()
+        while True:
+            if timeout > 0 and time.time() - start_time >= timeout:
+                return False
+
+            r = self.interface.next_line(timeout=timeout)
+            if not r:
+                continue
+
+            if search in r:
+                logging.info('Matching line found: %s', r)
+                return True
+
+    def wait_for_line(self, line: str, timeout: int = -1) -> bool:
         """
         Ingest lines until a matching line is found
         Ignores leading and trailing whitespace
         """
-        while True:
-            r = self.interface.next_line()
-            print(r)
-            if line.strip() == r.strip():
-                return
+        logging.info('Waiting for line %s on interface %s...',
+                     line, self.interface)
 
-    def wait_for_line_exact(self, line: str):
+        start_time = time.time()
+        while True:
+            if timeout > 0 and time.time() - start_time >= timeout:
+                return False
+
+            r = self.interface.next_line(timeout=timeout)
+            if not r:
+                continue
+
+            if line.strip() == r.strip():
+                logging.info('Matching line found...')
+                return True
+
+    def wait_for_line_exact(self, line: str, timeout: int = -1) -> bool:
         """
         Ingest lines until a matching line is found
         Does NOT ignores leading and trailing whitespace
         """
+        start_time = time.time()
         while True:
-            r = self.interface.next_line()
-            print(r)
-            if line == r:
-                return
+            if timeout > 0 and time.time() - start_time >= timeout:
+                return False
 
-    def wait_for_regex(self, regex: str) -> re.Match:
+            r = self.interface.next_line(timeout=timeout)
+            if not r:
+                continue
+
+            if line == r:
+                logging.info('Matching line found...')
+                return True
+
+    def wait_for_regex(self, regex: str, timeout: int = -1) -> Optional[re.Match]:
         """
         Ingest lines until a line matching the regex is found.
 
@@ -92,55 +154,80 @@ class CommManager:
         the regex needs to match the trailing newline
         """
         rg = re.compile(regex)
-        while True:
-            line = self.interface.next_line()
-            print(line)
-            m = rg.match(line)
-            if not m:
-                continue
-            return m
+        logging.info('Waiting for regex %s...', rg)
 
-    def execute(self, message) -> str:
+        start_time = time.time()
+        while True:
+            if timeout > 0 and time.time() - start_time >= timeout:
+                return None
+
+            r = self.interface.next_line(timeout=timeout)
+            if not r:
+                continue
+
+            m = rg.match(r)
+            if m:
+                return m
+
+    def execute(self, message, timeout: int = 1) -> Optional[str]:
         """
         Read all lines produced by the given message
         """
         terminator = uuid4()
         ter = str(terminator)
+
+        logging.info('Executing %s (ter: %s)...', message, ter)
+
         self.send_message(message + "; echo " + ter)
+
         buf = ""
+        start_time = time.time()
         while True:
-            r = self.interface.next_line()
-            if r == ter:
+            if timeout > 0 and time.time() - start_time >= timeout:
+                return None
+
+            line = self.interface.next_line(timeout=timeout)
+            if not line:
+                continue
+
+            if line == ter:
+                logging.info('Line %s matches terminator...', line)
                 break
-            buf += r
+            buf += line
+
         return buf
 
-    def test_setup(self, image: str, fmt: str, arch: str):
-        """
-        Check if qemu is running, if no, run it
-        """
-        script = os.path.join(os.path.dirname(__file__), 'run_qemu.sh')
-        qcmd = f"{script} {image} {fmt} {arch} \n"
+    def login_to_vm(self, user: str = 'root', password: str = 'linux',
+                    shell_prompt: str = '.*#.*') -> bool:
+        """ Login to VM. """
+        logging.info("Waiting for login prompt...")
 
-        hostname = socket.gethostname()
-        output = self.execute("hostname")
+        m = self.wait_for_regex(".*login:.*", timeout=30)
+        if not m:
+            logging.info("Trying to get login prompt by pressing enter...")
+            for i in range(0, 30):
+                logging.info('Try %d to get login prompt...', i)
+                self.send_keys('\n')
+                m = self.wait_for_regex(".*login:.*", timeout=1)
+                if m:
+                    logging.info('Login prompt detected.')
+                    break
 
-        if hostname not in output:
-            print("qemu is up and running")
-        else:
-            self.send_key(qcmd)
-            self.wait_for_regex(".*login:.*")
-            self.send_key("root\n")
-            time.sleep(0.5)
-            self.send_key("linux\n")
+        if not m:
+            return False
 
-    def create_session(self, session_name: str):
-        """
-        Create new session and window in case of serial mode
+        logging.info("Logging in with default credentials...")
+        self.send_message(user)
+        time.sleep(1)
+        self.send_message(password)
 
-        Args:
-            session_name (str): session name
-            window_name (str): window name
-        """
-        if self.mode == "Serial":
-            self.interface.create_session(session_name)
+        logging.info("Trying to get shell prompt...")
+
+        for i in range(0, 30):
+            logging.info('Try %d to get shell prompt...', i)
+            self.send_keys('\n')
+            m = self.wait_for_regex(shell_prompt, timeout=1)
+            if m:
+                return True
+
+        return False
