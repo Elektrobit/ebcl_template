@@ -5,6 +5,24 @@
 
 echo "Prepare EBcL container..."
 
+# Move SSH keys
+if [ -d "tools/.ssh" ]; then
+    echo "SSH keys found."
+
+    if [ ! -d "~/.ssh" ]; then
+        mkdir -p ~/.ssh
+    fi
+
+    echo "Moving ssh keys to ~/.ssh"
+    rm -rf ~/.ssh/*
+    mv tools/.ssh/* ~/.ssh/
+
+    echo "Deleting copied SSH keys from tools."
+    rm -rf tools/.ssh
+else
+    echo "No SSH keys found."
+fi
+
 # Run user setup
 if [ -d "/workspace/tools/user_config" ]; then
     echo "Running user setup..."

@@ -1,6 +1,7 @@
 *** Settings ***
 Library    lib/Fakeroot.py
 Library    lib/CommManager.py    mode=Process
+Test Timeout    1800s
 
 *** Test Cases ***
 
