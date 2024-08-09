@@ -23,6 +23,35 @@ boot_spec = ../boot.yaml
 # Config script for root filesystem
 config_root = ../config_root.sh
 
+#--------------------
+# Generated artefacts
+#--------------------
+
+# Disc image
+disc_image = $(result_folder)/image.raw
+
+# Base root tarball
+base_tarball = $(result_folder)/ubuntu.tar
+
+# Configured root tarball
+root_tarball = $(result_folder)/ubuntu.config.tar
+
+# Generated initrd.img
+initrd_img = $(result_folder)/initrd.img
+
+# Kernel image
+kernel = $(result_folder)/vmlinuz
+
+# Sysroot tarball
+sysroot_tarball = $(result_folder)/ubuntu_sysroot.tar
+
+#-------------------
+# Run the QEMU image
+#-------------------
+
+# QEMU kernel commandline
+kernel_cmdline_append = rw
+
 # for building
 include ../../../../qemu.mk
 

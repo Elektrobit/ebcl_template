@@ -12,3 +12,4 @@ packages:
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: fake # Type of execution environment - chfake means fakechroot
+    base_dir: ..

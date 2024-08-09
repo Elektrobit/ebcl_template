@@ -1,7 +1,7 @@
 *** Settings ***
 Library    lib/Fakeroot.py
 Library    lib/CommManager.py    mode=Process
-Test Timeout    1800s
+Test Timeout    45m
 
 *** Test Cases ***
 
@@ -22,6 +22,7 @@ Build Image amd64/qemu/jammy/elbe
 
 Build Image amd64/qemu/jammy/kernel_src
     [Tags]    amd64    qemu   elbe    jammy
+    [Timeout]    90m
     Test Systemd Image    amd64/qemu/jammy/kernel_src
 
 Build Image amd64/qemu/jammy/kiwi
@@ -66,15 +67,31 @@ Build Image arm64/qemu/ebcl/systemd/elbe
 #==================================
 Build Image example-old-images/qemu/berrymill
     [Tags]    amd64    qemu    berrymill    kiwi    ebcl    old
+    [Timeout]    1h
     Test Systemd Image    example-old-images/qemu/berrymill    root.qcow2
 
 Build Image example-old-images/qemu/elbe/amd64
     [Tags]    amd64    qemu    elbe    jammy    old
+    [Timeout]    1h
     Test Systemd Image    example-old-images/qemu/elbe/amd64    root.img
 
 Build Image example-old-images/qemu/elbe/arm64
     [Tags]    arm64    qemu    elbe    jammy    old
+    [Timeout]    1h
     Test Systemd Image    example-old-images/qemu/elbe/arm64    root.img
+
+#======================
+# Tests for RDB2 images
+#======================
+Build Image arm64/nxp/rdb2/systemd
+    [Tags]    arm64    rdb2    hardware    elbe    ebcl
+    Test Hardware Image    arm64/nxp/rdb2/systemd
+
+Build Image arm64/nxp/rdb2/kernel_src
+    [Tags]    arm64    rdb2    hardware    elbe    ebcl
+    Test Hardware Image    arm64/nxp/rdb2/kernel_src
+
+
 
 *** Keywords ***
 Build Image
@@ -90,7 +107,7 @@ Build Image
 
 Run Image
     [Arguments]    ${path}    ${image}=image.raw
-    [Timeout]    120s
+    [Timeout]    2m
     ${full_path}=    Evaluate    '/workspace/images/' + $path
     Send Message    cd ${full_path}
     Send Message    make qemu
@@ -98,7 +115,7 @@ Run Image
     Should Be True    ${success}
 
 Shutdown Systemd Image
-    [Timeout]    30s
+    [Timeout]    1m
     Send Message    \nsystemctl poweroff
     Wait For Line Containing    System Power Off
     Sleep    1s
@@ -106,7 +123,12 @@ Shutdown Systemd Image
 Test Systemd Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
-    Build Image    ${path}
-    Run Image    ${path}
+    Build Image    ${path}    ${image}
+    Run Image    ${path}    ${image}
     Shutdown Systemd Image
     Disconnect
+
+Test Hardware Image
+    [Arguments]    ${path}    ${image}=image.raw
+    Connect
+    Build Image    ${path}    ${image}

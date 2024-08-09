@@ -50,7 +50,7 @@ sysroot_tarball = $(result_folder)/ebcl_sysroot.tar
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline_append = "rw"
+kernel_cmdline_append = rw
 
 # for building
 include ../../../../../qemu.mk
