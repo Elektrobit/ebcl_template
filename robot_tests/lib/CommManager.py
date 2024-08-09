@@ -169,7 +169,7 @@ class CommManager:
             if m:
                 return m
 
-    def execute(self, message, timeout: int = 1) -> Optional[str]:
+    def execute(self, message, timeout: int = -1) -> Optional[str]:
         """
         Read all lines produced by the given message
         """
@@ -184,6 +184,8 @@ class CommManager:
         start_time = time.time()
         while True:
             if timeout > 0 and time.time() - start_time >= timeout:
+                logging.error(
+                    'Execute "%s" failed because of timeout %s!', message, timeout)
                 return None
 
             line = self.interface.next_line(timeout=timeout)
@@ -192,10 +194,9 @@ class CommManager:
 
             if line == ter:
                 logging.info('Line %s matches terminator...', line)
-                break
-            buf += line
+                return buf
 
-        return buf
+            buf += line
 
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
                     shell_prompt: str = '.*#.*') -> bool:
