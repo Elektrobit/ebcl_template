@@ -42,9 +42,9 @@ htmlcov
 
 initrd.img
 
-state/
+/state
 
-tools/
+/tools
 
 *.swp
 

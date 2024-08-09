@@ -1,5 +1,7 @@
 # Developing images
 
+TODO: Rework
+
 EB corbos Linux is intended as _embedded Linux distribution build kit_, like _Yocto_ is.
 Instead of starting form a pre-defined and pre-configured already integrated image, you describe
 what you need, and build a embedded Linux distribution tailored to your needs.

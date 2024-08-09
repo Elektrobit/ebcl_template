@@ -27,8 +27,8 @@
 
 ### Docs
 
-- [ ] Overview
-- [ ] Setup
+- [x] Overview
+- [x] Setup
 - [ ] Develop images
 - [ ] Packaging apps
 - [ ] Developing apps
