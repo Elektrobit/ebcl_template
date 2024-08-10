@@ -11,8 +11,8 @@
 
 - [ ] image tests
 
-- [ ] EBcL QEMU amd64 crinit
-- [ ] EBcL QEMU arm64 crinit
+- [x] EBcL QEMU amd64 crinit
+- [x] EBcL QEMU arm64 crinit
 - [ ] EBcL RDB2 crinit
 
 - [ ] EBcL Raspi crinit

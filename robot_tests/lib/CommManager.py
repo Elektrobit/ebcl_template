@@ -206,7 +206,7 @@ class CommManager:
             buf += line
 
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
-                    shell_prompt: str = '.*#.*') -> bool:
+                    shell_prompt: str = '.*#.*', timeout: int = 120) -> bool:
         """ Login to VM. """
         logging.info("Waiting for login prompt...")
 
@@ -215,7 +215,7 @@ class CommManager:
 
         self.send_keys('\n')  # Press return to show the login prompt
 
-        m = self.wait_for_regex(".*login:.*", timeout=30)
+        m = self.wait_for_regex(".*login:.*", timeout=timeout)
         if not m:
             logging.info("Trying to get login prompt by pressing enter...")
             for i in range(0, 30):

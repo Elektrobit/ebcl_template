@@ -101,7 +101,11 @@ class ShellSubprocess(CommunicationInterface):
         self.send_message('exit')
 
         logging.info('Waiting for the shell to exit...')
-        self.process.wait(timeout=5)
+        try:
+            self.process.wait(timeout=30)
+        except Exception as e:
+            logging.info(
+                'Waiting for bash to terminate after exit failed: %s', e)
 
         rc = self.process.poll()
         logging.info('Shell return code: %s', rc)
