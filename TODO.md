@@ -11,18 +11,18 @@
 - [x] EBcL QEMU amd64 crinit
 - [x] EBcL QEMU arm64 crinit
 - [x] EBcL RDB2 crinit
+- [x] Makefile for building old image descriptions
 
 - [ ] image tests
 
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd
+- [ ] copy to SD card with bmaptool
 
+- [ ] Image with apt, network, ssh, ...
 
 - [ ] test and complete sysroot build
 
-- [ ] copy to SD card with bmaptool
-
-- [ ] Makefile for building old image descriptions
 
 ### Docs
 
@@ -59,6 +59,8 @@
 - [ ] deboostrap builder
 - [ ] busybox builder
 - [ ] relative root CLI option for build tools
+
+- [ ] container images
 
 ## ToDo 1.4
 

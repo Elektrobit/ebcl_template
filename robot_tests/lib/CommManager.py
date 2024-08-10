@@ -4,6 +4,7 @@ Allows Robot to communicate with a physical or virtual target
 while abstracting away the concrete communication channel
 """
 import logging
+import os
 import re
 import time
 
@@ -13,6 +14,10 @@ from uuid import uuid4
 from interfaces.ssh import SshInterface
 from interfaces.tmux import TmuxConsole
 from interfaces.process import ShellSubprocess
+
+
+class InvalidImageError(Exception):
+    """ Raised if given QEMU image is invalid. """
 
 
 class CommManager:
@@ -250,3 +255,56 @@ class CommManager:
         Clear all the output lines.
         """
         self.interface.clear_lines()
+
+    def run_qemu_image(self, image: str, arch: Optional[str] = None,
+                       kernel_commandline: Optional[str] = None, memory: str = '256',
+                       images_folder: str = '/workspace/results/images'):
+        """ Run a QEMU image using the given communication interface. """
+        image = os.path.join(images_folder, image)
+
+        logging.info('Running image %s...', image)
+
+        console = ''
+        arch_options = ''
+        if not arch:
+            if 'aarch64' in image:
+                arch = 'aarch64'
+                console = 'console=ttyAMA0,115200n8'
+                arch_options = '    -machine virt \\' \
+                               '   -cpu cortex-a72 \\' \
+                               '   -nographic'
+            elif 'x86_64' in image:
+                arch = 'x86_64'
+                console = 'console=ttyS0,115200n8'
+                arch_options = '   -display none \\' \
+                               '   -serial stdio'
+            else:
+                raise InvalidImageError(
+                    f'Unknown architecture of image {image}!')
+
+        if not kernel_commandline:
+            kernel_commandline = f'root=/dev/vda1 rw {console}'
+
+        image = os.path.abspath(image)
+        image_dir = os.path.dirname(image)
+        kernel = os.path.join(image_dir, 'vmlinuz')
+        initrd = os.path.join(image_dir, 'initrd.img')
+        image_format = image.split('.')[-1]
+
+        memory = f'-m {memory}'
+
+        qemu_cmd = f'qemu-system-{arch} \\' \
+            f'   -m {memory} \\' \
+            f'   -kernel {kernel} \\' \
+            f'   -initrd {initrd} \\' \
+            f'  -append "{kernel_commandline}" \\' \
+            f' - drive file={image},format={image_format},if=virtio \\' \
+            '   -device virtio-net-pci,netdev=eth0 \\' \
+            '   -netdev user,id=eth0,ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,' \
+            'ipv6-dns=fd00::eb:3 \\'
+
+        qemu_cmd += arch_options
+
+        logging.info('Running QEMU command:\n%s', qemu_cmd)
+
+        self.send_keys(qemu_cmd)
