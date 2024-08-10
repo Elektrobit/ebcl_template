@@ -1,7 +1,7 @@
 *** Settings ***
 Library    lib/Fakeroot.py
 Library    lib/CommManager.py    mode=Process
-Test Timeout    45m
+Test Timeout    1h
 
 *** Test Cases ***
 
@@ -22,7 +22,7 @@ Build Image amd64/qemu/jammy/elbe
 
 Build Image amd64/qemu/jammy/kernel_src
     [Tags]    amd64    qemu   elbe    jammy
-    [Timeout]    90m
+    [Timeout]    2h
     Test Systemd Image    amd64/qemu/jammy/kernel_src
 
 Build Image amd64/qemu/jammy/kiwi
@@ -89,28 +89,44 @@ Build Image arm64/nxp/rdb2/systemd
 
 Build Image arm64/nxp/rdb2/kernel_src
     [Tags]    arm64    rdb2    hardware    elbe    ebcl
+    [Timeout]    2h
     Test Hardware Image    arm64/nxp/rdb2/kernel_src
 
 
 
 *** Keywords ***
+Run Make
+    [Arguments]    ${path}    ${target}    ${max_time}=
+    [Timeout]    ${max_time}
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${path}; make ${target}
+    RETURN    ${result}
+
 Build Image
-    [Arguments]    ${path}    ${image}=image.raw
+    [Arguments]    ${path}    ${image}=image.raw    ${max_time}=1h
+    [Timeout]    ${max_time}
     ${full_path}=    Evaluate    '/workspace/images/' + $path
     ${results_folder}=    Evaluate    $full_path + '/build'
-    # TODO: enable clean to build everything from scratch
-    # Run    bash -c "source /build/venv/bin/activate; cd ${full_path}; make clean"
-    Run    bash -c "source /build/venv/bin/activate; cd ${full_path}; make image"
-    ${result}=    Run    file ${results_folder}/image.raw
-    ${file_info}=    Evaluate    $result[0]
+    Run Make    ${full_path}    clean    2m
+    Run Make    ${full_path}    image    ${max_time}
+    Sleep    10s    # Give some processing time to other processes.
+    Wait For Line Containing    Image was written to 
+    ${file_info}=    Execute    cd ${results_folder}; file ${image}
     Should Not Contain    ${file_info}    No such file
+    Clear Lines    # Clear the output queue
+    Sleep    1s
+
+Test That Make Does Not Rebuild
+    [Arguments]    ${path}
+    [Timeout]    1m
+    ${full_path}=    Evaluate    '/workspace/images/' + $path
+    ${output}=    Run Make    ${full_path}    image
+    Should Contain    ${output}    Nothing to be done for 'image'
 
 Run Image
     [Arguments]    ${path}    ${image}=image.raw
     [Timeout]    2m
     ${full_path}=    Evaluate    '/workspace/images/' + $path
-    Send Message    cd ${full_path}
-    Send Message    make qemu
+    Send Message    source /build/venv/bin/activate; cd ${full_path}; make qemu
     ${success}=    Login To Vm
     Should Be True    ${success}
 
@@ -124,6 +140,7 @@ Test Systemd Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
     Build Image    ${path}    ${image}
+    Test That Make Does Not Rebuild    ${path}
     Run Image    ${path}    ${image}
     Shutdown Systemd Image
     Disconnect
@@ -132,3 +149,4 @@ Test Hardware Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
     Build Image    ${path}    ${image}
+    Test That Make Does Not Rebuild    ${path}

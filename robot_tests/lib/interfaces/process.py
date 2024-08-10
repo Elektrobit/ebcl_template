@@ -7,6 +7,7 @@ import sys
 from queue import Queue, Empty
 from subprocess import PIPE, Popen
 from threading import Thread
+from time import sleep
 from typing import Optional
 
 from . import CommunicationInterface
@@ -63,12 +64,9 @@ class ShellSubprocess(CommunicationInterface):
     def connect(self):
         """ Open shell process. """
         if self.process:
-            rc = self.process.poll()
-            if not rc:
-                logging.info('Using existing shell session.')
-                return
-            else:
-                logging.info('Old shell session ended with returncode %d.', rc)
+            logging.info(
+                'Old shell session found. Closing old shell session...')
+            self.disconnect()
 
         logging.info('Running shell %s...', self.shell)
 
@@ -160,3 +158,11 @@ class ShellSubprocess(CommunicationInterface):
 
     def create_session(self):
         """ Nothing to do. """
+
+    def clear_lines(self):
+        """ Clear the output queue. """
+        # Give the threads some time to read all the output,
+        sleep(0.5)
+        # then clear the output queue.
+        with self.queue.mutex:
+            self.queue.queue.clear()

@@ -178,6 +178,13 @@ class CommManager:
 
         logging.info('Executing %s (ter: %s)...', message, ter)
 
+        logging.info('Clearing old output...')
+
+        self.clear_lines()
+        time.sleep(0.2)
+
+        logging.info('Running command %s...', message)
+
         self.send_message(message + "; echo " + ter)
 
         buf = ""
@@ -192,7 +199,7 @@ class CommManager:
             if not line:
                 continue
 
-            if line == ter:
+            if ter in line:
                 logging.info('Line %s matches terminator...', line)
                 return buf
 
@@ -202,6 +209,11 @@ class CommManager:
                     shell_prompt: str = '.*#.*') -> bool:
         """ Login to VM. """
         logging.info("Waiting for login prompt...")
+
+        time.sleep(1)  # Give other processes and thread some time do work
+        self.clear_lines()  # Delete all the output bevor trying to login
+
+        self.send_keys('\n')  # Press return to show the login prompt
 
         m = self.wait_for_regex(".*login:.*", timeout=30)
         if not m:
@@ -232,3 +244,9 @@ class CommManager:
                 return True
 
         return False
+
+    def clear_lines(self):
+        """
+        Clear all the output lines.
+        """
+        self.interface.clear_lines()

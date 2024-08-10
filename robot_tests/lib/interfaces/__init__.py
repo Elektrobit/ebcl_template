@@ -77,3 +77,9 @@ class CommunicationInterface(ABC):
         if line:
             self.lines += line
         return line
+
+    @abstractmethod
+    def clear_lines(self):
+        """
+        Clear all the output lines.
+        """
