@@ -5,6 +5,7 @@ import os
 import subprocess
 import tempfile
 
+from pathlib import Path
 from subprocess import PIPE
 from typing import Optional, Tuple
 
@@ -21,6 +22,7 @@ class Fakeroot:
         """ Create fakeroot state. """
         logging.basicConfig(level=logging.DEBUG)
         self.fakestate = tempfile.mktemp()
+        Path(self.fakestate).touch()
 
     def __del__(self):
         """ Delete fakeroot state. """
@@ -106,20 +108,20 @@ class Fakeroot:
 
     def abs_file_should_exist(self, file: str, file_type: str = 'regular file'):
         """ Check that a file exists. """
-        (out, _) = self.run(cmd=f'stat -c \'%F\' {file}')
+        (out, _) = self.run_fake(cmd=f'stat -c \'%F\' {file}')
         assert out.strip() == file_type
 
     def abs_directory_should_exist(self, path: str):
         """ Check that a folder exists. """
-        (out, _) = self.run(cmd=f'stat -c \'%F\' {path}')
+        (out, _) = self.run_fake(cmd=f'stat -c \'%F\' {path}')
         assert out.strip() == 'directory'
 
     def abs_should_be_owned_by(self, path: str, uid: int, gid: int):
         """ Check ownership of file or dir. """
-        (out, _) = self.run(cmd=f'stat -c \'%u %g\' {path}')
+        (out, _) = self.run_fake(cmd=f'stat -c \'%u %g\' {path}')
         assert out.strip() == f'{uid} {gid}'
 
     def abs_should_have_mode(self, path: str, mode: int):
         """ Check ownership of file or dir. """
-        (out, _) = self.run(cmd=f'stat -c \'%a\' {path}')
+        (out, _) = self.run_fake(cmd=f'stat -c \'%a\' {path}')
         assert out.strip() == f'{mode}'

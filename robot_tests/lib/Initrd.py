@@ -46,7 +46,7 @@ class Initrd:
         logging.info('Target directory: %s', self.target)
 
         cmd = f'bash -c "source /build/venv; {generator} {config} {self.target}"'
-        self.fake.run_no_fake(cmd)
+        self.fake.run(cmd)
 
     def _unpack(self, arch):
         """ Unpack the initrd image. """
@@ -57,7 +57,7 @@ class Initrd:
 
     def _run(self, cmd: str, check=True) -> Tuple[str, str]:
         """ Run command using fakeroot. """
-        return self.fake.run(
+        return self.fake.run_fake(
             cmd=cmd,
             cwd=self.target,
             check=check

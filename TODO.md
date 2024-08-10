@@ -8,12 +8,11 @@
 - [x] EBcL RDB2 kernel src
 - [x] build folder arg for tools
 - [x] image test tools
-
-- [ ] image tests
-
 - [x] EBcL QEMU amd64 crinit
 - [x] EBcL QEMU arm64 crinit
-- [ ] EBcL RDB2 crinit
+- [x] EBcL RDB2 crinit
+
+- [ ] image tests
 
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd

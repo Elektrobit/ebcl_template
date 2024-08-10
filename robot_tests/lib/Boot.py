@@ -39,8 +39,8 @@ class Boot:
         self.target = tempfile.mkdtemp()
         logging.info('Target directory: %s', self.target)
 
-        cmd = f'bash -c "source /build/venv; {generator} {config} {self.target}"'
-        self.fake.run_no_fake(cmd)
+        cmd = f'bash -c "source /build/venv/bin/activate; {generator} {config} {self.target}"'
+        self.fake.run(cmd)
 
     def _unpack(self):
         """ Unpack the boot tar. """
@@ -53,7 +53,7 @@ class Boot:
     def _run(self, cmd: str, check=True) -> Tuple[str, str]:
         """ Run command using fakeroot. """
 
-        return self.fake.run(
+        return self.fake.run_fake(
             cmd=cmd,
             cwd=self.target,
             check=check

@@ -20,17 +20,6 @@ Build Image amd64/qemu/jammy/elbe
     [Tags]    amd64    qemu    elbe    jammy
     Test Systemd Image    amd64/qemu/jammy/elbe
 
-Build Image amd64/qemu/jammy/kernel_src
-    [Tags]    amd64    qemu   elbe    jammy    systemd
-    [Timeout]    2h
-    Connect
-    Build Image    amd64/qemu/jammy/kernel_src
-    Run Make    /workspace/images/amd64/qemu/jammy/kernel_src    build/vmlinux
-    Test That Make Does Not Rebuild    amd64/qemu/jammy/kernel_src
-    Run Image    amd64/qemu/jammy/kernel_src
-    Shutdown Systemd Image
-    Disconnect
-
 Build Image amd64/qemu/jammy/kiwi
     [Tags]    amd64    qemu    kiwi    jammy    systemd
     Test Systemd Image    amd64/qemu/jammy/kiwi
@@ -90,7 +79,7 @@ Build Image arm64/qemu/ebcl/crinit/elbe
 #==================================
 Build Image example-old-images/qemu/berrymill
     [Tags]    amd64    qemu    berrymill    kiwi    ebcl    old
-    [Timeout]    1h
+    [Timeout]    90m
     Test Systemd Image    example-old-images/qemu/berrymill    root.qcow2
 
 #======================
@@ -103,6 +92,21 @@ Build Image arm64/nxp/rdb2/systemd
 Build Image arm64/nxp/rdb2/systemd
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    crinit
     Test Hardware Image    arm64/nxp/rdb2/crinit
+
+#==========================================
+# Tests for images using local built kernel
+#==========================================
+Build Image amd64/qemu/jammy/kernel_src
+    [Tags]    amd64    qemu   elbe    jammy    systemd
+    [Timeout]    3h
+    Connect
+    Build Image    amd64/qemu/jammy/kernel_src
+    Run Make    /workspace/images/amd64/qemu/jammy/kernel_src    build/vmlinux
+    Test That Make Does Not Rebuild    amd64/qemu/jammy/kernel_src
+    Run Image    amd64/qemu/jammy/kernel_src
+    Shutdown Systemd Image
+    Disconnect
+
 
 Build Image arm64/nxp/rdb2/kernel_src
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    systemd
@@ -125,10 +129,10 @@ Build Image
     ${results_folder}=    Evaluate    $full_path + '/build'
     
     # Remove old build artefacts - build from scratch
-    Run Make    ${full_path}    clean    2m
-    
+    Run Make    ${full_path}    clean    2m 
+
     # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${path}; make image
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make image
     
     # Check for Embdgen log
     Should Contain    ${result}    Writing image to
