@@ -1,6 +1,5 @@
 # Kernel package to use
-kernel: linux-image-generic
-# Add the EB corbos Linux apt repo
+kernel: linux-generic
 use_ebcl_apt: true
 # Additional apt repos
 apt_repos:

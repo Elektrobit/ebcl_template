@@ -1,8 +1,8 @@
-# not type -> use default image builder
+base: ../base.yaml
+# reset the kernel value
+kernel: null
 # Name of the archive.
 name: ebcl
-# CPU architecture
-arch: amd64
 # Packages to install in the root tarball
 packages:
   - crinit

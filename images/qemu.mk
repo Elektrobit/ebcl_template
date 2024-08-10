@@ -192,7 +192,7 @@ edit_base:
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../$(base_tarball) .
 	rm -rf $(result_folder)/root
 
-.PHONY: edit_config
+.PHONY: edit_root
 edit_root:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root

@@ -1,8 +1,8 @@
-# not type -> use default image builder
+base: ../base.yaml
+# reset the kernel value
+kernel: null
 # Name of the archive.
-name: ebcl
-# CPU architecture
-arch: amd64
+name: ebcl_rdb2
 # Packages to install in the root tarball
 packages:
   - crinit
@@ -10,9 +10,7 @@ packages:
 # Crinit configuration, including sbin/init
 host_files:
   - source: crinit_config/*
-    base_dir: ..
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chfake # Type of execution environment
-    base_dir: ..

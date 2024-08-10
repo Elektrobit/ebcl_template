@@ -47,7 +47,7 @@ root_tarball = $(result_folder)/ubuntu.config.tar
 initrd_img = $(result_folder)/initrd.img
 
 # Kernel image
-kernel = $(result_folder)/vmlinux
+kernel = $(result_folder)/vmlinuz
 
 # Sysroot tarball
 sysroot_tarball = $(result_folder)/ubuntu_sysroot.tar
@@ -82,18 +82,18 @@ include ../../../../qemu_x86_64.mk
 .PHONY: rebuild_kernel
 rebuild_kernel:
 	mkdir -p $(result_folder)
-	cd kernel/linux-5.15.0 && $(MAKE) -j 16
-	rm -f build/vmlinux
-	cp kernel/linux-5.15.0/vmlinux build/vmlinux
+	cd $(kernel_dir) && $(MAKE) -j 16
+	rm -f $(kernel)
+	cp $(kernel_dir)/vmlinux $(kernel)
 
 # Rebuild the kernel modules
 .PHONY: rebuild_modules 
 rebuild_modules: kernel
 	mkdir -p $(result_folder)
-	cd kernel/linux-5.15.0 && $(MAKE) modules -j 16
-	cd kernel/linux-5.15.0 && chmod +x debian/scripts/sign-module
+	cd $(kernel_dir) && $(MAKE) modules -j 16
+	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
 	rm -rf build/lib
-	cd kernel/linux-5.15.0 && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
 
 # clean - delete the generated artefacts
 .PHONY: clean
@@ -108,23 +108,25 @@ clean:
 
 $(kernel): $(kconfig) $(source)
 	@echo "Get kernel binary..."
-	cp build/config kernel/linux-5.15.0/.config
-	cd kernel/linux-5.15.0 && $(MAKE) -j 16
-	cp kernel/linux-5.15.0/vmlinux build/vmlinux
+	cp build/config $(kernel_dir)/.config
+	cd $(kernel_dir) && yes "" | $(MAKE) -j 16 bzImage
+	cd $(kernel_dir) && INSTALL_PATH=../../$(result_folder) $(MAKE) install
+	cp -v $(result_folder)/vmlinuz-*-generic $(kernel)
+
 
 $(modules): $(kernel)
 	@echo "Get virtio driver..."
-	cd kernel/linux-5.15.0 && $(MAKE) modules -j 16
-	cd kernel/linux-5.15.0 && chmod +x debian/scripts/sign-module
+	cd $(kernel_dir) && $(MAKE) -j 16 modules
+	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
 	mkdir -p $(result_folder)
-	cd kernel/linux-5.15.0 && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) modules_install
 
 $(source):
 	@echo "Get kernel sources..."
 	mkdir -p kernel
 	cd kernel && apt -y source linux
 	sudo apt -y build-dep linux
-	cd kernel/linux-5.15.0 && chmod +x scripts/*.sh
+	cd $(kernel_dir) && chmod +x scripts/*.sh
 
 $(kconfig): $(boot_spec) $(source)
 	@echo "Get kernel config as $(kconfig)..."
@@ -136,7 +138,7 @@ $(kconfig): $(boot_spec) $(source)
 	@echo "Copying $(kconfig) to $(kernel_dir)..."
 	cp $(kconfig) $(kernel_dir)/.config
 	@echo "Set all not defined values of the kernel config to defaults..."
-	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) olddefconfig
+	cd $(kernel_dir) && yes "" | $(MAKE) $(kernel_make_args) olddefconfig
 	@echo "Copying modified config as olddefconfig..."
 	cp $(kernel_dir)/.config $(result_folder)/olddefconfig
 

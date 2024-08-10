@@ -1,4 +1,4 @@
-base: base.yaml
+base: ../base.yaml
 # reset the kernel value
 kernel: null
 # Name of the archive.
