@@ -32,10 +32,10 @@ sysroot_spec = sysroot.yaml
 # QEMU EFI images require only a qcow-image
 
 # Disc image
-disc_image = $(result_folder)/qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-1.1.0-0.qcow2
+disc_image = $(result_folder)/root.qcow2
 
 # Sysroot tarball
-sysroot_tarball = $(result_folder)/qemu_crinit_x86_64/qemu_crinit_x86_64.x86_64-1.1.0-0.tar.xz
+sysroot_tarball = $(result_folder)/root_sysroot.tar.xz
 
 #--------------------------------
 # Default make targets for images
