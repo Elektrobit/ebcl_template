@@ -4,7 +4,7 @@ EB corbos Linux built on Ubuntu is a long-term maintained embedded Linux distrib
 
 In contrast to IT Linux distributions, EB corbos Linux allows a user to create a completely customer specific image from scratch in a reproducible way. This is realized using this SDK. A free variant of EB corbos Linux is available at the [Elektrobit homepage](https://www.elektrobit.com/products/ecu/eb-corbos/linux-built-on-ubuntu/). The free variant doesn't contain proprietary hardware drivers or pre-qualified reference images.To kick-start the development of new ECUs, a full EB corbos Linux release also contains pre-qualified reference images which already implement typical automotive use-cases. Please contact [Elektrobit sales](https://www.elektrobit.com/contact-us/) to get a full evaluation package of EB corbos Linux.
 
-![Embedded Systems](/assets/EmbeddedSystem.drawio.png)
+![Embedded Systems](assets/EmbeddedSystem.drawio.png)
 
 The image above shows a range of embedded system architectures. 
 
