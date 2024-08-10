@@ -1,8 +1,9 @@
-# not type -> use default image builder
+# Derive the base configuration
+base: base.yaml
+# Reset the kernel - should not be installed
+kernel: null
 # Name of the archive.
 name: ubuntu
-# CPU architecture
-arch: amd64
 # Packages to install in the root tarball
 packages:
   - systemd

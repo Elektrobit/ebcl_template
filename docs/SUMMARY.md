@@ -7,6 +7,7 @@
 - [Developing images](images/index.md)
     - [Image concept](images/overview.md)
     - [Image specification](images/spec.md)
+    - [Configruation parameters](images/params.md)
     - [Building an image from scratch](images/from_scatch.md)
 - [The example images](examples/index.md)
 - [Kernel development](kernel.md)
