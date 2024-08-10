@@ -93,16 +93,6 @@ Build Image example-old-images/qemu/berrymill
     [Timeout]    1h
     Test Systemd Image    example-old-images/qemu/berrymill    root.qcow2
 
-Build Image example-old-images/qemu/elbe/amd64
-    [Tags]    amd64    qemu    elbe    jammy    old
-    [Timeout]    1h
-    Test Systemd Image    example-old-images/qemu/elbe/amd64    root.img
-
-Build Image example-old-images/qemu/elbe/arm64
-    [Tags]    arm64    qemu    elbe    jammy    old
-    [Timeout]    1h
-    Test Systemd Image    example-old-images/qemu/elbe/arm64    root.img
-
 #======================
 # Tests for RDB2 images
 #======================
