@@ -12,8 +12,7 @@
 - [x] EBcL QEMU arm64 crinit
 - [x] EBcL RDB2 crinit
 - [x] Makefile for building old image descriptions
-
-- [ ] image tests
+- [x] image tests
 
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd

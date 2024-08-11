@@ -1,5 +1,5 @@
-# Config to use as a base
-base: ../root.yaml
+# CPU architecture
+arch: 'amd64'
 # APT repo for kiwi build
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
