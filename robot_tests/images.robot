@@ -44,11 +44,11 @@ Build Image amd64/qemu/ebcl/crinit/elbe
     Test Crinit Image    amd64/qemu/ebcl/crinit/elbe
 
 Build Image amd64/qemu/ebcl/sbc
-    [Tags]    amd64    qemu    elbe    ebcl    crinit
+    [Tags]    amd64    qemu    elbe    ebcl    crinit    sbc
     Test Crinit Image    amd64/qemu/ebcl/sbc
 
 Build Image amd64/qemu/ebcl/sbc/systemd
-    [Tags]    amd64    qemu    elbe    ebcl    systemd
+    [Tags]    amd64    qemu    elbe    ebcl    systemd    sbc
     Test Systemd Image    amd64/qemu/ebcl/sbc/systemd
 
 #==================================
