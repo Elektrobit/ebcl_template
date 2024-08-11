@@ -112,7 +112,7 @@ $(kernel): $(kconfig) $(source)
 	cd $(kernel_dir) && yes "" | $(MAKE) -j 16 bzImage
 	cd $(kernel_dir) && INSTALL_PATH=../../$(result_folder) $(MAKE) install
 	cp -v $(result_folder)/vmlinuz-*-generic $(kernel)
-
+	@echo "Results were written to $(kernel)"
 
 $(modules): $(kernel)
 	@echo "Get virtio driver..."

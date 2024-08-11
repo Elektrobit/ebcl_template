@@ -126,6 +126,7 @@ $(kernel): $(kconfig) $(source)
 	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
 	@echo "Get kernel binary..."
 	cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
+	@echo "Results were written to $(kernel)"
 
 # Adpate build spec for the fitimage
 # Additional dependency to the kernel binary
