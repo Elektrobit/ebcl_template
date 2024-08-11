@@ -1,7 +1,7 @@
 *** Settings ***
 Library    lib/Fakeroot.py
 Library    lib/CommManager.py    mode=Process
-Test Timeout    1h
+Test Timeout    45m
 
 *** Test Cases ***
 
@@ -79,7 +79,7 @@ Build Image arm64/qemu/ebcl/crinit/elbe
 #==================================
 Build Image example-old-images/qemu/berrymill
     [Tags]    amd64    qemu    berrymill    kiwi    ebcl    old
-    [Timeout]    90m
+    [Timeout]    60m
     ${path}=    Set Variable    example-old-images/qemu/berrymill
     # ---------------
     # Build the image
@@ -125,19 +125,40 @@ Build Image arm64/nxp/rdb2/crinit
 #==========================================
 Build Image amd64/qemu/jammy/kernel_src
     [Tags]    amd64    qemu   elbe    jammy    systemd    kernel_src
-    [Timeout]    3h
+    [Timeout]    2h
     Connect
-    Build Image    amd64/qemu/jammy/kernel_src
-    Run Make    /workspace/images/amd64/qemu/jammy/kernel_src    build/vmlinux
+    ${path}=    Set Variable    amd64/qemu/jammy/kernel_src
+    ${full_path}=    Evaluate    '/workspace/images/' + $path
+    ${results_folder}=    Evaluate    $full_path + '/build'
+    # Remove old build artefacts - build from scratch
+    Run Make    ${full_path}    clean    2m 
+    # Build the initrd
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make initrd
+    # Check for boot generator log
+    Should Contain    ${result}    Image was written to
+    Sleep    1s
+    # Build the kernel
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make boot
+    Sleep    1s
+    # Build the image
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make image
+    # Check for Embdgen log
+    Should Contain    ${result}    Writing image to
+    Sleep    1s
+    # Check that image file exists
+    ${file_info}=    Execute    cd ${results_folder}; file image.raw
+    Should Not Contain    ${file_info}    No such file
+    # Clear the output queue
+    Clear Lines    
+    Sleep    1s
     Test That Make Does Not Rebuild    amd64/qemu/jammy/kernel_src
     Run Image    amd64/qemu/jammy/kernel_src
     Shutdown Systemd Image
     Disconnect
 
-
 Build Image arm64/nxp/rdb2/kernel_src
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    systemd    kernel_src
-    [Timeout]    3h
+    [Timeout]    90m
     Test Hardware Image    arm64/nxp/rdb2/kernel_src
 
 

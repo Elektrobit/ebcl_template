@@ -14,7 +14,7 @@ root_filesystem_spec = ../root.yaml
 # Specificaiton of the initrd.img
 initrd_spec = initrd.yaml
 # Specificaiton of the kernel
-boot_spec = ../boot.yaml
+boot_spec = boot.yaml
 
 #-------------------------
 # Additional configuration
@@ -28,7 +28,7 @@ config_root = ../config_root.sh
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline_append = "rw"
+kernel_cmdline_append = rw
 
 #--------------------
 # Generated artefacts
@@ -74,44 +74,15 @@ include ../../../../qemu.mk
 # for running QEMU
 include ../../../../qemu_x86_64.mk
 
-#--------------------
-# Helper make targets
-#--------------------
-
-# Rebuild the kernel binary
-.PHONY: rebuild_kernel
-rebuild_kernel:
-	mkdir -p $(result_folder)
-	cd $(kernel_dir) && $(MAKE) -j 16
-	rm -f $(kernel)
-	cp $(kernel_dir)/vmlinux $(kernel)
-
-# Rebuild the kernel modules
-.PHONY: rebuild_modules 
-rebuild_modules: kernel
-	mkdir -p $(result_folder)
-	cd $(kernel_dir) && $(MAKE) modules -j 16
-	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
-	rm -rf build/lib
-	cd $(kernel_dir) && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
-
-# clean - delete the generated artefacts
-.PHONY: clean
-clean:
-	rm -rf kernel
-	rm -rf build
-
-
 #--------------------------
 # Image build configuration
 #--------------------------
 
 $(kernel): $(kconfig) $(source)
 	@echo "Get kernel binary..."
-	cp build/config $(kernel_dir)/.config
 	cd $(kernel_dir) && yes "" | $(MAKE) -j 16 bzImage
 	cd $(kernel_dir) && INSTALL_PATH=../../$(result_folder) $(MAKE) install
-	cp -v $(result_folder)/vmlinuz-*-generic $(kernel)
+	cp -v $(result_folder)/vmlinuz-* $(kernel)
 	@echo "Results were written to $(kernel)"
 
 $(modules): $(kernel)
@@ -131,9 +102,8 @@ $(source):
 $(kconfig): $(boot_spec) $(source)
 	@echo "Get kernel config as $(kconfig)..."
 	mkdir -p $(result_folder)
-	set -o pipefail && boot_generator ../boot.yaml $(result_folder) 2>&1 | tee $(kconfig).log
+	set -o pipefail && boot_generator $(boot_spec) $(result_folder) 2>&1 | tee $(kconfig).log
 	@echo "Renaming $(result_folder)/config-* as $(kconfig)..."
-	ls -lah $(result_folder)/config-*
 	mv $(result_folder)/config-* $(kconfig)
 	@echo "Copying $(kconfig) to $(kernel_dir)..."
 	cp $(kconfig) $(kernel_dir)/.config
@@ -146,3 +116,32 @@ $(initrd_img): $(initrd_spec) $(modules)
 	@echo "Build initrd.img..."
 	mkdir -p $(result_folder)
 	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
+
+
+#--------------------
+# Helper make targets
+#--------------------
+
+# Rebuild the kernel binary
+.PHONY: rebuild_kernel
+rebuild_kernel:
+	mkdir -p $(result_folder)
+	cd $(kernel_dir) && yes "" | $(MAKE) -j 16 bzImage
+	cd $(kernel_dir) && INSTALL_PATH=../../$(result_folder) $(MAKE) install
+	cp -v $(result_folder)/vmlinuz-* $(kernel)
+	@echo "Results were written to $(kernel)"
+
+# Rebuild the kernel modules
+.PHONY: rebuild_modules 
+rebuild_modules: kernel
+	mkdir -p $(result_folder)
+	cd $(kernel_dir) && $(MAKE) modules -j 16
+	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
+	rm -rf build/lib
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
+
+# clean - delete the generated artefacts
+.PHONY: clean
+clean:
+	rm -rf kernel
+	rm -rf build
