@@ -1,5 +1,7 @@
 # CPU architecture
 arch: 'amd64'
+# Name of tarball
+name: ubuntu
 # APT repo for kiwi build
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
@@ -14,7 +16,16 @@ use_bootstrap_package: false
 # Select required bootstrap packages
 bootstrap:
   - apt
+# Packages to install in the root tarball
+packages:
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
 # Pattern to match the result file
 result: '*.tar.xz'
+# Scripts to configure the root tarball
+scripts:
+  - name: ../config_root.sh # Name of the script, relative path to this file
+    env: chfake # Type of execution environment - chfake means fakechroot
