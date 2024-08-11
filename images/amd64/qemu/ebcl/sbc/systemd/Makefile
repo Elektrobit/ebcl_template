@@ -41,7 +41,7 @@ sysroot_tarball = build/ebcl_sysroot.tar
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline_append = rw
+kernel_cmdline_append = 
 # Expose SSH port on host
 qemu_net_append = ,hostfwd=tcp::2222-:22
 
