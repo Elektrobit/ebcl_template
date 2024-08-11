@@ -29,6 +29,7 @@ packages:
 # Systemd configuration
 host_files:
   - source: config/*
+    mode: 755
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file

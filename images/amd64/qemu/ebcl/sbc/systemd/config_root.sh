@@ -14,8 +14,10 @@ ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 EOF
 
-# Create stub resolv.conf link
-# ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
+# Fix access rights of /etc
+chmod 755 /etc
+chmod -R 755 /etc/systemd
+chmod 600 /etc/ssh/ssh_host_ecdsa_key
 
 # Activate services
 systemctl enable systemd-networkd
