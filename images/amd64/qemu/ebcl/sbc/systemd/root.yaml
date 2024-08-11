@@ -1,0 +1,35 @@
+# not type -> use default image builder
+# Name of the archive.
+name: ebcl
+# CPU architecture
+arch: amd64
+# Packages to install in the root tarball
+packages:
+  - systemd
+  - systemd-timesyncd
+  - systemd-coredump
+  - udev
+  - locales
+  - bash
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - kmod
+  - openssh-server
+  - openssh-client
+  - iproute2
+  - iptables
+  - iputils-ping
+  - apt
+  - gnupg
+  - vim
+  - nano
+  - ntpdate
+# Systemd configuration
+host_files:
+  - source: config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chfake # Type of execution environment

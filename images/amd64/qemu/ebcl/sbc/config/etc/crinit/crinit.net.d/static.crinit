@@ -1,0 +1,7 @@
+NAME = netifd-ipv4-static
+
+COMMAND = /usr/sbin/netifd -r /run/resolv.conf.netifd -c /etc/config/network-static/
+DEPENDS = "ubus:spawn"
+PROVIDES = network:spawn
+RESPAWN = YES
+RESPAWN_RETRIES = 3

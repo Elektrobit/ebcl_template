@@ -40,9 +40,16 @@ Build Image amd64/qemu/ebcl/crinit/berrymill
     Test Crinit Image    amd64/qemu/ebcl/crinit/berrymill
 
 Build Image amd64/qemu/ebcl/crinit/elbe
-    [Tags]    amd64    qemu    crinit    ebcl    crinit
+    [Tags]    amd64    qemu    elbe    ebcl    crinit
     Test Crinit Image    amd64/qemu/ebcl/crinit/elbe
 
+Build Image amd64/qemu/ebcl/sbc
+    [Tags]    amd64    qemu    elbe    ebcl    crinit
+    Test Crinit Image    amd64/qemu/ebcl/sbc
+
+Build Image amd64/qemu/ebcl/sbc/systemd
+    [Tags]    amd64    qemu    elbe    ebcl    systemd
+    Test Systemd Image    amd64/qemu/ebcl/sbc/systemd
 
 #==================================
 # Tests for QEMU ARM64 Jammy images
