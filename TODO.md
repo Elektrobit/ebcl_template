@@ -13,12 +13,13 @@
 - [x] EBcL RDB2 crinit
 - [x] Makefile for building old image descriptions
 - [x] image tests
+- [x] Image with apt, network, ssh, ...
 
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd
 - [ ] copy to SD card with bmaptool
 
-- [ ] Image with apt, network, ssh, ...
+
 
 - [ ] test and complete sysroot build
 
