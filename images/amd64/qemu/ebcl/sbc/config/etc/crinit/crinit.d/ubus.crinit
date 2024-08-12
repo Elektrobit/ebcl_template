@@ -1,7 +1,0 @@
-NAME = ubus
-
-COMMAND = /usr/sbin/ubusd
-
-DEPENDS = @provided:tmpdir
-RESPAWN = YES
-RESPAWN_RETRIES = 3
