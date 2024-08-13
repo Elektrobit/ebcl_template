@@ -1,9 +1,9 @@
 # Kernel package to use
-kernel: linux-generic
+kernel: linux-image-raspi
 use_ebcl_apt: true
 # Additional apt repos
 apt_repos:
-  # Get Ubunut Raspberry Pi packages
+  # Get Ubuntu Raspberry Pi packages
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
     distro: jammy
     components:

@@ -1,0 +1,10 @@
+base: base.yaml
+name: ebcl_pi4
+packages:
+  - linux-firmware-raspi
+  - linux-raspi
+  - u-boot-rpi
+  - flash-kernel
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
