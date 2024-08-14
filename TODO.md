@@ -15,14 +15,14 @@
 - [x] image tests
 - [x] Image with apt, network, ssh, ...
 
+- [ ] RDB2 network & server variants
 - [ ] EBcL Raspi crinit
 - [ ] EBcL Raspi systemd
 - [ ] copy to SD card with bmaptool
 
-
-
 - [ ] test and complete sysroot build
 
+- [ ] Convert reference images
 
 ### Docs
 

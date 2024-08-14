@@ -204,8 +204,13 @@ class CommManager:
             if not line:
                 continue
 
+            if f'; echo {ter}' in line:
+                # Skip line if command is echoed.
+                continue
+
             if ter in line:
                 logging.info('Line %s matches terminator...', line)
+                buf += line  # do not loose output if not line break
                 return buf
 
             buf += line

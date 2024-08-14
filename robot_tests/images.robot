@@ -127,6 +127,10 @@ Build Image arm64/nxp/rdb2/crinit
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    crinit
     Test Hardware Image    arm64/nxp/rdb2/crinit
 
+Build Image arm64/nxp/rdb2/network
+    [Tags]    arm64    rdb2    hardware    elbe    ebcl    crinit    network
+    Test Hardware Image    arm64/nxp/rdb2/network
+
 #==========================================
 # Tests for images using local built kernel
 #==========================================
