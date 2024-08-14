@@ -14,15 +14,16 @@
 - [x] Makefile for building old image descriptions
 - [x] image tests
 - [x] Image with apt, network, ssh, ...
-
-- [ ] RDB2 network & server variants
+- [x] EBcL Raspi systemd
 - [ ] EBcL Raspi crinit
-- [ ] EBcL Raspi systemd
-- [ ] copy to SD card with bmaptool
+
 
 - [ ] test and complete sysroot build
 
 - [ ] Convert reference images
+
+- [ ] RDB2 selinux(?) issue
+
 
 ### Docs
 
@@ -37,6 +38,12 @@
 - [ ] Dev Container overview
 - [ ] Embdgen overview
 - [ ] EBcL build tools overview
+
+- [ ] EBcL user guide update
+
+- [ ] EBcL dev container docs
+- [ ] EBcL build tools docs
+- [ ] EBcL vscode tools docs
 
 ### App dev
 

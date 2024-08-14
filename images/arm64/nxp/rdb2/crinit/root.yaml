@@ -3,10 +3,26 @@ base: ../base.yaml
 kernel: null
 # Name of the archive.
 name: ebcl_rdb2
+apt_repos:
+  # Get SELinux packages
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
 # Packages to install in the root tarball
 packages:
   - crinit
   - crinit-ctl
+  - strace
+  - selinux-basics
+  - selinux-utils
 # Crinit configuration, including sbin/init
 host_files:
   - source: crinit_config/*

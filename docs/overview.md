@@ -12,7 +12,7 @@ Very simple embedded systems run only a bare-metal Linux. An example for such a 
 
 For real world industrial solutions at least secure boot is required, and typically a Trusted Execution Environment (TEE) is involved in the secure boot process. This is depicted above as a simple embedded system. Such images may already require a more complex partition layout, depending on the bootloader and SoC requirements.
 
-In the automotive world, in addition to a Posix OS, typically also a safety certified OS like classic Autosar is involved. This is depicted above as an embedded system. If this is combined with an A/B schema for the update of the Linux and the classic Autosar the partition layouts get quite complex and can hardly be directly created with the tools mentioned above.
+In the automotive world, in addition to a Posix OS, typically also a safety certified realtime OS like classic Autosar is involved. This is depicted above as an embedded system. If this is combined with an A/B schema for the update of the Linux and the classic Autosar the storage layout gets quite complex and can hardly be directly created with the tools mentioned above.
 
 Our day to day business at [Elektrobit](https://www.elektrobit.com/) are automotive high-performance controllers. Which extends the embedded system architecture with a hypervisor and multiple virtual machines (VMs), like an additional Andriod VM for infotainment solutions. The target of EB corbos Linux, and this SDK, is to fully support such embedded high-performance controller system architectures, and allow development and maintenance of such systems in an easy, efficient and reliable way.
 

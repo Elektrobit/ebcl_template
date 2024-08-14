@@ -131,6 +131,17 @@ Build Image arm64/nxp/rdb2/network
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    crinit    network
     Test Hardware Image    arm64/nxp/rdb2/network
 
+#================================
+# Tests for Raspberry Pi 4 images
+#================================
+Build Image arm64/raspberry/pi4/crinit
+    [Tags]    arm64    pi4    hardware    elbe    ebcl    crinit    network
+    Test Hardware Image    arm64/raspberry/pi4/crinit
+
+Build Image arm64/raspberry/pi4/systemd
+    [Tags]    arm64    pi4    hardware    elbe    ebcl    systemd
+    Test Hardware Image    arm64/raspberry/pi4/systemd
+
 #==========================================
 # Tests for images using local built kernel
 #==========================================

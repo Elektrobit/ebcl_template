@@ -2,7 +2,7 @@
 
 The EB corbos Linux template workspace is tested using Ubuntu 22.04 and Ubuntu 24.04 host environments on x86_64 machines. It is not compatible with other host CPU architectures, but arm64 host support is planned for a future release.
 
-The build host needs to provide a Docker installation and a Python 3 installation, including Python3 venv. Docker needs support for running privileged containers. For amd64 images, KVM acceleration can be used for speeding up the build, if nested virtualization is supported in the host environment.
+The build host needs to provide a Docker installation and a Python 3 installation, including Python3 venv. Docker needs support for running privileged containers.
 
 The EB corbos Linux template workspace is based on a [dev container](https://github.com/Elektrobit/ebcl_dev_container), and is not using VMs for cross-building. This simplifies the setup and provides good build speed, but it requires support for executing non-native binaries if images for foreign architectures shall be built. To make this work, the host needs to support _binfmt_. On Ubuntu hosts, _binfmt_ can be enabled by installing the packages _binfmt-support_ and _qemu-user-static_. To allow mount operations which are required during image build, a privileged execution of the container is necessary, and the _/dev_ folder needs to be bind-mounted into the container to allow access to newly created _losetup_ devices. Running other workloads on the build host may cause issues, since _binfmt_ and _losetup_ configure the kernel and therefore modify the host environment for all running processes and containers.
 

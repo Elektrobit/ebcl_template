@@ -44,28 +44,12 @@ SHELL := /bin/bash
 
 # Specificaiton of the partition layout of the image.raw
 partition_layout ?= image.yaml
-# Specificaiton of the initrd.img
-initrd_spec ?= initrd.yaml
-# Specificaiton of the fitimage
-boot_spec ?= boot.yaml
-# Specificaiton of the root environment for fitimage building
-boot_root_spec ?= boot_root.yaml
 # Specificaiton of the root filesystem content and configuration
 root_filesystem_spec ?= root.yaml
 
 #-------------------------
 # Additional configuration
 #-------------------------
-
-# Config script for root filesystem
-config_root ?= config_root.sh
-
-# Build script for the fitimage
-build_fitimage ?= build_fitimage.sh
-# Layout of the fitimage
-fitimage_config ?= bootargs.its
-# NXP bootloader config
-bootloader_config ?= bootargs-overlay.dts
 
 #--------------------
 # Generated artefacts
@@ -78,19 +62,10 @@ bootloader_config ?= bootargs-overlay.dts
 disc_image ?= $(result_folder)/image.raw
 
 # Base root tarball
-base_tarball ?= $(result_folder)/ebcl_rdb2.tar
+base_tarball ?= $(result_folder)/ebcl_pi4.tar
 
 # Configured root tarball
-root_tarball ?= $(result_folder)/ebcl_rdb2.config.tar
-
-# Boot root tarball
-boot_root ?= $(result_folder)/boot_root.tar
-
-# Disc image
-fitimage ?= $(result_folder)/fitimage
-
-# Generated initrd.img
-initrd_img ?= $(result_folder)/initrd.img
+root_tarball ?= $(result_folder)/ebcl_pi4.config.tar
 
 # Sysroot tarball
 sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
@@ -99,61 +74,14 @@ sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
 # Image build configuration
 #--------------------------
 
-# Build flow:
-#
-# root_filesystem_spec -[root gen]-> base_tarball -\
-#                                                   \
-# config_root ----------------------------------------[root conf]-> root_tarball -\
-#                                                                                  \
-# boot_root_spec -[root gen]-> boot_root -------\                                   \
-#                                                \                                   \
-# boot_spec --------------------------------------[boot gen]-> fitimage (and fip.s32) -[embdgen]-> disc_image
-#                                                /                                   /
-# fitimage_config ------------------------------/                                   /
-#                                              /                                   /
-# bootloader_config --------------------------/                                   /
-#                                            /                                   /
-# build_fitimage ---------------------------/                                   /
-#                                          /                                   /
-# initrd_spec -[initrd gen]-> initrd_img -/                                   /
-#                                                                            /
-# partition_layout ---------------------------------------------------------/
-
 # Embdgen is used to build the SD card image.
-# fitimage: the fitimage containing the kernel, the device tree and the inird.img
 # root_tarball: the contents of the root filesystem
 # partition_layout: the partition layout of the SD card image
-#
-# The bootloader fip.s32 is not explicitly metioned, since it is build in one step
-# with the fitimage.
-$(disc_image): $(fitimage) $(root_tarball) $(partition_layout)
+$(disc_image): $(root_tarball) $(partition_layout)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
 	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
 
-
-# The boot generator is used to run the fitimage build in a chroot environment.
-# boot_spec: spec of the fitimage build enviroment
-# boot_root: tarball of the fitimage build environment
-# build_fitimage: build script for the fitimage
-# fitimage_config: fitimage layout configuration
-# fitimage_config: bootloader configuration
-# initrd_img: the initrd.img which is embedded in the fitimage
-# initrd_spec: the initrd.img specification
-$(fitimage): $(boot_spec) $(boot_root) $(build_fitimage) $(fitimage_config) $(fitimage_config) $(initrd_img)
-	@echo "Build $(fitimage)..."
-	mkdir -p $(result_folder)
-	set -o pipefail && boot_generator $(boot_spec) $(result_folder) 2>&1 | tee $(fitimage).log
-
-# The root generator is used to build a chroot enviroment which contains all tools for building the fitimage.
-# boot_root_spec: specification of the fitimage build environment
-#
-# A separate image build is used for the fitimage build environment, to not bloat the
-# root filesystem with this stuff.
-$(boot_root): $(boot_root_spec)
-	@echo "Build $(boot_root) from $(boot_root_spec)..."
-	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --no-config $(boot_root_spec) $(result_folder) 2>&1 | tee $(boot_root).log
 
 # The root generator is used to build the base root filesystem tarball.
 # root_filesystem_spec: specification of the root filesystem packages.
@@ -175,13 +103,6 @@ $(root_tarball): $(base_tarball) $(config_root)
 	@echo "Configuring ${base_tarball} as ${root_tarball}..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
-
-# The initrd image is build using the initrd generator.
-# initrd_spec: specification of the initrd image.
-$(initrd_img): $(initrd_spec)
-	@echo "Build initrd.img..."
-	mkdir -p $(result_folder)
-	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
 
 # The root generator is used to build a sysroot variant of the root filesystem.
 # root_filesystem_spec: specification of the root filesystem
@@ -224,20 +145,6 @@ edit_root:
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../$(root_tarball) .
 	rm -rf $(result_folder)/root
 
-.PHONY: edit_boot_root
-edit_boot_root:
-	@echo "Extacting boot base tarball..."
-	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(boot_root) -C $(result_folder)/root
-	@echo "Open edit shell..."
-	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
-	@echo "Re-packing root tarball..."
-	rm -f $(boot_root).old
-	mv $(boot_root) $(boot_root).old
-	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../$(boot_root) .
-	rm -rf $(result_folder)/root
-
-
 #--------------------------------
 # Default make targets for images
 #--------------------------------
@@ -249,18 +156,6 @@ image: $(disc_image)
 # build of the root tarball(s)
 .PHONY: root
 root: $(base_tarball)
-
-# build of the initrd.img(s)
-.PHONY: initrd
-initrd: $(initrd_img)
-
-# build of the kernel(s)
-.PHONY: boot
-boot: $(fitimage)
-
-# build of the kernel(s)
-.PHONY: boot_root
-boot_root: $(boot_root)
 
 # config the root tarball
 .PHONY: config
