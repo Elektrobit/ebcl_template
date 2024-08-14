@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# Link crinit as init
-chmod +x /sbin/init
+chmod +x ./sbin/init
 
 # Create a fake machine-id
 echo "04711" > ./etc/machine-id
 
-# Create a hostname file
-echo "ebcl-rdb2-network" > ./etc/hostname
+# Enable DNS
+rm -f ./etc/resolv.conf || true
+ln -sf /var/run/resolv.conf.netifd ./etc/resolv.conf

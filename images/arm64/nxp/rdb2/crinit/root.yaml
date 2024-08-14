@@ -21,8 +21,6 @@ packages:
   - crinit
   - crinit-ctl
   - strace
-  - selinux-basics
-  - selinux-utils
 # Crinit configuration, including sbin/init
 host_files:
   - source: crinit_config/*

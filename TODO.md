@@ -15,14 +15,13 @@
 - [x] image tests
 - [x] Image with apt, network, ssh, ...
 - [x] EBcL Raspi systemd
-- [ ] EBcL Raspi crinit
-
+- [x] RDB2 ownership issue
+- [x] EBcL Raspi crinit
 
 - [ ] test and complete sysroot build
 
 - [ ] Convert reference images
 
-- [ ] RDB2 selinux(?) issue
 
 
 ### Docs

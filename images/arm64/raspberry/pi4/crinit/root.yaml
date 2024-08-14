@@ -37,7 +37,7 @@ scripts:
   - name: ../config_root.sh # Name of the script, relative path to this file
     env: fake
   - name: config_crinit.sh # Name of the script, relative path to this file
-    env: chfake
+    env: chroot
 host_files:
   - source: ../cmdline.txt
     destination: boot

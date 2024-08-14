@@ -123,26 +123,26 @@ $(sysroot_tarball): $(root_filesystem_spec)
 edit_base:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakeedit -- tar xf $(base_tarball) -C $(result_folder)/root
+	fakeroot -s $(result_folder)/fakeedit -- tar xf $(base_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
-	cd $(result_folder)/root && fakeroot -i ../fakeedit -s ../fakeedit
+	cd $(result_folder)/root && fakeroot -i $(result_folder)/fakeedit -s $(result_folder)/fakeedit
 	@echo "Re-packing root tarball..."
 	rm -f $(base_tarball).old
 	mv $(base_tarball) $(base_tarball).old
-	cd $(result_folder)/root && fakeroot -i ../fakeedit -s ../fakeedit -- tar cf ../../$(base_tarball) .
+	cd $(result_folder)/root && fakeroot -i $(result_folder)/fakeedit -s $(result_folder)/fakeedit -- tar cf ../../$(base_tarball) .
 	rm -rf $(result_folder)/root
 
 .PHONY: edit_root
 edit_root:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
+	fakeroot -s $(result_folder)/fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
-	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
+	cd $(result_folder)/root && fakeroot -i $(result_folder)/fakedit -s $(result_folder)/fakeedit
 	@echo "Re-packing root tarball..."
 	rm -f $(root_tarball).old
 	mv $(root_tarball) $(root_tarball).old
-	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../$(root_tarball) .
+	cd $(result_folder)/root && fakeroot -i $(result_folder)/fakedit -s $(result_folder)/fakedit -- tar cf ../../$(root_tarball) .
 	rm -rf $(result_folder)/root
 
 #--------------------------------
