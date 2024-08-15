@@ -28,4 +28,4 @@ result: '*.tar.xz'
 # Scripts to configure the root tarball
 scripts:
   - name: ../config_root.sh # Name of the script, relative path to this file
-    env: chfake # Type of execution environment - chfake means fakechroot
+    env: chroot # Type of execution environment - chfake means fakechroot
