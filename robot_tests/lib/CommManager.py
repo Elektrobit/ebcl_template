@@ -241,7 +241,12 @@ class CommManager:
 
         logging.info("Logging in with default credentials...")
         self.send_message(user)
-        time.sleep(1)
+
+        m = self.wait_for_regex(".*assword:.*", timeout=timeout)
+        if not m:
+            logging.error('No password line!')
+            return False
+
         self.send_message(password)
 
         logging.info("Trying to get shell prompt...")

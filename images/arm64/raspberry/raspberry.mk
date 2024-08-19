@@ -161,6 +161,18 @@ root: $(base_tarball)
 .PHONY: config
 config: $(root_tarball)
 
+# Build the initrd
+.PHONY: initrd
+initrd:
+	@echo "Fake target to be interface compliant"
+	@echo "Image was written to"
+
+# Build the initrd
+.PHONY: boot
+boot:
+	@echo "Fake target to be interface compliant"
+	@echo "Results were written to"
+
 # build the sysroot tarball
 .PHONY: sysroot
 sysroot: $(sysroot_tarball)
