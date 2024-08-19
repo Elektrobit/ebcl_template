@@ -215,6 +215,10 @@ class CommManager:
 
             buf += line
 
+    def read_line(self) -> str:
+        """ Read the next line. """
+        return self.interface.next_line()
+
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
                     shell_prompt: str = '.*#.*', timeout: int = 120) -> bool:
         """ Login to VM. """
