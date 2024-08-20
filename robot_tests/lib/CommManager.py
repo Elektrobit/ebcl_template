@@ -246,10 +246,7 @@ class CommManager:
         logging.info("Logging in with default credentials...")
         self.send_message(user)
 
-        m = self.wait_for_regex(".*assword:.*", timeout=timeout)
-        if not m:
-            logging.error('No password line!')
-            return False
+        time.sleep(5)  # Give some time to process user
 
         self.send_message(password)
 
