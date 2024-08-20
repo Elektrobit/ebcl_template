@@ -9,7 +9,6 @@ apt_repos:
     components:
       - main
       - universe
-    gpg: /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
 # Use debootstrap instead of bootstrap package
 # This allows to use only one apt repo.
 use_bootstrap_package: false

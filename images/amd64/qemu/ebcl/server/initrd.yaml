@@ -7,8 +7,6 @@ modules:
   - kernel/drivers/virtio/virtio.ko 
   - kernel/drivers/virtio/virtio_ring.ko 
   - kernel/drivers/block/virtio_blk.ko 
-  - kernel/drivers/virtio/virtio.ko 
-  - kernel/drivers/virtio/virtio_ring.ko 
   - kernel/net/core/failover.ko 
   - kernel/drivers/net/net_failover.ko 
   - kernel/drivers/net/virtio_net.ko

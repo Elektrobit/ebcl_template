@@ -4,7 +4,6 @@ base: ../base.yaml
 download_deps: true
 # Files to copy from the packages
 files:
-  - source: boot/config*
-    destination: 
+  - boot/config*
 # Do not pack the files as tar - we need to provide the kernel binary to QEMU
 tar: false

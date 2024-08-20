@@ -48,7 +48,7 @@
 ### Tests
 
 - [ ] improve and complete tests
-- [ ] fix robot tests
+- [x] fix robot tests
 
 
 ### Reference images

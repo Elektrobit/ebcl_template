@@ -138,10 +138,13 @@ rebuild_modules: kernel
 	cd $(kernel_dir) && $(MAKE) modules -j 16
 	cd $(kernel_dir) && chmod +x debian/scripts/sign-module
 	rm -rf build/lib
-	cd $(kernel_dir) && INSTALL_MOD_PATH=../.$(result_folder) $(MAKE) modules_install
+	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) modules_install
 
 # clean - delete the generated artefacts
 .PHONY: clean
 clean:
-	rm -rf kernel
-	rm -rf build
+	rm -rf $(result_folder)
+
+.PHONY: clean_kernel
+clean_kernel:
+	rm -rf $(source)
