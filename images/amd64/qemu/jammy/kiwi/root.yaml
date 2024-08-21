@@ -1,13 +1,5 @@
 # Config to use as a base
 base: ../root.yaml
-# APT repo for kiwi build
-apt_repos:
-  - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
-    components:
-      - main
-      - universe
-    gpg: /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
 # Add the EB corbos Linux apt repo to provide the boostrap package

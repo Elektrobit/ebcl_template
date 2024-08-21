@@ -7,9 +7,7 @@ tar: false
 # do not download and extract these packages, they are already installed in the boot_root.tar
 use_packages: false
 # Name of the boot root archive
-boot_tarball:
-  name: $$RESULTS$$/boot_root.tar
-  base_dir: .
+boot_tarball: $$RESULTS$$/boot_root.tar
 # Files to copy form the host environment
 host_files:
   - source: ../bootargs-overlay.dts

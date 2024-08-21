@@ -4,5 +4,3 @@ base: ../base.yaml
 kernel: null
 # Root device to mount
 root_device: /dev/mmcblk0p2
-# Template for the initrd init script
-template: init.sh
