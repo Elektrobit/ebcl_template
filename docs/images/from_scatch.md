@@ -70,9 +70,11 @@ image:
 
 You may notice that this image description requires three artifacts:
 
-**fip.s32**: This is the binary image containing the arm trusted firmware (ATF) and the U-Boot bootloader.
-**fitimage**: This is the binary flattened image tree (FIT) containing the kernel and device tree.
-**ebcl_rdb2.config.tar**: This is a tarball containing the contents of our Linux root filesystem.
+- **fip.s32**: This is the binary image containing the arm trusted firmware (ATF) and the U-Boot bootloader.
+
+- **fitimage**: This is the binary flattened image tree (FIT) containing the kernel and device tree.
+
+- **ebcl_rdb2.config.tar**: This is a tarball containing the contents of our Linux root filesystem.
 
 Since the NXP S32G2 SoC is supported by EB corbos Linux, a FIP image and a kernel binary is provided as part of the releases and free download. The fip.s32 image is contained in the Debian package _arm-trusted-firmware-s32g_, and provided on https://linux.elektrobit.com/eb-corbos-linux/1.2 as part of the distribution _ebcl_nxp_public_ in the component _nxp_public_. The kernel binary and modules are provided by the same distro and component, packaged as _linux-image-unsigned-5.15.0-1023-s32-eb_, _linux-modules-5.15.0-1023-s32-eb_ and _linux-modules-extra-5.15.0-1023-s32-eb_. 
 

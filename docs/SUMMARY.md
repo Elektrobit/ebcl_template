@@ -15,7 +15,6 @@
     - [Raspberry Pi 4 images](examples/rpi.md)
     - [NXP RDB2 images](examples/rdb2.md)
 - [Kernel development](kernel.md)
-- [Board Bringup](board_bringup.md)
 - [Packaging apps](packaging.md)
 - [Developing apps](apps/index.md)
 - [Bulding old images](old_images.md)
