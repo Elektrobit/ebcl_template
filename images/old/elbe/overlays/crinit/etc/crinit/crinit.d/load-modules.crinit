@@ -1,7 +1,0 @@
-# !LINKSTO ireq.network.manager, 1
-NAME = load-modules
-
-COMMAND = /usr/sbin/load_modules.sh
-DEPENDS = @provided:tmpdir
-PROVIDES = net:wait
-RESPAWN = NO
