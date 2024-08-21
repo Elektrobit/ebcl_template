@@ -7,13 +7,13 @@ arch = x86_64
 # Image specifications
 #---------------------
 
-# Specificaiton of the partition layout of the image.raw
+# Specification of the partition layout of the image.raw
 partition_layout = ../image.yaml
-# Specificaiton of the root filesystem content and configuration
+# Specification of the root filesystem content and configuration
 root_filesystem_spec = ../root.yaml
-# Specificaiton of the initrd.img
+# Specification of the initrd.img
 initrd_spec = initrd.yaml
-# Specificaiton of the kernel
+# Specification of the kernel
 boot_spec = boot.yaml
 
 #-------------------------
@@ -31,7 +31,7 @@ config_root = ../config_root.sh
 kernel_cmdline_append = rw
 
 #--------------------
-# Generated artefacts
+# Generated artifacts
 #--------------------
 
 # Disc image
@@ -140,7 +140,7 @@ rebuild_modules: kernel
 	rm -rf build/lib
 	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) modules_install
 
-# clean - delete the generated artefacts
+# clean - delete the generated artifacts
 .PHONY: clean
 clean:
 	rm -rf $(result_folder)

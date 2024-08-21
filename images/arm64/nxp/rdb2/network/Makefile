@@ -4,15 +4,15 @@
 # Image specifications
 #---------------------
 
-# Specificaiton of the partition layout of the image.raw
+# Specification of the partition layout of the image.raw
 partition_layout = ../image.yaml
-# Specificaiton of the initrd.img
+# Specification of the initrd.img
 initrd_spec = initrd.yaml
-# Specificaiton of the fitimage
+# Specification of the fitimage
 boot_spec = boot.yaml
-# Specificaiton of the root environment for fitimage building
+# Specification of the root environment for fitimage building
 boot_root_spec = ../boot_root.yaml
-# Specificaiton of the root filesystem content and configuration
+# Specification of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
 
 #-------------------------

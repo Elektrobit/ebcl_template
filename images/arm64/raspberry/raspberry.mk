@@ -9,7 +9,7 @@
 # The root partition for Linux can come as partition 2.
 # This image layout is specified in the image.yaml and picked up by embdgen.
 #
-# To generate the image, embdgen requires three artefacts:-
+# To generate the image, embdgen requires three artifacts:-
 # - the bootloader as fip.s32 image
 # - the kernel fitimage
 # - and the contents of the root partition.
@@ -42,9 +42,9 @@ SHELL := /bin/bash
 # Image specifications
 #---------------------
 
-# Specificaiton of the partition layout of the image.raw
+# Specification of the partition layout of the image.raw
 partition_layout ?= image.yaml
-# Specificaiton of the root filesystem content and configuration
+# Specification of the root filesystem content and configuration
 root_filesystem_spec ?= root.yaml
 
 #-------------------------
@@ -52,7 +52,7 @@ root_filesystem_spec ?= root.yaml
 #-------------------------
 
 #--------------------
-# Generated artefacts
+# Generated artifacts
 #--------------------
 
 # The ifeqs allow overwriting the values
@@ -184,7 +184,7 @@ sysroot_install: $(sysroot_tarball)
 	cp $(result_folder)/$(sysroot_tarball) /workspace/sysroot_$(arch)/
 	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
 
-# clean - delete the generated artefacts
+# clean - delete the generated artifacts
 .PHONY: clean
 clean:
 	rm -rf $(result_folder)

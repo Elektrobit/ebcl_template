@@ -9,4 +9,4 @@ image: appliance.kiwi
 # Relative path to the berrymill.conf
 berrymill_conf: berrymill.conf
 # Result file name pattern
-result: '*.qcow2'
+result_pattern: '*.qcow2'

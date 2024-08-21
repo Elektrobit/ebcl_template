@@ -19,14 +19,14 @@ result_folder ?= ./build
 # Image specifications
 #---------------------
 
-# Specificaiton of the root filesystem content and configuration
+# Specification of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
 
-# Specificaiton of the sysroot
+# Specification of the sysroot
 sysroot_spec = sysroot.yaml
 
 #--------------------
-# Generated artefacts
+# Generated artifacts
 #--------------------
 
 # QEMU EFI images require only a qcow-image
@@ -89,7 +89,7 @@ image: $(disc_image)
 .PHONY: sysroot
 sysroot: $(sysroot_tarball)
 
-# clean - delete the generated artefacts
+# clean - delete the generated artifacts
 .PHONY: clean
 clean:
 	rm -rf build

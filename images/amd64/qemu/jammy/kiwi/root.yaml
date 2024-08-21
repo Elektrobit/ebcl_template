@@ -15,4 +15,4 @@ use_ebcl_apt: true
 # Do not use berrymill
 use_berrymill: false
 # Pattern to match the result file
-result: '*.tar.xz'
+result_pattern: '*.tar.xz'
