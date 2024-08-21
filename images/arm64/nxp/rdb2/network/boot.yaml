@@ -24,7 +24,7 @@ scripts:
     env: chroot
 # Files to copy to the build folder
 files:
-  - source: boot/fip.s32
-  - source: boot/fitimage
-  - source: lib/modules
+  - boot/fip.s32
+  - boot/fitimage
+  - lib/modules
 

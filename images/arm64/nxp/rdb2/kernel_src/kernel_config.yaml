@@ -6,4 +6,4 @@ tar: false
 use_packages: true
 # Files to copy to the build folder
 files:
-  - source: boot/config*
+  - boot/config*

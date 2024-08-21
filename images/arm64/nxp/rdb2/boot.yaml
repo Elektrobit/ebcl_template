@@ -7,7 +7,7 @@ tar: false
 # do not download and extract these packages, they are already installed in the boot_root.tar
 use_packages: false
 # Name of the boot root archive
-boot_tarball:
+base_tarball:
   name: $$RESULTS$$/boot_root.tar
   base_dir: .
 # Files to copy form the host environment
@@ -25,5 +25,5 @@ scripts:
     env: chroot
 # Files to copy to the build folder
 files:
-  - source: boot/fip.s32
-  - source: boot/fitimage
+  - boot/fip.s32
+  - boot/fitimage
