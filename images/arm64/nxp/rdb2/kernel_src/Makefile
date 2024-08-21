@@ -177,5 +177,8 @@ rebuild_modules: kernel
 # clean - delete the generated artifacts
 .PHONY: clean
 clean:
-	rm -rf $(source)
 	rm -rf $(result_folder)
+
+.PHONY: clean_kernel
+clean_kernel:
+	rm -rf $(source)
