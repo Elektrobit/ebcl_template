@@ -453,7 +453,7 @@ root_tarball ?= $(result_folder)/ebcl_rdb2.config.tar
 # The root generator is used to build the base root filesystem tarball.
 # root_filesystem_spec: specification of the root filesystem packages.
 #
-# This fist step only installs the specified packages. User configuration
+# This first step only installs the specified packages. User configuration
 # is done as a second step, because the build of this tarball is quite 
 # time consuming and configuration is fast. This is an optimization for 
 # the image development process.

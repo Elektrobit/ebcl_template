@@ -1,10 +1,10 @@
 # Image specification
 
-Let's take a look at this QEMU build flow in detail, and see how the details of this solution are specified and the roles of the different [build helper tools](https://github.com/Elektrobit/ebcl_build_tools/).
+Let's take a look at this QEMU build flow example in detail and see how the details of this solution are specified and the roles of the different [build helper tools](https://github.com/Elektrobit/ebcl_build_tools/).
 
 ![Embedded Systems](../assets/QEMU_flow.drawio.png)
 
-Let’s take a look at it from left to right. The _base.yaml_ specifies the common aspects of all the generated artifacts. It configures the kernel package, the used apt repositories and the target CPU architecture.
+Let’s look at it from left to right. The _base.yaml_ specifies the common aspects of all the generated artifacts. It configures the kernel package, the used apt repositories and the target CPU architecture.
 
 ```yaml
 # Kernel package to use
@@ -43,7 +43,7 @@ tar: false
 
 The _boot generator_ reads this configuration, and the _base.yaml_, downloads and extracts the package _linux-generic_ and its dependencies to a temporary folder, and copies the kernel binary and kernel configuration to the given output folder. In general, the _boot generator_ is the tool to automate the build steps of the boot artifacts, like kernel collection and generation of SoC specific binary artifacts.
 
-Let's now take a look at the _initrd.img_ generation. The initrd images created by the tooling from the server and desktop world are very flexible and complete from a feature point of view, but completely bloated form an embedded point of view. Since we know our target hardware and software in detail, we don’t need flexibility, but typically we want to have the best startup performance we can squeeze out of the used hardware. The _inird generator_ is a small helper tool to build a minimal _initrd.img_, to get the best possible startup performance. It also helps to fast and easily customize the initrd content, e.g. for implementing a secure boot solution.
+Let's now take a look at the _initrd.img_ generation. The initrd images created by the tooling from the server and desktop world are very flexible and complete from a feature point of view, but completely bloated from an embedded point of view. Since we know our target hardware and software in detail, we don’t need flexibility, but typically we want to have the best startup performance we can squeeze out of the used hardware. The _inird generator_ is a small helper tool to build a minimal _initrd.img_, to get the best possible startup performance. It also helps to fast and easily customize the initrd content, e.g. for implementing a secure boot solution.
 
 ```yaml
 # Derive values from base.yaml - relative path

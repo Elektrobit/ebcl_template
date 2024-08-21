@@ -1,6 +1,6 @@
 # Configruation parameters
 
-The following list gives an overview about the supported configuration parameters for the EB corbos Linux build helper tools. Embdgen is developed separately, and the details and options for the storage specification is documented in the [embdgen documentation](https://elektrobit.github.io/embdgen/index.html).
+The following list gives an overview of the supported configuration parameters for the EB corbos Linux build helper tools. In the round brackets it is noted for whcih files which option is applicable. Embdgen is developed separately, and the details and options for the storage specification is documented in the [embdgen documentation](https://elektrobit.github.io/embdgen/index.html).
 
 - **base** _(boot/initrd/root/config)_  \[default: None \]: Parent configuration file. If specified, the values from the parent file will be used if not otherwise specified in the current file.
 
@@ -152,7 +152,7 @@ The string “$$RESULTS$$” will be replaced with the path to the output folder
 
 - **domain** _(root)_  \[default: elektrobit.com \]: The domain name of the generated root filesystem.
 
-- **console** _(root)_  \[default: auto configured \]: The console parameter fo the generated root filesystem. If none is given, “ttyS0,115200” is used for amd64, and “ttyAMA0,115200” is used for amd64.
+- **console** _(root)_  \[default: auto configured \]: The console parameter of the generated root filesystem. If none is given, “ttyS0,115200” is used for amd64, and “ttyAMA0,115200” is used for amd64.
 
 - **packer** _(boot/initrd/root/config)_  \[default: none \]: The packer used to compress the result of the elbe build. By default, the result is not compressed.
 
