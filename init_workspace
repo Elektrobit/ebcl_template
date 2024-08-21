@@ -19,7 +19,7 @@ if [ -d "${HOME}/.ebcl_config" ]; then
     rm -rf tools/user_config
     mkdir -p tools/user_config
     cp -R ~/.ebcl_config/* tools/user_config
-    cp -R ~/.ebcl_config/.* tools/user_config
+    cp -R ~/.ebcl_config/.env tools/user_config
 else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
 fi
