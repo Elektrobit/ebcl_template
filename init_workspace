@@ -9,7 +9,11 @@ LOCAL_CONTAINER_TAG="local"
 
 echo "Setting EBcL workspace up..."
 
+# Create tools folder
 mkdir -p tools
+# Create cache folders
+mkdir -p state/cache
+mkdir -p state/apt
 
 source .env
 
