@@ -18,12 +18,6 @@
 - [x] RDB2 ownership issue
 - [x] EBcL Raspi crinit
 
-- [ ] test and complete sysroot build
-
-- [ ] Convert reference images
-
-
-
 ### Docs
 
 - [x] Overview
@@ -46,13 +40,20 @@
 
 ### App dev
 
+
+- [ ] test and complete sysroot build
 - [ ] cmake presets 
 - [ ] appdev user docs
 
 ### Tests
 
 - [ ] improve and complete tests
-- [ ] fix robot tests
+- [x] fix robot tests
+
+
+### Reference images
+
+- [ ] Convert reference images
 
 ### Stretch goal
 

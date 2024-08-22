@@ -24,13 +24,21 @@ Skipping automatic installation will allow you to change the hardware settings b
 Boot the VM with the Ubuntu ISO image and follow the installation wizard. I have chosen the minimal server variant.
 
 After installation, log in to the VM and install openssh-server, docker and git: `sudo apt install openssh-server docker.io git`. Get the IP address of the VM by running the command `ip addr`. The address starting with `192.168.` is the one of the host-only interface.
-For me the address was `192.168.56.106`.
+For me, the address was `192.168.56.106`.
+
+### Enabling nested virtualization for KVM support
+
+The Linux KVM technology allows running virtual machines, for the same CPU architecture as the host, with almost native speed. To make use of this in VirtualBox, you need to disable the Windows Hypervisor. Please be aware that this may affect other virtualization tooling like Windows WSL. To disable the Windows Hypervisor, open a PowerShell as Administrator, and run `bcdedit /set hypervisorlaunchtype off`. Afterwards, you need to reboot your Windows machine.
+
+After the reboot, you can enable nested virtualization for your VirtualBox VM by editing the machine, choosing _System > CPU_ and enabling the checkbox for nested VT-x/AMD-V.
 
 ## Setup Visual Studio Code
 
 Install [Visual Studio Code](https://code.visualstudio.com/) on your local machine. It's available for free for all major operating systems.
 
 Run [Visual Studio Code](https://code.visualstudio.com/) (VS Code) and open the extensions view (_CTRL_ + _SHIFT_ + _X_). Now install the _Remote SSH_ and the _Dev Containers_ extensions.
+
+If you will not use an remote development host you can skip the next two sections and start with installing the required tools.
 
 ### Prepare SSH connection
 
@@ -49,7 +57,7 @@ Now you are ready to use the _Remote SSH_. Open VS Code, then open the command p
 
 If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io python3 python3-venv python-is-python3 binfmt-support qemu-user-static`
 
-To use dev containers, your user on the remote machine needs to be able to create local Docker containers. To give your user this rights, you need to add the user to the docker group with the command: `sudo usermod -aG docker $USER`. The changes become active after a new login. Close the remote connection using the menu in the lower left corner of your VS Code window and reopen the connection using the command palette.
+To use dev containers, your user (on the remote machine) needs to be able to create local Docker containers. To give your user these rights, you need to add the user to the docker group with the command: `sudo usermod -aG docker $USER`. The changes become active after a new login. Close the remote connection using the menu in the lower left corner of your VS Code window and reopen the connection using the command palette or if not using a remote machine simply log out and in again.
 
 To use the SDK, we need _git_ to clone the remote repository (or you download it otherwise), and we need _Docker_ to run the dev container. All other required tools come as part of the container.
 
@@ -70,8 +78,3 @@ Now you can use the VS Code build tasks (_Ctrl_ + _Shift_ + _B_) to build the ex
 
 If you don’t want to use VS Code, or you want to integrate the EBcL SDK in your CI workflows, you can use the dev container stand-alone. For more details on how to do this, take a look at [dev container](https://github.com/Elektrobit/ebcl_dev_container).
 
-### Enabling nested virtualization for KVM support
-
-The Linux KVM technology allows running virtual machines, for the same CPU architecture as the host, with almost native speed. To make use of this in VirtualBox, you need to disable the Windows Hypervisor. Please be aware that this may affect other virtualization tooling like Windows WSL. To disable the Windows Hypervisor, open a PowerShell as Administrator, and run `bcdedit /set hypervisorlaunchtype off`. Afterwards, you need to reboot your Windows machine.
-
-After the reboot, you can enable nested virtualization for your VirtualBox VM by editing the machine, choosing _System > CPU_ and enabling the checkbox for nested VT-x/AMD-V.

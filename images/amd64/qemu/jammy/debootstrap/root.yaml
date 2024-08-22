@@ -1,5 +1,5 @@
 # CPU architecture
-arch: 'amd64'
+arch: amd64
 # Name of tarball
 name: ubuntu
 # APT repo for kiwi build
@@ -9,7 +9,6 @@ apt_repos:
     components:
       - main
       - universe
-    gpg: /etc/apt/trusted.gpg.d/ubuntu-keyring-2018-archive.gpg
 # Use debootstrap instead of bootstrap package
 # This allows to use only one apt repo.
 use_bootstrap_package: false
@@ -24,8 +23,8 @@ packages:
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
 # Pattern to match the result file
-result: '*.tar.xz'
+result_pattern: '*.tar.xz'
 # Scripts to configure the root tarball
 scripts:
   - name: ../config_root.sh # Name of the script, relative path to this file
-    env: chroot # Type of execution environment - chfake means fakechroot
+    env: chroot # Type of execution environment

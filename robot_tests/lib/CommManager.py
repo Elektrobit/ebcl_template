@@ -215,6 +215,10 @@ class CommManager:
 
             buf += line
 
+    def read_line(self) -> str:
+        """ Read the next line. """
+        return self.interface.next_line()
+
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
                     shell_prompt: str = '.*#.*', timeout: int = 120) -> bool:
         """ Login to VM. """
@@ -242,10 +246,7 @@ class CommManager:
         logging.info("Logging in with default credentials...")
         self.send_message(user)
 
-        m = self.wait_for_regex(".*assword:.*", timeout=timeout)
-        if not m:
-            logging.error('No password line!')
-            return False
+        time.sleep(5)  # Give some time to process user
 
         self.send_message(password)
 

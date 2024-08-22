@@ -1,2 +1,2 @@
 base: ../initrd.yaml
-modules_folder: build
+modules_folder: $$RESULTS$$

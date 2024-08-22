@@ -1,6 +1,6 @@
 # Makefile for QEMU images
 
-# QEMU images require three artefacts:
+# QEMU images require three artifacts:
 # - root filesystem image (image.raw)
 # - Linux kernel binary (vmlinuz)
 # - Initrd image (initrd.img)
@@ -28,13 +28,13 @@ SHELL := /bin/bash
 # Image specifications
 #---------------------
 
-# Specificaiton of the partition layout of the image.raw
+# Specification of the partition layout of the image.raw
 partition_layout ?= image.yaml
-# Specificaiton of the root filesystem content and configuration
+# Specification of the root filesystem content and configuration
 root_filesystem_spec ?= root.yaml
-# Specificaiton of the initrd.img
+# Specification of the initrd.img
 initrd_spec ?= initrd.yaml
-# Specificaiton of the kernel
+# Specification of the kernel
 boot_spec ?= boot.yaml
 
 #-------------------------
@@ -45,7 +45,7 @@ boot_spec ?= boot.yaml
 config_root ?= config_root.sh
 
 #--------------------
-# Generated artefacts
+# Generated artifacts
 #--------------------
 
 # Disc image
@@ -171,7 +171,7 @@ sysroot_install: $(sysroot_tarball)
 	cp $(sysroot_tarball) /workspace/sysroot_$(arch)/
 	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
 
-# clean - delete the generated artefacts
+# clean - delete the generated artifacts
 .PHONY: clean
 clean:
 	rm -rf $(result_folder)

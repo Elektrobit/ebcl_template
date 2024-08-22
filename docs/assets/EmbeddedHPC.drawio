@@ -1,0 +1,43 @@
+<mxfile host="65bd71144e" scale="3" border="0">
+    <diagram name="Seite-1" id="CUBMuGRyKNjGysphk1Jc">
+        <mxGraphModel dx="1162" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="Linux kernel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="720" width="110" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Linux Userland&lt;div&gt;(Libraries, Apps,&lt;/div&gt;&lt;div&gt;Containers, ...)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+                    <mxGeometry x="30" y="590" width="110" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="Embedded High-Perfomance Controller" style="swimlane;horizontal=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry y="580" width="540" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="System on Chip (SoC)&lt;br&gt;Hardware Layer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" parent="4" vertex="1">
+                    <mxGeometry x="30" y="260" width="500" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" value="Bootloader (SPL)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="4" vertex="1">
+                    <mxGeometry x="30" y="220" width="500" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="Hypervisor" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="4" vertex="1">
+                    <mxGeometry x="30" y="180" width="290" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="Trusted Execution Environment&lt;div&gt;(TEE)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="4" vertex="1">
+                    <mxGeometry x="330" y="10" width="80" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="Real-time&lt;div&gt;Operating&lt;/div&gt;&lt;div&gt;System&lt;/div&gt;&lt;div&gt;(e.g.&amp;nbsp;&lt;span style=&quot;background-color: initial;&quot;&gt;FreeRTOS,&lt;br&gt;&lt;/span&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;classic Autosar)&lt;/span&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="4" vertex="1">
+                    <mxGeometry x="420" y="10" width="110" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="Android kernel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="4" vertex="1">
+                    <mxGeometry x="150" y="140" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Andorid&lt;div&gt;Userland&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="4" vertex="1">
+                    <mxGeometry x="150" y="10" width="90" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="Other VMs" style="rounded=0;whiteSpace=wrap;html=1;" parent="4" vertex="1">
+                    <mxGeometry x="250" y="10" width="70" height="160" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

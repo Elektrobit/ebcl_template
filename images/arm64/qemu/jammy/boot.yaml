@@ -4,9 +4,7 @@ base: base.yaml
 download_deps: true
 # Files to copy from the packages
 files:
-  - source: boot/vmlinuz*
-    destination:           # Empty means root folder
-  - source: boot/config*
-    destination: 
+  - boot/vmlinuz*
+  - boot/config*
 # Do not pack the files as tar - we need to provide the kernel binary to QEMU
 tar: false
