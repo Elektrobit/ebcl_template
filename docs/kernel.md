@@ -41,9 +41,7 @@ tar: false
 # do not download and extract these packages, they are already installed in the boot_root.tar
 use_packages: false
 # Name of the boot root archive
-boot_tarball:
-  name: $$RESULTS$$/boot_root.tar
-  base_dir: .
+base_tarball: $$RESULTS$$/boot_root.tar
 # Files to copy form the host environment
 host_files:
   - source: ../bootargs-overlay.dts
@@ -62,7 +60,6 @@ scripts:
 files:
   - boot/fip.s32
   - boot/fitimage
-
 ```
 
 The only change compared to the old _boot.yaml_ is that we add “$$RESULTS$$/vmlinuz” to the _host_files_. This means our kernel binary is copied to the _/boot_ folder of the fitimage build environment, and will overwrite the one from the kernel Debian package. This will give us the following build flow:
