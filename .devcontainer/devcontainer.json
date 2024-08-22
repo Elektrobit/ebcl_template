@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "EB corbos Linux SDK 1.2.1",
+	"name": "EB corbos Linux SDK 1.3",
 	// DO NOT MODIFY THE TAG!!!
 	// The local container tag and used upstream container version is defined in .env.
 	"image": "linux.elektrobit.com/ebcl/sdk:local",
