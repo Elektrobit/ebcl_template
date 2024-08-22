@@ -365,9 +365,9 @@ Let’s take a closer look at the _crinit_config_ overlay. The _sbin/init_ mount
 
 The _amd64/qemu/ebcl/crinit/berrymill_ defines a QEMU image using _berrymill_ and _kiwi-ng_ for building the root filesystem. This root filesystem is a very minimal one, only providing _crinit_.
 
-#### The amd64 EB corbos Linux systemd elbe image
+#### The amd64 EB corbos Linux crinit elbe image
 
-The _amd64/qemu/ebcl/crinit/berrymill_ defines a QEMU image using _elbe_ for building the root filesystem. This root filesystem is a very minimal one, only providing _crinit_.
+The _amd64/qemu/ebcl/crinit/elbe_ defines a QEMU image using _elbe_ for building the root filesystem. This root filesystem is a very minimal one, only providing _crinit_.
 
 ### The amd64 EB corbos Linux server images
 

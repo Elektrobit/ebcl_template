@@ -118,6 +118,19 @@ include ../../../../qemu_aarch64.mk
 The _Makefile_ point _make_ to the right specification files, sets the flag to mount the root filesystem as writable, and includes the base makefiles describing how to build an QEMU image and how to run the build results using QEMU.
 
 
+## The amd64 EB corbos Linux images
 
+EB corbos Linux (EBcL) is an embedded Linux distribution targeting automotive and other industrial embedded Linux solutions. The main differences between EBcL and Ubuntu are the release and qualification handling, and some additional components added by EBcL which allow building more lightweight and better performing embedded images. The code is again very similar to the amd64 QEMU images.
 
+The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in _*.mk_ files.
 
+### Supported images
+
+The following images are supported:
+
+- aarch64 EB corbos Linux systemd berrymill
+- aarch64 EB corbos Linux systemd elbe image
+- aarch64 EB corbos Linux crinit images 
+- aarch64 EB corbos Linux crinit berrymill image
+
+Their functuonality and implementation is analog to the corresponding amd64 images.
