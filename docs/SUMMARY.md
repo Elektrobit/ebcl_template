@@ -21,9 +21,8 @@
 - [The workspace in detail](workspace/index.md)
 - [The dev container](dev_container.md)
 - [The build tools](tools/index.md)
-    - [Embdgen](tools/embdgen.md)
+    - [Initrd generator](tools/initrd.md)
     - [Root generator](tools/root.md)
     - [Root configurator](tools/root_config.md)
-    - [Initrd generator](tools/initrd.md)
     - [Boot generator](tools/boot.md)
-
+    - [Embdgen](tools/embdgen.md)
