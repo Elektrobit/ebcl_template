@@ -22,11 +22,11 @@
 
 - [x] Overview
 - [x] Setup
-- [ ] Develop images
+- [x] Develop images
+- [x] The example images
+- [x] Building old kiwi or elbe images
 - [ ] Packaging apps
 - [ ] Developing apps
-- [ ] The example images
-- [ ] Building old kiwi or elbe images
 - [ ] Workspace in detail
 - [ ] Dev Container overview
 - [ ] Embdgen overview
