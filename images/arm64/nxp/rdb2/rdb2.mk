@@ -202,7 +202,7 @@ $(sysroot_tarball): $(root_filesystem_spec)
 edit_base:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakeedit -- tar xf $(base_tarball) -C $(result_folder)/root
+	fakeroot -s  $(result_folder)/fakeedit -- tar xf $(base_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
 	cd $(result_folder)/root && fakeroot -i ../fakeedit -s ../fakeedit
 	@echo "Re-packing root tarball..."
@@ -215,7 +215,7 @@ edit_base:
 edit_root:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
+	fakeroot -s  $(result_folder)/fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
 	@echo "Re-packing root tarball..."
@@ -228,7 +228,7 @@ edit_root:
 edit_boot_root:
 	@echo "Extacting boot base tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(boot_root) -C $(result_folder)/root
+	fakeroot -s  $(result_folder)/fakedit -- tar xf $(boot_root) -C $(result_folder)/root
 	@echo "Open edit shell..."
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
 	@echo "Re-packing root tarball..."

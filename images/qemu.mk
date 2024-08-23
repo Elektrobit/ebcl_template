@@ -183,7 +183,7 @@ clean:
 edit_base:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(base_tarball) -C $(result_folder)/root
+	fakeroot -s $(result_folder)/fakedit -- tar xf $(base_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
 	@echo "Re-packing root tarball..."
@@ -196,7 +196,7 @@ edit_base:
 edit_root:
 	@echo "Extacting base root tarball..."
 	mkdir -p $(result_folder)/root
-	fakeroot -s fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
+	fakeroot -s $(result_folder)/fakedit -- tar xf $(root_tarball) -C $(result_folder)/root
 	@echo "Open edit shell..."
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakeedit
 	@echo "Re-packing root tarball..."
