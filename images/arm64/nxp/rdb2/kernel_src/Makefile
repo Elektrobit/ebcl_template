@@ -111,8 +111,8 @@ $(kconfig): $(kernel_config) $(source)
 	@echo "Get kernel config..."
 	mkdir -p $(result_folder)
 	set -o pipefail && boot_generator $(kernel_config) $(result_folder) 2>&1 | tee $(kconfig).log
-	@echo "Renaming $(result_folder)/config-* as $(kconfig)..."
-	mv $(result_folder)/config-* $(kconfig)
+	@echo "Renaming $(result_folder)/config* as $(kconfig)..."
+	mv $(result_folder)/config* $(kconfig)
 	@echo "Copying $(kconfig) to $(kernel_dir)..."
 	cp $(result_folder)/config $(kernel_dir)/.config
 	@echo "Set all not defined values of the kernel config to defaults..."
