@@ -9,7 +9,7 @@ partition_layout = ../../image.yaml
 # Specification of the initrd.img
 initrd_spec = ../../initrd.yaml
 # Specification of the fitimage
-boot_spec = ../../boot.yaml
+boot_spec = boot.yaml
 # Specification of the root environment for fitimage building
 boot_root_spec = ../../boot_root.yaml
 # Specification of the root filesystem content and configuration

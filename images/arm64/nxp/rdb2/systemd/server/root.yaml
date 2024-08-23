@@ -1,5 +1,7 @@
 base: ../root.yaml
 packages:
+  - systemd-timesyncd
+  - systemd-coredump
   # SSH server
   - openssh-server
   # Other basic tools
@@ -24,3 +26,17 @@ packages:
   - curl
   # QSPI tooling
   - mtd-utils
+  # for module loading
+  - kmod
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot
+# Systemd configuration
+host_files:
+  - source: config/*
+    uid: 0
+    gid: 0
+    mode: 755
+  - source: $$RESULTS$$/modules
+    destination: lib
