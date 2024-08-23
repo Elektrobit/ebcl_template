@@ -1,0 +1,26 @@
+base: ../root.yaml
+packages:
+  # SSH server
+  - openssh-server
+  # Other basic tools
+  - openssh-client
+  - locales
+  - bash
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - iproute2
+  - iptables
+  - iputils-ping
+  # Apt package manager
+  - apt
+  - gnupg
+  # Editors
+  - vim
+  - nano
+  # network tools
+  - wget
+  - curl
+  # QSPI tooling
+  - mtd-utils
