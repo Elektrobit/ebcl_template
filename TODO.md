@@ -1,3 +1,8 @@
+## Bugs
+
+- [ ] fix ownership of config files
+- [ ] fix initrd modules dependencies
+
 ## ToDo 1.3
 
 - [x] Jammy QEMU amd64
@@ -68,6 +73,8 @@
 - [ ] relative root CLI option for build tools
 
 - [ ] container images
+
+- [ ] auto-optimize modules for RDB2
 
 ## ToDo 1.4
 
