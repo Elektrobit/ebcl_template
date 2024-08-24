@@ -27,6 +27,10 @@ The _image.yaml_ describes the required storage layout, the _initrd.yaml_ is a v
 
 The minimal RDB2 _systemd_ example image is contained in the folder _images/arm64/nxp/rdb2/systemd_. This image defines a minimal working RDB2 image, and provides only _systemd_, _udev_ and _util-linux_ in the userland.
 
+## EBcL RDB2 systemd server image
+
+The folder _images/arm64/nxp/rdb2/systemd/server_ contains a Raspberry Pi server like image for the RDB2 board. This image comes with and SSH server, apt, and mtd-utils.
+
 ## EBcL RDB2 crinit image
 
 The minimal RDB2 _crinit_ example image is contained in the folder _images/arm64/nxp/rdb2/crinit_. This image defines a minimal working RDB2 image, and provides only _crinit_ in the userland.
