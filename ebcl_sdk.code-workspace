@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "apps/my-json-app"
 		}
 	],
 	"settings": {
