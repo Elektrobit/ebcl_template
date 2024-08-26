@@ -120,7 +120,7 @@ sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
 # partition_layout ---------------------------------------------------------/
 
 # Embdgen is used to build the SD card image.
-# fitimage: the fitimage containing the kernel, the device tree and the inird.img
+# fitimage: the fitimage containing the kernel, the device tree and the initrd.img
 # root_tarball: the contents of the root filesystem
 # partition_layout: the partition layout of the SD card image
 #
