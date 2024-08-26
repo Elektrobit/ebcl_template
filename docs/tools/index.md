@@ -1,4 +1,5 @@
 # The build tools
+
 In below example of the build flow for the s32g you can see all currently supported tools marked in color. An explanation of the fliw is already given in the Section "Building an image from scratch".
 
 ![BuildTools](../assets/S32G2_fulltools.png)
