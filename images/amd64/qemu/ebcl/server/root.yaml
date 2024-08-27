@@ -17,6 +17,14 @@ packages:
   - netbase
   # NTP time client
   - ntpdate
+  # required for example my-json-app
+  - libjsoncpp25
+  # gdbserver for debugging
+  - gdbserver
+  # psmisc for 'killall' cmd
+  - psmisc
+  # rsync for app deployment during development
+  - rsync
 # Crinit configuration, including sbin/init
 host_files:
   - source: config/*
