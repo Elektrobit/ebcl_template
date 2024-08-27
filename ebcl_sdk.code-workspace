@@ -7,6 +7,9 @@
 			"path": "apps/my-json-app"
 		},
 		{
+			"path": "apps/meminfo-reader"
+		},
+		{
 			"path": "apps/common"
 		}
 	],
