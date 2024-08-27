@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "apps/my-json-app"
+		},
+		{
+			"path": "apps/common"
 		}
 	],
 	"settings": {
