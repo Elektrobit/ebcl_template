@@ -18,10 +18,6 @@
                 "DESTDIR": "/build/results/apps/$env{APP_NAME}/${presetName}/build/install"
             },
             "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": {
-                    "type": "PATH",
-                    "value": "/usr"
-                },
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
                     "value": "TRUE"
