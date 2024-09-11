@@ -43,7 +43,7 @@ sysroot_tarball = build/ebcl_sysroot.tar
 # QEMU kernel commandline
 kernel_cmdline_append = rw
 # Expose SSH port on host
-qemu_net_append = ,ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,ipv6-dns=fd00::eb:3,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333
+qemu_net_append = ,ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,ipv6-dns=fd00::eb:3,hostfwd=tcp::2222-:22
 
 # for building
 include ../../../../qemu.mk

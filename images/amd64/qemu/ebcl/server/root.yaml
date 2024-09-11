@@ -20,9 +20,6 @@ packages:
 # Crinit configuration, including sbin/init
 host_files:
   - source: config/*
-# Add libjson package for app development example
-sysroot_packages:
-  - libjsoncpp-dev
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
