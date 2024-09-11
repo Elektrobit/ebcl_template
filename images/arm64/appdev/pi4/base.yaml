@@ -1,0 +1,23 @@
+# Kernel package to use
+kernel: linux-image-raspi
+use_ebcl_apt: true
+# Additional apt repos
+apt_repos:
+  # Get Ubuntu Raspberry Pi packages
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+# CPU architecture
+arch: arm64

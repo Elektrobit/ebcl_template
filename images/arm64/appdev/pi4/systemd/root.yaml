@@ -1,0 +1,19 @@
+base: ../root_common.yaml
+name: ebcl_pi4
+packages:
+  - systemd
+  - systemd-coredump
+  - systemd-timesyncd
+  - udev
+# Scripts to configure the root tarball
+scripts:
+  - name: ../config_root.sh # Name of the script, relative path to this file
+    env: fake
+  - name: config_systemd.sh # Name of the script, relative path to this file
+    env: chroot
+host_files:
+  - source: ../cmdline.txt
+    destination: boot
+  - source: ../config.txt
+    destination: boot
+  - source: systemd_config/* # Crinit configuration

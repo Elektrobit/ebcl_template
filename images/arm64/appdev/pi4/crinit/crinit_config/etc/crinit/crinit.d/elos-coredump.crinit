@@ -1,0 +1,8 @@
+# loads the coredump utility/client for elosd
+NAME = elos-coredump
+
+COMMAND = /usr/bin/elos-coredump
+DEPENDS = @provided:elos
+PROVIDES = elos-coredump:spawn
+RESPAWN = NO
+RESPAWN_RETRIES = 3
