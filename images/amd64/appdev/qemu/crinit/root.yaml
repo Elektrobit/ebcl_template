@@ -1,4 +1,4 @@
-base: root_common.yaml
+base: ../root_common.yaml
 # Additional packages for the crinit variant
 packages:
   # Init manager
