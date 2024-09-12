@@ -58,23 +58,28 @@ After building is done, the artifacts will be available in `/build/results/apps/
 
 ### Pre-execute steps
 
-Before you can start the application for any of the available presets.
-What needs to be done, depends on the used preset.
+Before you can start the application for any of the available presets, you need to start the corresponding image.
+Again, we take the amd64 qemu crinit image as example.
+The following command will start the qemu instance, as well as builds the image beforehand if needed:
 
-* Start the EBcL target. In case of a qemu-based target you can use the corresponding `Run EBcL QEMU xxxx image` task
-* Run task `Deploy app from active build preset` to deploy the required artifacts for the currently active build preset
+```{bash}
+cd /workspace/images/amd64/appdev/qemu/crinit
+make
+```
+
+Afterwards, you can run task `Deploy app from active build preset` to deploy the required artifacts for the currently active build preset.
 
 ### Run demo applications
 
-The applications can be started by means of the task explorer with the task `Run app from active build preset`.
-Afterwards, the application will be called via an ssh session.
-The output messages of the applications, will be displayed in a terminal window associated to the used run task.
-Alternatively, you could also login via ssh to the target and call the application from there.
+The applications can be started with the task `Run app from active build preset`.
+Based on the build preset, the ssh connection parameters are derived from `/workspace/apps/common/deployment.targets` and the application is called on the target via an ssh session.
+All output messages of the application, will be displayed in a terminal window associated to the used run task.
+Alternatively, you could also login via ssh to the target and call the application from there directly.
 
 ### Post-execute steps
 
 This step is not required for the provided example applications, since both terminate directly and don't inlcude any continous loops.
-Nevertheless, your own applications, may keep running or simply wait a termination signal.
+Nevertheless, your own applications, may behave differently.
 In order to stop the execution of an application you can either press CTRL-C in the corresponding terminal window or stop the parent task.
 To stop the parent task click on "■" (Stop icon) in the task `Run app from active build preset` to stop the application.
 
