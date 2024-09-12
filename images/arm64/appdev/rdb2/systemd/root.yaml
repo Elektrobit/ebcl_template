@@ -6,13 +6,10 @@ packages:
   - udev
 # Scripts to configure the root tarball
 scripts:
-  - name: ../config_root.sh # Name of the script, relative path to this file
-    env: fake
   - name: config_systemd.sh # Name of the script, relative path to this file
     env: chroot
+# Files to copy form the host environment
 host_files:
-  - source: ../cmdline.txt
-    destination: boot
-  - source: ../config.txt
-    destination: boot
-  - source: systemd_config/* # Crinit configuration
+  - source: $$RESULTS$$/modules
+    destination: lib
+  - source: systemd_config/*

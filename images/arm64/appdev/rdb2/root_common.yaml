@@ -5,11 +5,6 @@ kernel: null
 name: ebcl_rdb2
 # Packages to install in the root tarball
 packages:
-  # Pi firmware and bootloader
-  - linux-firmware-raspi
-  - linux-raspi
-  - u-boot-rpi
-  - flash-kernel
   # SSH server
   - openssh-server
   # Other basic tools

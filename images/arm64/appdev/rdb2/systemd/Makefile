@@ -20,7 +20,7 @@ root_filesystem_spec = root.yaml
 #-------------------------
 
 # Config script for root filesystem
-config_root = config_root.sh
+config_root = config_systemd.sh
 
 # Build script for the fitimage
 build_fitimage = ../build_fitimage.sh
