@@ -31,6 +31,14 @@ This file may belong to the application folder or any of its subfolders.
 
 ### Build
 
+Before you can build any of the example applications, please make sure to run `make sysroot_install` for the used image configuration.
+As an example, for the amd64 qemu image with crinit as init daemon, building the sysroot would be done like this:
+
+```{bash}
+cd /workspace/images/amd64/appdev/qemu/crinit
+make sysroot_install
+```
+
 In order to build the applications, use the Visual Studio Code CMake extension on the Visual Studio Code bottom ribbon:
 
 . Choose active project as `my-json-app` or `meminfo-reader`
@@ -61,6 +69,7 @@ What needs to be done, depends on the used preset.
 The applications can be started by means of the task explorer with the task `Run app from active build preset`.
 Afterwards, the application will be called via an ssh session.
 The output messages of the applications, will be displayed in a terminal window associated to the used run task.
+Alternatively, you could also login via ssh to the target and call the application from there.
 
 ### Post-execute steps
 
