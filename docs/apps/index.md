@@ -41,9 +41,9 @@ make sysroot_install
 
 In order to build the applications, use the Visual Studio Code CMake extension on the Visual Studio Code bottom ribbon:
 
-. Choose active project as `my-json-app` or `meminfo-reader`
-. Choose active configure preset `qemu-x86_64`, `qemu-aarch64`, `rdb2` or `raspberry-pi`
-. Click on `Build`
+* Choose active project as `my-json-app` or `meminfo-reader`
+* Choose active configure preset `qemu-x86_64`, `qemu-aarch64`, `rdb2` or `raspberry-pi`
+* Click on `Build`
 
 Alternatively to the use of Visual Studio Code tasks, building can also be done directly via cmake.
 The following commands will configure, build and install the `my-json-app` for the `qemu-x86_64` preset.
