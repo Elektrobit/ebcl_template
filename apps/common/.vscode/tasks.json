@@ -57,6 +57,13 @@
               "hide": true,
               "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP killall gdbserver",
               "problemMatcher": []
+          },
+          {
+              "label": "Run app from active build preset",
+              "type": "shell",
+              "dependsOn": "Deploy app from active build preset",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP ${command:cmake.launchTargetPath}",
+              "problemMatcher": []
           }
       ]
 }
