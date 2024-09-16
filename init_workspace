@@ -51,21 +51,22 @@ elif [ $BUILD_CONTAINER -eq 1 ]; then
     if [ $REBUILD_CONTAINER -eq 0 ] && [ $CONTAINER_EXISTS -eq 1 ]; then
         echo "Container exists, not rebuilding..."
     else
-        if [ ! -d tools/container ]; then
-            echo "Downloading container sources..."
-            echo "Using container from branch ${CONTAINER_BRANCH}."
+        echo "Deleting old container sources..."
+        rm -rf tools/container
 
-            if [ -z "${CONTAINER_BRANCH}" ]; then
-                CONTAINER_BRANCH="main"
-                echo "Using default branch ${CONTAINER_BRANCH}."
-            fi
+        echo "Downloading container sources..."
+        echo "Using container from branch ${CONTAINER_BRANCH}."
 
-            if [ -z "${GET_CONTAINER}" ]; then
-                GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
-            fi
-
-            $GET_CONTAINER 
+        if [ -z "${CONTAINER_BRANCH}" ]; then
+            CONTAINER_BRANCH="main"
+            echo "Using default branch ${CONTAINER_BRANCH}."
         fi
+
+        if [ -z "${GET_CONTAINER}" ]; then
+            GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
+        fi
+
+        $GET_CONTAINER 
 
         python3 -m venv tools/.venv
         source tools/.venv/bin/activate
