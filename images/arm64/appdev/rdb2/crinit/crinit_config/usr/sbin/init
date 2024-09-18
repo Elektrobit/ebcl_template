@@ -1,0 +1,5 @@
+#!/usr/bin/sh
+
+/usr/bin/mount -t proc proc /proc
+
+exec /usr/bin/crinit

@@ -18,6 +18,5 @@ add_executable(MyJsonApp main.cpp)
 target_link_libraries(MyJsonApp ${JSONCPP_LIBRARIES})
 
 # Installation configuration
-SET (CMAKE_INSTALL_PREFIX "/usr")
-install(TARGETS MyJsonApp DESTINATION bin)
-SET (CPACK_SET_DESTDIR "/usr/bin/")
+install(TARGETS MyJsonApp DESTINATION ${CMAKE_INSTALL_BINDIR})
+#SET (CPACK_SET_DESTDIR "/usr/bin/")

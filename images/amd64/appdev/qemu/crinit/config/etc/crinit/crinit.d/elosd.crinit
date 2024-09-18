@@ -1,0 +1,13 @@
+# loads the event log scanner (elos)
+NAME = elosd
+
+COMMAND = /usr/bin/elosd
+
+# We need a writable tmpdir for elos to work and a machine-id for log tags.
+DEPENDS = @provided:tmpdir @provided:machine-id
+
+PROVIDES = elos:spawn syslog:spawn
+
+RESPAWN = YES
+# So we don't land in an infinite loop if there is an elos misconfiguration
+RESPAWN_RETRIES = 3

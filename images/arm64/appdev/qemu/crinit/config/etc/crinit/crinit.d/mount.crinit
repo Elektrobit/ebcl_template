@@ -1,0 +1,10 @@
+# !LINKSTO ireq.config.tmp, 1
+NAME = mount
+
+COMMAND = /usr/bin/mount -t tmpfs none /tmp
+          /usr/bin/mkdir /dev/shm
+          /usr/bin/mount -t tmpfs shmfs /dev/shm
+
+DEPENDS = ""
+PROVIDES = fstab:wait tmpdir:wait
+RESPAWN = NO

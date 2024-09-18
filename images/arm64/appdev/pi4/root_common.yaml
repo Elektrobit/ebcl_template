@@ -1,0 +1,39 @@
+base: base.yaml
+# Reset kernel package
+kernel: null
+# Name of the archive.
+name: ebcl_pi4
+# Packages to install in the root tarball
+packages:
+  # Pi firmware and bootloader
+  - linux-firmware-raspi
+  - linux-raspi
+  - u-boot-rpi
+  - flash-kernel
+  # SSH server
+  - openssh-server
+  # Other basic tools
+  - openssh-client
+  - locales
+  - bash
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - iproute2
+  - iptables
+  - iputils-ping
+  # Apt package manager
+  - apt
+  - gnupg
+  # Editors
+  - vim
+  - nano
+  # required for example my-json-app
+  - libjsoncpp25
+  # gdbserver for debugging
+  - gdbserver
+  # psmisc for 'killall' cmd
+  - psmisc
+  # rsync for app deployment during development
+  - rsync

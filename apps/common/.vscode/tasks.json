@@ -1,0 +1,69 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+          {
+              "type": "cmake",
+              "label": "Cmake build app from active build preset",
+              "detail": "Application build task for currently active preset",
+              "command": "install",
+              "hide": true,
+              "group": "build",
+              "problemMatcher": [],
+          },
+          {
+              "label": "Connection test",
+              "detail": "Connection test for remote deployment target",
+              "type": "shell",
+              "dependsOn": "Cmake build app from active build preset",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && ${workspaceFolder}/check_and_update_ssh_key.sh --prefix \"$SSH_PREFIX\" --port $SSH_PORT --user $SSH_USER --target $TARGET_IP",
+              "hide": true,
+              "problemMatcher": []
+          },
+          {
+              "label": "Deploy app from active build preset",
+              "detail": "Deploy app from active build preset to remote deployment target",
+              "type": "shell",
+              "dependsOn": [
+                  "Cmake build app from active build preset",
+                  "Connection test",
+              ],
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX rsync -rlptv -e \"ssh -p $SSH_PORT\" --exclude */include/* --exclude *.debug ${command:cmake.buildDirectory}/install/ $SSH_USER@$TARGET_IP:/",
+              "problemMatcher": []
+          },
+          {
+              "label": "Prepare gdb session",
+              "detail": "Write app_setup.gdbinit for active build preset",
+              "type": "shell",
+              "hide": true,
+              "dependsOn": "Deploy app from active build preset",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && touch ${command:cmake.buildDirectory}/.gdbinit && echo \"target extended-remote $TARGET_IP:$GDB_PORT\" > ${command:cmake.buildDirectory}/.gdbinit",
+              "problemMatcher": []
+          },
+          {
+              "label": "Start gdb on target",
+              "detail": "Start gdbserver on remote deployment target",
+              "type": "shell",
+              "hide": true,
+              "dependsOn": "Prepare gdb session",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP \"gdbserver --multi :$GDB_PORT >/dev/null 2>/tmp/gdb.err &\"",
+              "problemMatcher": []
+          },
+          {
+              "label": "Stop gdb on target",
+              "detail": "Stop gdbserver on remote deployment target",
+              "type": "shell",
+              "hide": true,
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP killall gdbserver",
+              "problemMatcher": []
+          },
+          {
+              "label": "Run app from active build preset",
+              "type": "shell",
+              "dependsOn": "Deploy app from active build preset",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP ${command:cmake.launchTargetPath}",
+              "problemMatcher": []
+          }
+      ]
+}

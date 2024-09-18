@@ -12,9 +12,12 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
-				"cmake.sourceDirectory": "/workspace/apps/my-json-app"
+                "cmake.options.statusBarVisibility": "visible",
+                "cmake.configureOnOpen": false
 			},
-			"extensions": []
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack@1.3.0"
+			]
 		}
 	},
 	"remoteUser": "ebcl",

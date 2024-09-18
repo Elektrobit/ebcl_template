@@ -1,0 +1,27 @@
+# Derive values from base.yaml - relative path
+base: ../base.yaml
+# Reset the kernel value - we don't want to download and extract it
+kernel: null
+# Do not pack the files as tar
+tar: false
+# do not download and extract these packages, they are already installed in the boot_root.tar
+use_packages: false
+# Name of the boot root archive
+base_tarball: $$RESULTS$$/boot_root.tar
+# Files to copy form the host environment
+host_files:
+  - source: ../bootargs-overlay.dts
+    destination: boot
+  - source: ../bootargs.its
+    destination: boot
+  - source: $$RESULTS$$/initrd.img
+    destination: boot
+# Scripts to build the fitimage and fip.s32
+scripts:
+  - name: ../build_fitimage.sh # Build the fitimage in the boot_root.tar environment
+    env: chroot
+# Files to copy to the build folder
+files:
+  - boot/fip.s32
+  - boot/fitimage
+  - lib/modules

@@ -169,7 +169,7 @@ sysroot: $(sysroot_tarball)
 sysroot_install: $(sysroot_tarball)
 	rm -rf /workspace/sysroot_$(arch)/*
 	cp $(sysroot_tarball) /workspace/sysroot_$(arch)/
-	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
+	tar xf $(sysroot_tarball) -C /workspace/sysroot_$(arch)/ >> /dev/null
 
 # clean - delete the generated artifacts
 .PHONY: clean
