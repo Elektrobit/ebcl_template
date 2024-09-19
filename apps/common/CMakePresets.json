@@ -12,11 +12,12 @@
             "name": "base",
             "hidden": true,
             "inherits": "base-app-env",
-            "binaryDir": "/build/results/apps/$env{APP_NAME}/${presetName}/build",
             "generator": "Unix Makefiles",
             "environment": {
-                "DESTDIR": "/build/results/apps/$env{APP_NAME}/${presetName}/build/install"
+                "BUILDDIR": "/build/results/apps/$env{APP_NAME}/${presetName}/build",
+                "DESTDIR": "$env{BUILDDIR}/install"
             },
+            "binaryDir": "$env{BUILDDIR}",
             "cacheVariables": {
                 "CMAKE_EXPORT_COMPILE_COMMANDS": {
                     "type": "BOOL",
