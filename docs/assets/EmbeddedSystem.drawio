@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" scale="3" border="0">
     <diagram name="Page-1" id="2TYgwuEKGSjm0ON4_aNX">
-        <mxGraphModel dx="1162" dy="607" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
+        <mxGraphModel dx="804" dy="511" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="#ffffff" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -85,7 +85,7 @@
                 <mxCell id="XRMtSqIOEsNKMCHWb8mg-29" value="Android kernel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="XRMtSqIOEsNKMCHWb8mg-26" vertex="1">
                     <mxGeometry x="150" y="140" width="90" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="XRMtSqIOEsNKMCHWb8mg-30" value="Andorid&lt;div&gt;Userland&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="XRMtSqIOEsNKMCHWb8mg-26" vertex="1">
+                <mxCell id="XRMtSqIOEsNKMCHWb8mg-30" value="Android&lt;div&gt;Userland&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="XRMtSqIOEsNKMCHWb8mg-26" vertex="1">
                     <mxGeometry x="150" y="10" width="90" height="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="XRMtSqIOEsNKMCHWb8mg-31" value="Other VMs" style="rounded=0;whiteSpace=wrap;html=1;" parent="XRMtSqIOEsNKMCHWb8mg-26" vertex="1">
