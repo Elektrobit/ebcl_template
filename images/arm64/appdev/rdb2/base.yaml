@@ -1,5 +1,5 @@
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1023-s32-eb
+kernel: linux-buildinfo-5.15.0-1034-s32-eb
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
