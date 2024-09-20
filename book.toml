@@ -14,8 +14,6 @@ command = "mdbook-image-size"
 
 [output.html]
 additional-css = ["docs/custom.css"]
-default-theme = "dark"
-preferred-dark-theme = "navy"
 curly-quotes = true
 mathjax-support = false
 copy-fonts = true
