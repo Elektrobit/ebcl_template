@@ -18,8 +18,6 @@
 - [Bulding old images](old_images.md)
 - [Packaging apps](packaging.md)
 - [Developing apps](apps/index.md)
-- [The workspace in detail](workspace/index.md)
-- [The dev container](dev_container.md)
 - [The build tools](tools/index.md)
     - [Initrd generator](tools/initrd.md)
     - [Root generator](tools/root.md)
