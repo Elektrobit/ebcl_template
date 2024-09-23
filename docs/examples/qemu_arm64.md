@@ -1,12 +1,15 @@
 # The arm64 images
 
-EB corbos Linux comes with arm64 baesedxample images for rpi4 and nxp s32g boards at the moment. To ease development and testing we also provide QEMU arm64 images.
+EB corbos Linux comes with arm64 baesedxample images for rpi4 and nxp s32g boards at the moment.
+To ease development and testing we also provide QEMU arm64 images.
 
-For _arm64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy. The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation.
+For _arm64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
+The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation.
 
 ## The arm64 Jammy images
 
-In _images/arm64/qemu/jammy_ you can find two basic example images demonstrating how to use the EB corbos Linux SDK. This folder contains the common configuration shared by all the examples, and makes use of the QEMU _images/qemu*.mk_ include makefiles.
+In _images/arm64/qemu/jammy_ you can find two basic example images demonstrating how to use the EB corbos Linux SDK.
+This folder contains the common configuration shared by all the examples, and makes use of the QEMU _images/qemu*.mk_ include makefiles.
 
 ```yaml
 # Kernel package to use
@@ -27,13 +30,16 @@ apt_repos:
 arch: 'arm64'
 ```
 
-All examples make use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package. The Canonical Ubuntu apt repositories are used to build the examples.
+All examples make use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package.
+The Canonical Ubuntu apt repositories are used to build the examples.
 
 Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further shared yaml files for the arm64 Jammy images with berrymill and elbe are identical to the amd64 QEMU jammy images, and hence documented already in the previous section.
 
 ## The arm4 Jammy images
 
-At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _elbe_ and _kiwi-ng_. The default is _elbe_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported. Note that _kiwi-ng_ is wrapped by _berrymill_ to provide additional features like derived images. Future EBcL major release lines may drop both and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own elbe or kiwi-ng XML image description.
+At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _elbe_ and _kiwi-ng_. The default is _elbe_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
+Note that _kiwi-ng_ is wrapped by _berrymill_ to provide additional features like derived images.
+Future EBcL major release lines may drop both and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own elbe or kiwi-ng XML image description.
 
 The _arm64/qemu/jammy/berrymill_ image makes use of the above mentioned configurations, and extends it with an own _root.yaml_ and a specific _Makefile_.
 
@@ -119,7 +125,9 @@ The _Makefile_ point _make_ to the right specification files, sets the flag to m
 
 ## The arm64 EB corbos Linux images
 
-EB corbos Linux (EBcL) is an embedded Linux distribution targeting automotive and other industrial embedded Linux solutions. The main differences between EBcL and Ubuntu are the release and qualification handling, and some additional components added by EBcL which allow building more lightweight and better performing embedded images. The code is again very similar to the amd64 QEMU images.
+EB corbos Linux (EBcL) is an embedded Linux distribution targeting automotive and other industrial embedded Linux solutions.
+The main differences between EBcL and Ubuntu are the release and qualification handling, and some additional components added by EBcL which allow building more lightweight and better performing embedded images.
+The code is again very similar to the amd64 QEMU images.
 
 The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in _*.mk_ files.
 

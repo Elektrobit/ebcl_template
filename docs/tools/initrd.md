@@ -6,7 +6,8 @@ An initrd can be generated with the initrd generator.
 
 ## Description
 
-Creates a custom inittial RAM disk (initrd) based on busybox using YAML configuration file. The synopsis is `initrd_generator <initrd>.yaml <output_path>`
+Creates a custom inittial RAM disk (initrd) based on busybox using YAML configuration file.
+The synopsis is `initrd_generator <initrd>.yaml <output_path>`
 
 ![BuildTools](../assets/initrd_generator.drawio.png)
 

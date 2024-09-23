@@ -1,10 +1,14 @@
 # Kernel development
 
-If you do the bring-up for a new board, you may need to adapt the kernel configuration. This section continues where "Building an image from scratch" ended.
+If you do the bring-up for a new board, you may need to adapt the kernel configuration.
+This section continues where "Building an image from scratch" ended.
 
-Please be aware that EB corbos Linux allows you to “open the box”, but if you modify the provided binary packages the support and maintenance for these packages is not covered with the base offer. You can get support, qualification and long term maintenance as an add-on to the base offer, as a yearly fee for each package.
+Please be aware that EB corbos Linux allows you to “open the box”, but if you modify the provided binary packages the support and maintenance for these packages is not covered with the base offer.
+You can get support, qualification and long term maintenance as an add-on to the base offer, as a yearly fee for each package.
 
-Nevertheless, let’s see how we can build our own kernel. To build a custom kernel package we need the kernel sources and the base kernel config. We can get the kernel sources and build dependencies using apt:
+Nevertheless, let’s see how we can build our own kernel.
+To build a custom kernel package we need the kernel sources and the base kernel config.
+We can get the kernel sources and build dependencies using apt:
 
 ```bash
 mkdir -p kernel
@@ -62,7 +66,8 @@ files:
   - boot/fitimage
 ```
 
-The only change compared to the old _boot.yaml_ is that we add “$$RESULTS$$/vmlinuz” to the _host_files_. This means our kernel binary is copied to the _/boot_ folder of the fitimage build environment, and will overwrite the one from the kernel Debian package. This will give us the following build flow:
+The only change compared to the old _boot.yaml_ is that we add “$$RESULTS$$/vmlinuz” to the _host_files_. This means our kernel binary is copied to the _/boot_ folder of the fitimage build environment, and will overwrite the one from the kernel Debian package.
+This will give us the following build flow:
 
 ![S32G2](assets/S32G2_kernel.png)
 

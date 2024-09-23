@@ -1,8 +1,10 @@
 # Building an image from scratch
 
-Let’s develop a new EB corbos Linux image step by step, for the NXP RDB2 board using the NXP S32G2 SoC. According to the NXP S32G2 user manual, the following bootloader layout is required:
+Let’s develop a new EB corbos Linux image step by step, for the NXP RDB2 board using the NXP S32G2 SoC.
+According to the NXP S32G2 user manual, the following bootloader layout is required:
 
-> The space between 0x0 and 0x1d_3000 is occupied by some or all of the following components: IVT, QSPI Parameters, DCD, HSE_FW, SYS_IMG, Application Boot Code Header, TF-A FIP image. The actual layout is determined at boot time and can be obtained from the arm-trusted-firmware.
+> The space between 0x0 and 0x1d_3000 is occupied by some or all of the following components: IVT, QSPI Parameters, DCD, HSE_FW, SYS_IMG, Application Boot Code Header, TF-A FIP image.
+The actual layout is determined at boot time and can be obtained from the arm-trusted-firmware.
 >
 > IVT: Offset: 0x1000 Size: 0x100
 > AppBootCode Header: Offset: 0x1200 Size: 0x40 
@@ -11,7 +13,8 @@ Let’s develop a new EB corbos Linux image step by step, for the NXP RDB2 board
 > 
 > For SD/eMMC the partitioned space begins at 0x1d_3000.
 
-For our SD card image, this means, the first 256B of the FIP image containing the ATF and the U-Boot needs to be written to block 0, then a gap of 0x2000 B is required, at position 0x1e0000 B, for the U-Boot env, and then the remaining part of the ATF and U-Boot image can be written. The partition table and partitions come afterwards.
+For our SD card image, this means, the first 256B of the FIP image containing the ATF and the U-Boot needs to be written to block 0, then a gap of 0x2000 B is required, at position 0x1e0000 B, for the U-Boot env, and then the remaining part of the ATF and U-Boot image can be written.
+The partition table and partitions come afterwards.
 
 Further the user manual describes that the kernel can be provided as a FIT image, and one way to provide this FIT image is to put it on the first partition, which has to be FAT32, using the name _fitimage_.
 
@@ -76,9 +79,13 @@ You may notice that this image description requires three artifacts:
 
 - **ebcl_rdb2.config.tar**: This is a tarball containing the contents of our Linux root filesystem.
 
-Since the NXP S32G2 SoC is supported by EB corbos Linux, a FIP image and a kernel binary is provided as part of the releases and free download. The fip.s32 image is contained in the Debian package _arm-trusted-firmware-s32g_, and provided on https://linux.elektrobit.com/eb-corbos-linux/1.2 as part of the distribution _ebcl_nxp_public_ in the component _nxp_public_. The kernel binary and modules are provided by the same distro and component, packaged as _linux-image-unsigned-5.15.0-1023-s32-eb_, _linux-modules-5.15.0-1023-s32-eb_ and _linux-modules-extra-5.15.0-1023-s32-eb_. 
+Since the NXP S32G2 SoC is supported by EB corbos Linux, a FIP image and a kernel binary is provided as part of the releases and free download.
+The fip.s32 image is contained in the Debian package _arm-trusted-firmware-s32g_, and provided on https://linux.elektrobit.com/eb-corbos-linux/1.2 as part of the distribution _ebcl_nxp_public_ in the component _nxp_public_. The kernel binary and modules are provided by the same distro and component, packaged as _linux-image-unsigned-5.15.0-1023-s32-eb_, _linux-modules-5.15.0-1023-s32-eb_ and _linux-modules-extra-5.15.0-1023-s32-eb_. 
 
-The tooling to build the fitimage is contained in the packages _u-boot-s32-tools_, _arm-trusted-firmware-s32g_, _device-tree-compiler_, and  _nautilos-uboot-tools_. We need to install these tools in some environment to be able to build the fitimage. Adding them to the root filesystem would be a possibility, but not a good one, since this would bloat the root filesystem and also gives very useful tools to an attacker trying to hack our embedded solution. Since the tooling is only needed during build time, a better approach is to install it in a separate environment. This could be our build host, but since we want reproducible builds, the better solution is to use the _root generator_ to define and create a well specified chroot build environment.
+The tooling to build the fitimage is contained in the packages _u-boot-s32-tools_, _arm-trusted-firmware-s32g_, _device-tree-compiler_, and  _nautilos-uboot-tools_. We need to install these tools in some environment to be able to build the fitimage.
+Adding them to the root filesystem would be a possibility, but not a good one, since this would bloat the root filesystem and also gives very useful tools to an attacker trying to hack our embedded solution.
+Since the tooling is only needed during build time, a better approach is to install it in a separate environment.
+This could be our build host, but since we want reproducible builds, the better solution is to use the _root generator_ to define and create a well specified chroot build environment.
 
 Let’s first define some common settings used by our image overall, as _base.yaml_:
 
@@ -100,7 +107,8 @@ apt_repos:
 
 ```
 
-This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_, build an arm64 image, and make use of the default EBcL apt repository, and the EBcL NXP additions. Now we can base on this file and define our fitimage build environment as _boot_root.yaml_:
+This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_, build an arm64 image, and make use of the default EBcL apt repository, and the EBcL NXP additions.
+Now we can base on this file and define our fitimage build environment as _boot_root.yaml_:
 
 ```yaml
 # Derive values from base.yaml - relative path
@@ -118,7 +126,8 @@ packages:
   - nautilos-uboot-tools
 ```
 
-We install all the above mentioned packages into this environment. For building the fitimage, and for extracting the fip.s32, we can make use of the _boot generator_:
+We install all the above mentioned packages into this environment.
+For building the fitimage, and for extracting the fip.s32, we can make use of the _boot generator_:
 
 ```yaml
 # Derive values from base.yaml - relative path
@@ -150,9 +159,18 @@ files:
   - boot/fitimage
 ```
 
-The kernel is already part of the chroot tarball environment, and we don’t need to download it again. We need to provide the fitimage and fip.s32 binaries directly to embdgen, so we don’t want to pack it. The tarball created by the root generator will be named “boot_root.tar”, because of the name given in the _boot_root.yaml_. Because of the “base_tarball” parameter, the _boot generator_ will pick up the tarball, extract it and chroot into this environment. The _boot generator_ will also replace the string “$$RESULTS$$” with the path to the given output folder. In addition, we need the files “bootargs-overlay.dts”, “bootargs.its” and “$$RESULTS$$/initrd.img” in the host environment. These files will be copied into the chroot environment and used for building the fitimage. The script _build_fitimage.sh_ implements the fitimage building. When this script has done its job, the files _fip.s32_ and _fitimage_ will be copied to the output folder.
+The kernel is already part of the chroot tarball environment, and we don’t need to download it again.
+We need to provide the fitimage and fip.s32 binaries directly to embdgen, so we don’t want to pack it.
+The tarball created by the root generator will be named “boot_root.tar”, because of the name given in the _boot_root.yaml_. Because of the “base_tarball” parameter, the _boot generator_ will pick up the tarball, extract it and chroot into this environment.
+The _boot generator_ will also replace the string “$$RESULTS$$” with the path to the given output folder.
+In addition, we need the files “bootargs-overlay.dts”, “bootargs.its” and “$$RESULTS$$/initrd.img” in the host environment.
+These files will be copied into the chroot environment and used for building the fitimage.
+The script _build_fitimage.sh_ implements the fitimage building.
+When this script has done its job, the files _fip.s32_ and _fitimage_ will be copied to the output folder.
 
-To use this recipe, we first need the input artifacts. The _bootargs.its_ is the fitimage description we need to provide. The following description will do the job:
+To use this recipe, we first need the input artifacts.
+The _bootargs.its_ is the fitimage description we need to provide.
+The following description will do the job:
 
 ```dts
 /dts-v1/;
@@ -216,7 +234,10 @@ The _bootargs-overlay.dts_ is the U-Boot configuration:
 };
 ```
 
-The _inird.img_ is the initalramdisc we want to use. We can use the _initrd generator_ to create such an _initrd.img_ which fits our needs. As long as we don’t want to implement secure boot, your needs are quite small. We just want to use _/dev/mmcblk0p2_ as root partition, which is partition two of the internal eMMC storage.
+The _inird.img_ is the initalramdisc we want to use.
+We can use the _initrd generator_ to create such an _initrd.img_ which fits our needs.
+As long as we don’t want to implement secure boot, your needs are quite small.
+We just want to use _/dev/mmcblk0p2_ as root partition, which is partition two of the internal eMMC storage.
 
 ```yaml
 # Derive values from base.yaml - relative path
@@ -229,7 +250,8 @@ root_device: /dev/mmcblk0p2
 
 Running the _initrd generator_ with this spec will create us a minimal initrd.img.
 
-The final missing input is the script to generate the fitimage. We can use the following script:
+The final missing input is the script to generate the fitimage.
+We can use the following script:
 
 ```bash
 #!/bin/sh
@@ -277,7 +299,8 @@ Now we are prepared to build our fitimage, and get the fip.s32 binary.
 
 We can build the _boot_root.tar_ using the command `root_generator boot_root.yaml ./out`, then we can build the _initrd.img_ using the command `initrd_generator initrd.yaml ./out`, and finally we can build the _fitimage_ using the command `boot_generator boot.yaml ./out`.
 
-To avoid typing all these commands by hand, we can use make. The following _Makefile_ will do the job:
+To avoid typing all these commands by hand, we can use make.
+The following _Makefile_ will do the job:
 
 ```make
 #--------------
@@ -394,7 +417,8 @@ clean:
 	rm -rf $(result_folder)
 ```
 
-Now the board specific parts are done, and the only missing piece to build the image is the root filesystem. A minimal root filesystem making use of the _systemd_ init manager can be specified as: 
+Now the board specific parts are done, and the only missing piece to build the image is the root filesystem.
+A minimal root filesystem making use of the _systemd_ init manager can be specified as: 
 
 ```yaml
 base: base.yaml
@@ -453,9 +477,11 @@ root_tarball ?= $(result_folder)/ebcl_rdb2.config.tar
 # The root generator is used to build the base root filesystem tarball.
 # root_filesystem_spec: specification of the root filesystem packages.
 #
-# This first step only installs the specified packages. User configuration
+# This first step only installs the specified packages.
+User configuration
 # is done as a second step, because the build of this tarball is quite 
-# time consuming and configuration is fast. This is an optimization for 
+# time consuming and configuration is fast.
+This is an optimization for 
 # the image development process.
 $(base_tarball): $(root_filesystem_spec)
 	@echo "Build root.tar..."
@@ -472,9 +498,12 @@ $(root_tarball): $(base_tarball) $(config_root)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
 ```
 
-The above makefile splits the image installation and the configuration step of building the root tarball. This is useful if you expect changes for the configuration, because the installation step is quite time consuming, and the configuration step is quite fast. This optimization can save you a lot of build time.
+The above makefile splits the image installation and the configuration step of building the root tarball.
+This is useful if you expect changes for the configuration, because the installation step is quite time consuming, and the configuration step is quite fast.
+This optimization can save you a lot of build time.
 
-Finally we need to run embdgen to build our binary image. This can be done manually running `embdgen image.yaml ./out`, but we can also add it to our _Makefile_.
+Finally we need to run embdgen to build our binary image.
+This can be done manually running `embdgen image.yaml ./out`, but we can also add it to our _Makefile_.
 
 ```make
 #---------------------
@@ -508,6 +537,7 @@ $(disc_image): $(fitimage) $(root_tarball) $(partition_layout)
 	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
 ```
 
-Now you have an image which you can flash to your NXP RDB2 board. The overall build flow with the changes above is:
+Now you have an image which you can flash to your NXP RDB2 board.
+The overall build flow with the changes above is:
 
 ![S32G2](../assets/S32G2_full.png)

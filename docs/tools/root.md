@@ -6,7 +6,9 @@ A root tarball can be generated with the root generator.
 
 ## Description
 
-Creates a custom, root tarball using YAML configuration file. It can be used for example to build a normal rootfs, but also the build chroot build environments containing tooling needed for building other artifacts. The synopsis is `root_generator <root>.yaml <output_path> --no-config --sysroot`
+Creates a custom, root tarball using YAML configuration file.
+It can be used for example to build a normal rootfs, but also the build chroot build environments containing tooling needed for building other artifacts.
+The synopsis is `root_generator <root>.yaml <output_path> --no-config --sysroot`
 
 ![BuildTools](../assets/root_generator.drawio.png)
 
