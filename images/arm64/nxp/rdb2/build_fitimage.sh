@@ -21,7 +21,7 @@ cp /lib/firmware/*/device-tree/freescale/s32g274a-rdb2.dtb \
 #=======================================
 # Get NXP S32G ATF (secure boot image)
 #---------------------------------------
-cp /usr/lib/arm-trusted-firmware-s32g/s32g274ardb2/fip.s32 \
+cp /usr/lib/arm-trusted-firmware-s32/s32g274ardb2/fip.s32 \
     /boot/fip.s32
 
 #=======================================
