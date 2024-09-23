@@ -27,8 +27,6 @@
          <!-- kernel -->
         <package name="linux-generic"/>
         <!-- bootloader -->
-        <package name="grub-common" arch="x86_64"/>
-        <package name="grub2-common" arch="x86_64"/>
         <package name="grub-pc-bin" arch="x86_64"/>
         <!-- system -->
         <!-- crinit and related packages -->
