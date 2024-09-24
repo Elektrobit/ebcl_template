@@ -1,7 +1,7 @@
 # Makefile for old Berrymill images
 
 # Arch for sysroot extraction
-arch = x86_64
+arch = aarch64
 
 #---------------------
 # Select bash as shell
@@ -66,12 +66,15 @@ $(sysroot_tarball): $(sysroot_spec)
 .PHONY: qemu
 qemu: $(disc_image)
 	@echo "Running $(disc_image) in QEMU x86_64 using EFI loader..."
-	qemu-system-x86_64 \
-        -m 4096 \
-        -nographic \
-        -netdev user,id=mynet0$(qemu_net_append) \
-        -device virtio-net-pci,netdev=mynet0 \
-        -drive file=$(disc_image),if=virtio
+	qemu-system-aarch64 \
+        -machine virt \
+		-cpu cortex-a72 \
+		-m 4096 \
+		-nographic \
+		-netdev user,id=mynet0,hostfwd=tcp::2222-:22,hostfwd=tcp::1234-:1234 \
+		-device virtio-net-pci,netdev=mynet0 \
+		-drive file=${disc_image},if=virtio  \
+		-bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd
 
 #--------------------------------
 # Default make targets for images

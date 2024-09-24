@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<image schemaversion="7.4" name="qemu_crinit_x86_64">
+<image schemaversion="7.4" name="qemu_crinit_aarch64">
     <description type="system">
         <author>Elektrobit Automotive GmbH</author>
         <contact>info@elektrobit.com</contact>
         <specification>Image description for using crinit</specification>
     </description>
 
-    <preferences arch="x86_64">
+    <preferences arch="aarch64">
         <version>1.1.0</version>
         <packagemanager>apt</packagemanager>
-        <type image="oem" filesystem="ext4" firmware="custom" initrd_system="none" format="qcow2">
+        <type image="oem" filesystem="ext4" firmware="efi" initrd_system="none" format="qcow2">
             <bootloader name="grub2"/>
             <oemconfig>
                 <oem-resize>false</oem-resize>
@@ -21,23 +21,18 @@
 
     <users>
         <user password="linux" pwdformat="plain" home="/root" name="root" groups="root"/>
+        <user password="linux" pwdformat="plain" home="/home/ebcl" name="ebcl" groups="users,kvm" shell="/bin/bash"/>
     </users>
 
     <packages type="image">
-         <!-- kernel -->
+        <!-- kernel -->
         <package name="linux-generic"/>
         <!-- bootloader -->
-        <package name="grub-pc-bin" arch="x86_64"/>
+        <package name="grub-efi-arm64" arch="aarch64"/>
         <!-- system -->
         <!-- crinit and related packages -->
         <package name="crinit"/>
         <package name="crinit-ctl"/>
-        <package name="elos"/>
-        <package name="elos-coredump"/>
-        <package name="elos-plugin-backend-json"/>
-        <package name="elos-plugin-backend-dummy"/>
-        <package name="elos-plugin-scanner-kmsg"/>
-        <package name="elos-plugin-scanner-syslog"/>
         <package name="netifd"/>
         <package name="udhcpc"/>
         <package name="ubus"/>
@@ -61,16 +56,11 @@
         <package name="iputils-ping"/>
         <!-- required for apt gpg key verification -->
         <package name="gnupg"/>
-        <!-- required for apt update -->
-        <package name="dialog"/>
         <!-- add editors -->
         <package name="vim"/>
         <package name="nano"/>
-        <!-- dependency of my-json-app -->
-        <package name="libjsoncpp25"/>
         <!-- debug tools -->
         <package name="gdbserver"/>
-        <package name="libc6-dbg"/>
         <package name="socat"/>
         <package name="iperf3"/>
         <package name="tcpdump"/>
