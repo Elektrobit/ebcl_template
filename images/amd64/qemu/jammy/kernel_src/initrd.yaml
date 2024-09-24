@@ -1,2 +1,0 @@
-base: ../initrd.yaml
-modules_folder: $$RESULTS$$
