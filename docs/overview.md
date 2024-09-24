@@ -5,7 +5,7 @@ Elektrobit can provide security patches for a frozen package set for up to 15 ye
 To realize this, Elektrobit partners with Canonical.
 EB corbos Linux uses many Ubuntu packages, qualifies these packages for automotive embedded use-cases in reference images, and adds additional embedded optimized components, to create an industry grade embedded Linux build toolkit.
 
-In contrast to IT Linux distributions, EB corbos Linux allows a user to create a completely customer specific image from scratch in a reproducible way.
+In contrast to general purpose Linux distributions, EB corbos Linux allows a user to create a completely customer specific image from scratch in a reproducible way.
 This is realized using this SDK.
 A free variant of EB corbos Linux is available at the [Elektrobit homepage](https://www.elektrobit.com/products/ecu/eb-corbos/linux-built-on-ubuntu/). To kick-start the development of new ECUs, a full EB corbos Linux release also contains pre-qualified reference images which already implement typical automotive use-cases.
 The free variant doesn't contain proprietary hardware drivers or pre-qualified reference images.
