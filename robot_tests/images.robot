@@ -146,6 +146,42 @@ Build Image arm64/nxp/rdb2/systemd/server
     [Tags]    arm64    pi4    hardware    elbe    ebcl    systemd    server
     Test Hardware Image    arm64/nxp/rdb2/systemd/server
 
+#========================
+# Tests for appdev images
+#========================
+Build Image amd64/appdev/qemu/crinit
+    [Tags]    amd64    qemu    elbe    crinit    ebcl    appdev
+    Test Crinit Image    amd64/appdev/qemu/crinit
+
+Build Image amd64/appdev/qemu/systemd
+    [Tags]    amd64    qemu    elbe    systemd    ebcl    appdev
+    Test Systemd Image    amd64/appdev/qemu/systemd
+
+Build Image arm64/appdev/qemu/crinit
+    [Tags]    arm64    qemu    elbe    crinit    ebcl    appdev
+    Test Crinit Image    arm64/appdev/qemu/crinit
+
+Build Image arm64/appdev/qemu/systemd
+    [Tags]    arm64    qemu    elbe    systemd    ebcl    appdev
+    Test Systemd Image    arm64/appdev/qemu/systemd
+
+Build Image arm64/appdev/pi4/crinit
+    [Tags]    arm64    pi4    hardware    elbe    ebcl    crinit    appdev
+    Test Hardware Image    arm64/appdev/pi4/crinit
+
+Build Image arm64/appdev/pi4/systemd
+    [Tags]    arm64    pi4    hardware    elbe    ebcl    systemd    appdev
+    Test Hardware Image    arm64/appdev/pi4/systemd
+
+Build Image arm64/appdev/rdb2/crinit
+    [Tags]    arm64    rdb2    hardware    elbe    ebcl    systemd    appdev
+    Test Hardware Image    arm64/appdev/rdb2/crinit
+
+Build Image arm64/appdev/rdb2/systemd
+    [Tags]    arm64    rdb2    hardware    elbe    ebcl    crinit    appdev
+    Test Hardware Image    arm64/appdev/rdb2/systemd
+
+
 #==========================================
 # Tests for images using local built kernel
 #==========================================
@@ -186,8 +222,6 @@ Build Image arm64/nxp/rdb2/kernel_src
     [Tags]    arm64    rdb2    hardware    elbe    ebcl    systemd    kernel_src
     [Timeout]    90m
     Test Hardware Image    arm64/nxp/rdb2/kernel_src
-
-
 
 *** Keywords ***
 Run Make
