@@ -6,12 +6,15 @@ name: ebcl_rdb2
 packages:
   - crinit
   - crinit-ctl
+  # Elos for logging
   - elos
   - elos-coredump
   - elos-plugin-backend-json
   - elos-plugin-backend-dummy
   - elos-plugin-scanner-kmsg
   - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
   - netifd
   - udhcpc
   - ubus

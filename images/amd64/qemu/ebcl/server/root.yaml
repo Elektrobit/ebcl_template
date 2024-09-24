@@ -11,6 +11,8 @@ packages:
   - elos-plugin-backend-dummy
   - elos-plugin-scanner-kmsg
   - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
   # Network manager
   - netifd
   - udhcpc
