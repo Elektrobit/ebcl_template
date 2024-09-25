@@ -22,9 +22,19 @@ image:
         offset: 512 B
 
     - name: uboot.env
-      type:  empty
-      start: 0x1e0000 B
+      type:  raw
+      start: 0x280000 B
       size:  0x2000 B
+      content:
+        type:  uboot_env
+        vars:
+          hwconfig:    "serdes0:mode=pcie,clock=ext;serdes1:mode=xpcs0&xpcs1,clock=ext,fmhz=125;xpcs1_0:speed=1G;xpcs1_1:speed=1G;pcie0:mode=rc;pcie1:mode=rc;"
+          fdt_addr:    "0x83000000"
+          fdt_high:    "0xffffffffffffffff"
+          initrd_high: "0xffffffffffffffff"
+          loadaddr:    "0xa0000000"
+          loadimage:   "mmc dev 0; mmc rescan; fatload mmc 0:1 ${loadaddr} fitimage"
+          bootcmd:     "run loadimage; bootm"
 
     - name: boot
       type: partition
