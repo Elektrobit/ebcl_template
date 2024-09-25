@@ -1,0 +1,30 @@
+base: ../base.yaml
+# reset the kernel value
+kernel: null
+# Name of the archive.
+name: ebcl_rdb2
+apt_repos:
+  # Get SELinux packages
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+# Packages to install in the root tarball
+packages:
+  - crinit
+  - crinit-ctl
+  - strace
+# Crinit configuration, including sbin/init
+host_files:
+  - source: crinit_config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

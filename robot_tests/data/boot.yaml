@@ -1,0 +1,25 @@
+apt_repos:
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy
+    components:
+      - main
+      - universe
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-security
+    components:
+      - main
+      - universe
+packages: 
+  - linux-generic
+download_deps: true
+arch: 'amd64'
+files:
+  - source: boot/vmlinuz-*
+  - source: boot/config-*
+    mode: 777
+    uid: 123
+    gid: 456
+  - source: boot/some_config
+scripts:
+  - name: config_boot.sh
+    env: fake

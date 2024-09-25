@@ -1,0 +1,33 @@
+base: ../root_common.yaml
+name: ebcl_pi4
+packages:
+  - crinit
+  - crinit-ctl
+  # Elos for logging
+  - elos
+  - elos-coredump
+  - elos-plugin-backend-json
+  - elos-plugin-backend-dummy
+  - elos-plugin-scanner-kmsg
+  - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
+  - netifd
+  - udhcpc
+  - ubus
+  - util-linux
+  - netbase
+  - ntpdate
+  - kmod
+# Scripts to configure the root tarball
+scripts:
+  - name: ../config_root.sh # Name of the script, relative path to this file
+    env: fake
+  - name: config_crinit.sh # Name of the script, relative path to this file
+    env: chroot
+host_files:
+  - source: ../cmdline.txt
+    destination: boot
+  - source: ../config.txt
+    destination: boot
+  - source: crinit_config/* # Crinit configuration, including sbin/init

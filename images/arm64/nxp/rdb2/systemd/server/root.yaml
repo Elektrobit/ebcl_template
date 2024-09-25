@@ -1,0 +1,42 @@
+base: ../root.yaml
+packages:
+  - systemd-timesyncd
+  - systemd-coredump
+  # SSH server
+  - openssh-server
+  # Other basic tools
+  - openssh-client
+  - locales
+  - bash
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - iproute2
+  - iptables
+  - iputils-ping
+  # Apt package manager
+  - apt
+  - gnupg
+  # Editors
+  - vim
+  - nano
+  # network tools
+  - wget
+  - curl
+  # QSPI tooling
+  - mtd-utils
+  # for module loading
+  - kmod
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot
+# Systemd configuration
+host_files:
+  - source: config/*
+    uid: 0
+    gid: 0
+    mode: 755
+  - source: $$RESULTS$$/modules
+    destination: lib

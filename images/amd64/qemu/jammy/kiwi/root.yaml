@@ -1,0 +1,10 @@
+# Config to use as a base
+base: ../root.yaml
+# Overwrite the image builder type - ensure kiwi is used
+type: kiwi
+# Add the EB corbos Linux apt repo to provide the boostrap package
+use_ebcl_apt: true
+# Do not use berrymill
+use_berrymill: false
+# Pattern to match the result file
+result_pattern: '*.tar.xz'

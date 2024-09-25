@@ -1,0 +1,11 @@
+NAME = mount
+
+COMMAND = /usr/bin/mount -t tmpfs none /tmp
+          /usr/bin/mount -t tmpfs tmpfs /var/log
+          /usr/bin/mkdir -p /dev/shm
+          /usr/bin/mount -t tmpfs shmfs /dev/shm
+          /usr/bin/mount -t cgroup2 none /sys/fs/cgroup
+
+DEPENDS = ""
+PROVIDES = fstab:wait tmpdir:wait shmfs:wait cgroup2fs:wait
+RESPAWN = NO

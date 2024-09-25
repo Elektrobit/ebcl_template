@@ -1,0 +1,4 @@
+base: ../../boot.yaml
+# Files to copy to the build folder
+files:
+  - lib/modules

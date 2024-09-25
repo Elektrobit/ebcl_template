@@ -1,0 +1,4 @@
+# Config to use as a base
+base: ../root.yaml
+# Overwrite the image builder type - ensure elbe is used
+type: elbe

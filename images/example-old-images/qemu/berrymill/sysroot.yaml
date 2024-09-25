@@ -1,0 +1,6 @@
+base: root.yaml
+# Relative path to the kiwi appliancd
+image: appliance_sysroot.kiwi
+# Result file name pattern
+result_pattern: '*.tar.xz'
+

@@ -1,0 +1,92 @@
+#!/bin/bash
+
+# This script is exectued in the container environment,
+# after the VS Code dev-container build.
+
+echo "Setting EBcL container up..."
+
+# Move SSH keys
+if [ -d "tools/.ssh" ]; then
+    echo "SSH keys found."
+
+    if [ ! -d "~/.ssh" ]; then
+        mkdir -p ~/.ssh
+    fi
+
+    echo "Moving ssh keys to ~/.ssh"
+    rm -rf ~/.ssh/*
+    mv tools/.ssh/* ~/.ssh/
+
+    echo "Deleting copied SSH keys from tools."
+    rm -rf tools/.ssh
+else
+    echo "No SSH keys found."
+fi
+
+# Setup /build folder
+for folder in results/images results/packages results/apps images identity sysroot_x86_64 sysroot_aarch64
+do
+    rm -rf /build/${folder}
+    ln -s /workspace/${folder} /build/${folder}
+done
+
+# source user env, if it exists
+ENV="tools/user_config/.env"
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
+fi
+
+# Run user setup
+if [ -d "/workspace/tools/user_config" ]; then
+    echo "Running user setup..."
+    if [ -f "/workspace/tools/user_config/settings.json" ]; then
+        echo "Overwriting VS Code settings..."
+        rm -f /workspace/.vscode/settings.json
+        cp /workspace/tools/user_config/settings.json /workspace/.vscode/settings.json
+    else
+        echo "No settings.json provided."
+    fi
+else
+    echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
+fi
+
+# Link tools to tools folder
+mkdir -p /workspace/tools
+for tool in embdgen ebcl_build_tools ebcl_vscode_tools
+do
+    if [ ! -L /workspace/tools/${tool} ]; then
+        echo "Symlinking ${tool} as tools/${tool}..."
+        ln -s /build/${tool} /workspace/tools/${tool}
+    fi
+done
+
+# Clone additional images
+if [ ! -z "$IMAGE_REPO" ]; then
+    echo "Cloning additional image repo..."
+    git clone $IMAGE_REPO /workspace/images/extra
+fi
+
+# Clone additional apps
+if [ ! -z "$APP_REPO" ]; then
+    echo "Cloning additional apps repo..."
+    git clone $APP_REPO /workspace/apps/extra
+fi
+
+# Clone user images
+if [ ! -z "$USER_IMAGE_REPO" ]; then
+    echo "Cloning user image repo..."
+    git clone $USER_IMAGE_REPO /workspace/images/user
+fi
+
+# Clone user apps
+if [ ! -z "$USER_APP_REPO" ]; then
+    echo "Cloning user apps repo..."
+    git clone $USER_APP_REPO /workspace/apps/user
+fi
+
+# Generate VS Code build tasks
+generate_build_tasks
+
+# Workaround for robot tests
+echo "/workspace/robot_tests/lib" > /build/venv/lib/python3.10/site-packages/_Fakeroot.pth

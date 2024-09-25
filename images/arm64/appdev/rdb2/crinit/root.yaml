@@ -1,0 +1,29 @@
+base: ../root_common.yaml
+# reset the kernel value
+kernel: null
+packages:
+  - crinit
+  - crinit-ctl
+  # Elos for logging
+  - elos
+  - elos-coredump
+  - elos-plugin-backend-json
+  - elos-plugin-backend-dummy
+  - elos-plugin-scanner-kmsg
+  - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
+  - netifd
+  - udhcpc
+  - ubus
+  - kmod
+  - ntpdate
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: sudo
+# Files to copy form the host environment
+host_files:
+  - source: $$RESULTS$$/modules
+    destination: lib
+  - source: crinit_config/*

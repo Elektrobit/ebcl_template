@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<image schemaversion="6.8" name="Ubuntu-22.04_appliance">
+    <inherit path="appliance.kiwi"/>
+    <add>
+        <packages type="image">
+        </packages>
+    </add>
+</image>

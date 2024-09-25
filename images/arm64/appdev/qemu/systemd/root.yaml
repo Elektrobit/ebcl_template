@@ -1,0 +1,14 @@
+base: ../root_common.yaml
+# Packages to install in the root tarball
+packages:
+  - systemd
+  - systemd-timesyncd
+  - systemd-coredump
+  - udev
+# Systemd configuration
+host_files:
+  - source: config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

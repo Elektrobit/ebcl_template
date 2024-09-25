@@ -1,0 +1,7 @@
+# !LINKSTO ireq.network.manager, 1
+NAME = netifd-network
+
+COMMAND = /usr/sbin/netifd -r /run/resolv.conf.netifd -c /etc/config/network/
+DEPENDS = ubus:spawn
+PROVIDES = network:spawn
+RESPAWN = YES

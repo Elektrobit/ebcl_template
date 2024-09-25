@@ -1,0 +1,14 @@
+base: base.yaml
+# reset the kernel value
+kernel: null
+# Name of the archive.
+name: ubuntu
+# Packages to install in the root tarball
+packages:
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

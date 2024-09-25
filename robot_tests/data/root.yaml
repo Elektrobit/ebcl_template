@@ -1,0 +1,13 @@
+name: ubuntu
+arch: amd64
+packages:
+  - systemd
+  - udev        # udev will create the device node for ttyS0
+  - util-linux
+scripts:
+  - name: root_config_chfake.sh
+    env: chfake
+  - name: root_config_fake.sh
+    env: fake
+  - name: root_config_chroot.sh
+    env: chroot

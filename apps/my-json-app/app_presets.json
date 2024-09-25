@@ -1,0 +1,16 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21
+    },
+    "configurePresets": [
+        {
+            "name": "base-app-env",
+            "hidden": true,
+            "environment": {
+                "APP_NAME": "my-json-app"
+            }
+        }
+    ]
+}

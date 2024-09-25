@@ -1,0 +1,58 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: mbr
+  boot_partition: boot
+
+  parts:
+    - name: u-boot part 1
+      type: raw
+      start: 0
+      size:  256 B
+      content:
+        type:  raw
+        file:  build/fip.s32
+  
+    - name: u-boot part 2
+      type: raw
+      start:  512 B
+      content:
+        type:   raw
+        file:   build/fip.s32
+        offset: 512 B
+
+    - name: uboot.env
+      type:  raw
+      start: 0x280000 B
+      size:  0x2000 B
+      content:
+        type:  uboot_env
+        vars:
+          hwconfig:    "serdes0:mode=pcie,clock=ext;serdes1:mode=xpcs0&xpcs1,clock=ext,fmhz=125;xpcs1_0:speed=1G;xpcs1_1:speed=1G;pcie0:mode=rc;pcie1:mode=rc;"
+          fdt_addr:    "0x83000000"
+          fdt_high:    "0xffffffffffffffff"
+          initrd_high: "0xffffffffffffffff"
+          loadaddr:    "0xa0000000"
+          loadimage:   "mmc dev 0; mmc rescan; fatload mmc 0:1 ${loadaddr} fitimage"
+          bootcmd:     "run loadimage; bootm"
+
+    - name: boot
+      type: partition
+      fstype: fat32
+      content:
+        type: fat32
+        content:
+          type: files
+          files:
+            - build/fitimage
+      size: 100 MB
+
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 4 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/ebcl_rdb2.config.tar

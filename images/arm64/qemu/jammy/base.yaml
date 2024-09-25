@@ -1,0 +1,16 @@
+# Kernel package to use
+kernel: linux-image-generic
+# Apt repositories to use
+apt_repos:
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+# CPU architecture
+arch: arm64

@@ -1,0 +1,8 @@
+# !LINKSTO ireq.config.getty, 1
+NAME = getty-ttyAMA0
+
+COMMAND = /usr/bin/setsid /usr/sbin/getty 115200 ttyAMA0
+
+RESPAWN = YES
+DEPENDS = ""
+RESPAWN_RETRIES = 3

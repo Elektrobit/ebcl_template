@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Debug app from active preset",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:cmake.buildDirectory}/install/${command:cmake.launchTargetPath}",
+            "stopAtEntry": true,
+            "cwd": "${command:cmake.buildDirectory}/install/",
+            "MIMode": "gdb",
+            "preLaunchTask": "Start gdb on target",
+            // We use the pipeTransport to be able to handover the address of the remote target with the .gdbinit file.
+            // We can't use the "miDebuggerServerAddress" setting, as this would require us to use a static target address.
+            // Without the pipeTransport workaround, debugging would only partly (e.g. you would not be able to interrupt a
+            // running application), since VSCode handles remote targets differently.
+            // Using the pipeTransport workaround forces VSCode to treat the gdb session as a remote target without the need
+            // to specify the target address statically via "miDebuggerServerAddress".
+            "pipeTransport": {
+                "pipeCwd": "/usr/bin",
+                "pipeProgram": "/bin/bash",
+                "pipeArgs": ["-c"],
+                "debuggerPath": "/usr/bin/gdb-multiarch"
+            },
+            "postDebugTask": "Stop gdb on target",
+            "additionalSOLibSearchPath": "${command:cmake.buildDirectory}/install/usr/lib",
+            "setupCommands": [
+                {
+                    "description": "Source gdbinit file to determine remote connection",
+                    "text": "source ${command:cmake.buildDirectory}/.gdbinit"
+                },
+                {
+                    "description": "Set executable on target",
+                    "text": "set remote exec-file ${command:cmake.launchTargetPath}",
+                }
+            ]
+        }
+
+    ]
+}

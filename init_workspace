@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# This script is exectued in the host environment,
+# before the VS Code dev-container build.
+
+CONTAINER_TOOL="docker"
+CONTAINER_TAG="testing"
+LOCAL_CONTAINER_TAG="local"
+
+echo "Setting EBcL workspace up..."
+
+# Create tools folder
+mkdir -p tools
+# Create cache folders
+mkdir -p state/cache
+mkdir -p state/apt
+
+source .env
+
+# Copy user config
+if [ -d "${HOME}/.ebcl_config" ]; then
+    echo "Copying user config..."
+    rm -rf tools/user_config
+    mkdir -p tools/user_config
+    cp -R ~/.ebcl_config/* tools/user_config
+    cp -R ~/.ebcl_config/.env tools/user_config
+else
+    echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
+fi
+
+# source user env, if it exists
+ENV="tools/user_config/.env"
+if [ -f "$ENV" ]; then
+    echo "Sourcing '${ENV}'..."    
+    source $ENV
+fi
+
+if [ ${PULL_CONTAINER} -eq 1 ]; then
+    echo "Pulling container..."
+    ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
+
+elif [ $BUILD_CONTAINER -eq 1 ]; then
+    echo "Checking if container exists..."
+    ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
+    if [ $? -ne 0 ]; then
+        CONTAINER_EXISTS=0
+    else
+        CONTAINER_EXISTS=1
+    fi
+
+    if [ $REBUILD_CONTAINER -eq 0 ] && [ $CONTAINER_EXISTS -eq 1 ]; then
+        echo "Container exists, not rebuilding..."
+    else
+        echo "Deleting old container sources..."
+        rm -rf tools/container
+
+        echo "Downloading container sources..."
+        echo "Using container from branch ${CONTAINER_BRANCH}."
+
+        if [ -z "${CONTAINER_BRANCH}" ]; then
+            CONTAINER_BRANCH="main"
+            echo "Using default branch ${CONTAINER_BRANCH}."
+        fi
+
+        if [ -z "${GET_CONTAINER}" ]; then
+            GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
+        fi
+
+        $GET_CONTAINER 
+
+        python3 -m venv tools/.venv
+        source tools/.venv/bin/activate
+        pip install -r tools/container/requirements.txt
+
+        if [ -z "${CONTAINER_CONF}" ]; then
+            CONTAINER_CONF="build_config.yaml"
+        fi
+
+        if [ -z "${CONTAINER_BUILD_PATH}" ]; then
+            CONTAINER_BUILD_PATH="tools/container"
+        fi
+
+        echo "Building container..."
+        pushd .
+        cd ${CONTAINER_BUILD_PATH}
+        python3 build_container.py -c ${CONTAINER_CONF}
+        popd
+    fi
+
+else
+    echo "Expecting container to exist..."
+fi
+
+echo "Tagging linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG} as linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}..."
+
+${CONTAINER_TOOL} tag "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" "linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}"
+
+# check if container exists
+echo "Checking if container exists..."
+${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
+if [ $? -ne 0 ]; then
+    echo "Container not found."
+    exit 1
+fi
+
+
+# Copy SSH keys
+if [ ${COPY_SSH} -eq 1 ]; then
+    echo "Copying SSH keys from host..."
+    if [ -d ${HOME}/.ssh ]; then
+        echo "Copying SSH folder to tools..."
+        rm -rf tools/.ssh
+        cp -R ${HOME}/.ssh tools/
+        echo "Copied keys:"
+        ls -lah tools/.ssh/*
+    else
+        echo "No .ssh folder found!"
+    fi
+else
+    echo "Not copying SSH keys from host."
+fi

@@ -1,0 +1,28 @@
+if [ "$TARGET" == "qemu-x86_64" ] ; then
+    TARGET_IP=localhost
+    SSH_PORT=2222
+    SSH_USER=root
+    SSH_PREFIX="sshpass -p linux"
+    GDB_PORT=3333
+elif [ "$TARGET" == "qemu-aarch64" ] ; then
+    TARGET_IP=localhost
+    SSH_PORT=2222
+    SSH_USER=root
+    SSH_PREFIX="sshpass -p linux"
+    GDB_PORT=3333
+elif [ "$TARGET" == "rdb2" ] ; then
+    TARGET_IP=[fd00::eb:2]
+    SSH_PORT=22
+    SSH_USER=root
+    SSH_PREFIX="sshpass -p linux"
+    GDB_PORT=3333
+elif [ "$TARGET" == "raspberry-pi" ] ; then
+    TARGET_IP=[fd00::eb:2]
+    SSH_PORT=22
+    SSH_USER=root
+    SSH_PREFIX="sshpass -p linux"
+    GDB_PORT=3333
+else
+    echo "Target \"$TARGET\" not supported!"
+    exit -1
+fi

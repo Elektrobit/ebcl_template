@@ -1,0 +1,28 @@
+[book]
+authors = ["Elektrobit Automotive GmbH"]
+description = "EB corbos Linux container and VS Code workspace."
+language = "en"
+multilingual = false
+src = "docs"
+title = "EB corbos Linux SDK"
+
+[build]
+create-missing = true
+
+[preprocessor.image-size]
+command = "mdbook-image-size"
+
+[output.html]
+additional-css = ["docs/custom.css"]
+curly-quotes = true
+mathjax-support = false
+copy-fonts = true
+git-repository-url = "https://github.com/Elektrobit/ebcl_template/"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/Elektrobit/ebcl_template/edit/main/{path}"
+input-404 = "not-found.md"
+
+[output.html.print]
+enable = true
+page-break = true
+

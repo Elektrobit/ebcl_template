@@ -1,0 +1,31 @@
+base: ../root_common.yaml
+# Additional packages for the crinit variant
+packages:
+  # Init manager
+  - crinit
+  - crinit-ctl
+  # Elos for logging
+  - elos
+  - elos-coredump
+  - elos-plugin-backend-json
+  - elos-plugin-backend-dummy
+  - elos-plugin-scanner-kmsg
+  - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
+  # Network manager
+  - netifd
+  - udhcpc
+  - netbase
+  # NTP time client
+  - ntpdate
+# Crinit configuration, including sbin/init
+host_files:
+  - source: config/*
+# Add libjson package for app development example
+sysroot_packages:
+  - libjsoncpp-dev
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

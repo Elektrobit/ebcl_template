@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "apps/my-json-app"
+		},
+		{
+			"path": "apps/meminfo-reader"
+		},
+		{
+			"path": "apps/common"
+		}
+	],
+	"settings": {
+		"git.ignoreLimitWarning": true
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": []
+	}
+}

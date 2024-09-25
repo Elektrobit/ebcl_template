@@ -1,0 +1,13 @@
+# Kernel package to use
+kernel: linux-generic
+use_ebcl_apt: true
+# Additional apt repos
+apt_repos:
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+# CPU architecture
+arch: arm64

@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# This script is exectued in the container environment,
+# when the container is entered.
+
+echo "Prepare EBcL container..."
+
+# Move SSH keys
+if [ -d "tools/.ssh" ]; then
+    echo "SSH keys found."
+
+    if [ ! -d "~/.ssh" ]; then
+        mkdir -p ~/.ssh
+    fi
+
+    echo "Moving ssh keys to ~/.ssh"
+    rm -rf ~/.ssh/*
+    mv tools/.ssh/* ~/.ssh/
+
+    echo "Deleting copied SSH keys from tools."
+    rm -rf tools/.ssh
+else
+    echo "No SSH keys found."
+fi
+
+# Run user setup
+if [ -d "/workspace/tools/user_config" ]; then
+    echo "Running user setup..."
+    if [ -x "/workspace/tools/user_config/setup_vscode" ]; then
+        echo "Running setup code script..."
+        /workspace/tools/user_config/setup_vscode
+    else
+        echo "No setup_vscode provided."
+    fi
+else
+    echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
+fi

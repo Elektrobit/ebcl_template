@@ -1,0 +1,91 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23
+    },
+    "include": [
+        "./app_presets.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "inherits": "base-app-env",
+            "generator": "Unix Makefiles",
+            "environment": {
+                "BUILDDIR": "/build/results/apps/$env{APP_NAME}/${presetName}/build",
+                "DESTDIR": "$env{BUILDDIR}/install"
+            },
+            "binaryDir": "$env{BUILDDIR}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": {
+                    "type": "BOOL",
+                    "value": "TRUE"
+                },
+                "CMAKE_BUILD_TYPE": {
+                    "type": "STRING",
+                    "value": "Debug"
+                }
+            }
+        },
+        {
+            "name": "ebcl-x86_64",
+            "hidden": true,
+            "inherits": "base",
+            "toolchainFile": "/build/cmake/toolchain-x86_64.cmake"
+        },
+        {
+            "name": "ebcl-aarch64",
+            "hidden": true,
+            "inherits": "base",
+            "toolchainFile": "/build/cmake/toolchain-aarch64.cmake"
+        },
+        {
+            "name": "qemu-x86_64",
+            "inherits": "ebcl-x86_64"
+        },
+        {
+            "name": "qemu-aarch64",
+            "inherits": "ebcl-aarch64"
+        },
+        {
+            "name": "rdb2",
+            "inherits": "ebcl-aarch64"
+        },
+        {
+            "name": "raspberry-pi",
+            "inherits": "ebcl-aarch64"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "jobs": 8,
+            "targets" : [
+                "install"
+            ]
+        },
+        {
+            "name": "qemu-x86_64",
+            "configurePreset": "qemu-x86_64",
+            "inherits": "base"
+        },
+        {
+            "name": "qemu-aarch64",
+            "configurePreset": "qemu-aarch64",
+            "inherits": "base"
+        },
+        {
+            "name": "rdb2",
+            "configurePreset": "rdb2",
+            "inherits": "base"
+        },
+        {
+            "name": "raspberry-pi",
+            "configurePreset": "raspberry-pi",
+            "inherits": "base"
+        }
+    ]
+}

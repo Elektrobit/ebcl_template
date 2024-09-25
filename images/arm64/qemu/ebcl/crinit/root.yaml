@@ -1,0 +1,16 @@
+base: ../base.yaml
+# reset the kernel value
+kernel: null
+# Name of the archive.
+name: ebcl
+# Packages to install in the root tarball
+packages:
+  - crinit
+  - crinit-ctl
+# Crinit configuration, including sbin/init
+host_files:
+  - source: crinit_config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment
