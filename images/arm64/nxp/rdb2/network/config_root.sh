@@ -7,7 +7,7 @@ chmod +x ./sbin/*
 echo "04711" > ./etc/machine-id
 
 # Create a hostname file
-echo "ebcl-rdb2-network" > ./etc/hostname
+echo "ebclrdb2network" > ./etc/hostname
 
 # Create /etc/hosts
 cat > ./etc/hosts <<- EOF
