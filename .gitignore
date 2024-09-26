@@ -1,3 +1,6 @@
+*.raw
+*.raw.xz
+
 sysroot*/**/*
 !sysroot_x86_64/.gitkeep
 !sysroot_aarch64/.gitkeep
