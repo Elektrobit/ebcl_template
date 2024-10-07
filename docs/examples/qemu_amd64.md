@@ -126,7 +126,7 @@ result_pattern: '*.tar.xz'
 This _root.yaml_ inherits the _root.yaml_ from the partent folder, described above, and adds the EBcL apt repository, which provides the required kiwi-ng bootstrap package, set the build type to “kiwi” and updates the build result search pattern to “*.tar.xz”, since there is no way to disable the result compression with _kiwi-ng_.
 
 ```make
-# Makefile for ammy QEMU amd64 image using kiwi
+# Makefile for Jammy QEMU amd64 image using kiwi
 
 # Arch for sysroot extraction
 arch = x86_64
