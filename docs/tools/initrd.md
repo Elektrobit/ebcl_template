@@ -20,7 +20,7 @@ The internal steps are:
  5. Creates device nodes for initrd image based on the configuration.
  6. Copy all specified files and directories into the initrd image
  7. Generate the init script
- 8. Generate initrd based on all the files with `cpio`
+ 8. Generate initrd based on all the files using `cpio`
 
 ## Configuration options
 
