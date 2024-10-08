@@ -26,7 +26,7 @@ The internal steps are:
 
 **--no-config, -n**: Skip the root filesystem configuration step
 
-**--sysroot, -s**: Build a sysroot insteas of a normal root tarball
+**--sysroot, -s**: Build a sysroot inside of a normal root tarball
 
 ### Yaml file
 

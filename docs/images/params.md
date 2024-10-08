@@ -1,7 +1,7 @@
 # Configruation parameters
 
 The following list gives an overview of the supported configuration parameters for the EB corbos Linux build helper tools.
-In the round brackets it is noted for whcih files which option is applicable.
+In the round brackets it is noted for which files which option is applicable.
 Embdgen is developed separately, and the details and options for the storage specification is documented in the [embdgen documentation](https://elektrobit.github.io/embdgen/index.html).
 
 - **base** _(boot/initrd/root/config)_  \[default: None \]: Parent configuration file.
@@ -28,7 +28,7 @@ apt_repos:
       - main
       - universe
 ```
-In addition, an armored public key file or URL can be given as “key”, and a dearmored gpg file can be given as “gpg”, to authenticate the package sources.
+In addition, an armored public key file or URL can be given as “key”, and a unarmored gpg file can be given as “gpg”, to authenticate the package sources.
 
 - **use_ebcl_apt** _(boot/initrd/root)_  \[default: No \]: If yes, the public apt repository of the EB corbos Linux will be added.
 By default, the latest release will be used if the _ebcl_version_ parameter is not given.

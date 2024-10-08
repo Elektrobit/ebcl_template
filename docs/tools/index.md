@@ -5,5 +5,5 @@ An explanation of the flow is already given in the Section "Building an image fr
 
 ![BuildTools](../assets/S32G2_fulltools.png)
 
-The idea behin the set of build tools in this SDK folllows the UNIX philosophy to make each program do one and only one thing well and  by adding new features through connecting the output from one programm to another programm that again does one job well.
+The idea behind the set of build tools in this SDK follows the UNIX philosophy to make each program do one and only one thing well and  by adding new features through connecting the output from one program to another program that again does one job well.
 This modular approach offers high flexibility and is easy to maintain.
