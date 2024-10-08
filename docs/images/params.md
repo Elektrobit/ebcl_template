@@ -86,7 +86,7 @@ a meta-package for the kernel binary and modules.
 
 - **packages** _(boot/initrd/root/config)_  \[default: None \]: A list of packages.
 For the _root generator_, these packages are installed in the base _deboostrap_ environment.
-For the _initrd generator_, these packages will be downloaded and extracted to the resuling _initrd.img_.
+For the _initrd generator_, these packages will be downloaded, extracted and integrated into the resutling _initrd.img_.
 For the _boot generator_, these packages will be downloaded and extracted to get the kernel binary.
  
 - **kernel** _(boot/initrd/root)_  \[default: None \]: Name of the kernel package.
