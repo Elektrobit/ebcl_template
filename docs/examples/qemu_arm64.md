@@ -35,7 +35,7 @@ The Canonical Ubuntu apt repositories are used to build the examples.
 
 Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further shared yaml files for the arm64 Jammy images with berrymill and elbe are identical to the amd64 QEMU jammy images, and hence documented already in the previous section.
 
-## The arm4 Jammy images
+## The arm64 Jammy images
 
 At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _elbe_ and _kiwi-ng_. The default is _elbe_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
 Note that _kiwi-ng_ is wrapped by _berrymill_ to provide additional features like derived images.

@@ -6,7 +6,7 @@ An initrd can be generated with the initrd generator.
 
 ## Description
 
-Creates a custom inittial RAM disk (initrd) based on busybox using YAML configuration file.
+Creates a custom initial RAM disk (initrd) based on busybox using YAML configuration file.
 The synopsis is `boot_generator <boot>.yaml <output_path>`
 
 ![BuildTools](../assets/boot_config.drawio.png)
@@ -19,7 +19,7 @@ The internal steps are:
     1. Extract debian packages into the folder
     2. Copy all specified (host)files and directories into the folder
     3. Run config scripts in the folder
- 4. Generate boottarball from the temporary folder, if configured
+ 4. Generate boot tarball from the temporary folder, if configured
 
 ## Configuration options
 

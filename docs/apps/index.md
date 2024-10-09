@@ -91,4 +91,4 @@ Before Visual Studio Code starts the gdb and after debugging, the following task
 
 |Pre debug|Post debug|
 |---------|----------|
-|<ul><li>Build and check target connection</li><ul><li>Trigger incremental application build</li><li>Perform ssh connection test and update ssh keys, if needed</li></ul><li>Build and check target connection</li><li>Update application deployment</li><li>Prepare application specific gdbinit file</li><li>Start gdbserver on remote target/li></ul>|<ul><li>Stop gdbserver on remote target</li></ul>|
+|<ul><li>Build and check target connection</li><ul><li>Trigger incremental application build</li><li>Perform ssh connection test and update ssh keys, if needed</li></ul><li>Build and check target connection</li><li>Update application deployment</li><li>Prepare application specific gdbinit file</li><li>Start gdbserver on remote target</li></ul>|<ul><li>Stop gdbserver on remote target</li></ul>|
