@@ -37,7 +37,7 @@ if [ -f "$ENV" ]; then
 fi
 
 # Test if docker image is available
-if [ -z "$(docker images -q "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" ]; then
+if [ -z "$(docker images -q "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}")" ]; then
     if [ -z "${EBCL_CONTAINER_URL}" ]; then
         echo "No container download url found! Please ensure the dev container image is available."
         exit 1
