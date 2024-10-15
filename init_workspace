@@ -4,13 +4,14 @@
 # before the VS Code dev-container build.
 
 CONTAINER_TOOL="docker"
-CONTAINER_TAG="testing"
-LOCAL_CONTAINER_TAG="local"
+CONTAINER_TAG=$(cat .devcontainer/devcontainer.json | grep "linux.elektrobit.com" | awk -F ":" '{print $3}' | awk -F "\"" '{print $1}')
 
 echo "Setting EBcL workspace up..."
+echo "Using EBcL container ${CONTAINER_TAG}."
 
 # Create tools folder
 mkdir -p tools
+
 # Create cache folders
 mkdir -p state/cache
 mkdir -p state/apt
@@ -35,74 +36,18 @@ if [ -f "$ENV" ]; then
     source $ENV
 fi
 
-if [ ${PULL_CONTAINER} -eq 1 ]; then
-    echo "Pulling container..."
-    ${CONTAINER_TOOL} pull "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
-
-elif [ $BUILD_CONTAINER -eq 1 ]; then
-    echo "Checking if container exists..."
-    ${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
-    if [ $? -ne 0 ]; then
-        CONTAINER_EXISTS=0
+# Test if docker image is available
+if [ -z "$(docker images -q "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" ]; then
+    if [ -z "${EBCL_CONTAINER_URL}" ]; then
+        echo "No container download url found! Please ensure the dev container image is available."
+        exit 1
     else
-        CONTAINER_EXISTS=1
+        # Download and import the image
+        docker import "${EBCL_CONTAINER_URL}/ebcl_dev_container_${CONTAINER_TAG}.tar.xz" "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
     fi
-
-    if [ $REBUILD_CONTAINER -eq 0 ] && [ $CONTAINER_EXISTS -eq 1 ]; then
-        echo "Container exists, not rebuilding..."
-    else
-        echo "Deleting old container sources..."
-        rm -rf tools/container
-
-        echo "Downloading container sources..."
-        echo "Using container from branch ${CONTAINER_BRANCH}."
-
-        if [ -z "${CONTAINER_BRANCH}" ]; then
-            CONTAINER_BRANCH="main"
-            echo "Using default branch ${CONTAINER_BRANCH}."
-        fi
-
-        if [ -z "${GET_CONTAINER}" ]; then
-            GET_CONTAINER="git clone --branch ${CONTAINER_BRANCH} https://github.com/Elektrobit/ebcl_dev_container.git ./tools/container"
-        fi
-
-        $GET_CONTAINER 
-
-        python3 -m venv tools/.venv
-        source tools/.venv/bin/activate
-        pip install -r tools/container/requirements.txt
-
-        if [ -z "${CONTAINER_CONF}" ]; then
-            CONTAINER_CONF="build_config.yaml"
-        fi
-
-        if [ -z "${CONTAINER_BUILD_PATH}" ]; then
-            CONTAINER_BUILD_PATH="tools/container"
-        fi
-
-        echo "Building container..."
-        pushd .
-        cd ${CONTAINER_BUILD_PATH}
-        python3 build_container.py -c ${CONTAINER_CONF}
-        popd
-    fi
-
 else
-    echo "Expecting container to exist..."
+    echo "Dev container image "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" is available."
 fi
-
-echo "Tagging linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG} as linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}..."
-
-${CONTAINER_TOOL} tag "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" "linux.elektrobit.com/ebcl/sdk:${LOCAL_CONTAINER_TAG}"
-
-# check if container exists
-echo "Checking if container exists..."
-${CONTAINER_TOOL} image ls | grep "linux.elektrobit.com/ebcl/sdk " | grep "${LOCAL_CONTAINER_TAG}"
-if [ $? -ne 0 ]; then
-    echo "Container not found."
-    exit 1
-fi
-
 
 # Copy SSH keys
 if [ ${COPY_SSH} -eq 1 ]; then
