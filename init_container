@@ -3,7 +3,9 @@
 # This script is exectued in the container environment,
 # after the VS Code dev-container build.
 
+echo "EBcL template ${WS_VERSION}"
 echo "Setting EBcL container up..."
+
 
 # Move SSH keys
 if [ -d "tools/.ssh" ]; then
@@ -24,6 +26,7 @@ else
 fi
 
 # Setup /build folder
+echo "Linking workspace to build folder..."
 for folder in results/images results/packages results/apps images identity sysroot_x86_64 sysroot_aarch64
 do
     rm -rf /build/${folder}
@@ -44,8 +47,6 @@ if [ -d "/workspace/tools/user_config" ]; then
         echo "Overwriting VS Code settings..."
         rm -f /workspace/.vscode/settings.json
         cp /workspace/tools/user_config/settings.json /workspace/.vscode/settings.json
-    else
-        echo "No settings.json provided."
     fi
 else
     echo "No user config found. You can provide your own init scripts in ~/.ebcl_config"
