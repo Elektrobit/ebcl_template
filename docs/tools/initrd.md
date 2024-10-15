@@ -15,11 +15,12 @@ The internal steps are:
 
  1. Read in YAML configuration file
  2. Add BusyBox binary
- 3. Add kernel modules, extracts the specified modules
- 4. Creates device nodes for initrd image based on the configuration.
- 5. Copy all specified files and directories into the initrd image
- 6. Generates init script
- 7. Generate initrd based on all the files with `cpio`
+ 3. Download and extract additional packages
+ 4. Add kernel modules, extracts the specified modules
+ 5. Creates device nodes for initrd image based on the configuration.
+ 6. Copy all specified files and directories into the initrd image
+ 7. Generate the init script
+ 8. Generate initrd based on all the files using `cpio`
 
 ## Configuration options
 
@@ -52,5 +53,9 @@ devices:
     type: <block|char>
     major: <major_number>
     minor: <minor_number>
+  - ...
+# Packages to add, e.g. e2fstools
+packages:
+  - <package name>
   - ...
 ```
