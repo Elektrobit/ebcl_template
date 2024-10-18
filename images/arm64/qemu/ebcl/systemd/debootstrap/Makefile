@@ -1,7 +1,7 @@
-# Makefile for Jammy QEMU amd64 image using elbe
+# Makefile for Jammy QEMU amd64 image using debootstrap
 
 # Arch for sysroot extraction
-arch = x86_64
+arch = aarch64
 
 #---------------------
 # Image specifications
@@ -27,24 +27,33 @@ config_root = ../config_root.sh
 # Generated artifacts
 #--------------------
 
+# Disc image
+disc_image = $(result_folder)/image.raw
+
 # Base root tarball
-base_tarball = build/ebcl.tar
+base_tarball = $(result_folder)/ebcl.tar
 
 # Configured root tarball
-root_tarball = build/ebcl.config.tar
+root_tarball = $(result_folder)/ebcl.config.tar
+
+# Generated initrd.img
+initrd_img = $(result_folder)/initrd.img
+
+# Kernel image
+kernel = $(result_folder)/vmlinuz
 
 # Sysroot tarball
-sysroot_tarball = build/ebcl_sysroot.tar
+sysroot_tarball = $(result_folder)/ebcl_sysroot.tar
 
 #-------------------
 # Run the QEMU image
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline_append = "rw"
+kernel_cmdline_append = rw
 
 # for building
 include ../../../../../qemu.mk
 
 # for running QEMU
-include ../../../../../qemu_x86_64.mk
+include ../../../../../qemu_aarch64.mk
