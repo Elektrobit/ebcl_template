@@ -13,11 +13,7 @@ Build Image amd64/qemu/jammy/berrymill
     Test Systemd Image    amd64/qemu/jammy/berrymill
 
 Build Image amd64/qemu/jammy/debootstrap
-    [Tags]    amd64    qemu    berrymill    kiwi    jammy    systemd
-    Test Systemd Image    amd64/qemu/jammy/debootstrap
-
-Build Image amd64/qemu/jammy/debootstrap
-    [Tags]    amd64    qemu    debootstrap    jammy
+    [Tags]    amd64    qemu    debootstrap    jammy    systemd
     Test Systemd Image    amd64/qemu/jammy/debootstrap
 
 Build Image amd64/qemu/jammy/kiwi
