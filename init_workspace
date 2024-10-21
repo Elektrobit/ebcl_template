@@ -55,7 +55,8 @@ if [ ${COPY_SSH} -eq 1 ]; then
     if [ -d ${HOME}/.ssh ]; then
         echo "Copying SSH folder to tools..."
         rm -rf tools/.ssh
-        cp -R ${HOME}/.ssh tools/
+        mkdir -p tools/.ssh
+        cp -R ${HOME}/.ssh/* tools/.ssh/
         echo "Copied keys:"
         ls -lah tools/.ssh/*
     else
