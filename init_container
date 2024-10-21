@@ -30,7 +30,7 @@ echo "Linking workspace to build folder..."
 for folder in results/images results/packages results/apps images identity sysroot_x86_64 sysroot_aarch64
 do
     sudo rm -rf /build/${folder}
-    ln -s /workspace/${folder} /build/${folder}
+    sudo ln -s /workspace/${folder} /build/${folder}
 done
 
 # source user env, if it exists
