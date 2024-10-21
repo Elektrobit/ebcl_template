@@ -1,7 +1,13 @@
-# Makefile for Jammy QEMU amd64 image using kiwi
+# Makefile for Jammy QEMU amd64 image using debootstrap
 
 # Arch for sysroot extraction
 arch = x86_64
+
+#--------------
+# Result folder
+#--------------
+
+result_folder = ./build
 
 #---------------------
 # Image specifications
@@ -31,7 +37,7 @@ config_root = ../config_root.sh
 disc_image = $(result_folder)/image.raw
 
 # Base root tarball
-base_tarball = $(result_folder)/ubuntu.tar.xz
+base_tarball = $(result_folder)/ubuntu.tar
 
 # Configured root tarball
 root_tarball = $(result_folder)/ubuntu.config.tar
@@ -51,6 +57,10 @@ sysroot_tarball = $(result_folder)/ubuntu_sysroot.tar
 
 # QEMU kernel commandline
 kernel_cmdline_append = "rw"
+
+#-----------------------
+# Include base makefiles
+#-----------------------
 
 # for building
 include ../../../../qemu.mk

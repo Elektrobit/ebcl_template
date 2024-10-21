@@ -423,7 +423,7 @@ A minimal root filesystem making use of the _systemd_ init manager can be specif
 ```yaml
 base: base.yaml
 name: ebcl_rdb2
-type: elbe
+type: debootstrap
 packages:
   - systemd
   - udev

@@ -1,4 +1,4 @@
-# Makefile for Jammy QEMU amd64 image using elbe
+# Makefile for Jammy QEMU amd64 image using debootstrap
 
 # Arch for sysroot extraction
 arch = aarch64
