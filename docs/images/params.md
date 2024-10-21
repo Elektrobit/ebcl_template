@@ -74,7 +74,7 @@ In addition, parameters which are forwarded to the script can be provided as “
 
 - **template** _(initrd/root)_  \[default: None \]: A Jinja2 template to create a configuration.
 In case of the _initrd generator_, a template for the init script can be provided.
-In case of the _root generator_, a template for the elbe XML image specification, or the kiwi-ng XML image specification can be provided.
+In case of the _root generator_, a template for the kiwi-ng XML image specification can be provided.
 
 - **name** _(boot/initrd/root)_  \[default: None \]: A name which is used in the filenames of the generated artifacts.
 
@@ -144,7 +144,7 @@ The string “$$RESULTS$$” will be replaced with the path to the output folder
 - **result_pattern** _(root)_  \[default: auto detected \]: A name pattern to match the build result, e.g.
 *.tar.xz for kiwi-ng tbz builds.
 
-- **image** _(boot/initrd/root/config)_  \[default: None \]: A kiwi-ng or elbe XML image description.
+- **image** _(boot/initrd/root/config)_  \[default: None \]: A kiwi-ng XML image description.
 This parameter can be used to integrate old image descriptions into new build flows.
 
 - **berrymill_conf** _(root)_  \[default: None \]: A _berrymill.conf_ used for _berrymill_ build.
@@ -172,10 +172,10 @@ If this flag is set to True, one of the specified repositories needs to provide 
 
 - **image_version** _(root)_  \[default: 1.0.0 \]: Image version for the generated kiwi-ng image descrption.
 
-- **type** _(root)_  \[default: elbe \]: Type of the root filesystem generator to use.
-The supported generators are “elbe” and “kiwi”.
+- **type** _(root)_  \[default: debootstrap \]: Type of the root filesystem generator to use.
+The supported generators are "debootstrap" and "kiwi".
 
-- **primary_repo** _(root)_  \[default: auto selected Ubuntu Jammy repository \]: The primary apt repository for the elbe or kiwi-ng build.
+- **primary_repo** _(root)_  \[default: auto selected Ubuntu Jammy repository \]: The primary apt repository for the debootstrap or kiwi-ng build.
 The main component of this repository is used for _debootrap_.
 
 - **primary_distro** _(root)_  \[default: jammy \]: The name of the distribution used for _debootrap_.
@@ -188,9 +188,6 @@ The main component of this repository is used for _debootrap_.
 
 - **console** _(root)_  \[default: auto configured \]: The console parameter of the generated root filesystem.
 If none is given, “ttyS0,115200” is used for amd64, and “ttyAMA0,115200” is used for amd64.
-
-- **packer** _(boot/initrd/root/config)_  \[default: none \]: The packer used to compress the result of the elbe build.
-By default, the result is not compressed.
 
 - **sysroot_packages** _(boot/initrd/root/config)_  \[default: None \]: List of additional packages which shall be installed for sysroot builds.
 This can be used to add additional development headers.

@@ -33,13 +33,13 @@ arch: 'arm64'
 All examples make use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package.
 The Canonical Ubuntu apt repositories are used to build the examples.
 
-Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further shared yaml files for the arm64 Jammy images with berrymill and elbe are identical to the amd64 QEMU jammy images, and hence documented already in the previous section.
+Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further shared yaml files for the arm64 Jammy images with berrymill and debootstrap are identical to the amd64 QEMU jammy images, and hence documented already in the previous section.
 
 ## The arm64 Jammy images
 
-At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _elbe_ and _kiwi-ng_. The default is _elbe_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
+At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _debootstrap_ and _kiwi-ng_. The default is _debootstrap_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
 Note that _kiwi-ng_ is wrapped by _berrymill_ to provide additional features like derived images.
-Future EBcL major release lines may drop both and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own elbe or kiwi-ng XML image description.
+Future EBcL major release lines may drop _kiwi-ng_ and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own kiwi-ng XML image description.
 
 The _arm64/qemu/jammy/berrymill_ image makes use of the above mentioned configurations, and extends it with an own _root.yaml_ and a specific _Makefile_.
 
@@ -136,7 +136,7 @@ The differences for aarch64 are the adaption of the architecture in _base.yaml_ 
 The following images are supported:
 
 - aarch64 EB corbos Linux systemd berrymill
-- aarch64 EB corbos Linux systemd elbe image
+- aarch64 EB corbos Linux systemd debootstrap image
 - aarch64 EB corbos Linux crinit images 
 - aarch64 EB corbos Linux crinit berrymill image
 

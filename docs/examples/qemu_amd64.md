@@ -107,8 +107,8 @@ All examples use “ubuntu” as name, by default have a minimal root filesystem
 
 ### The amd64 Jammy berrymill image
 
-At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _elbe_ and _kiwi-ng_. The default is _elbe_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
-Future EBcL major release lines may drop both and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own elbe or kiwi-ng XML image description.
+At the moment, the EBcL SDK makes use of two more generic Linux root filesystem builders, _debootstrap_ and _kiwi-ng_. The default is _debootstrap_, because it provides a much better build speed, but also the previously used _kiwi-ng_ is still supported.
+Future EBcL major release lines may drop _kiwi-ng_ and come with a more embedded optimized solution, so ideally you make use of the _root.yaml_ instead of using an own kiwi-ng XML image description.
 
 The _amd64/qemu/jammy/berrymill_ image makes use of the above mentioned configurations, and extends it with an own _root.yaml_ and a specific _Makefile_.
 
@@ -233,16 +233,16 @@ scripts:
 
 The _root.yaml_ configures the Ubuntu Jammy apt repository as the single apt repository to use, and sets the “use_bootstrap_package” to false, which will result in a kiwi-ng build not relying on the EBcL bootstrap package.
 
-### The amd64 Jammy elbe image
+### The amd64 Jammy debootstrap image
 
-The _images/amd64/qemu/jammy/elbe_ image makes use of the _elbe_ root filesystem builder.
-The only difference to the shared configuration is that _elbe_ is explicitly selected.
+The _images/amd64/qemu/jammy/debootstrap_ image makes use of the _debootstrap_ root filesystem builder.
+The only difference to the shared configuration is that _debootstrap_ is explicitly selected.
 
 ```yaml
 # Config to use as a base
 base: ../root.yaml
-# Overwrite the image builder type - ensure elbe is used
-type: elbe
+# Overwrite the image builder type - ensure debootstrap is used
+type: debootstrap
 ```
 The _Makefile_ is similar to the one above.
 
@@ -376,9 +376,9 @@ EBcL supports the _systemd_ init-manager and if startup time and the resource fo
 The _amd64/qemu/ebcl/systemd/berrymill_ defines a QEMU image using _berrymill_ and _kiwi-ng_ for building the root filesystem.
 This root filesystem is a very minimal one, only providing _systemd_, _udev_ and the default command line tools.
 
-#### The amd64 EB corbos Linux systemd elbe image
+#### The amd64 EB corbos Linux systemd debootstrap image
 
-The _amd64/qemu/ebcl/systemd/berrymill_ defines a QEMU image using _elbe_ for building the root filesystem.
+The _amd64/qemu/ebcl/systemd/debootstrap_ defines a QEMU image using _debootstrap_ for building the root filesystem.
 This root filesystem is a very minimal one, only providing _systemd_, _udev_ and the default command line tools.
 
 ### The amd64 EB corbos Linux crinit images 
@@ -403,9 +403,9 @@ The task _/etc/crinit/crinit.d/mount.crinit_ takes care of mounting the addition
 The _amd64/qemu/ebcl/crinit/berrymill_ defines a QEMU image using _berrymill_ and _kiwi-ng_ for building the root filesystem.
 This root filesystem is a very minimal one, only providing _crinit_.
 
-#### The amd64 EB corbos Linux crinit elbe image
+#### The amd64 EB corbos Linux crinit debootstrap image
 
-The _amd64/qemu/ebcl/crinit/elbe_ defines a QEMU image using _elbe_ for building the root filesystem.
+The _amd64/qemu/ebcl/crinit/debootstrap_ defines a QEMU image using _debootstrap_ for building the root filesystem.
 This root filesystem is a very minimal one, only providing _crinit_.
 
 ### The amd64 EB corbos Linux server images

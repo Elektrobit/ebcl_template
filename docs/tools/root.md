@@ -16,7 +16,7 @@ The internal steps are:
 
  1. Read in YAML configuration file
  2. If sysroot is configured add generic sysroot packages like g++
- 3. Depending on the configuration build the image with kiwi or elbe
+ 3. Depending on the configuration build the image with kiwi or debootstrap
  4. If configuration is not skipped run config.sh script if present
  5. Copy image tar to output folder
 
