@@ -90,5 +90,5 @@ fi
 generate_build_tasks
 
 # Workaround for robot tests
-sudo mkdir -p /build/venv/lib/python3.10/site-packages/
-sudo echo "/workspace/robot_tests/lib" > /build/venv/lib/python3.10/site-packages/_Fakeroot.pth
+sudo bash -c 'echo "/workspace/robot_tests/lib" > /build/venv/lib/python3.10/site-packages/_Fakeroot.pth'
+
