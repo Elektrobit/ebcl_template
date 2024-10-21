@@ -7,6 +7,9 @@ project(MeminfoReader)
 # Set the C standard to C99 (you can change this to C11 or another version if needed)
 set(CMAKE_C_STANDARD 99)
 
+# Include GNUInstallDirs to determine the correct values for CMAKE_INSTALL_*
+include(GNUInstallDirs)
+
 # Add the executable target
 add_executable(meminfo-reader meminfo_reader.c)
 
