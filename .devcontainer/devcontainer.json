@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
 	"name": "EB corbos Linux SDK 1.3",
-	"image": "linux.elektrobit.com/ebcl/sdk:v1.3.8",
+	"image": "linux.elektrobit.com/ebcl/sdk:v1.3.9",
 	// This script will get the container and tag it with the local container tag. 
 	"initializeCommand": "${PWD}/init_workspace",
 	"postCreateCommand": "${PWD}/init_container",
