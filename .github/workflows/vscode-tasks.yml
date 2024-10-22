@@ -1,0 +1,26 @@
+name: Run tasks.json tasks to build selected images
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  task-qemu-images:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Fetch and import docker image
+      run: ./init_workspace
+
+    - name: Run make ci-build in dev container
+      uses: devcontainers/ci@v0.3
+      with:
+        noCache: true
+        runCmd: | 
+          sudo pip install vscode-task-runner==1.3.3
+          vtr "EBcL: Image amd64/qemu/jammy/debootstrap"
+    
