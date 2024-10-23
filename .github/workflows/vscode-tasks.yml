@@ -1,4 +1,4 @@
-name: Test selected .vscode/tasks.json
+name: Test .vscode
 
 on:
   push:
@@ -36,13 +36,11 @@ jobs:
           - "EBcL: Image amd64/appdev/qemu/crinit"
           - "EBcL: Image amd64/qemu/ebcl/crinit/berrymill"
           - "EBcL: Image amd64/qemu/ebcl/crinit/debootstrap"
-          - "EBcL: Image arm64/appdev/pi4/crinit"
           - "EBcL: Image arm64/appdev/qemu/crinit"
           - "EBcL: Image arm64/appdev/rdb2/crinit"
           - "EBcL: Image arm64/nxp/rdb2/crinit"
           - "EBcL: Image arm64/qemu/ebcl/crinit/berrymill"
           - "EBcL: Image arm64/qemu/ebcl/crinit/debootstrap"
-          - "EBcL: Image arm64/raspberry/pi4/crinit"
     steps:
       - uses: actions/checkout@v4
       - run: |
