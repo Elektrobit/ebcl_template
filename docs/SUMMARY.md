@@ -24,3 +24,4 @@
     - [Root configurator](tools/root_config.md)
     - [Boot generator](tools/boot.md)
     - [Embdgen](tools/embdgen.md)
+- [SDK on arm64](arm64_host.md)
