@@ -4,6 +4,10 @@ The EB corbos Linux SDK is primary developed and tested on amd64 Linux hosts,
 but it is also possible to use it on arm64 hosts.
 It was tested once on a Raspberry Pi 5 8GB successfully.
 
+## Prepare the host
+
+Please setup VisualStudio Code and Docker as described in [Setup](setup.md).
+
 ## Preprare the dev container
 
 The pre-built dev container is only available for amd64 hosts,
