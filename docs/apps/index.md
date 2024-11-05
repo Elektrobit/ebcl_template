@@ -11,8 +11,7 @@ The supported presets are the following:
 |------|----|-------|-----|
 |qemu-x86_64|x86_64|sysroot_x86_64|/workspace/images/amd64/appdev/qemu/[crinit\|systemd]|
 |qemu-aarch64|aarch64|sysroot_aarch64|/workspace/images/arm64/appdev/qemu/[crinit\|systemd]|
-|rdb2|aarch64|sysroot_aarch64|/workspace/images/arm64/appdev/rdb2/[crinit\|systemd]|
-|raspberry-pi|aarch64|sysroot_aarch64|/workspace/images/arm64/appdev/pi4/[crinit\|systemd]|
+|hardware|aarch64|sysroot_aarch64|/workspace/images/arm64/appdev/[rdb2\|pi4]/[crinit\|systemd]|
 
 The different columns represent the name of the preset, CPU architecture, the sysroot the application is built against and a path to a possible image configuration with either crinit or systemd as init daemon.
 
@@ -42,7 +41,7 @@ make sysroot_install
 In order to build the applications, use the Visual Studio Code CMake extension on the Visual Studio Code bottom ribbon:
 
 * Choose active project as `my-json-app` or `meminfo-reader`
-* Choose active configure preset `qemu-x86_64`, `qemu-aarch64`, `rdb2` or `raspberry-pi`
+* Choose active configure preset `qemu-x86_64`, `qemu-aarch64` or `hardware`
 * Click on `Build`
 
 Alternatively to the use of Visual Studio Code tasks, building can also be done directly via cmake.
