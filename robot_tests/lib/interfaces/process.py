@@ -3,9 +3,10 @@ tmux implementation of CommunicationInterface
 """
 import logging
 import sys
+import os
 
 from queue import Queue, Empty
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen, run
 from threading import Thread
 from time import sleep
 from typing import Optional
@@ -55,6 +56,7 @@ class ShellSubprocess(CommunicationInterface):
 
     def __del__(self):
         if self.process:
+            run(f'pkill -P {self.process.pid} -KILL', shell=True, check=False)
             self.process.kill()
 
     def _process_command(self) -> list[str]:
@@ -112,7 +114,8 @@ class ShellSubprocess(CommunicationInterface):
         if rc is not None:
             logging.info('Shell session ended with returncode %d.', rc)
         else:
-            logging.warning('Killing shell...')
+            logging.warning('Killing shell and subprocesses...')
+            run(f'pkill -P {self.process.pid} -KILL', shell=True, check=False)
             self.process.kill()
 
         self.process = None

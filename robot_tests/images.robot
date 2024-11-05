@@ -1,6 +1,7 @@
 *** Settings ***
 Library    lib/Fakeroot.py
 Library    lib/CommManager.py    mode=Process
+Library    ../.venv/lib/python3.10/site-packages/robot/libraries/String.py
 Test Timeout    45m
 
 *** Test Cases ***
@@ -246,6 +247,25 @@ Run Image
     ${success}=    Login To Vm
     Should Be True    ${success}
 
+Check For Startup Errors
+    [Timeout]    2m
+    ${kernel_logs}=    Execute    dmesg
+    # Filter known log containing the error search word.
+    ${kernel_logs}=    Replace String    ${kernel_logs}    Correctable Errors collector initialized    \
+    Should Not Contain    ${kernel_logs}    error    ignore_case=${True}
+    Should Not Contain    ${kernel_logs}    failed    ignore_case=${True}
+
+Check For Crinit Task Issues
+    [Timeout]    2m
+    ${crinit}=    Execute    crinit-ctl list
+    Should Not Contain    ${crinit}    failed    ignore_case=${True}
+    Should Not Contain    ${crinit}    wait    ignore_case=${True}
+
+Check For Systemd Unit Issues
+    [Timeout]    2m
+    ${systemd}=    Execute    systemctl list-units
+    Should Not Contain    ${systemd}    failed    ignore_case=${True}
+
 Shutdown Systemd Image
     [Timeout]    2m
     Send Message    \nsystemctl poweroff
@@ -258,6 +278,8 @@ Test Systemd Image
     Build Image    ${path}    ${image}
     Test That Make Does Not Rebuild    ${path}
     Run Image    ${path}
+    Check For Startup Errors
+    Check For Systemd Unit Issues
     Shutdown Systemd Image
     Disconnect
 
@@ -273,6 +295,8 @@ Test Crinit Image
     Build Image    ${path}    ${image}
     Test That Make Does Not Rebuild    ${path}
     Run Image    ${path}
+    Check For Startup Errors
+    Check For Crinit Task Issues
     Shutdown Crinit Image
     Disconnect
 
