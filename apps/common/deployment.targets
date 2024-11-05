@@ -10,13 +10,7 @@ elif [ "$TARGET" == "qemu-aarch64" ] ; then
     SSH_USER=root
     SSH_PREFIX="sshpass -p linux"
     GDB_PORT=3333
-elif [ "$TARGET" == "rdb2" ] ; then
-    TARGET_IP=[fd00::eb:2]
-    SSH_PORT=22
-    SSH_USER=root
-    SSH_PREFIX="sshpass -p linux"
-    GDB_PORT=3333
-elif [ "$TARGET" == "raspberry-pi" ] ; then
+elif [ "$TARGET" == "hardware" ] ; then
     TARGET_IP=[fd00::eb:2]
     SSH_PORT=22
     SSH_USER=root

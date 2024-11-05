@@ -50,11 +50,7 @@
             "inherits": "ebcl-aarch64"
         },
         {
-            "name": "rdb2",
-            "inherits": "ebcl-aarch64"
-        },
-        {
-            "name": "raspberry-pi",
+            "name": "hardware",
             "inherits": "ebcl-aarch64"
         }
     ],
@@ -78,13 +74,8 @@
             "inherits": "base"
         },
         {
-            "name": "rdb2",
-            "configurePreset": "rdb2",
-            "inherits": "base"
-        },
-        {
-            "name": "raspberry-pi",
-            "configurePreset": "raspberry-pi",
+            "name": "hardware",
+            "configurePreset": "hardware",
             "inherits": "base"
         }
     ]
