@@ -34,12 +34,10 @@ jobs:
       matrix:
         task:
           - "EBcL: Image amd64/appdev/qemu/crinit"
-          - "EBcL: Image amd64/qemu/ebcl/crinit/berrymill"
           - "EBcL: Image amd64/qemu/ebcl/crinit/debootstrap"
           - "EBcL: Image arm64/appdev/qemu/crinit"
           - "EBcL: Image arm64/appdev/rdb2/crinit"
           - "EBcL: Image arm64/nxp/rdb2/crinit"
-          - "EBcL: Image arm64/qemu/ebcl/crinit/berrymill"
           - "EBcL: Image arm64/qemu/ebcl/crinit/debootstrap"
     steps:
       - uses: actions/checkout@v4
