@@ -1,1 +1,20 @@
-../common/CMakePresets.json
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21
+    },
+    "include": [
+        "/build/cmake/BasePresets.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "base-app-env",
+            "inherits": "base",
+            "hidden": true,
+            "environment": {
+                "APP_NAME": "meminfo-reader"
+            }
+        }
+    ]
+}
