@@ -30,7 +30,7 @@ default: image
 # Result folder
 #--------------
 
-result_folder ?= ./build
+result_folder ?= $(PWD)/build
 
 #---------------------
 # Select bash as shell
@@ -68,7 +68,7 @@ base_tarball ?= $(result_folder)/ebcl_pi4.tar
 root_tarball ?= $(result_folder)/ebcl_pi4.config.tar
 
 # Sysroot tarball
-sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
+sysroot_tarball ?= $(result_folder)/ebcl_pi4_sysroot.tar
 
 #--------------------------
 # Image build configuration
@@ -80,7 +80,7 @@ sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
 $(disc_image): $(root_tarball) $(partition_layout)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
-	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
+	set -o pipefail && embdgen -o $(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
 
 
 # The root generator is used to build the base root filesystem tarball.
@@ -181,7 +181,7 @@ sysroot: $(sysroot_tarball)
 .PHONY: sysroot_install
 sysroot_install: $(sysroot_tarball)
 	rm -rf /workspace/sysroot_$(arch)/*
-	cp $(result_folder)/$(sysroot_tarball) /workspace/sysroot_$(arch)/
+	cp $(sysroot_tarball) /workspace/sysroot_$(arch)/
 	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
 
 # clean - delete the generated artifacts
