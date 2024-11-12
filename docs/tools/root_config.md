@@ -6,7 +6,7 @@ A root tarball can be configured with user scripts by the root generator.
 
 ## Description
 
-Configures a tarball with user privided scripts.
+Configures a tarball with user provided scripts.
 Splitting the root tarball generation from the configuration allows for fast configuration adaptions.
 The synopsis is `root_configurator <root>.yaml <input>.tar <output>.tar`
 

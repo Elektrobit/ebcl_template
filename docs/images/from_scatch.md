@@ -234,7 +234,7 @@ The _bootargs-overlay.dts_ is the U-Boot configuration:
 };
 ```
 
-The _inird.img_ is the initalramdisc we want to use.
+The _initrd.img_ is the initial ramdisk we want to use.
 We can use the _initrd generator_ to create such an _initrd.img_ which fits our needs.
 As long as we don’t want to implement secure boot, your needs are quite small.
 We just want to use _/dev/mmcblk0p2_ as root partition, which is partition two of the internal eMMC storage.
@@ -529,7 +529,7 @@ disc_image ?= $(result_folder)/image.raw
 # root_tarball: the contents of the root filesystem
 # partition_layout: the partition layout of the SD card image
 #
-# The bootloader fip.s32 is not explicitly metioned, since it is build in one step
+# The bootloader fip.s32 is not explicitly mentioned, since it is built in one step
 # with the fitimage.
 $(disc_image): $(fitimage) $(root_tarball) $(partition_layout)
 	@echo "Build image..."

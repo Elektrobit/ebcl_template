@@ -85,8 +85,8 @@ a meta-package for the kernel binary and modules.
 - **base_tarball** _(boot/initrd)_  \[default: None \]: A base chroot environment for generating the boot artifacts and for the _initrd.img_. If no base chroot environment is given, a minimal busybox based environment will be used.
 
 - **packages** _(boot/initrd/root/config)_  \[default: None \]: A list of packages.
-For the _root generator_, these packages are installed in the base _deboostrap_ environment.
-For the _initrd generator_, these packages will be downloaded, extracted and integrated into the resutling _initrd.img_.
+For the _root generator_, these packages are installed in the base _debootstrap_ environment.
+For the _initrd generator_, these packages will be downloaded, extracted and integrated into the resulting _initrd.img_.
 For the _boot generator_, these packages will be downloaded and extracted to get the kernel binary.
  
 - **kernel** _(boot/initrd/root)_  \[default: None \]: Name of the kernel package.
@@ -170,15 +170,15 @@ If this flag is set to True, one of the specified repositories needs to provide 
 
 - **kvm** _(root)_  \[default: True \]: Flag if KVM acceleration shall be used for kiwi-ng builds.
 
-- **image_version** _(root)_  \[default: 1.0.0 \]: Image version for the generated kiwi-ng image descrption.
+- **image_version** _(root)_  \[default: 1.0.0 \]: Image version for the generated kiwi-ng image description.
 
 - **type** _(root)_  \[default: debootstrap \]: Type of the root filesystem generator to use.
 The supported generators are "debootstrap" and "kiwi".
 
 - **primary_repo** _(root)_  \[default: auto selected Ubuntu Jammy repository \]: The primary apt repository for the debootstrap or kiwi-ng build.
-The main component of this repository is used for _debootrap_.
+The main component of this repository is used for _debootstrap_.
 
-- **primary_distro** _(root)_  \[default: jammy \]: The name of the distribution used for _debootrap_.
+- **primary_distro** _(root)_  \[default: jammy \]: The name of the distribution used for _debootstrap_.
 
 - **root_password** _(root)_  \[default: linux \]: The root password of the generated root filesystem.
 
