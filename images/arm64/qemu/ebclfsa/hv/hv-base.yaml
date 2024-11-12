@@ -1,0 +1,63 @@
+shms:
+  - name: fbshm
+    size:   0x3000000 # 48 * 1024 * 1024
+  - name: proxycomshm
+    size:   0x200000
+  - name: hicomshm
+    size:   0x21000
+  - name: tmshm
+    size:   0x1000
+  - name: fishm
+    size:   0x1000
+
+cons:
+  default_vm: vm-base
+
+vms:
+  - name: vm-base
+    kernel: "Image_li"
+    ram:     512
+    cpus:    0x3
+    cmdline: "console=hvc0 rdinit=/init rw"
+    initrd:  ramdisk_base
+    dtb:     virt-li.dtb
+    vbus:    vm_hw
+    vnets:   [vnet_li_hi]
+    shms:
+      - fbshm
+      - proxycomshm
+      - fishm
+    virtio_block:
+      servers:
+        - root
+        - data
+
+  - name: vm-safe
+    kernel: "Image_hi"
+    ram:     128
+    cpus:    0xc
+    cmdline: "console=hvc0 ip=192.168.7.100::192.168.7.1:255.255.255.0 root=/dev/vda ro"
+    dtb:     virt-hi.dtb
+    vnets:   [vnet_li_hi]
+    hi:      True
+    shms:
+      - wdgshm
+      - monilisa_wdgshm
+      - fbshm
+      - proxycomshm
+      - hicomshm
+      - tmshm
+      - fishm
+    virtio_block:
+      clients:
+        - root
+        - data
+
+hm_supervisors:
+  - name: sv_both
+    ipc: user32
+  - name: sv_ml
+    ipc: user33
+  - name: sv_lisa
+    ipc: user34
+

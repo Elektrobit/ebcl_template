@@ -1,0 +1,14 @@
+# Derive values from base.yaml - relative path
+base: ./base.yaml
+# Root device to mount
+root_device: /dev/vda2
+# List of kernel modules
+modules:
+  - kernel/drivers/block/virtio_blk.ko
+  - kernel/net/core/failover.ko
+  - kernel/drivers/net/net_failover.ko
+  - kernel/drivers/net/virtio_net.ko
+  - kernel/net/llc/llc.ko
+  - kernel/net/802/stp.ko
+  - kernel/net/bridge/bridge.ko
+  

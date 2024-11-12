@@ -1,0 +1,3 @@
+NAME = agetty-hvc0
+COMMAND = /usr/bin/setsid /usr/sbin/agetty -a root 115200 hvc0
+RESPAWN = YES

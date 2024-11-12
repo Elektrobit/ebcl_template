@@ -1,0 +1,29 @@
+/ {
+	sharedmem {
+		memory-region = <&hv_proxycomshm &hv_fbshm>;
+		compatible = "l4,hv-shm";
+		status = "okay";
+	};
+
+	reserved-memory {
+		ranges;
+		#size-cells = <2>;
+		#address-cells = <2>;
+
+		hv_proxycomshm: hv_proxycomshm@9100000 {
+			device_type = "memory";
+			l4vmm,dscap = "proxycomshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09100000 0x0 0x0>;
+			status = "okay";
+		};
+
+		hv_fbshm: hv_fbshm@9500000 {
+			device_type = "memory";
+			l4vmm,dscap = "fbshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09500000 0x0 0x0>;
+			status = "okay";
+		};
+	};
+};
