@@ -1,0 +1,74 @@
+{
+    "root": {
+        "elos": {
+            "UseEnv": true,
+            "LogLevel": "Info",
+            "ClientInputs": {
+                "Plugins": {
+                    "LocalTcp": {
+                        "File": "client_tcp.so",
+                        "Run": "always",
+                        "Config": {
+                            "ConnectionLimit": 200,
+                            "Port": 54321,
+                            "Interface": "127.0.0.1",
+                            "EventBlacklist": ".event.messageCode 2000 EQ",
+                            "authorizedProcesses": [
+                                ".process.uid 0 EQ .process.gid 0 EQ .process.exec '/bin/elosc' STRCMP AND",
+                                ".process.gid 200 EQ .process.exec '/bin/elosc' STRCMP AND",
+                                ".process.pid 1 EQ"
+                            ]
+                        }
+                    }
+                }
+            },
+            "EventLogging": {
+                "Plugins": {
+                    "everythingElse": {
+                        "File": "backend_json.so",
+                        "Run": "always",
+                        "Filter": [
+                            ".e.messageCode 5005 NE"
+                        ],
+                        "Config": {
+                            "StoragePath": "/var/log/elosd_%host%_%date%_%count%.log"
+                        }
+                    }
+                }
+            },
+            "Scanner": {
+                "Plugins": {
+                    "KmsgScanner": {
+                        "File": "scanner_kmsg.so",
+                        "Run": "always",
+                        "Config": {
+                            "KmsgFile": "/dev/kmsg"
+                        }
+                    },
+                    "SyslogScanner": {
+                        "File": "scanner_syslog.so",
+                        "Run": "always",
+                        "Config": {
+                            "SyslogPath": "/dev/log",
+                            "MappingRules": {
+                                "MessageCodes": {
+                                    "2000": ".event.source.appName 'crinit' STRCMP",
+                                    "1000": ".event.source.appName 'login' STRCMP",
+                                    "1102": "1 1 EQ"
+                                }
+                            }
+                        }
+                    }
+                },
+                "Shmem": {
+                    "ShmemFile": "scanner_shmem",
+                    "ShmemCreate": true,
+                    "ShmemLogEntries": 16,
+                    "ShmemOffset": 0,
+                    "SemFile": "scanner_shmem_sem",
+                    "SemCreate": true
+                }
+            }
+        }
+    }
+}
