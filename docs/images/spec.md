@@ -51,7 +51,7 @@ In general, the _boot generator_ is the tool to automate the build steps of the 
 Let's now take a look at the _initrd.img_ generation.
 The initrd images created by the tooling from the server and desktop world are very flexible and complete from a feature point of view, but completely bloated from an embedded point of view.
 Since we know our target hardware and software in detail, we don’t need flexibility, but typically we want to have the best startup performance we can squeeze out of the used hardware.
-The _inird generator_ is a small helper tool to build a minimal _initrd.img_, to get the best possible startup performance.
+The _initrd generator_ is a small helper tool to build a minimal _initrd.img_, to get the best possible startup performance.
 It also helps to fast and easily customize the initrd content, e.g.
 for implementing a secure boot solution.
 
@@ -68,7 +68,7 @@ modules:
 The initrd specification also derives the values from the _base.yaml_, and specifies that the _/dev/vda1_ shall be used as device for the root filesystem.
 Since the Canonical default kernel has no built-in support for virt-IO block devices, we have to load this driver in the _initrd.img_, to be able to mount the root filesystem.
 This is done by specifying the kernel module in the modules list.
-Because of this line, the _inird generator_ downloads and extracts the specified kernel package and its dependencies, detects the kernel version, gets the right module, adds it to the _initrd.img_, and loads it before mounting the root filesystem.
+Because of this line, the _initrd generator_ downloads and extracts the specified kernel package and its dependencies, detects the kernel version, gets the right module, adds it to the _initrd.img_, and loads it before mounting the root filesystem.
 How this works in detail will be described in the later chapters.
 
 ```yaml

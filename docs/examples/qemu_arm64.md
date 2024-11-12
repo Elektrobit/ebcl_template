@@ -1,6 +1,6 @@
 # The arm64 images
 
-EB corbos Linux comes with arm64 baesedxample images for rpi4 and nxp s32g boards at the moment.
+EB corbos Linux comes with arm64 based example images for rpi4 and nxp s32g boards at the moment.
 To ease development and testing we also provide QEMU arm64 images.
 
 For _arm64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
@@ -46,7 +46,7 @@ The _arm64/qemu/jammy/berrymill_ image makes use of the above mentioned configur
 ```yaml
 # Config to use as a base
 base: ../root.yaml
-# Add the EB corbos Linux apt repo to provide the boostrap package
+# Add the EB corbos Linux apt repo to provide the bootstrap package
 use_ebcl_apt: true
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
@@ -54,7 +54,7 @@ type: kiwi
 result_pattern: '*.tar.xz'
 ```
 
-This _root.yaml_ inherits the _root.yaml_ from the partent folder, described above, and adds the EBcL apt repository, which provides the required kiwi-ng bootstrap package, set the build type to “kiwi” and updates the build result search pattern to “*.tar.xz”, since there is no way to disable the result compression with _kiwi-ng_.
+This _root.yaml_ inherits the _root.yaml_ from the parent folder, described above, and adds the EBcL apt repository, which provides the required kiwi-ng bootstrap package, set the build type to “kiwi” and updates the build result search pattern to “*.tar.xz”, since there is no way to disable the result compression with _kiwi-ng_.
 
 ```make
 # Makefile for any QEMU arm64 image using kiwi
@@ -140,4 +140,4 @@ The following images are supported:
 - aarch64 EB corbos Linux crinit images 
 - aarch64 EB corbos Linux crinit berrymill image
 
-Their functuonality and implementation is analog to the corresponding amd64 images.
+Their functionality and implementation is analog to the corresponding amd64 images.

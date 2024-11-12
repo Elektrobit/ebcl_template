@@ -115,7 +115,7 @@ The _amd64/qemu/jammy/berrymill_ image makes use of the above mentioned configur
 ```yaml
 # Config to use as a base
 base: ../root.yaml
-# Add the EB corbos Linux apt repo to provide the boostrap package
+# Add the EB corbos Linux apt repo to provide the bootstrap package
 use_ebcl_apt: true
 # Overwrite the image builder type - ensure kiwi is used
 type: kiwi
@@ -123,7 +123,7 @@ type: kiwi
 result_pattern: '*.tar.xz'
 ```
 
-This _root.yaml_ inherits the _root.yaml_ from the partent folder, described above, and adds the EBcL apt repository, which provides the required kiwi-ng bootstrap package, set the build type to “kiwi” and updates the build result search pattern to “*.tar.xz”, since there is no way to disable the result compression with _kiwi-ng_.
+This _root.yaml_ inherits the _root.yaml_ from the parent folder, described above, and adds the EBcL apt repository, which provides the required kiwi-ng bootstrap package, set the build type to “kiwi” and updates the build result search pattern to “*.tar.xz”, since there is no way to disable the result compression with _kiwi-ng_.
 
 ```make
 # Makefile for Jammy QEMU amd64 image using kiwi
@@ -325,7 +325,7 @@ The “$(source)” is responsible for fetching the kernel sources using apt, an
 The “$(kconfig)” target gets the default config for the used kernel package and adds it to the kernel source tree.
  The “$(kernel)” target describes how to compile the kernel and get the kernel binary.
 The “$(modules)” describes how to build and install the modules to the results folder.
-The new make for the _inird.img_ adds the dependency to the locally built kernel modules.
+The new make for the _initrd.img_ adds the dependency to the locally built kernel modules.
 
 Overall, these new rules describe how to fetch the kernel sources and build the kernel binary and modules.
 These binaries are then picked up by the default QEMU build flow and make rules.
@@ -383,7 +383,7 @@ This root filesystem is a very minimal one, only providing _systemd_, _udev_ and
 
 ### The amd64 EB corbos Linux crinit images 
 
-EBcL adds [crinit](https://github.com/Elektrobit/crinit) init-manger, as an alternative to _systemd_. [Crinit](https://github.com/Elektrobit/crinit) is a much more lightweight init-manager, compared with _systemd_, and tailored ro embedded.
+EBcL adds [crinit](https://github.com/Elektrobit/crinit) init-manger, as an alternative to _systemd_. [Crinit](https://github.com/Elektrobit/crinit) is a much more lightweight init-manager, compared with _systemd_, and tailored to embedded.
 Since all the hardware and use-cases are very well known in advance for an embedded system, many dynamic configuration and detection features of _systemd_ can be skipped, which results in a faster and much more lightweight solution.
 The drawback of using _crinit_ is that the Ubuntu packages are not prepared for _crinit_, and all service and startup configuration needs to be done by the user.
 
@@ -417,7 +417,7 @@ The server images provide a more complete user experience and add logging, netwo
 #### The amd64 EB corbos Linux server crinit image
 
 The _crinit_ variant of the server image is contained in _images/amd64/qemu/ebcl/server_. In addition to _crinit_, it provides the [elos](https://github.com/Elektrobit/elos) logging and event manager, which is a lightweight replacement of _journald_ and _dbus_, which allows automatic log evaluation and event handling.
-To manage the network interfaces, _netifd_ form the OpenWRT world is used.
+To manage the network interfaces, _netifd_ from the OpenWRT world is used.
 It’s a very powerful and nevertheless lightweight network manager used in many router solutions.
 Als NTP client _ntpdate_ is used.
 To allow remote login _openssh-server_ is added.
@@ -435,7 +435,7 @@ The file _/etc/config/network/network_ is evaluated by _netifd_ to bring up the 
 This configuration makes use of an static IPv6 and a dynamic IPv4 configuration.
 The _crinit_ tasks are extended with tasks to run _elos_, bring up the network, run the SSH service, and trigger the NTP time update.
 The file _/etc/elos/elosd.json_ contains some basic _elos_ configuration, to use it as syslog demon.
-The conifg _/etc/ssh/sshd_config.d/10-root-login.conf_ enables SSH login is root.
+The config _/etc/ssh/sshd_config.d/10-root-login.conf_ enables SSH login is root.
 The config _/etc/gai.conf_ ensures that IPv4 DNS is preferred over IPv6. The other config files just set some reasonable defaults.
 
 #### The amd64 EB corbos Linux server systemd image

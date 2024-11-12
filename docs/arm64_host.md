@@ -8,7 +8,7 @@ It was tested once on a Raspberry Pi 5 8GB successfully.
 
 Please setup VisualStudio Code and Docker as described in [Setup](setup.md).
 
-## Preprare the dev container
+## Prepare the dev container
 
 The pre-built dev container is only available for amd64 hosts,
 so first the container needs to be build locally on arm64.
@@ -28,7 +28,7 @@ and select the "Reopen in container" command.
 ## Build an arm64 image
 
 Now you can build arm64 images.
-Open the folder containg the image description you want to build,
+Open the folder containing the image description you want to build,
 e.g. _/workspace/images/arm64/qemu/ebcl/crinit/debootstrap_,
 in the integrated terminal in the dev container.
 Then run `make` to build the image.
