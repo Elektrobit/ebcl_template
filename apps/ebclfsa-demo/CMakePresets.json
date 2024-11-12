@@ -1,0 +1,39 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21
+    },
+    "include": [
+        "/build/cmake/ebclfsaPresets.json"
+    ],
+    "configurePresets": [
+        {
+            "name": "hi-app",
+            "inherits": "ebclfsa-aarch64",
+            "cacheVariables": {
+                "BUILD_HI": "ON"
+            },
+            "environment": {
+                "APP_NAME": "ebclfsa-demo"
+            }
+        },
+        {
+            "name": "li-app",
+            "inherits": "ebcl-aarch64",
+            "cacheVariables": {
+                "BUILD_HI": "OFF"
+            },
+            "environment": {
+                "APP_NAME": "ebclfsa-demo"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "qemu-aarch64",
+            "configurePreset": "li-app",
+            "inherits": "base"
+        }
+    ]
+}

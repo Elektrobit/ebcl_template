@@ -1,0 +1,9 @@
+NAME = sshd
+
+COMMAND = /bin/mkdir -p /run/sshd
+COMMAND = /usr/sbin/sshd -D
+
+DEPENDS = ""
+
+RESPAWN = YES
+RESPAWN_RETRIES = 3

@@ -1,0 +1,5 @@
+NAME = network
+
+COMMAND = /sbin/netifd -r /var/run/resolv.conf.netifd
+DEPENDS = "ubus:spawn"
+RESPAWN = YES
