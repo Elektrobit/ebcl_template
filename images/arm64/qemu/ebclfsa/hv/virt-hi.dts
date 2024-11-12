@@ -1,0 +1,28 @@
+/dts-v1/;
+
+/include/ "virt-common.dtsi"
+/include/ "shm-hi.dtsi"
+
+/ {
+	l4vmm {
+		virtio_block@0 {
+			compatible = "virtio,mmio";
+			reg = <0x0 0x1000>;
+			interrupt-parent = <&gic>;
+			interrupts = <0 0x7c 4>;
+			l4vmm,vdev = "proxy";
+			l4vmm,virtiocap = "root_client";
+			status = "okay";
+		};
+
+		virtio_block@1000 {
+			compatible = "virtio,mmio";
+			reg = <0x1000 0x1000>;
+			interrupt-parent = <&gic>;
+			interrupts = <0 0x7d 4>;
+			l4vmm,vdev = "proxy";
+			l4vmm,virtiocap = "data_client";
+			status = "okay";
+		};
+	};
+};
