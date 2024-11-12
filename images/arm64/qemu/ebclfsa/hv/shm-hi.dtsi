@@ -1,0 +1,52 @@
+/ {
+	reserved-memory {
+		ranges;
+		#size-cells = <2>;
+		#address-cells = <2>;
+
+		hv_proxycomshm: hv_proxycomshm@9100000 {
+			device_type = "memory";
+			l4vmm,dscap = "proxycomshm";
+			compatible = "l4,proxycomshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09100000 0x0 0x0>;
+			status = "okay";
+		};
+
+		hv_wdgshm: hv_wdgshm@9300000 {
+			device_type = "memory";
+			l4vmm,dscap = "wdgshm";
+			compatible = "l4,wdgshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09300000 0x0 0x0>;
+			status = "okay";
+		};
+
+		hv_hicomshm: hv_hicomshm@9400000 {
+			device_type = "memory";
+			l4vmm,dscap = "hicomshm";
+			compatible = "l4,hicomshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09400000 0x0 0x0>;
+			status = "okay";
+		};
+
+		hv_fbshm: hv_fbshm@9500000 {
+			device_type = "memory";
+			l4vmm,dscap = "fbshm";
+			compatible = "l4,fbshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09500000 0x0 0x0>;
+			status = "okay";
+		};
+
+		hv_tmshm: hv_tmshm@9700000 {
+			device_type = "memory";
+			l4vmm,dscap = "tmshm";
+			compatible = "l4,tmshm";
+			/* size is picked up from corresponding dataspace */
+			reg = <0x0 0x09700000 0x0 0x0>;
+			status = "okay";
+		};
+	};
+};
