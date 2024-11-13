@@ -8,7 +8,7 @@ packages:
 # Scripts to configure the root tarball
 scripts:
   - name: ../config_root.sh # Name of the script, relative path to this file
-    env: fake
+    env: chroot
   - name: config_systemd.sh # Name of the script, relative path to this file
     env: chroot
 host_files:
