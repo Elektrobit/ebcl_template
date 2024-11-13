@@ -37,3 +37,6 @@ packages:
   - psmisc
   # rsync for app deployment during development
   - rsync
+# Add libjson package for app development example
+sysroot_packages:
+  - libjsoncpp-dev
