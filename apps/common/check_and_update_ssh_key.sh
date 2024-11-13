@@ -1,6 +1,7 @@
 #!/bin/bash
+SSH_WELL_KNOWN=22
 SSH_PREFIX=""
-SSH_PORT=22
+SSH_PORT=$SSH_WELL_KNOWN
 SSH_USER=root
 SSH_TARGET=localhost
 KNOWN_HOSTS="/home/ebcl/.ssh/known_hosts"
@@ -39,8 +40,10 @@ SSH_CMD="$SSH_PREFIX ssh"
 SSH_COMMON_PARM="-p $SSH_PORT $SSH_USER@$SSH_TARGET true"
 [ -z "$KNOWN_HOSTS" ] && KNOWN_HOSTS=
 
+# For any port other than 22, we need to use [] for the hostname/IP
 $SSH_CMD $SSH_COMMON_PARM || { \
+    [ "$SSH_PORT" != "$SSH_WELL_KNOWN" ] && SSH_TARGET="[$SSH_TARGET]:$SSH_PORT" ; \
     echo "SSH key not found or outdated, performing update!" ; \
-    ssh-keygen -f "$KNOWN_HOSTS" -R "[$SSH_TARGET]:$SSH_PORT"; \
+    ssh-keygen -f "$KNOWN_HOSTS" -R "$SSH_TARGET"; \
     $SSH_CMD -o StrictHostKeyChecking=accept-new $SSH_COMMON_PARM; \
 }
