@@ -68,7 +68,7 @@ base_tarball ?= $(result_folder)/ebcl_pi4.tar
 root_tarball ?= $(result_folder)/ebcl_pi4.config.tar
 
 # Sysroot tarball
-sysroot_tarball ?= $(result_folder)/ebcl_rdb2_sysroot.tar
+sysroot_tarball ?= $(result_folder)/ebcl_pi4_sysroot.tar
 
 #--------------------------
 # Image build configuration
@@ -181,8 +181,7 @@ sysroot: $(sysroot_tarball)
 .PHONY: sysroot_install
 sysroot_install: $(sysroot_tarball)
 	rm -rf /workspace/sysroot_$(arch)/*
-	cp $(result_folder)/$(sysroot_tarball) /workspace/sysroot_$(arch)/
-	cd /workspace/sysroot_$(arch)/ && tar xf $(sysroot_tarball)
+	tar xf $(sysroot_tarball) -C /workspace/sysroot_$(arch)/ || true
 
 # clean - delete the generated artifacts
 .PHONY: clean
