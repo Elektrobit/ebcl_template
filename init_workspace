@@ -3,7 +3,6 @@
 # This script is exectued in the host environment,
 # before the VS Code dev-container build.
 
-CONTAINER_TOOL="docker"
 CONTAINER_TAG=$(cat .devcontainer/devcontainer.json | grep "linux.elektrobit.com" | awk -F ":" '{print $3}' | awk -F "\"" '{print $1}')
 
 echo "Setting EBcL workspace up..."
@@ -34,19 +33,6 @@ ENV="tools/user_config/.env"
 if [ -f "$ENV" ]; then
     echo "Sourcing '${ENV}'..."    
     source $ENV
-fi
-
-# Test if docker image is available
-if [ -z "$(docker images -q "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}")" ]; then
-    if [ -z "${EBCL_CONTAINER_URL}" ]; then
-        echo "No container download url found! Please ensure the dev container image is available."
-        exit 1
-    else
-        # Download and import the image
-        docker import "${EBCL_CONTAINER_URL}/ebcl_dev_container_${CONTAINER_TAG}.tar.xz" "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}"
-    fi
-else
-    echo "Dev container image "linux.elektrobit.com/ebcl/sdk:${CONTAINER_TAG}" is available."
 fi
 
 # Copy SSH keys
