@@ -250,7 +250,7 @@ The _Makefile_ is similar to the one above.
 
 The _amd64/qemu/jammy/kernel_src_ image is a proof of concept showing how to make use of local compiled kernels with EBcL builds.
 The _boot.yaml_ is used to get the kernel configuration of the Ubuntu Jammy kernel.
-The _initrd.yaml_ extends the shared _initrd.yaml_ with the line “modules_folder: $$RESULTS$$”. The parameter “modules_folder” can be used to provide kernel modules from the host environment, and the string “$$RESULTS$$” will be replaced with the path to the build folder.
+The _initrd.yaml_ extends the shared _initrd.yaml_ with the line “modules_folder: ``$$RESULTS$$``. The parameter “modules_folder” can be used to provide kernel modules from the host environment, and the string ``$$RESULTS$$`` will be replaced with the path to the build folder.
 
 The _Makefile_ extends the default QEMU makefile with a bunch of new make targets.
 
@@ -321,10 +321,10 @@ rebuild_modules: kernel
 	cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) modules_install
 ```
 
-The “$(source)” is responsible for fetching the kernel sources using apt, and installing the kernel build dependencies.
-The “$(kconfig)” target gets the default config for the used kernel package and adds it to the kernel source tree.
- The “$(kernel)” target describes how to compile the kernel and get the kernel binary.
-The “$(modules)” describes how to build and install the modules to the results folder.
+The ``$(source)`` is responsible for fetching the kernel sources using apt, and installing the kernel build dependencies.
+The ``$(kconfig)`` target gets the default config for the used kernel package and adds it to the kernel source tree.
+ The ``$(kernel)`` target describes how to compile the kernel and get the kernel binary.
+The ``$(modules)`` describes how to build and install the modules to the results folder.
 The new make for the _initrd.img_ adds the dependency to the locally built kernel modules.
 
 Overall, these new rules describe how to fetch the kernel sources and build the kernel binary and modules.
