@@ -2,4 +2,4 @@
 
 This page doesn't exist.
 
-![Elektrobit](/assets/logo.png)
+![Elektrobit](assets/logo.png)
