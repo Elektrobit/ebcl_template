@@ -66,10 +66,10 @@ files:
   - boot/fitimage
 ```
 
-The only change compared to the old _boot.yaml_ is that we add “$$RESULTS$$/vmlinuz” to the _host_files_. This means our kernel binary is copied to the _/boot_ folder of the fitimage build environment, and will overwrite the one from the kernel Debian package.
+The only change compared to the old _boot.yaml_ is that we add ``$$RESULTS$$/vmlinuz`` to the _host_files_. This means our kernel binary is copied to the _/boot_ folder of the fitimage build environment, and will overwrite the one from the kernel Debian package.
 This will give us the following build flow:
 
-![S32G2](assets/S32G2_kernel.png)
+![S32G2](../assets/S32G2_kernel.png)
 
 We can add this to our _Makefile_ with the following changes:
 
