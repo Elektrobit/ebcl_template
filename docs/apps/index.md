@@ -77,7 +77,7 @@ Alternatively, you could also login via ssh to the target and call the applicati
 
 ### Post-execute steps
 
-This step is not required for the provided example applications, since both terminate directly and don't inlcude any continous loops.
+This step is not required for the provided example applications, since both terminate directly and don't include any continuous loops.
 Nevertheless, your own applications, may behave differently.
 In order to stop the execution of an application you can either press CTRL-C in the corresponding terminal window or stop the parent task.
 To stop the parent task click on "■" (Stop icon) in the task `Run app from active build preset` to stop the application.

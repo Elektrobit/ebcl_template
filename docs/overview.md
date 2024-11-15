@@ -27,7 +27,7 @@ In the automotive world, in addition to a Posix OS, typically also a safety cert
 This is depicted above as an embedded system.
 If this is combined with an A/B schema for the update of the Linux and the classic Autosar the storage layout gets quite complex and can hardly be directly created with the tools mentioned above.
 
-Our day to day business at [Elektrobit](https://www.elektrobit.com/) are automotive high-performance controllers (HPCs). HPCs extend the embedded system architecture with a hypervisor and multiple virtual machines (VMs), like an additional Andriod VM for infotainment solutions.
+Our day to day business at [Elektrobit](https://www.elektrobit.com/) are automotive high-performance controllers (HPCs). HPCs extend the embedded system architecture with a hypervisor and multiple virtual machines (VMs), like an additional Android VM for infotainment solutions.
 The target of EB corbos Linux, and this SDK, is to fully support such embedded high-performance controller system architectures, and allow development and maintenance of such systems in an easy, efficient and reliable way.
 
 [This repository](https://github.com/Elektrobit/ebcl_template/) provides a template workspace to start developing your own Linux images and applications.

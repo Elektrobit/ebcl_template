@@ -84,7 +84,7 @@ kernel_config = kernel_config.yaml
 kernel_package = linux-buildinfo-5.15.0-1034-s32-eb
 
 #--------------------
-# Generated artefacts
+# Generated artifacts
 #--------------------
 
 # Kernel image
@@ -135,7 +135,7 @@ $(kernel): $(kconfig) $(source)
     cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
     @echo "Results were written to $(kernel)"
 
-# Adpate build spec for the fitimage
+# Adapt build spec for the fitimage
 # Additional dependency to the kernel binary
 # Please note that another boot_spec is used, see boot.yaml.
 $(fitimage): $(boot_spec) $(boot_root) $(build_fitimage) $(fitimage_config) $(fitimage_config) $(initrd_img) $(kernel)
@@ -181,7 +181,7 @@ rebuild_modules: kernel
     @echo "Install the new kernel modules..."
     cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) $(kernel_make_args) modules_install
 
-# clean - delete the generated artefacts
+# clean - delete the generated artifacts
 .PHONY: clean
 clean:
     rm -rf $(source)

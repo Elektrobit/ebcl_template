@@ -12,9 +12,9 @@ ff02::2         ip6-allrouters
 EOF
 
 # Copy Raspi device trees
-cp ./usr/lib/firmware/5.15.0-1060-raspi/device-tree/broadcom/bcm2711*.dtb ./boot/
+cp ./usr/lib/firmware/5.15.0-*-raspi/device-tree/broadcom/bcm2711*.dtb ./boot/
 # Copy device tree overlays
-cp -R ./usr/lib/firmware/5.15.0-1060-raspi/device-tree/overlays ./boot/
+cp -R ./usr/lib/firmware/5.15.0-*-raspi/device-tree/overlays ./boot/
 # Copy raspi firmware
 cp ./usr/lib/linux-firmware-raspi/* ./boot/
 
