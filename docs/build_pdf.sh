@@ -1,6 +1,7 @@
 #!/bin/bash
 
-md_files=$(grep -Poz "\(.*md" SUMMARY.md  | tr '(' " "| tr -d '\0')
+index_file=$(dirname "$0")/SUMMARY.md
+md_files=$(grep -Poz "\(.*md" $index_file  | tr '(' " "| tr -d '\0')
 tex_files=graphics.tex
 file_name=EBcL_SDK.pdf
 
@@ -15,4 +16,4 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 pandoc $tex_files $md_files -o $file_name --pdf-engine=lualatex --from markdown \
- --template eisvogel --listings --resource-path=assets
+ --template "template/eisvogel.tex" --listings --resource-path=assets

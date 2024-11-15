@@ -1,0 +1,14 @@
+name: Build docu for tag
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build-docu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build pdf docu
+        run: bash ${GITHUB_WORKSPACE}/docs/build_pdf.sh EBcL_SDK_$GITHUB_REF_NAME.pdf
