@@ -1,0 +1,7 @@
+NAME = earlysetup
+
+COMMAND = /usr/bin/hostname -F /etc/hostname
+          
+PROVIDES = machine-id:wait
+RESPAWN = NO
+DEPENDS = ""
