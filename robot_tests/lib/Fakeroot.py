@@ -50,10 +50,11 @@ class Fakeroot:
         logging.info('Command %s completed with returncode %s.',
                      cmd, p.returncode)
 
-        pout = p.stdout.decode('utf8').strip()
+
+        pout = p.stdout.decode('utf8', errors='ignore').strip()
         logging.info('STDOUT: %s', pout)
 
-        perr = p.stderr.decode('utf8').strip()
+        perr = p.stderr.decode('utf8', errors='ignore').strip()
         if perr:
             logging.error('STDERR: %s', perr)
         else:

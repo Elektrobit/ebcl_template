@@ -1,6 +1,8 @@
 # Kernel package to use
 kernel: linux-image-generic
 use_ebcl_apt: true
+# Repository for debootstrap
+primary_repo: https://linux.elektrobit.com/eb-corbos-linux/1.4
 # Additional apt repos
 apt_repos:
   # Get latest security fixes
