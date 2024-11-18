@@ -8,20 +8,20 @@ arch = x86_64
 #---------------------
 
 # Specification of the partition layout of the image.raw
-partition_layout = ../../image.yaml
+partition_layout = ../image.yaml
 # Specification of the root filesystem content and configuration
 root_filesystem_spec = root.yaml
 # Specification of the initrd.img
-initrd_spec = ../../initrd.yaml
+initrd_spec = ../initrd.yaml
 # Specification of the kernel
-boot_spec = ../../boot.yaml
+boot_spec = ../boot.yaml
 
 #-------------------------
 # Additional configuration
 #-------------------------
 
 # Config script for root filesystem
-config_root = ../config_root.sh
+config_root = config_root.sh
 
 #--------------------
 # Generated artifacts
@@ -41,10 +41,17 @@ sysroot_tarball = build/ebcl_sysroot.tar
 #-------------------
 
 # QEMU kernel commandline
-kernel_cmdline_append = "rw"
+kernel_cmdline_append = 
+# Expose SSH port on host
+qemu_net_append = ,hostfwd=tcp::2223-:22
 
 # for building
-include ../../../../../qemu.mk
+include ../../../../qemu.mk
 
 # for running QEMU
-include ../../../../../qemu_x86_64.mk
+include ../../../../qemu_x86_64.mk
+
+.PHONY: ssh
+ssh:
+	ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2223"
+	ssh -p 2223 root@localhost

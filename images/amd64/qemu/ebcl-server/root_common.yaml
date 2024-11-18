@@ -1,4 +1,4 @@
-base: ../base.yaml
+base: base.yaml
 # Reset kernel package
 kernel: null
 # Name of the archive.
