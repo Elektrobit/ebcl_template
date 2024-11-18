@@ -3,10 +3,9 @@ tmux implementation of CommunicationInterface
 """
 import logging
 import sys
-import os
 
 from queue import Queue, Empty
-from subprocess import PIPE, Popen, run
+from subprocess import PIPE, Popen, run, check_output
 from threading import Thread
 from time import sleep
 from typing import Optional
@@ -37,6 +36,28 @@ def _enqueue_output(out, queue: Queue, prefix: str = ''):
     out.close()
 
 
+def _kill_process_tree(pid: int):
+    """ Kill all processes belonging to the subtree of the given pid. """
+    # Get child processes
+    try:
+        out = check_output(['pgrep', '-P', pid])
+        out = out.decode("utf-8")
+        processes = [ p.strip() for p in out.split('\n') ]
+        # Remove empty entries
+        processes = list(filter(None, processes))
+    except Exception:
+        # pgrep returns 1 in case of no childs
+        processes = []
+ 
+    if processes:
+        # List is not empty, recursion for child processes
+        logging.debug('Process %s has sub processes %s.', str(pid), str(processes))
+        for cpid in processes:
+            _kill_process_tree(cpid)
+    
+    logging.info(f'Killing process {pid}...')
+    run(f'kill -9 {pid}', shell=True, check=False)
+
 class ShellSubprocess(CommunicationInterface):
     """
     Subprocess implementation of CommunicationInterface
@@ -56,8 +77,7 @@ class ShellSubprocess(CommunicationInterface):
 
     def __del__(self):
         if self.process:
-            run(f'pkill -P {self.process.pid} -KILL', shell=True, check=False)
-            self.process.kill()
+            _kill_process_tree(self.process.pid)
 
     def _process_command(self) -> list[str]:
         """ Get the command to execute. """
@@ -115,8 +135,7 @@ class ShellSubprocess(CommunicationInterface):
             logging.info('Shell session ended with returncode %d.', rc)
         else:
             logging.warning('Killing shell and subprocesses...')
-            run(f'pkill -P {self.process.pid} -KILL', shell=True, check=False)
-            self.process.kill()
+            _kill_process_tree(self.process.pid)
 
         self.process = None
 

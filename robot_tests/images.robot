@@ -9,74 +9,46 @@ Test Timeout    45m
 #==================================
 # Tests for QEMU AMD64 Jammy images
 #==================================
-Build Image amd64/qemu/jammy/berrymill
-    [Tags]    amd64    qemu    berrymill    kiwi    jammy    systemd
-    Test Systemd Image    amd64/qemu/jammy/berrymill
-
-Build Image amd64/qemu/jammy/debootstrap
+Build Image amd64/qemu/jammy
     [Tags]    amd64    qemu    debootstrap    jammy    systemd
-    Test Systemd Image    amd64/qemu/jammy/debootstrap
-
-Build Image amd64/qemu/jammy/kiwi
-    [Tags]    amd64    qemu    kiwi    jammy    systemd
-    Test Systemd Image    amd64/qemu/jammy/kiwi
+    Test Systemd Image    amd64/qemu/jammy
 
 #==================================
 # Tests for QEMU AMD64 EBcL images
 #==================================
-Build Image amd64/qemu/ebcl/systemd/berrymill
-    [Tags]    amd64    qemu    berrymill    kiwi    ebcl    systemd
-    Test Systemd Image    amd64/qemu/ebcl/systemd/berrymill
-
-Build Image amd64/qemu/ebcl/systemd/debootstrap
+Build Image amd64/qemu/ebcl/systemd
     [Tags]    amd64    qemu    berrymill    kiwi    ebcl    systemd
     Test Systemd Image    amd64/qemu/ebcl/systemd/debootstrap
 
-Build Image amd64/qemu/ebcl/crinit/berrymill
-    [Tags]    amd64    qemu    crinit    ebcl    crinit
-    Test Crinit Image    amd64/qemu/ebcl/crinit/berrymill
-
-Build Image amd64/qemu/ebcl/crinit/debootstrap
+Build Image amd64/qemu/ebcl/crinit
     [Tags]    amd64    qemu    debootstrap    ebcl    crinit
-    Test Crinit Image    amd64/qemu/ebcl/crinit/debootstrap
+    Test Crinit Image    amd64/qemu/ebcl/crinit
 
-Build Image amd64/qemu/ebcl/server
+Build Image amd64/qemu/ebcl-server/crinit
     [Tags]    amd64    qemu    debootstrap    ebcl    crinit    server
-    Test Crinit Image    amd64/qemu/ebcl/server
+    Test Crinit Image    amd64/qemu/ebcl-server/crinit
 
-Build Image amd64/qemu/ebcl/server/systemd
+Build Image amd64/qemu/ebcl-server/systemd
     [Tags]    amd64    qemu    debootstrap    ebcl    systemd    server
-    Test Systemd Image    amd64/qemu/ebcl/server/systemd
+    Test Systemd Image    amd64/qemu/ebcl-server/systemd
 
 #==================================
 # Tests for QEMU ARM64 Jammy images
 #==================================
-Build Image arm64/qemu/jammy/berrymill
-    [Tags]    arm64    qemu    berrymill    kiwi    jammy    systemd
-    Test Systemd Image    arm64/qemu/jammy/berrymill
-
-Build Image arm64/qemu/jammy/debootstrap
+Build Image arm64/qemu/jammy
     [Tags]    arm64    qemu    debootstrap    jammy    systemd
-    Test Systemd Image    arm64/qemu/jammy/debootstrap
+    Test Systemd Image    arm64/qemu/jammy
 
 #==================================
 # Tests for QEMU ARM64 EBcL images
 #==================================
-Build Image arm64/qemu/ebcl/systemd/berrymill
-    [Tags]    arm64    qemu    berrymill    kiwi    ebcl    systemd
-    Test Systemd Image    arm64/qemu/ebcl/systemd/berrymill
-
-Build Image arm64/qemu/ebcl/systemd/debootstrap
+Build Image arm64/qemu/ebcl/systemd
     [Tags]    arm64    qemu    debootstrap    ebcl    systemd
-    Test Systemd Image    arm64/qemu/ebcl/systemd/debootstrap
+    Test Systemd Image    arm64/qemu/ebcl/systemd
 
-Build Image arm64/qemu/ebcl/crinit/berrymill
+Build Image arm64/qemu/ebcl/crinit
     [Tags]    arm64    qemu    crinit    ebcl    crinit
-    Test Crinit Image    arm64/qemu/ebcl/crinit/berrymill
-
-Build Image arm64/qemu/ebcl/crinit/debootstrap
-    [Tags]    arm64    qemu    crinit    ebcl    crinit
-    Test Crinit Image    arm64/qemu/ebcl/crinit/debootstrap
+    Test Crinit Image    arm64/qemu/ebcl/crinit
 
 #======================
 # Tests for RDB2 images
@@ -252,6 +224,8 @@ Check For Startup Errors
     ${kernel_logs}=    Execute    dmesg
     # Filter known log containing the error search word.
     ${kernel_logs}=    Replace String    ${kernel_logs}    Correctable Errors collector initialized    \
+    # Ignore systemd complaining about wanted kernel module.
+    ${kernel_logs}=    Replace String    ${kernel_logs}     Failed to look up module alias 'autofs4'    \
     Should Not Contain    ${kernel_logs}    error    ignore_case=${True}
     Should Not Contain    ${kernel_logs}    failed    ignore_case=${True}
 
@@ -263,7 +237,7 @@ Check For Crinit Task Issues
 
 Check For Systemd Unit Issues
     [Timeout]    2m
-    ${systemd}=    Execute    systemctl list-units
+    ${systemd}=    Execute    systemctl list-units --no-pager
     Should Not Contain    ${systemd}    failed    ignore_case=${True}
 
 Shutdown Systemd Image

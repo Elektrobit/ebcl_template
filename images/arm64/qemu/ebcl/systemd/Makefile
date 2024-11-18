@@ -21,7 +21,7 @@ boot_spec = ../boot.yaml
 #-------------------------
 
 # Config script for root filesystem
-config_root = ../config_root.sh
+config_root = config_root.sh
 
 #--------------------
 # Generated artifacts
@@ -31,10 +31,10 @@ config_root = ../config_root.sh
 disc_image = $(result_folder)/image.raw
 
 # Base root tarball
-base_tarball = $(result_folder)/ubuntu.tar
+base_tarball = $(result_folder)/ebcl.tar
 
 # Configured root tarball
-root_tarball = $(result_folder)/ubuntu.config.tar
+root_tarball = $(result_folder)/ebcl.config.tar
 
 # Generated initrd.img
 initrd_img = $(result_folder)/initrd.img
@@ -43,7 +43,7 @@ initrd_img = $(result_folder)/initrd.img
 kernel = $(result_folder)/vmlinuz
 
 # Sysroot tarball
-sysroot_tarball = $(result_folder)/ubuntu_sysroot.tar
+sysroot_tarball = $(result_folder)/ebcl_sysroot.tar
 
 #-------------------
 # Run the QEMU image
