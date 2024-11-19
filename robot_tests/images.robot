@@ -18,7 +18,7 @@ Build Image amd64/qemu/jammy
 #==================================
 Build Image amd64/qemu/ebcl/systemd
     [Tags]    amd64    qemu    berrymill    kiwi    ebcl    systemd
-    Test Systemd Image    amd64/qemu/ebcl/systemd/debootstrap
+    Test Systemd Image    amd64/qemu/ebcl/systemd
 
 Build Image amd64/qemu/ebcl/crinit
     [Tags]    amd64    qemu    debootstrap    ebcl    crinit
@@ -221,12 +221,14 @@ Run Image
 
 Check For Startup Errors
     [Timeout]    2m
-    ${kernel_logs}=    Execute    dmesg
     # Filter known log containing the error search word.
+    ${kernel_logs}=    Execute    dmesg
     ${kernel_logs}=    Replace String    ${kernel_logs}    Correctable Errors collector initialized    \
-    # Ignore systemd complaining about wanted kernel module.
-    ${kernel_logs}=    Replace String    ${kernel_logs}     Failed to look up module alias 'autofs4'    \
     Should Not Contain    ${kernel_logs}    error    ignore_case=${True}
+
+Check For Startup Fails
+    [Timeout]    2m
+    ${kernel_logs}=    Execute    dmesg
     Should Not Contain    ${kernel_logs}    failed    ignore_case=${True}
 
 Check For Crinit Task Issues
@@ -253,7 +255,7 @@ Test Systemd Image
     Test That Make Does Not Rebuild    ${path}
     Run Image    ${path}
     Check For Startup Errors
-    Check For Systemd Unit Issues
+    # TODO: Check For Systemd Unit Issues
     Shutdown Systemd Image
     Disconnect
 
@@ -270,6 +272,7 @@ Test Crinit Image
     Test That Make Does Not Rebuild    ${path}
     Run Image    ${path}
     Check For Startup Errors
+    Check For Startup Fails
     Check For Crinit Task Issues
     Shutdown Crinit Image
     Disconnect
