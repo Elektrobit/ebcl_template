@@ -7,18 +7,27 @@ on:
     branches: [ "main" ]
 
 jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      tasks: ${{ steps.tasks.outputs.tasks }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run devcontainer once to generate tasks
+        uses: devcontainers/ci@v0.3
+      - name: Scan tasks
+        id: tasks
+        run: |
+          echo "tasks=$(jq '.tasks[].label' .vscode/tasks.json | grep -E '(Sysroot|Image)')" >> $GITHUB_OUTPUT
+    
   task:
     runs-on: ubuntu-latest
+    needs: discover
     strategy:
       fail-fast: false
       matrix:
         task:
-          - "EBcL: Image amd64/appdev/qemu/crinit"
-          - "EBcL: Image amd64/qemu/ebcl/crinit/debootstrap"
-          - "EBcL: Image arm64/appdev/qemu/crinit"
-          - "EBcL: Image arm64/appdev/rdb2/crinit"
-          - "EBcL: Image arm64/nxp/rdb2/crinit"
-          - "EBcL: Image arm64/qemu/ebcl/crinit/debootstrap"
+          ${{ fromJson(needs.discover.outputs.tasks) }}
     steps:
       - uses: actions/checkout@v4
       - run: |
