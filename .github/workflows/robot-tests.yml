@@ -124,6 +124,15 @@ jobs:
           sanitized_test_name=$(echo "$test_name" | tr '/' '_')  # Replace slashes with underscores
           echo "sanitized_test_name=$sanitized_test_name" >> $GITHUB_ENV
         
+      - name: Discover Build Tools State Cache
+        id: state_cache
+        uses: actions/cache@v3
+        env:
+          cache-name: buildtool-cache
+        with:
+          path: ~/state 
+          key: ${{ env.cache-name }}-${{ needs.prepare-sdk.outputs.container_tag }}
+
       - name: Run Robot Test in dev container
         id: robot
         uses: devcontainers/ci@v0.3
