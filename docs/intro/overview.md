@@ -11,7 +11,7 @@ A free variant of EB corbos Linux is available at the [Elektrobit homepage](http
 The free variant doesn't contain proprietary hardware drivers or pre-qualified reference images.
 Please contact [Elektrobit sales](https://www.elektrobit.com/contact-us/) to get a full evaluation package of EB corbos Linux.
 
-![Embedded Systems](assets/EmbeddedSystem.png)
+![Embedded Systems](../assets/EmbeddedSystem.png)
 
 The image above shows a range of embedded system architectures.
 

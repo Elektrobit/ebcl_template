@@ -5,7 +5,7 @@ The S32G2 has very specific storage layout requirements, and if you are interest
 
 ```yaml
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1023-s32-eb
+kernel: linux-image-unsigned-5.15.0-1034-s32-eb
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
@@ -20,7 +20,7 @@ apt_repos:
     gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
 ```
 
-The packages for the NXP RDB2 board are provided as a separate distribution, called _ebcl_nxp_public_, as component _nxp_public_. For the RDB2 images, the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_ is used.
+The packages for the NXP RDB2 board are provided as a separate distribution, called _ebcl_nxp_public_, as component _nxp_public_. For the RDB2 images, the kernel package _linux-image-unsigned-5.15.0-1034-s32-eb_ is used.
 This package contains a Linux kernel image for the S32G2, and has slightly different kernel  configuration as the Ubuntu Jammy default.
 
 

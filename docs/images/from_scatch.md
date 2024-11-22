@@ -162,8 +162,8 @@ files:
 The kernel is already part of the chroot tarball environment, and we don’t need to download it again.
 We need to provide the fitimage and fip.s32 binaries directly to embdgen, so we don’t want to pack it.
 The tarball created by the root generator will be named “boot_root.tar”, because of the name given in the _boot_root.yaml_. Because of the “base_tarball” parameter, the _boot generator_ will pick up the tarball, extract it and chroot into this environment.
-The _boot generator_ will also replace the string “$$RESULTS$$” with the path to the given output folder.
-In addition, we need the files “bootargs-overlay.dts”, “bootargs.its” and “$$RESULTS$$/initrd.img” in the host environment.
+The _boot generator_ will also replace the string ``$$RESULTS$$`` with the path to the given output folder.
+In addition, we need the files “bootargs-overlay.dts”, “bootargs.its” and ``$$RESULTS$$/initrd.img`` in the host environment.
 These files will be copied into the chroot environment and used for building the fitimage.
 The script _build_fitimage.sh_ implements the fitimage building.
 When this script has done its job, the files _fip.s32_ and _fitimage_ will be copied to the output folder.
