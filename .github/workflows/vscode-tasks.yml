@@ -19,7 +19,7 @@ jobs:
       - name: Scan tasks
         id: tasks
         run: |
-          echo "tasks=$(jq '[.tasks[] | select(.label | test("Sysroot|Image")) | .label]' .vscode/tasks.json)" >> $GITHUB_OUTPUT
+          echo "tasks=$(jq -c '[.tasks[] | select(.label | test("Sysroot|Image")) | .label]' .vscode/tasks.json)" >> $GITHUB_OUTPUT
     
   task:
     runs-on: ubuntu-latest
