@@ -132,6 +132,8 @@ jobs:
         with:
           path: ~/state 
           key: ${{ env.cache-name }}-${{ needs.prepare-sdk.outputs.container_tag }}-${{ env.sanitized_test_name }}
+          restore-keys: |
+            ${{ env.cache-name }}-${{ needs.prepare-sdk.outputs.container_tag }}-
 
       - name: Run Robot Test in dev container
         id: robot
