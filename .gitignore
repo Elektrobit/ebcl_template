@@ -63,3 +63,5 @@ fakedit
 /work*
 
 .mypy_cache
+
+/testing
