@@ -126,12 +126,12 @@ jobs:
         
       - name: Discover Build Tools State Cache
         id: state_cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         env:
           cache-name: buildtool-cache
         with:
           path: ~/state 
-          key: ${{ env.cache-name }}-${{ needs.prepare-sdk.outputs.container_tag }}
+          key: ${{ env.cache-name }}-${{ needs.prepare-sdk.outputs.container_tag }}-${{ env.sanitized_test_name }}
 
       - name: Run Robot Test in dev container
         id: robot
