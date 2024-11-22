@@ -13,8 +13,9 @@ jobs:
       tasks: ${{ steps.tasks.outputs.tasks }}
     steps:
       - uses: actions/checkout@v4
-      - name: Run devcontainer once to generate tasks
-        uses: devcontainers/ci@v0.3
+      - uses: devcontainers/ci@v0.3
+        with:
+          runCmd: echo "Starting the container once to run init scripts."
       - name: Scan tasks
         id: tasks
         run: |
