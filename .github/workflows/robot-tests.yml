@@ -121,7 +121,7 @@ jobs:
         id: sanitize
         run: |
           test_name="${{ matrix.test_case }}"
-          sanitized_test_name=$(echo "$test_name" | tr '/' '_')  # Replace slashes with underscores
+          sanitized_test_name=$(echo "$test_name" | tr '/' '_' | tr ' ' '_')  # Replace slashes with underscores
           echo "sanitized_test_name=$sanitized_test_name" >> $GITHUB_ENV
         
       - name: Discover Build Tools State Cache
