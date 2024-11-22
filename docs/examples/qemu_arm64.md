@@ -4,7 +4,8 @@ EB corbos Linux comes with arm64 based example images for rpi4 and nxp s32g boar
 To ease development and testing we also provide QEMU arm64 images.
 
 For _arm64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
-The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation.
+The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation. Additionally there is an example image provided for application development. You can find more about application development in later chapters.
+
 
 ## The arm64 Jammy image
 
