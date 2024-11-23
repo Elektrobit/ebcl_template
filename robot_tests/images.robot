@@ -173,24 +173,24 @@ Build Image
     ${results_folder}=    Evaluate    $full_path + '/build'
     
     # Remove old build artefacts - build from scratch
-    Run Make    ${full_path}    clean    2m 
+    Execute   rm -rf ${results_folder} ${full_path}/.task
 
     # Build the initrd
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make initrd
-    # Check for boot generator log
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_initrd
+    # Check for initrd generator log
     Should Contain    ${result}    Image was written to
 
     Sleep    1s
 
     # Build the kernel
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make boot
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_kernel
     # Check for boot generator log
     Should Contain    ${result}    Results were written to
 
     Sleep    1s
 
     # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make image
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_image
     # Check for Embdgen log
     Should Contain    ${result}    Writing image to
 
@@ -204,18 +204,18 @@ Build Image
     Clear Lines    
     Sleep    1s
 
-Test That Make Does Not Rebuild
+Test That Task Does Not Rebuild
     [Arguments]    ${path}
     [Timeout]    1m
     ${full_path}=    Evaluate    '/workspace/images/' + $path
-    ${output}=    Run Make    ${full_path}    image
-    Should Contain    ${output}    Nothing to be done for 'image'
+    ${output}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_image
+    Should Contain    ${output}    is up to date
 
 Run Image
     [Arguments]    ${path}
     [Timeout]    5m
     ${full_path}=    Evaluate    '/workspace/images/' + $path
-    Send Message    source /build/venv/bin/activate; cd ${full_path}; make qemu
+    Send Message    source /build/venv/bin/activate; cd ${full_path}; task run_qemu
     ${success}=    Login To Vm
     Should Be True    ${success}
 
@@ -252,7 +252,7 @@ Test Systemd Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
     Build Image    ${path}    ${image}
-    Test That Make Does Not Rebuild    ${path}
+    Test That Task Does Not Rebuild    ${path}
     Run Image    ${path}
     Check For Startup Errors
     # TODO: Check For Systemd Unit Issues
@@ -269,7 +269,7 @@ Test Crinit Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
     Build Image    ${path}    ${image}
-    Test That Make Does Not Rebuild    ${path}
+    Test That Task Does Not Rebuild    ${path}
     Run Image    ${path}
     Check For Startup Errors
     Check For Startup Fails
@@ -281,4 +281,4 @@ Test Hardware Image
     [Arguments]    ${path}    ${image}=image.raw
     Connect
     Build Image    ${path}    ${image}
-    Test That Make Does Not Rebuild    ${path}
+    Test That Task Does Not Rebuild    ${path}

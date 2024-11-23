@@ -1,0 +1,23 @@
+# Taskfile for QEMU amd64 images
+version: '3'
+
+# QEMU kernel commandline
+vars:
+  kernel_cmdline: console=ttyS0
+  kernel_cmdline_append: ""
+  qemu_net_append: ""
+
+env:
+  SHELL : /bin/bash
+
+tasks:
+  run_qemu:
+    cmds:
+      - echo "Running {{.disc_image}} in QEMU x86_64 using EFI loader..."
+      - |
+      	qemu-system-x86_64 \
+        -m 4096 \
+        -nographic \
+        -netdev user,id=mynet0{{.qemu_net_append}} \
+        -device virtio-net-pci,netdev=mynet0 \
+        -drive format=raw,file={{.disc_image}},if=virtio
