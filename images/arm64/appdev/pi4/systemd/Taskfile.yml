@@ -7,7 +7,7 @@ vars:
 
 includes:
   rpi:
-    taskfile: ./../../raspberry/raspberry.yml
+    taskfile: ./../../../raspberry/raspberry.yml
     internal: true
 
 tasks:

@@ -17,9 +17,9 @@ tasks:
       - mkdir -p {{.result_folder}}
       - initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.initrd_img}}.log
     sources:
-       - ../initrd.yaml
+       - ./{{.initrd_spec}}
     generates:
-       - ./build/initrd.img
+       - ./{{.initrd_img}}
 
   build_fitimage:
     deps: [build_root_base, build_initrd, build_boot_root]
@@ -30,8 +30,9 @@ tasks:
     preconditions:
        - test -f {{.boot_spec}}
     sources:
+       - ./{{.boot_spec}}
     generates:
-       - ./build/fitimage
+       - ./{{.fitimage}}
 
   build_boot_root:
     cmds:
@@ -41,9 +42,9 @@ tasks:
     preconditions: 
        - test -f {{.boot_root_spec}}
     sources: 
-       - boot_root.yaml
+       - ./{{.boot_root_spec}}
     generates: 
-       - ./build/boot_root.tar
+       - ./{{.boot_root}}
 
   build_root_base:
     cmds:
@@ -53,9 +54,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
-    generates: 
-       - ./build/ebcl.tar
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.base_tarball}}
   
   build_rootfs:
     deps: [build_root_base]
@@ -66,9 +67,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
-    generates: 
-       - ./build/ebcl.config.tar
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.root_tarball}}
 
   build_image:
     deps: [build_rootfs, build_fitimage]
@@ -79,9 +80,9 @@ tasks:
     preconditions: 
        - test -f {{.partition_layout}}
     sources: 
-       - image.yaml
+       - ./{{.partition_layout}}
     generates: 
-       - ./build/image.raw
+       - ./{{.disc_image}}
 
   sysroot_tarball:
     cmds: 
@@ -90,10 +91,10 @@ tasks:
       - set -o pipefail && root_generator --sysroot --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.sysroot_tarball}}.log
     preconditions: 
       - test -f {{.root_filesystem_spec}}
-    sources:
-      - root.yaml
-    generates: 
-      - ./build/ebcl_sysroot.tar
+    sources: 
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.sysroot_tarball}}
 
   install_sysroot:
     deps: [sysroot_tarball]
@@ -140,3 +141,12 @@ tasks:
       - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.boot_root}} .
       - defer: rm -rf {{.result_folder}}/root
 
+  build_initrd:
+    cmds:
+      - echo "Fake target to be interface compliant"
+      - echo "Image was written to"
+
+  build_kernel:
+    cmds:
+      - echo "Fake target to be interface compliant"
+      - echo "Results were written to"
