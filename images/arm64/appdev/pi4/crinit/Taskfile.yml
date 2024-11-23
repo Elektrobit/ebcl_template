@@ -1,0 +1,16 @@
+version: '3'
+
+vars:
+  arch: 'aarch64'
+  partition_layout: ../image.yaml
+  root_filesystem_spec: root.yaml
+
+includes:
+  rpi:
+    taskfile: ./../../raspberry/raspberry.yml
+    internal: true
+
+tasks:
+  default:
+    cmds:
+      - task: rpi:build_image

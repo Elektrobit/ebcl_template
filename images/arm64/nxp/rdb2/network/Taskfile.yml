@@ -4,8 +4,8 @@ vars:
   arch: 'aarch64'
   partition_layout: ../image.yaml
   root_filesystem_spec: root.yaml
-  initrd_spec: ../initrd.yaml
-  boot_spec: ../boot.yaml
+  initrd_spec: initrd.yaml
+  boot_spec: boot.yaml
   boot_root_spec: ../boot_root.yaml
   config_root: config_root.sh
   base_tarball: build/ebcl_rdb2.tar
