@@ -4,10 +4,10 @@ vars:
   arch: 'aarch64'
   partition_layout: ../image.yaml
   root_filesystem_spec: root.yaml
-  initrd_spec: ../initrd.yaml
-  boot_spec: ../boot.yaml
+  initrd_spec: initrd.yaml
+  boot_spec: boot.yaml
   boot_root_spec: ../boot_root.yaml
-  config_root: config_root.sh
+  config_root: ../config_root.sh
   base_tarball: build/ebcl_rdb2.tar
   root_tarball: build/ebcl_rdb2.config.tar
   sysroot_tarball: build/ebcl_rdb2_sysroot.tar
@@ -17,8 +17,8 @@ vars:
   fitimage: ./build/fitimage
 
 includes:
-  rdb2:
-    taskfile: ../rdb2.yml
+  nxp:
+    taskfile:  ../../../nxp/rdb2/rdb2.mk
     flatten: true
 
 tasks:

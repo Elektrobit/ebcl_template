@@ -12,9 +12,8 @@ vars:
   sysroot_tarball: build/ebcl_sysroot.tar
   kernel_cmdline_append: "rw"
 
-
 includes:
-   qemu_aarch64:
+  qemu_aarch64:
     taskfile: ../../../../qemu_aarch64.yml
     internal: true
   qemu:
@@ -25,4 +24,4 @@ tasks:
   run_qemu:
     deps: [build_image, build_kernel, build_initrd]
     cmds:
-      - task:  qemu_aarch64:run_qemu
+      - task: qemu_aarch64:run_qemu
