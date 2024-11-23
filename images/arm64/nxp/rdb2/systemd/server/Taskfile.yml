@@ -18,7 +18,7 @@ vars:
 
 includes:
   rdb2:
-    taskfile: ../rdb2.yml
+    taskfile: ../../rdb2.yml
     flatten: true
 
 tasks:

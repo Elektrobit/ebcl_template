@@ -7,11 +7,10 @@ vars:
   initrd_spec: ../initrd.yaml
   boot_spec: ../boot.yaml
   config_root: config_root.sh
-  base_tarball: build/ubuntu.tar
-  root_tarball: build/ubuntu.config.tar
-  sysroot_tarball: build/ubuntu_sysroot.tar
+  base_tarball: build/ebcl.tar
+  root_tarball: build/ebcl.config.tar
+  sysroot_tarball: build/ebcl_sysroot.tar
   kernel_cmdline_append: "rw"
-
 
 includes:
   qemu_aarch64:

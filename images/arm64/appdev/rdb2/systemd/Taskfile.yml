@@ -18,7 +18,7 @@ vars:
 
 includes:
   nxp:
-    taskfile:  ../../../nxp/rdb2/rdb2.mk
+    taskfile:  ../../../nxp/rdb2/rdb2.yml
     flatten: true
 
 tasks:
