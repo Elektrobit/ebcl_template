@@ -2,18 +2,18 @@ version: '3'
 
 vars:
   arch: 'aarch64'
-  partition_layout: ../image.yaml
+  partition_layout: ../../image.yaml
   root_filesystem_spec: root.yaml
-  initrd_spec: ../initrd.yaml
-  boot_spec: ../boot.yaml
-  boot_root_spec: ../boot_root.yaml
+  initrd_spec: ../../initrd.yaml
+  boot_spec: boot.yaml
+  boot_root_spec: ../../boot_root.yaml
   config_root: config_root.sh
   base_tarball: build/ebcl_rdb2.tar
   root_tarball: build/ebcl_rdb2.config.tar
   sysroot_tarball: build/ebcl_rdb2_sysroot.tar
-  build_fitimage: ../build_fitimage.sh
-  fitimage_config: ../bootargs.its
-  bootloader_config: ../bootargs-overlay.dts
+  build_fitimage: ../../build_fitimage.sh
+  fitimage_config: ../../bootargs.its
+  bootloader_config: ../../bootargs-overlay.dts
   fitimage: ./build/fitimage
 
 includes:
