@@ -1,0 +1,27 @@
+version: '3'
+
+vars:
+  arch: 'x86_64'
+  partition_layout: image.yaml
+  root_filesystem_spec: root.yaml
+  initrd_spec: initrd.yaml
+  boot_spec: boot.yaml
+  config_root: config_root.sh
+  base_tarball: build/ubuntu.tar
+  root_tarball: build/ubuntu.config.tar
+  sysroot_tarball: build/ubuntu_sysroot.tar
+  kernel_cmdline_append: "rw"
+
+includes:
+  qemu_x86_64:
+    taskfile: ../../../qemu_x86_64.yml
+    internal: true
+  qemu:
+    taskfile: ../../../qemu.yml
+    flatten: true
+
+tasks:
+  run_qemu:
+    deps: [build_image, build_kernel, build_initrd]
+    cmds:
+      - task: qemu_x86_64:run_qemu
