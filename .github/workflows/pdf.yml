@@ -1,0 +1,23 @@
+name: Build docu for tag
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+jobs:
+  build-docu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build pdf docu
+        run: |
+          sudo apt-get update && sudo apt-get install -y pandoc texlive texlive-fonts-recommended texlive-fonts-extra texlive-luatex
+          sudo cp ${GITHUB_WORKSPACE}/docs/template/eisvogel.tex /usr/share/pandoc/data/templates/eisvogel.tex
+          bash -x ${GITHUB_WORKSPACE}/docs/build_pdf.sh -o EBcL_SDK_$GITHUB_REF_NAME.pdf
+      - name: pdf release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }} ${{ github.event.head_commit.message }}
+          tag_name: ${{ github.ref_name }}
+          files:  ${{ github.workspace }}/docs/EBcL_SDK_${{ github.ref_name }}.pdf

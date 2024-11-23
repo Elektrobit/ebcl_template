@@ -12,7 +12,7 @@ The integration, if needed, is done using [Embdgen](https://github.com/Elektrobi
 Let’s take a closer look at this build for the very simple QEMU build target.
 Typically QEMU gets a disc image, a Linux kernel binary and optionally an initrd.img, together with some configuration parameters.
 
-![Embedded Systems](../assets/QEMU.drawio.png =300x)
+![Embedded Systems](../assets/QEMU.drawio.png)
 
 From a run-time point of view, there are dependencies between these three artifacts caused by the used kernel version.
 The used kernel modules need to fit to the used kernel, and the C library used in the root filesystem must fit to the used kernel interface.

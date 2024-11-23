@@ -139,7 +139,7 @@ Example:
 modules_folder: $$RESULTS$$
 ```
 
-The string “$$RESULTS$$” will be replaced with the path to the output folder, for all paths given in yaml config files of the build tools.
+The string ``$$RESULTS$$`` will be replaced with the path to the output folder, for all paths given in yaml config files of the build tools.
 
 - **result_pattern** _(root)_  \[default: auto detected \]: A name pattern to match the build result, e.g.
 *.tar.xz for kiwi-ng tbz builds.
