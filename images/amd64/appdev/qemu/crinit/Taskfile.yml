@@ -1,0 +1,33 @@
+version: '3'
+
+vars:
+  arch: 'x86_64'
+  partition_layout: ../image.yaml
+  root_filesystem_spec: root.yaml
+  initrd_spec: ../initrd.yaml
+  boot_spec: ../boot.yaml
+  config_root: config_root.sh
+  base_tarball: build/ebcl.tar
+  root_tarball: build/ebcl.config.tar
+  sysroot_tarball: build/ebcl_sysroot.tar
+  qemu_net_append: ",ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,ipv6-dns=fd00::eb:3,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333"
+  kernel_cmdline_append: "rw"
+
+
+includes:
+  qemu_x86_64:
+    taskfile: ../../../../qemu_x86_64.yml
+    internal: true
+  qemu:
+    taskfile: ../../../../qemu.yml
+    flatten: true
+
+tasks:
+  run_qemu:
+    deps: [build_image, build_kernel, build_initrd]
+    cmds:
+      - task: qemu_x86_64:run_qemu
+  ssh:
+    cmds:
+      - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2222"
+      - ssh -p 2222 root@localhost
