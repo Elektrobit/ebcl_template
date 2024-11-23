@@ -1,0 +1,118 @@
+version: '3'
+
+vars:
+  kernel_cmdline_append: rw
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  initrd_img: ./build/initrd.img
+  kernel: ./build/vmlinuz
+
+env:
+  SHELL : /bin/bash
+
+tasks:
+  build_initrd:
+    cmds:
+      - echo "Build initrd.img..."
+      - mkdir -p {{.result_folder}}
+      - initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.initrd_img}}.log
+    sources:
+       - ../initrd.yaml
+    generates:
+       - ./build/initrd.img
+
+  build_kernel:
+    cmds:
+      - echo "Get kernel binary..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.kernel}}.log
+      - mv ./{{.kernel}}-* ./{{.kernel}} || true
+    preconditions:
+       - test -f {{.boot_spec}}
+    sources:
+       - ../boot.yaml
+    generates:
+       - ./build/vmlinuz
+
+  build_root_base:
+    cmds:
+      - echo "Build root.tar..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.base_tarball}}.log
+    preconditions: 
+       - test -f {{.root_filesystem_spec}}
+    sources: 
+       - root.yaml
+    generates: 
+       - ./build/ebcl.tar
+  
+  build_rootfs:
+    deps: [build_root_base]
+    cmds: 
+      - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
+      - mkdir -p  {{.result_folder}}
+      - set -o pipefail && root_configurator {{.root_filesystem_spec}} {{.base_tarball}} {{.root_tarball}} 2>&1 | tee {{.root_tarball}}.log
+    preconditions: 
+       - test -f {{.root_filesystem_spec}}
+    sources: 
+       - root.yaml
+    generates: 
+       - ./build/ebcl.config.tar
+
+  build_image:
+    deps: [build_rootfs, build_kernel, build_initrd]
+    cmds: 
+      - echo "Build image..."
+      - mkdir -p  {{.result_folder}}
+      - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
+    preconditions: 
+       - test -f {{.partition_layout}}
+    sources: 
+       - image.yaml
+    generates: 
+       - ./build/image.raw
+
+  sysroot_tarball:
+    cmds: 
+      - echo "Build sysroot.tar..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --sysroot --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.sysroot_tarball}}.log
+    preconditions: 
+      - test -f {{.root_filesystem_spec}}
+    sources:
+      - root.yaml
+    generates: 
+      - ./build/ebcl_sysroot.tar
+
+  install_sysroot:
+    deps: [sysroot_tarball]
+    cmds: 
+      - rm -rf /workspace/sysroot_{{.arch}}/*
+      - tar xf {{.sysroot_tarball}} -C /workspace/sysroot_{{.arch}}/ || true
+
+  edit_base:
+    cmds: 
+      - echo "Extacting base root tarball..."
+      - mkdir -p {{.result_folder}}/root
+      - fakeroot -s {{.result_folder}}/fakedit -- tar xf {{.base_tarball}} -C {{.result_folder}}/root
+      - echo "Open edit shell..."
+      - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakeedit
+      - echo "Re-packing root tarball..."
+      - defer: rm -f {{.base_tarball}}.old
+      - mv {{.base_tarball}} {{.base_tarball}}.old
+      - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.base_tarball}} .
+      - defer: rm -rf {{.result_folder}}/root
+    
+  edit_root:
+    cmds: 
+      - echo "Extacting base root tarball..."
+      - mkdir -p {{.result_folder}}/root
+      - fakeroot -s {{.result_folder}}/fakedit -- tar xf {{.root_tarball}} -C {{.result_folder}}/root
+      - echo "Open edit shell..."
+      - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakeedit
+      - echo "Re-packing root tarball..."
+      - defer: rm -f {{.root_tarball}}.old
+      - mv {{.root_tarball}} {{.root_tarball}}.old
+      - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.root_tarball}} .
+      - defer: rm -rf {{.result_folder}}/root
+

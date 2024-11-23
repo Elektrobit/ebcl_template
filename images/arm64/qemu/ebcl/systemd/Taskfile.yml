@@ -1,0 +1,28 @@
+version: '3'
+
+vars:
+  arch: 'aarch64'
+  partition_layout: ../image.yaml
+  root_filesystem_spec: root.yaml
+  initrd_spec: ../initrd.yaml
+  boot_spec: ../boot.yaml
+  config_root: config_root.sh
+  base_tarball: build/ebcl.tar
+  root_tarball: build/ebcl.config.tar
+  sysroot_tarball: build/ebcl_sysroot.tar
+  kernel_cmdline_append: "rw"
+
+
+includes:
+   qemu_aarch64:
+    taskfile: ../../../../qemu_aarch64.yml
+    internal: true
+  qemu:
+    taskfile: ../../../../qemu.yml
+    flatten: true
+
+tasks:
+  run_qemu:
+    deps: [build_image, build_kernel, build_initrd]
+    cmds:
+      - task:  qemu_aarch64:run_qemu

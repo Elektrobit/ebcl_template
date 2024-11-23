@@ -1,0 +1,26 @@
+version: '3'
+
+vars:
+  arch : 'x86_64'
+  partition_layout : ../image.yaml
+  root_filesystem_spec : root.yaml
+  initrd_spec : ../initrd.yaml
+  boot_spec : ../boot.yaml
+  config_root : ../config_root.sh
+  base_tarball : build/ebcl.tar
+  root_tarball : build/ebcl.config.tar
+  sysroot_tarball : build/ebcl_sysroot.tar
+
+includes:
+  qemu_x86_64:
+    taskfile: ../../../../qemu_x86_64.yml
+    internal: true
+  qemu: 
+    taskfile: ../../../../qemu.yml
+    flatten: true
+
+tasks:
+  run_qemu:
+    deps: [build_image, build_kernel, build_initrd]
+    cmds:
+      - task: qemu_x86_64:run_qemu
