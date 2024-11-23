@@ -17,9 +17,9 @@ tasks:
       - mkdir -p {{.result_folder}}
       - initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.initrd_img}}.log
     sources:
-       - ../initrd.yaml
+       - ./{{.initrd_spec}}
     generates:
-       - ./build/initrd.img
+       - ./{{.initrd_img}}
 
   build_kernel:
     cmds:
@@ -30,9 +30,9 @@ tasks:
     preconditions:
        - test -f {{.boot_spec}}
     sources:
-       - ../boot.yaml
+       - ./{{.boot_spec}}
     generates:
-       - ./build/vmlinuz
+       - ./{{.kernel}}
 
   build_root_base:
     cmds:
@@ -42,9 +42,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
+       - ./{{.root_filesystem_spec}}
     generates: 
-       - ./build/ebcl.tar
+       - ./{{.base_tarball}}
   
   build_rootfs:
     deps: [build_root_base]
@@ -55,9 +55,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
+       - ./{{.root_filesystem_spec}}
     generates: 
-       - ./build/ebcl.config.tar
+       - ./{{.root_tarball}}
 
   build_image:
     deps: [build_rootfs, build_kernel, build_initrd]
@@ -68,9 +68,9 @@ tasks:
     preconditions: 
        - test -f {{.partition_layout}}
     sources: 
-       - image.yaml
+       - ./{{.partition_layout}}
     generates: 
-       - ./build/image.raw
+       - ./{{.disc_image}}
 
   sysroot_tarball:
     cmds: 
@@ -82,7 +82,7 @@ tasks:
     sources:
       - root.yaml
     generates: 
-      - ./build/ebcl_sysroot.tar
+      - ./{{.sysroot_tarball}}
 
   install_sysroot:
     deps: [sysroot_tarball]

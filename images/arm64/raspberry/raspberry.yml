@@ -21,9 +21,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
-    generates: 
-       - ./build/ebcl.tar
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.base_tarball}}
   
   build_rootfs:
     deps: [build_root_base]
@@ -34,9 +34,9 @@ tasks:
     preconditions: 
        - test -f {{.root_filesystem_spec}}
     sources: 
-       - root.yaml
-    generates: 
-       - ./build/ebcl.config.tar
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.root_tarball}}
 
   build_image:
     deps: [build_rootfs]
@@ -47,9 +47,10 @@ tasks:
     preconditions: 
        - test -f {{.partition_layout}}
     sources: 
-       - image.yaml
+       - ./{{.partition_layout}}
     generates: 
-       - ./build/image.raw
+       - ./{{.disc_image}}
+
 
   sysroot_tarball:
     cmds: 
@@ -58,10 +59,10 @@ tasks:
       - set -o pipefail && root_generator --sysroot --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.sysroot_tarball}}.log
     preconditions: 
       - test -f {{.root_filesystem_spec}}
-    sources:
-      - root.yaml
-    generates: 
-      - ./build/ebcl_sysroot.tar
+    sources: 
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.sysroot_tarball}}
 
   install_sysroot:
     deps: [sysroot_tarball]
