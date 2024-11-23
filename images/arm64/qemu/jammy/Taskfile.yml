@@ -2,10 +2,10 @@ version: '3'
 
 vars:
   arch: 'aarch64'
-  partition_layout: ../image.yaml
+  partition_layout: ^11.yaml
   root_filesystem_spec: root.yaml
-  initrd_spec: ../initrd.yaml
-  boot_spec: ../boot.yaml
+  initrd_spec: initrd.yaml
+  boot_spec: boot.yaml
   config_root: config_root.sh
   base_tarball: build/ebcl.tar
   root_tarball: build/ebcl.config.tar
