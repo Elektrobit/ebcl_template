@@ -141,3 +141,12 @@ tasks:
       - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.boot_root}} .
       - defer: rm -rf {{.result_folder}}/root
 
+  build_initrd:
+    cmds:
+      - echo "Fake target to be interface compliant"
+      - echo "Image was written to"
+
+  build_kernel:
+    cmds:
+      - echo "Fake target to be interface compliant"
+      - echo "Image was written to"
