@@ -149,4 +149,4 @@ tasks:
   build_kernel:
     cmds:
       - echo "Fake target to be interface compliant"
-      - echo "Image was written to"
+      - echo "Results were written to"
