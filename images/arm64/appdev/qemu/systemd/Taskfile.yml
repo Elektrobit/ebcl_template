@@ -15,9 +15,10 @@ vars:
 
 
 includes:
-  qemu_x86_64:
+  qemu_aarch64:
     taskfile: ../../../../qemu_aarch64.yml
     internal: true
+    flatten: true
   qemu:
     taskfile: ../../../../qemu.yml
     flatten: true
@@ -26,7 +27,7 @@ tasks:
   run_qemu:
     deps: [build_image, build_boot, build_initrd]
     cmds:
-      - task: qemu_x86_64:run_qemu
+      - task: qemu_aarch64:run_qemu
   ssh:
     cmds:
       - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2222"
