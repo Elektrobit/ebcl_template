@@ -150,7 +150,7 @@ Build Image example-old-images/qemu/berrymill
     # Run the image
     # -------------
     Test That Make Does Not Rebuild    ${path}
-    Run Image    ${path}
+    Run Old Image    ${path}
     Send Message    \ncrinit-ctl poweroff
     Sleep    20s
     Disconnect
@@ -213,6 +213,14 @@ Test That Task Does Not Rebuild
     ${full_path}=    Evaluate    '/workspace/images/' + $path
     ${output}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_image
     Should Contain    ${output}    is up to date
+
+Run Old Image
+    [Arguments]    ${path}
+    [Timeout]    5m
+    ${full_path}=    Evaluate    '/workspace/images/' + $path
+    Send Message    source /build/venv/bin/activate; cd ${full_path}; make qemu
+    ${success}=    Login To Vm
+    Should Be True    ${success}
 
 Run Image
     [Arguments]    ${path}
