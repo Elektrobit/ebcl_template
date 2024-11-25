@@ -24,8 +24,7 @@ fi
 for key in $other_cache_keys; do
   echo "Deleting cache: $key"
   gh api -X DELETE -H "Accept: application/vnd.github+json" \
-    /repos/Elektrobit/ebcl_template/actions/caches \
-    -f key="$key"
+    /repos/Elektrobit/ebcl_template/actions/caches?key=$key
 done
 
 echo "All smaller caches deleted successfully."
