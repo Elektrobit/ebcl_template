@@ -16,6 +16,7 @@ includes:
   qemu_aarch64:
     taskfile: ../../../../qemu_aarch64.yml
     internal: true
+    flatten: true
   qemu:
     taskfile: ../../../../qemu.yml
     flatten: true
