@@ -152,3 +152,24 @@ jobs:
             ./robot_tests/report.html
             ./robot_tests/output.xml
             ./robot_tests/log.html
+          retention-days: 3
+
+  # Github Cache has immutable Caches. Their proposed solution is creating a Cache for every matrix job and uploading it.
+  # This is not viable, as the cache limit is exceeded almost immediately.
+  # All image builds will profit from one cache no matter, if more packages than only their needed ones are inside.
+  # Thus only take the largest cache and keep it for the next run. Delete all others.
+  # Idea. Largest Cache will grow over time and eventually contain everything. 
+  # This Cache will be used for every Test and be the same for every SDK release        
+  cache-cleanup:
+    name: Cache Cleanup
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Run Cleanup Script
+        run: ./.github/workflows/tools/cache_cleanup.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
