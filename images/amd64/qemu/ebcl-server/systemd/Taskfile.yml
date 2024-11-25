@@ -22,7 +22,7 @@ includes:
 
 tasks:
   run_qemu:
-    deps: [build_image, build_kernel, build_initrd]
+    deps: [build_image, build_boot, build_initrd]
     cmds:
       - task: qemu_x86_64:run_qemu
   ssh:

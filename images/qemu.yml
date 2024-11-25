@@ -21,7 +21,7 @@ tasks:
     generates:
        - ./{{.initrd_img}}
 
-  build_kernel:
+  build_boot:
     cmds:
       - echo "Get kernel binary..."
       - mkdir -p {{.result_folder}}
@@ -60,7 +60,7 @@ tasks:
        - ./{{.root_tarball}}
 
   build_image:
-    deps: [build_rootfs, build_kernel, build_initrd]
+    deps: [build_rootfs, build_boot, build_initrd]
     cmds: 
       - echo "Build image..."
       - mkdir -p  {{.result_folder}}

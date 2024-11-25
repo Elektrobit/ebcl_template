@@ -8,7 +8,7 @@ vars:
 includes:
   rpi:
     taskfile: ../../raspberry.yml
-    internal: true
+    flatten: true
 
 tasks:
   default:
