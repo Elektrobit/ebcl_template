@@ -15,8 +15,8 @@ vars:
 includes:
   qemu_aarch64:
     taskfile: ../../../../qemu_aarch64.yml
-    internal: true
     flatten: true
+    internal: true
   qemu:
     taskfile: ../../../../qemu.yml
     flatten: true
@@ -25,4 +25,4 @@ tasks:
   run_qemu:
     deps: [build_image, build_boot, build_initrd]
     cmds:
-      - task: qemu_aarch64:run_qemu
+      - task: run_qemu_internal

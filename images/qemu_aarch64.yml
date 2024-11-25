@@ -3,13 +3,13 @@ version: '3'
 
 # QEMU kernel commandline
 vars:
-  kernel_cmdline: console=ttyS0
+  kernel_cmdline: console=ttyAMA0
 
 env:
   SHELL : /bin/bash
 
 tasks:
-  run_qemu:
+  run_qemu_internal:
     cmds:
       - echo "Running {{.disc_image}} in QEMU aarch64..."
       - |

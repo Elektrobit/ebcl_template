@@ -4,14 +4,12 @@ version: '3'
 # QEMU kernel commandline
 vars:
   kernel_cmdline: console=ttyS0
-  kernel_cmdline_append: ""
-  qemu_net_append: ""
 
 env:
   SHELL : /bin/bash
 
 tasks:
-  run_qemu:
+  run_qemu_internal:
     cmds:
       - echo "Running {{.disc_image}} in QEMU x86_64 using EFI loader..."
       - |

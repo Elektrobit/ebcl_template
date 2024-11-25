@@ -183,7 +183,7 @@ Build Image
     Sleep    1s
 
     # Build the kernel
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_kernel
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_boot
     # Check for boot generator log
     Should Contain    ${result}    Results were written to
 
@@ -203,6 +203,13 @@ Build Image
     # Clear the output queue
     Clear Lines    
     Sleep    1s
+
+Test That Make Does Not Rebuild
+    [Arguments]    ${path}
+    [Timeout]    1m
+    ${full_path}=    Evaluate    '/workspace/images/' + $path
+    ${output}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make
+    Should Contain    ${output}    is up to date
 
 Test That Task Does Not Rebuild
     [Arguments]    ${path}

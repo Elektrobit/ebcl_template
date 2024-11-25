@@ -9,7 +9,7 @@ env:
   SHELL : /bin/bash
 
 tasks:
-  run_qemu:
+  run_qemu_internal:
     cmds:
       - echo "Running {{.disc_image}} in QEMU x86_64..."
       - |
