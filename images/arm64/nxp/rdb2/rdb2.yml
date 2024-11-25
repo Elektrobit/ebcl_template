@@ -21,8 +21,8 @@ tasks:
     generates:
        - ./{{.initrd_img}}
 
-  build_fitimage:
-    deps: [build_root_base, build_initrd, build_boot_root]
+  build_boot:
+    deps: [build_initrd, build_boot_root]
     cmds:
       - echo "Get fitimage..."
       - mkdir -p {{.result_folder}}
@@ -31,6 +31,8 @@ tasks:
        - test -f {{.boot_spec}}
     sources:
        - ./{{.boot_spec}}
+       - ./{{.fitimage_config}}
+       - ./{{.build_fitimage}}
     generates:
        - ./{{.fitimage}}
 
@@ -68,11 +70,12 @@ tasks:
        - test -f {{.root_filesystem_spec}}
     sources: 
        - ./{{.root_filesystem_spec}}
+       - ./{{.config_root}}
     generates:
        - ./{{.root_tarball}}
 
   build_image:
-    deps: [build_rootfs, build_fitimage]
+    deps: [build_rootfs, build_boot]
     cmds: 
       - echo "Build image..."
       - mkdir -p  {{.result_folder}}
@@ -140,13 +143,3 @@ tasks:
       - mv {{.boot_root}} {{.boot_root}}.old
       - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.boot_root}} .
       - defer: rm -rf {{.result_folder}}/root
-
-  build_initrd:
-    cmds:
-      - echo "Fake target to be interface compliant"
-      - echo "Image was written to"
-
-  build_kernel:
-    cmds:
-      - echo "Fake target to be interface compliant"
-      - echo "Results were written to"

@@ -156,8 +156,8 @@ config_kernel:
 	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) menuconfig
 
 # Rebuild the kernel binary
-.PHONY: rebuild_kernel
-rebuild_kernel:
+.PHONY: rebuild_boot
+rebuild_boot:
 	mkdir -p $(result_folder)
 	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
 	@echo "Delete the old kernel binary..."
