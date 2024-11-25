@@ -1,11 +1,17 @@
 # Makefile for runnung QEMU amd64 images
 
+# QEMU kernel commandline
+vars:
+  kernel_cmdline: console=ttyS0
+
+env:
+  SHELL : /bin/bash
 #-------------------
 # Run the QEMU image
 #-------------------
 
 tasks:
-  run_qemu:
+  run_qemu_internal:
     cmds:
       - echo "Running {{.disc_image}} in QEMU aarch64 using EFI loader..."
       - |
