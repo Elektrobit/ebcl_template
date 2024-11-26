@@ -10,6 +10,7 @@ env:
 
 tasks:
   run_qemu_internal:
+    desc: Run a build qemu image
     cmds:
       - echo "Running {{.disc_image}} in QEMU x86_64 using EFI loader..."
       - |

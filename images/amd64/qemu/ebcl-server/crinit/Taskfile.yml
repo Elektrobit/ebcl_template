@@ -22,10 +22,12 @@ includes:
 
 tasks:
   run_qemu:
+    desc: Build and run the qemu image
     deps: [build_image, build_boot, build_initrd]
     cmds:
       - task: run_qemu_internal
   ssh:
+    desc: Connect to the running qemu instance via ssh
     cmds:
       - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2223"
       - ssh -p 2223 root@localhost
