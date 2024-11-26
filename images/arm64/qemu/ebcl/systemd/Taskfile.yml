@@ -21,7 +21,8 @@ includes:
     flatten: true
 
 tasks:
-  run_qemu:
+  default:
+    aliases: [run_qemu]
     deps: [build_image, build_boot, build_initrd]
     cmds:
       - task: run_qemu_internal
