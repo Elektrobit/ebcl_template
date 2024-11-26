@@ -1,0 +1,5 @@
+NAME = agetty-ttyS0
+COMMAND = /usr/bin/setsid /usr/sbin/agetty 115200 ttyS0
+
+RESPAWN = YES
+RESPAWN_RETRIES = 3

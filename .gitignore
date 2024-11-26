@@ -67,3 +67,5 @@ fakedit
 .mypy_cache
 
 /testing
+
+**/.task

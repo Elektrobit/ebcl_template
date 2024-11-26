@@ -79,8 +79,6 @@ tasks:
     preconditions: 
        - test -f {{.partition_layout}}
        - test -f {{.root_tarball}}
-       - test -f {{.kernel}}
-       - test -f {{.initrd_img}}
     sources: 
        - ./{{.partition_layout}}
     generates: 
