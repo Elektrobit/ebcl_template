@@ -135,6 +135,6 @@ tasks:
     generates:
       - ./{{.modules}}
 
-    clean_kernel:
-      cmds:
-       - rm -rf {{.source}}
+  clean_kernel:
+    cmds:
+      - rm -rf {{.source}}

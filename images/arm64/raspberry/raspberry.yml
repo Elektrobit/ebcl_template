@@ -105,3 +105,13 @@ tasks:
     cmds:
       - echo "Fake target to be interface compliant"
       - echo "Results were written to"
+
+  clean:
+    cmds:
+      - rm -rf {{.result_folder}}
+
+  mrproper:
+    cmds:
+      - rm -rf {{.result_folder}}
+      - rm -rf /workspace/state
+
