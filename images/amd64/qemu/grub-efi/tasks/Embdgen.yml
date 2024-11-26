@@ -4,7 +4,7 @@ includes:
   RootGenerator: RootGenerator.yml
 
 tasks:
-  build-root-filesystem-tarball:
+  build-image:
     deps:
       - task: RootGenerator:config-root-filesystem-tarball
 
@@ -18,4 +18,3 @@ tasks:
 
     generates:
       - '{{.result_folder}}/{{.disc_image}}'
-

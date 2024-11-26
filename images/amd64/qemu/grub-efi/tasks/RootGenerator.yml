@@ -24,7 +24,6 @@ tasks:
     sources:
       - '{{.root_filesystem_spec}}'
       - '{{.config_root_script}}'
-      - '{{.root_overlay}}'
       - '{{.result_folder}}/{{.base_tarball}}'
 
     generates:

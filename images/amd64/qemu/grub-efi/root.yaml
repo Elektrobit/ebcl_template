@@ -3,15 +3,13 @@ base: base.yaml
 name: ebcl
 # CPU architecture
 arch: amd64
-# Add the EB corbos Linux apt repo to provide the boostrap package
-use_ebcl_apt: true
 # Packages to install in the root tarball
 packages:
-  - crinit
-  - crinit-ctl
-# Crinit configuration, including sbin/init
-host_files:
-  - source: config/*
+  - linux-image-generic
+  - systemd
+  - udev
+  - util-linux
+  - grub-efi
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
