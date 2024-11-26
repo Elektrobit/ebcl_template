@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+  prepare-efi-partition:
+    vars:
+      disc:
+        sh: sudo losetup -fP --show {{.result_folder}}/{{.disc_image}}
+    cmds:
+      - echo "Using losetup device {{.disc}}..."
+      
+      - sudo losetup -d {{.disc}}
+
+    sources:
+      - '{{.result_folder}}/{{.disc_image}}'
+
+    generates:
+      - '{{.result_folder}}/{{.disc_image}}'
+

@@ -1,0 +1,22 @@
+version: '3'
+
+vars:
+  result_folder: ./build
+  root_filesystem_spec: root.yaml
+  base_tarball: ebcl.tar
+  config_root_script: config_root.sh
+  root_overlay: config
+  root_tarball: ebcl.config.tar
+  partition_layout: image.yaml
+  disc_image: image.raw
+
+includes:
+  Generic: tasks/Generic.yml
+  RootGenerator: tasks/RootGenerator.yml
+  Embdgen: tasks/Embdgen.yml
+  Efi: tasks/Efi.yml
+
+tasks:
+  default:
+    deps:
+      - task: Embdgen:build-root-filesystem-tarball
