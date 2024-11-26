@@ -8,9 +8,9 @@ vars:
   boot_spec: boot.yaml
   boot_root_spec: ../boot_root.yaml
   config_root: config_root.sh
-  base_tarball: build/ebcl.tar
-  root_tarball: build/ebcl.config.tar
-  sysroot_tarball: build/ebcl_sysroot.tar
+  base_tarball: build/ebcl_rdb2.tar
+  root_tarball: build/ebcl_rdb2.config.tar
+  sysroot_tarball: build/ebcl_rdb2_sysroot.tar
   kernel_config: kernel_config.yaml
   kernel_package: linux-buildinfo-5.15.0-1034-s32-eb
   build_fitimage: ../build_fitimage.sh
@@ -26,7 +26,7 @@ vars:
 includes:
   rdb2:
     taskfile: ../rdb2.yml
-    flatten: true
+    flatten: false
 
 tasks:
   source:
@@ -52,7 +52,7 @@ tasks:
       - echo "Copying {{.kconfig}} to {{.kernel_dir}}..."
       - cp {{.kconfig}} {{.kernel_dir}}/.config
       - echo "Set all not defined values of the kernel config to defaults..."
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} olddefconfig
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} olddefconfig
       - echo "Copying modified config as olddefconfig..."
       - cp {{.kernel_dir}}/.config {{.result_folder}}/olddefconfig
     sources: 
@@ -64,7 +64,7 @@ tasks:
     deps: [kconfig]
     cmds:
       - echo "Compile kernel..."
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} -j 16 Image
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
       - echo "Get kernel binary..."
       - cp {{.kernel_dir}}/arch/arm64/boot/Image {{.kernel}}
       - echo "Results were written to {{.kernel}}"
@@ -77,23 +77,39 @@ tasks:
     deps: [build_kernel]
     cmds:
       - echo "Get virtio driver..."
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} modules -j 16
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
       - cd {{.kernel_dir}} && chmod +x debian/scripts/sign-module
       - mkdir -p {{.result_folder}}
-      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} {{.MAKE}} {{.kernel_make_args}} modules_install
+      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} make {{.kernel_make_args}} modules_install
     generates:
       - ./{{.modules}}
 
   config_kernel:
     cmds:
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} menuconfig
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} menuconfig
     preconditions:
       - test -d {{.kernel_dir}} 
+
+  build_boot:
+    deps: [build_kernel, build_initrd]
+    cmds:
+      - echo "Get fitimage..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.fitimage}}.log
+    preconditions:
+       - test -f {{.boot_spec}}
+    sources:
+       - ./{{.boot_spec}}
+       -  /{{.boot_root}}
+       - ./{{.fitimage_config}}
+       - ./{{.build_fitimage}}
+    generates:
+       - ./{{.fitimage}}
 
   rebuild_boot:
     cmds:
       - mkdir -p {{.result_folder}}
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} -j 16 Image
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
       - echo "Delete the old kernel binary..."
       - rm -f {{.kernel}}
       - echo "Get the new kernel binary..."
@@ -107,18 +123,53 @@ tasks:
   rebuild_modules:
     cmds:
       - mkdir -p {{.result_folder}}
-      - cd {{.kernel_dir}} && {{.MAKE}} {{.kernel_make_args}} modules -j 16
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
       - cd {{.kernel_dir}} && chmod +x debian/scripts/sign-module
       - echo "Delete the old kernel modules..."
       - rm -rf {{.modules}}
       - echo "Install the new kernel modules..."
-      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} {{.MAKE}} {{.kernel_make_args}} modules_install
+      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} make {{.kernel_make_args}} modules_install
     preconditions:
       - test -d {{.kernel_dir}}
       - test -f {{.kconfig}}
     generates:
       - ./{{.modules}}
 
-  clean_kernel:
+  clean:
     cmds:
+      - task: rdb2:clean
       - rm -rf {{.source}}
+
+  build_boot_root:
+    cmds:
+      - task: rdb2:build_boot_root
+
+  build_image:
+    deps: [build_kernel, build_boot]
+    cmds:
+      - task: rdb2:build_image
+  
+  build_initrd:
+    cmds:
+      - task: rdb2:build_initrd
+
+  build_rootfs:
+    cmds:
+      - task: rdb2:build_rootfs
+
+  edit_root:
+    cmds:
+      - task: rdb2:edit_root
+
+  install_sysroot:
+    cmds:
+      - task: rdb2:install_sysroot
+
+  mrproper:
+    cmds:
+      - task: rdb2:mrproper
+      - task: clean
+
+  sysroot_tarball:
+    cmds:
+      - task: rdb2:sysroot_tarball
