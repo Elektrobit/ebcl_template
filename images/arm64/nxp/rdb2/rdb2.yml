@@ -143,3 +143,12 @@ tasks:
       - mv {{.boot_root}} {{.boot_root}}.old
       - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.boot_root}} .
       - defer: rm -rf {{.result_folder}}/root
+
+  clean:
+    cmds:
+      - rm -rf {{.result_folder}}
+
+  mrproper:
+    cmds:
+      - rm -rf {{.result_folder}}
+      - rm -rf /workspace/state

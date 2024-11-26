@@ -116,3 +116,12 @@ tasks:
       - cd {{.result_folder}}/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../{{.root_tarball}} .
       - defer: rm -rf {{.result_folder}}/root
 
+  clean:
+    cmds:
+      - rm -rf {{.result_folder}}
+
+  mrproper:
+    cmds:
+      - rm -rf {{.result_folder}}
+      - rm -rf /workspace/state
+
