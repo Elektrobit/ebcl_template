@@ -13,20 +13,11 @@ jobs:
     outputs:
       # Names of every Test Case defined
       test_cases: ${{ steps.get_tests.outputs.test_cases }}
-      container_tag: ${{ steps.ver.outputs.container_tag}}
+      container_tag: ${{ steps.ver.outputs.container_tag }}
     steps:
       # Checkout the repository
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      # Login to Docker registry
-      - name: Login to Docker Registry
-        uses: docker/login-action@v3
-        id: reg_login
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Import SDK image and initialize workspace
       - name: Extract DevContainer Version
@@ -34,49 +25,6 @@ jobs:
         run: |
           CONTAINER_TAG=$(cat .devcontainer/devcontainer.json | grep "ghcr.io" | awk -F ":" '{print $3}' | awk -F "\"" '{print $1}')
           echo "container_tag=$CONTAINER_TAG" >> $GITHUB_OUTPUT
-      
-
-      - name: Check Modified DevContainer Available
-        id: check_con
-        run: docker manifest inspect ghcr.io/elektrobit/robot_test_dev_con:${{ steps.ver.outputs.container_tag }}
-        continue-on-error: true
-      
-      - name: Pull Latest DevContainer
-        if: ${{ steps.check_con.outcome == 'failure' }}
-        id: pull_dev
-        run: docker pull ghcr.io/elektrobit/ebcl_dev_container:${{ steps.ver.outputs.container_tag }}
-
-      # Predownload Kiwi Box
-      # Required, because of sporadic network issues when running all Test Cases simultaniously
-      # which all try to download the same kiwi box.
-      # To Do this, the easiest way, run minimal valid boxbuild command, which will download the kiwi box but fail immediatly after that
-      # due to missing kiwi configuration"
-      # Sometimes kiwi is run as ebcl user -> cp kiwi box to ebcl home
-      - name: Predownload x86_64 Kiwi Box
-        if: ${{ steps.check_con.outcome == 'failure' }}
-        id: x86_64_box
-        run: |
-            docker run --user ebcl --name container-w-amd-box \
-            -v $PWD:/workspace \
-            ghcr.io/elektrobit/ebcl_dev_container:${{ steps.ver.outputs.container_tag }} bash -c \
-              "bash /workspace/.github/workflows/tools/box_download.sh x86_64" 
-            docker commit container-w-amd-box ghcr.io/elektrobit/robot_test_dev_con:${{ steps.ver.outputs.container_tag }}
-      
-      - name: Predownload aarch64 Kiwi Box
-        if: ${{ steps.check_con.outcome == 'failure' }}
-        id: aarch64_box
-        run: |
-            docker run --user ebcl --name container-w-arm-box \
-            -v $PWD:/workspace \
-            ghcr.io/elektrobit/robot_test_dev_con:${{ steps.ver.outputs.container_tag }} bash -c \
-              "bash /workspace/.github/workflows/tools/box_download.sh aarch64 && \
-                sudo mkdir -p /root/.kiwi_boxes && \
-                sudo ln -s /home/ebcl/.kiwi_boxes/ubuntu /root/.kiwi_boxes/" 
-            docker commit container-w-arm-box ghcr.io/elektrobit/robot_test_dev_con:${{ steps.ver.outputs.container_tag }}
-      
-      - name: Push Modified DevContainer
-        if: ${{ steps.check_con.outcome == 'failure' }}
-        run: docker push ghcr.io/elektrobit/robot_test_dev_con:${{ steps.ver.outputs.container_tag }}
       
       # Generate Test Matrix
       - name: Generate Test Matrix
@@ -105,15 +53,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull Modified DevContainer
+      - name: Pull DevContainer
         id: pull_dev
-        run: docker pull ghcr.io/elektrobit/robot_test_dev_con:${{ needs.prepare-sdk.outputs.container_tag }}
-
-      - name: Retag Modified DevContainer 
-        id: import
-        run: |
-            docker tag ghcr.io/elektrobit/robot_test_dev_con:${{ needs.prepare-sdk.outputs.container_tag }} \
-            ghcr.io/elektrobit/ebcl_dev_container:${{ needs.prepare-sdk.outputs.container_tag }}
+        run: docker pull ghcr.io/elektrobit/ebcl_dev_container:${{ needs.prepare-sdk.outputs.container_tag }}
       
       # Replace '/' in Test Case Names with '_'
       # '/' not allowed in File Names
@@ -133,7 +75,7 @@ jobs:
       
       - name: Upload test report
         # Upload artifacts always when Robot Test failed but never when prepare steps fail.
-        if:  ${{ failure() && steps.import.conclusion == 'success' && steps.sanitize.conclusion == 'success'}}
+        if:  ${{ failure() && steps.pull_dev.conclusion == 'success' && steps.sanitize.conclusion == 'success'}}
         uses: actions/upload-artifact@v4
         with:
           name: "report-${{ env.sanitized_test_name }}"
