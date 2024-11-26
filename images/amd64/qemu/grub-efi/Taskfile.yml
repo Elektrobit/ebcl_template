@@ -1,0 +1,34 @@
+version: '3'
+
+vars:
+  arch : 'x86_64'
+  partition_layout : image.yaml
+  root_filesystem_spec : root.yaml
+  initrd_spec : initrd.yaml
+  boot_spec : boot.yaml
+  config_root : config_root.sh
+  base_tarball : build/ebcl.tar
+  root_tarball : build/ebcl.config.tar
+  efi_image: build/image.efi.raw
+  # Image specific variables
+  grub_config: grub.cfg
+  result_folder: build
+
+includes:
+  qemu_x86_64_efi: ../../../qemu_x86_64_efi.yml
+  qemu: ../../../qemu.yml
+  efi: efi.yml
+
+tasks:
+  default:
+    aliases: [run_qemu]
+    desc: Build and run the qemu image
+    cmds:   
+      - task: qemu:build_initrd
+      - task: qemu:build_root_base
+      - task: qemu:build_rootfs
+      - task: qemu:build_image
+      - task: efi:install-grub
+      - task: qemu_x86_64_efi:run_qemu_internal
+
+

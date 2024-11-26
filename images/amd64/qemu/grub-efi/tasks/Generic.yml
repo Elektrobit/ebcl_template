@@ -1,0 +1,12 @@
+version: '3'
+
+tasks:
+  clean:
+    cmds:
+      - rm -rf {{.result_folder}}
+
+  clean-cache:
+    cmds:
+      - rm -rf /workspace/state/apt/*
+      - rm -rf /workspace/state/cache/*
+      - rm -rf /workspace/state/debootstrap/*

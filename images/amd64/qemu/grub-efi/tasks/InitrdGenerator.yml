@@ -1,0 +1,33 @@
+version: '3'
+
+tasks:
+  build-initrd-img:
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}/{{.initrd_img}}.log
+
+    sources:
+      - '{{.initrd_spec}}'
+
+    generates:
+      - '{{.result_folder}}/{{.initrd_img}}'
+      - '{{.base_spec}}'
+
+  install-initrd-img:
+    cmds:
+      - sudo losetup -fP --show {{.result_folder}}/{{.disc_image}} > {{.result_folder}}/loop_device
+      - echo "Using losetup device $(cat {{.result_folder}}/loop_device)..."
+      - mkdir -p {{.result_folder}}/mnt
+      # Mount root partition
+      - sudo mount $(cat {{.result_folder}}/loop_device)p2 {{.result_folder}}/mnt
+      # Copy the initrd.img
+      - sudo rm -f {{.result_folder}}/mnt/boot/initrd.img || true
+      - sudo cp {{.result_folder}}/{{.initrd_img}} {{.result_folder}}/mnt/boot/initrd.img
+      # Umount the root filesystem
+      - sudo umount {{.result_folder}}/mnt
+      # Unmount the image
+      - sudo losetup -d $(cat {{.result_folder}}/loop_device)
+
+    sources:
+      - '{{.result_folder}}/{{.initrd_img}}'
+      - '{{.result_folder}}/{{.disc_image}}'
