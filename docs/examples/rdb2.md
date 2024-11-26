@@ -61,5 +61,5 @@ The crinit task _crinit_config/etc/crinit/crinit.d/modprobe.crinit_ runs the scr
 ## EBcL RDB2 kernel_src image
 
 The folder _images/arm64/nxp/rdb2/kernel_src_ contains a proof of concept on how to use a locally built kernel for an RDB2 image.
-The _kernel_config.yaml_ is used to extract the default kernel config, the _Makefile_ downloads and builds the kernel, and the _boot.yaml_ picks the kernel binary up and adds it to the _fitimage.
+The _kernel_config.yaml_ is used to extract the default kernel config, the _Taskfile_ downloads and builds the kernel, and the _boot.yaml_ picks the kernel binary up and adds it to the _fitimage.
 More details are described in the chapter [Kernel development](../kernel.md).

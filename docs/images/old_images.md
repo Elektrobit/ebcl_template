@@ -2,7 +2,7 @@
 
 The previous versions of the EBcL SDK used _kiwi-ng_ for building images.
 Using _kiwi-ng_ was a quite pragmatic choice, since it’s an established tool to build images from binary IT distribution packages. Nevertheless, it turned out that _kiwi-ng_ is not flexible enough to build typical embedded images.
-Starting from EBcL SDK 1.3 the new _make_ and _generator_ based builds are used.
+Starting from EBcL SDK 1.3 the new _make_ and _generator_ based builds are used. In the EBcL SDK 1.5 furthermore _make_ was replaced with _task_. Nonetheless _make_ is still supported for the old images.
 This approach has the advantage that it’s flexible enough for any imaginable build flow, and that the builds are much more efficient.
 Nevertheless, at least for EBcL 1.x, _kiwi-ng_ is still provided and supported.
 If you are at the very beginning of your development, we recommend switching to the new build flow, since it is more efficient, and _kiwi-ng_ support will be most likely dropped with the EBcL 2.x line.
