@@ -73,22 +73,6 @@ tasks:
     generates: 
        - ./{{.kernel}}
 
-  build_boot:
-    deps: [build_kernel, build_initrd]
-    cmds:
-      - echo "Get fitimage..."
-      - mkdir -p {{.result_folder}}
-      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.fitimage}}.log
-    preconditions:
-       - test -f {{.boot_spec}}
-    sources:
-       - ./{{.boot_spec}}
-       -  /{{.boot_root}}
-       - ./{{.fitimage_config}}
-       - ./{{.build_fitimage}}
-    generates:
-       - ./{{.fitimage}}
-
   build_modules:
     deps: [build_kernel]
     cmds:
