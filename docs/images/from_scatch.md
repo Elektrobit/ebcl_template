@@ -107,7 +107,7 @@ apt_repos:
 
 ```
 
-This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_, build an arm64 image, and make use of the default EBcL apt repository, and the EBcL NXP additions.
+This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_, build an arm64 image, and task use of the default EBcL apt repository, and the EBcL NXP additions.
 Now we can base on this file and define our fitimage build environment as _boot_root.yaml_:
 
 ```yaml
@@ -127,7 +127,7 @@ packages:
 ```
 
 We install all the above mentioned packages into this environment.
-For building the fitimage, and for extracting the fip.s32, we can make use of the _boot generator_:
+For building the fitimage, and for extracting the fip.s32, we can task use of the _boot generator_:
 
 ```yaml
 # Derive values from base.yaml - relative path
@@ -299,122 +299,88 @@ Now we are prepared to build our fitimage, and get the fip.s32 binary.
 
 We can build the _boot_root.tar_ using the command `root_generator boot_root.yaml ./out`, then we can build the _initrd.img_ using the command `initrd_generator initrd.yaml ./out`, and finally we can build the _fitimage_ using the command `boot_generator boot.yaml ./out`.
 
-To avoid typing all these commands by hand, we can use make.
-The following _Makefile_ will do the job:
+To avoid typing all these commands by hand, we can use task.
+The following _taskfile_ will do the job:
 
-```make
-#--------------
-# Result folder
-#--------------
+```yaml
+version: '3'
 
-result_folder ?= ./out
-
-#---------------------
-# Select bash as shell
-#---------------------
-
-SHELL := /bin/bash
-
-#---------------------
-# Image specifications
-#---------------------
-
-partition_layout ?= image.yaml
-
-initrd_spec ?= initrd.yaml
-boot_root_spec ?= boot_root.yaml
-boot_spec ?= boot.yaml
-
-#-------------------------
-# Additional configuration
-#-------------------------
-
-# Build script for the fitimage
-build_fitimage ?= build_fitimage.sh
-
-# Layout of the fitimage
-fitimage_config ?= bootargs.its
-
-# NXP bootloader config
-bootloader_config ?= bootargs-overlay.dts
-
-#--------------------
-# Generated artifacts
-#--------------------
-
-# Disc image
-disc_image ?= $(result_folder)/image.raw
-
-# Boot root tarball
-boot_root ?= $(result_folder)/boot_root.tar
-
-# Disc image
-fitimage ?= $(result_folder)/fitimage
-
-# Generated initrd.img
-initrd_img ?= $(result_folder)/initrd.img
-
-#--------------------------
-# Image build configuration
-#--------------------------
-
-# The initrd image is built using the initrd generator.
-# initrd_spec: specification of the initrd image.
-$(initrd_img): $(initrd_spec)
-	@echo "Build initrd.img..."
-	mkdir -p $(result_folder)
-	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
-
-# The root generator is used to build a sysroot variant of the root filesystem.
-# root_filesystem_spec: specification of the root filesystem
-#
-# --no-config means that the configuration step is skipped
-$(sysroot_tarball): $(root_filesystem_spec)
-	@echo "Build sysroot.tar..."
-	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --sysroot --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
+vars:
+  kernel_cmdline_append: rw
+  result_folder: ./build
+  initrd_img: ./build/initrd.img
 
 
-# The root generator is used to build a chroot environment which contains all tools for building the fitimage.
-# boot_root_spec: specification of the fitimage build environment
-$(boot_root): $(boot_root_spec)
-	@echo "Build $(boot_root) from $(boot_root_spec)..."
-	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --no-config $(boot_root_spec) $(result_folder) 2>&1 | tee $(boot_root).log
+env:
+  SHELL : /bin/bash
 
-# The boot generator is used to run the fitimage build in a chroot environment.
-# boot_spec: spec of the fitimage build environment
-# boot_root: tarball of the fitimage build environment
-# build_fitimage: build script for the fitimage
-# fitimage_config: fitimage layout configuration
-# fitimage_config: bootloader configuration
-# initrd_img: the initrd.img which is embedded in the fitimage
-# initrd_spec: the initrd.img specification
-$(fitimage): $(boot_spec) $(boot_root) $(build_fitimage) $(fitimage_config) $(fitimage_config) $(initrd_img)
-	@echo "Build $(fitimage)..."
-	mkdir -p $(result_folder)
-	set -o pipefail && boot_generator $(boot_spec) $(result_folder) 2>&1 | tee $(fitimage).log
+tasks:
+  build_initrd:
+    desc: The initrd image is build using the initrd generator.
+    cmds:
+      - echo "Build initrd.img..."
+      - mkdir -p {{.result_folder}}
+      - initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.initrd_img}}.log
+    sources:
+       - ./{{.initrd_spec}}
+    generates:
+       - ./{{.initrd_img}}
 
-#--------------------------------
-# Default make targets for images
-#--------------------------------
+  build_boot:
+    desc: The boot generator is used to extract the kernel image for a Debian package.
+    deps: [build_initrd, build_boot_root]
+    cmds:
+      - echo "Get fitimage..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.fitimage}}.log
+    preconditions:
+       - test -f {{.boot_spec}}
+    sources:
+       - ./{{.boot_spec}}
+       - ./{{.fitimage_config}}
+       - ./{{.build_fitimage}}
+    generates:
+       - ./{{.fitimage}}
 
-# build of the initrd.img(s)
-.PHONY: initrd
-initrd: $(initrd_img)
+  build_boot_root:
+    desc: The root generator is used to build a chroot enviroment which contains all tools for building the fitimage.
+    cmds:
+      - echo "Build boot root"
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --no-config {{.boot_root_spec}} {{.result_folder}} 2>&1 | tee {{.boot_root}}.log
+    preconditions: 
+       - test -f {{.boot_root_spec}}
+    sources: 
+       - ./{{.boot_root_spec}}
+    generates: 
+       - ./{{.boot_root}}
 
-# build of the fitimage
-.PHONY: boot
-boot: $(fitimage)
+  build_image:
+    desc: Use embdgen to build the SD card image
+    deps: [build_rootfs, build_boot]
+    cmds: 
+      - echo "Build image..."
+      - mkdir -p  {{.result_folder}}
+      - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
+    preconditions: 
+       - test -f {{.partition_layout}}
+    sources: 
+       - ./{{.partition_layout}}
+    generates: 
+       - ./{{.disc_image}}
 
-# build of the fitimage build env
-.PHONY: boot_root
-boot_root: $(boot_root)
-
-# clean - delete the generated artifacts
-.PHONY: clean
-clean:
-	rm -rf $(result_folder)
+  sysroot_tarball:
+    desc: The root generator is used to build a sysroot variant of the root filesystem.
+    cmds: 
+      - echo "Build sysroot.tar..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --sysroot --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.sysroot_tarball}}.log
+    preconditions: 
+      - test -f {{.root_filesystem_spec}}
+    sources: 
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.sysroot_tarball}}
 ```
 
 Now the board specific parts are done, and the only missing piece to build the image is the root filesystem.
@@ -443,98 +409,76 @@ The _config_root.sh_ script is needed to link _systemd_ as _/sbin/init_.
 ln -s /usr/lib/systemd/systemd ./sbin/init
 ```
 
-To build the root filesystem tarball, we can run `root_generator root.yaml ./out`, or we extend our _Makefile_.
+To build the root filesystem tarball, we can run `root_generator root.yaml ./out`, or we extend our _taskfile_.
 
-```make
-#---------------------
-# Image specifications
-#---------------------
+```yaml
+vars:
+  root_filesystem_spec: root.yaml
+  config_root: config_root.sh
+  base_tarball: build/ebcl_rdb2.tar
+  root_tarball: build/ebcl_rdb2.config.tar
 
-# Specification of the root filesystem content and configuration
-root_filesystem_spec ?= root.yaml
-
-#-------------------------
-# Additional configuration
-#-------------------------
-
-# Config script for root filesystem
-config_root ?= config_root.sh
-
-#--------------------
-# Generated artifacts
-#--------------------
-
-# Base root tarball
-base_tarball ?= $(result_folder)/ebcl_rdb2.tar
-
-# Configured root tarball
-root_tarball ?= $(result_folder)/ebcl_rdb2.config.tar
-
-#--------------------------
-# Image build configuration
-#--------------------------
-
-# The root generator is used to build the base root filesystem tarball.
-# root_filesystem_spec: specification of the root filesystem packages.
-#
-# This first step only installs the specified packages.
-User configuration
-# is done as a second step, because the build of this tarball is quite 
-# time consuming and configuration is fast.
-This is an optimization for 
-# the image development process.
-$(base_tarball): $(root_filesystem_spec)
-	@echo "Build root.tar..."
-	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
-
-# The root configurator is used to run the user configuration scripts
-# as a separate step in the build process.
-# base_tarball: tarball which is configured
-# config_root: the used configuration script
-$(root_tarball): $(base_tarball) $(config_root)
-	@echo "Configuring ${base_tarball} as ${root_tarball}..."
-	mkdir -p $(result_folder)
-	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
+ build_root_base:
+    desc: |
+            Use the root generator to build the base root filesystem tarball.
+            This fist step only installs the specified packages. User configuration
+            is done as a second step, because the build of this tarball is quite 
+            time consuming and configuration is fast. This is an optimization for 
+            the image development process.
+    cmds:
+      - echo "Build root.tar..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.base_tarball}}.log
+    preconditions: 
+       - test -f {{.root_filesystem_spec}}
+    sources: 
+       - ./{{.root_filesystem_spec}}
+    generates:
+       - ./{{.base_tarball}}
+  
+  build_rootfs:
+    desc: |
+           The root configurator is used to run the user configuration scripts
+           as a separate step in the build process.
+    deps: [build_root_base]
+    cmds: 
+      - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
+      - mkdir -p  {{.result_folder}}
+      - set -o pipefail && root_configurator {{.root_filesystem_spec}} {{.base_tarball}} {{.root_tarball}} 2>&1 | tee {{.root_tarball}}.log
+    preconditions: 
+       - test -f {{.root_filesystem_spec}}
+    sources: 
+       - ./{{.root_filesystem_spec}}
+       - ./{{.config_root}}
+    generates:
+       - ./{{.root_tarball}}
 ```
 
-The above makefile splits the image installation and the configuration step of building the root tarball.
+The above taskfile splits the image installation and the configuration step of building the root tarball.
 This is useful if you expect changes for the configuration, because the installation step is quite time consuming, and the configuration step is quite fast.
 This optimization can save you a lot of build time.
 
 Finally we need to run embdgen to build our binary image.
-This can be done manually running `embdgen image.yaml ./out`, but we can also add it to our _Makefile_.
+This can be done manually running `embdgen image.yaml ./out`, but we can also add it to our _taskfile_.
 
-```make
-#---------------------
-# Image specifications
-#---------------------
+```yaml
+vars:
+  partition_layout: ../image.yaml
 
-# Specification of the partition layout of the image.raw
-partition_layout ?= image.yaml
-
-#--------------------
-# Generated artifacts
-#--------------------
-
-# Disc image
-disc_image ?= $(result_folder)/image.raw
-
-#--------------------------
-# Image build configuration
-#--------------------------
-
-# Embdgen is used to build the SD card image.
-# fitimage: the fitimage containing the kernel, the device tree and the initrd.img
-# root_tarball: the contents of the root filesystem
-# partition_layout: the partition layout of the SD card image
-#
-# The bootloader fip.s32 is not explicitly mentioned, since it is built in one step
-# with the fitimage.
-$(disc_image): $(fitimage) $(root_tarball) $(partition_layout)
-	@echo "Build image..."
-	mkdir -p $(result_folder)
-	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
+tasks:
+  build_image:
+    desc: Use embdgen to build the SD card image
+    deps: [build_rootfs, build_boot]
+    cmds: 
+      - echo "Build image..."
+      - mkdir -p  {{.result_folder}}
+      - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
+    preconditions: 
+       - test -f {{.partition_layout}}
+    sources: 
+       - ./{{.partition_layout}}
+    generates: 
+       - ./{{.disc_image}}
 ```
 
 Now you have an image which you can flash to your NXP RDB2 board.

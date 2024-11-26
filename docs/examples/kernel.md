@@ -31,7 +31,7 @@ files:
   - boot/config*
 ```
 
-We can copy this config as _.config_ into the kernel source and build the kernel using make.
+We can copy this config as _.config_ into the kernel source and build the kernel using task.
 
 To make use of our local built kernel binary we need and adapted _boot.yaml_:
 
@@ -71,120 +71,183 @@ This will give us the following build flow:
 
 ![S32G2](../assets/S32G2_kernel.png)
 
-We can add this to our _Makefile_ with the following changes:
+We can add this to our _Taskfile_ with the following changes:
 
-```make
-#---------------------
-# Image specifications
-#---------------------
+```yaml
+version: '3'
 
-# Specification how to get the kernel config
-kernel_config = kernel_config.yaml
-# Kernel source package name
-kernel_package = linux-buildinfo-5.15.0-1034-s32-eb
+vars:
+  arch: 'aarch64'
+  partition_layout: ../image.yaml
+  root_filesystem_spec: root.yaml
+  initrd_spec: ../initrd.yaml
+  boot_spec: boot.yaml
+  boot_root_spec: ../boot_root.yaml
+  config_root: config_root.sh
+  base_tarball: build/ebcl_rdb2.tar
+  root_tarball: build/ebcl_rdb2.config.tar
+  sysroot_tarball: build/ebcl_rdb2_sysroot.tar
+  kernel_config: kernel_config.yaml
+  kernel_package: linux-buildinfo-5.15.0-1034-s32-eb
+  build_fitimage: ../build_fitimage.sh
+  fitimage_config: ../bootargs.its
+  bootloader_config: ../bootargs-overlay.dts
+  kernel: build/vmlinuz
+  modules: build/lib
+  kconfig: build/config
+  source: kernel
+  kernel_dir: kernel/linux-s32-eb-5.15.0
+  kernel_make_args: ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 
-#--------------------
-# Generated artifacts
-#--------------------
+includes:
+  rdb2:
+    taskfile: ../rdb2.yml
+    flatten: false
 
-# Kernel image
-kernel = $(result_folder)/vmlinuz
-# Kernel modules
-modules = $(result_folder)/lib
-# Kernel config
-kconfig = $(result_folder)/config
-# Kernel source
-source = kernel
-# Path of the kernel sources
-kernel_dir = $(source)/linux-s32-eb-5.15.0
-# Kernel make arguments
-kernel_make_args = ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+tasks:
+  source:
+    cmds:
+      - echo "Get kernel sources..."
+      - mkdir -p {{.source}}
+      - cd {{.source}} && apt -y source {{.kernel_package}}
+      - sudo apt -y build-dep {{.kernel_package}}
+      - cd {{.kernel_dir}} && chmod +x scripts/*.sh
+    generates:
+      - ./{{.source}}
 
-#--------------------------
-# Image build configuration
-#--------------------------
+  kconfig:
+    deps: [source]
+    cmds:
+      - echo "Get kernel config..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.kernel_config}} {{.result_folder}} 2>&1 | tee {{.kconfig}}.log
+      - echo "Deleting old {{.kconfig}}..."
+      - rm -f {{.kconfig}} || true
+      - echo "Renaming {{.result_folder}}/config-* as {{.kconfig}}..."
+      - mv {{.result_folder}}/config-* {{.kconfig}} || true
+      - echo "Copying {{.kconfig}} to {{.kernel_dir}}..."
+      - cp {{.kconfig}} {{.kernel_dir}}/.config
+      - echo "Set all not defined values of the kernel config to defaults..."
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} olddefconfig
+      - echo "Copying modified config as olddefconfig..."
+      - cp {{.kernel_dir}}/.config {{.result_folder}}/olddefconfig
+    sources: 
+       - ./{{.kernel_config}}
+    generates: 
+       - ./{{.kconfig}}
 
-# Download the kernel source form the apt repo
-# and install the build dependencies.
-$(source):
-    @echo "Get kernel sources..."
-    mkdir -p $(source)
-    cd $(source) && apt -y source $(kernel_package)
-    sudo apt -y build-dep $(kernel_package)
-    cd $(kernel_dir) && chmod +x scripts/*.sh
+  build_kernel:
+    deps: [kconfig]
+    cmds:
+      - echo "Compile kernel..."
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
+      - echo "Get kernel binary..."
+      - cp {{.kernel_dir}}/arch/arm64/boot/Image {{.kernel}}
+      - echo "Results were written to {{.kernel}}"
+    sources: 
+       - ./{{.kconfig}}
+    generates: 
+       - ./{{.kernel}}
 
-# Get the kernel config from the configured kernel binary package.
-$(kconfig): $(kernel_config) $(source)
-    @echo "Get kernel config..."
-    mkdir -p $(result_folder)
-    set -o pipefail && boot_generator $(kernel_config) $(result_folder) 2>&1 | tee $(kconfig).log
-    @echo "Renaming $(result_folder)/config-* as $(kconfig)..."
-    mv $(result_folder)/config-* $(kconfig)
-    @echo "Copying $(kconfig) to $(kernel_dir)..."
-    cp $(result_folder)/config $(kernel_dir)/.config
-    @echo "Set all not defined values of the kernel config to defaults..."
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) olddefconfig
-    @echo "Copying modified config as olddefconfig..."
-    cp $(kernel_dir)/.config $(result_folder)/olddefconfig
+  build_modules:
+    deps: [build_kernel]
+    cmds:
+      - echo "Get virtio driver..."
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
+      - cd {{.kernel_dir}} && chmod +x debian/scripts/sign-module
+      - mkdir -p {{.result_folder}}
+      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} make {{.kernel_make_args}} modules_install
+    generates:
+      - ./{{.modules}}
 
-# Build the kernel binary
-$(kernel): $(kconfig) $(source)
-    @echo "Compile kernel..."
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
-    @echo "Get kernel binary..."
-    cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
-    @echo "Results were written to $(kernel)"
+  config_kernel:
+    cmds:
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} menuconfig
+    preconditions:
+      - test -d {{.kernel_dir}} 
 
-# Adapt build spec for the fitimage
-# Additional dependency to the kernel binary
-# Please note that another boot_spec is used, see boot.yaml.
-$(fitimage): $(boot_spec) $(boot_root) $(build_fitimage) $(fitimage_config) $(fitimage_config) $(initrd_img) $(kernel)
-    @echo "Build $(fitimage)..."
-    mkdir -p $(result_folder)
-    set -o pipefail && boot_generator $(boot_spec) $(result_folder) 2>&1 | tee $(fitimage).log
+  build_boot:
+    deps: [build_kernel, build_initrd]
+    cmds:
+      - echo "Get fitimage..."
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.fitimage}}.log
+    preconditions:
+       - test -f {{.boot_spec}}
+    sources:
+       - ./{{.boot_spec}}
+       -  /{{.boot_root}}
+       - ./{{.fitimage_config}}
+       - ./{{.build_fitimage}}
+    generates:
+       - ./{{.fitimage}}
 
-# Make the modules and install them in the results folder
-$(modules): $(kernel)
-    @echo "Get virtio driver..."
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) modules -j 16
-    cd $(kernel_dir) && chmod +x debian/scripts/sign-module
-    mkdir -p $(result_folder)
-    cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) $(kernel_make_args) modules_install
+  rebuild_boot:
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
+      - echo "Delete the old kernel binary..."
+      - rm -f {{.kernel}}
+      - echo "Get the new kernel binary..."
+      - cp {{.kernel_dir}}/arch/arm64/boot/Image {{.kernel}}
+    preconditions:
+      - test -d {{.kernel_dir}}
+      - test -f {{.kconfig}}
+    generates:
+      - ./{{.kernel}}
 
-#--------------------
-# Helper make targets
-#--------------------
+  rebuild_modules:
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - cd {{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
+      - cd {{.kernel_dir}} && chmod +x debian/scripts/sign-module
+      - echo "Delete the old kernel modules..."
+      - rm -rf {{.modules}}
+      - echo "Install the new kernel modules..."
+      - cd {{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} make {{.kernel_make_args}} modules_install
+    preconditions:
+      - test -d {{.kernel_dir}}
+      - test -f {{.kconfig}}
+    generates:
+      - ./{{.modules}}
 
-# Configure the kernel binary
-.PHONY: config_kernel
-config_kernel:
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) menuconfig
+  clean:
+    cmds:
+      - task: rdb2:clean
+      - rm -rf {{.source}}
 
-# Rebuild the kernel binary
-.PHONY: rebuild_kernel
-rebuild_kernel:
-    mkdir -p $(result_folder)
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
-    @echo "Delete the old kernel binary..."
-    rm -f $(kernel)
-    @echo "Get the new kernel binary..."
-    cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
+  build_boot_root:
+    cmds:
+      - task: rdb2:build_boot_root
 
-# Rebuild the kernel modules
-.PHONY: rebuild_modules 
-rebuild_modules: kernel
-    mkdir -p $(result_folder)
-    cd $(kernel_dir) && $(MAKE) $(kernel_make_args) modules -j 16
-    cd $(kernel_dir) && chmod +x debian/scripts/sign-module
-    @echo "Delete the old kernel modules..."
-    rm -rf $(modules)
-    @echo "Install the new kernel modules..."
-    cd $(kernel_dir) && INSTALL_MOD_PATH=../../$(result_folder) $(MAKE) $(kernel_make_args) modules_install
+  build_image:
+    deps: [build_kernel, build_boot]
+    cmds:
+      - task: rdb2:build_image
+  
+  build_initrd:
+    cmds:
+      - task: rdb2:build_initrd
 
-# clean - delete the generated artifacts
-.PHONY: clean
-clean:
-    rm -rf $(source)
-    rm -rf $(result_folder)
+  build_rootfs:
+    cmds:
+      - task: rdb2:build_rootfs
+
+  edit_root:
+    cmds:
+      - task: rdb2:edit_root
+
+  install_sysroot:
+    cmds:
+      - task: rdb2:install_sysroot
+
+  mrproper:
+    cmds:
+      - task: rdb2:mrproper
+      - task: clean
+
+  sysroot_tarball:
+    cmds:
+      - task: rdb2:sysroot_tarball
 ```
 
