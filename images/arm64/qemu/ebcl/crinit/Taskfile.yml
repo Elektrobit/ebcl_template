@@ -22,6 +22,7 @@ includes:
 
 tasks:
   run_qemu:
+    desc: Build and run the qemu image
     deps: [build_image, build_boot, build_initrd]
     cmds:
       - task: run_qemu_internal

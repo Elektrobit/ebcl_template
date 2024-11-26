@@ -12,5 +12,6 @@ includes:
 
 tasks:
   default:
+    desc: Build raspberry pi 4 image
     cmds:
       - task: rpi:build_image

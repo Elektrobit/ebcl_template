@@ -14,6 +14,12 @@ env:
 
 tasks:
   build_root_base:
+    desc: |
+            Use the root generator to build the base root filesystem tarball.
+            This fist step only installs the specified packages. User configuration
+            is done as a second step, because the build of this tarball is quite 
+            time consuming and configuration is fast. This is an optimization for 
+            the image development process.
     cmds:
       - echo "Build root.tar..."
       - mkdir -p {{.result_folder}}
@@ -26,6 +32,9 @@ tasks:
        - ./{{.base_tarball}}
   
   build_rootfs:
+    desc: |
+           The root configurator is used to run the user configuration scripts
+           as a separate step in the build process.
     deps: [build_root_base]
     cmds: 
       - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
@@ -39,6 +48,7 @@ tasks:
        - ./{{.root_tarball}}
 
   build_image:
+    desc: Use embdgen to build the disc image
     deps: [build_rootfs]
     cmds: 
       - echo "Build image..."
@@ -53,6 +63,7 @@ tasks:
 
 
   sysroot_tarball:
+    desc: The root generator is used to build a sysroot variant of the root filesystem.
     cmds: 
       - echo "Build sysroot.tar..."
       - mkdir -p {{.result_folder}}
@@ -65,12 +76,14 @@ tasks:
        - ./{{.sysroot_tarball}}
 
   install_sysroot:
+    desc: Install sysroot_tarball to workspace
     deps: [sysroot_tarball]
     cmds: 
       - rm -rf /workspace/sysroot_{{.arch}}/*
       - tar xf {{.sysroot_tarball}} -C /workspace/sysroot_{{.arch}}/ || true
 
   edit_base:
+    desc: Opens a shell for manual base root configuration
     cmds: 
       - echo "Extacting base root tarball..."
       - mkdir -p {{.result_folder}}/root
@@ -84,6 +97,7 @@ tasks:
       - defer: rm -rf {{.result_folder}}/root
     
   edit_root:
+    desc: Opens a shell for manual root configuration
     cmds: 
       - echo "Extacting base root tarball..."
       - mkdir -p {{.result_folder}}/root
@@ -97,20 +111,24 @@ tasks:
       - defer: rm -rf {{.result_folder}}/root
 
   build_initrd:
+    desc: Fake target to be interface compliant
     cmds:
       - echo "Fake target to be interface compliant"
       - echo "Image was written to"
 
   build_boot:
+    desc: Fake target to be interface compliant
     cmds:
       - echo "Fake target to be interface compliant"
       - echo "Results were written to"
 
   clean:
+    desc: Remove build artifacts
     cmds:
       - rm -rf {{.result_folder}}
 
   mrproper:
+    desc: Remove build artifacts and clean all caches
     cmds:
       - rm -rf {{.result_folder}}
       - rm -rf /workspace/state

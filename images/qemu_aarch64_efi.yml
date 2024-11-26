@@ -1,4 +1,5 @@
 # Makefile for runnung QEMU amd64 images
+version: '3'
 
 # QEMU kernel commandline
 vars:
@@ -12,10 +13,11 @@ env:
 
 tasks:
   run_qemu_internal:
+    desc: Run a build qemu image
     cmds:
       - echo "Running {{.disc_image}} in QEMU aarch64 using EFI loader..."
       - |
-      	qemu-system-aarch64 \
+        qemu-system-aarch64 \
         -machine virt \
         -cpu cortex-a72 \
         -m 4096 \
