@@ -15,7 +15,8 @@
 			},
 			"extensions": [
 				"ms-vscode.cpptools-extension-pack@1.3.0",
-				"spmeesseman.vscode-taskexplorer@2.9.1"
+				"spmeesseman.vscode-taskexplorer@2.9.1",
+				"paulvarache.vscode-taskfile"
 			]
 		}
 	},
