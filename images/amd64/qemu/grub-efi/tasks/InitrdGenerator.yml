@@ -1,8 +1,5 @@
 version: '3'
 
-includes:
-  Efi: Efi.yml
-
 tasks:
   build-initrd-img:
     cmds:
@@ -16,10 +13,6 @@ tasks:
       - '{{.result_folder}}/{{.initrd_img}}'
 
   install-initrd-img:
-    deps:
-      - task: build-initrd-img
-      - task: Efi:install-grub
-
     cmds:
       - sudo losetup -fP --show {{.result_folder}}/{{.disc_image}} > {{.result_folder}}/loop_device
       - echo "Using losetup device $(cat {{.result_folder}}/loop_device)..."

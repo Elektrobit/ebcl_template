@@ -8,6 +8,7 @@ vars:
   root_tarball: ebcl.config.tar
   partition_layout: image.yaml
   disc_image: image.raw
+  efi_image: image.efi.raw
   grub_config: grub.cfg
   initrd_spec: initrd.yaml
   initrd_img: initrd.img
@@ -23,5 +24,10 @@ includes:
 
 tasks:
   default:
-    deps:
+    cmds:
+      - task: InitrdGenerator:build-initrd-img
+      - task: RootGenerator:build-root-filesystem-tarball
+      - task: RootGenerator:config-root-filesystem-tarball
+      - task: Embdgen:build-image
+      - task: Efi:install-grub
       - task: Qemu:run-qemu-efi-amd64

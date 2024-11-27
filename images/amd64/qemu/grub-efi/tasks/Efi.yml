@@ -1,15 +1,12 @@
 version: '3'
-
-includes:
-  Embdgen: Embdgen.yml
-
 tasks:
   install-grub:
-    deps:
-      - task: Embdgen:build-image
-
     cmds:
-      - sudo losetup -fP --show {{.result_folder}}/{{.disc_image}} > {{.result_folder}}/loop_device
+      # Copy image
+      - rm -f {{.result_folder}}/{{.efi_image}}
+      - cp {{.result_folder}}/{{.disc_image}} {{.result_folder}}/{{.efi_image}}
+      # Mount image copy
+      - sudo losetup -fP --show {{.result_folder}}/{{.efi_image}} > {{.result_folder}}/loop_device
       - echo "Using losetup device $(cat {{.result_folder}}/loop_device)..."
       - mkdir -p {{.result_folder}}/mnt
       # Mount root partition
@@ -48,3 +45,6 @@ tasks:
     sources:
       - '{{.grub_config}}'
       - '{{.result_folder}}/{{.disc_image}}'
+
+    generates:
+      - '{{.result_folder}}/{{.efi_image}}'

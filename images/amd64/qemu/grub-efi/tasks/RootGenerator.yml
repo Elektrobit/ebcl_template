@@ -13,9 +13,6 @@ tasks:
       - '{{.result_folder}}/{{.base_tarball}}'
 
   config-root-filesystem-tarball:
-    deps:
-      - task: build-root-filesystem-tarball
-
     cmds:
       - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
       - mkdir -p {{.result_folder}}
@@ -25,6 +22,7 @@ tasks:
       - '{{.root_filesystem_spec}}'
       - '{{.config_root_script}}'
       - '{{.result_folder}}/{{.base_tarball}}'
+      - '{{.result_folder}}/{{.initrd_img}}'
 
     generates:
       - '{{.result_folder}}/{{.root_tarball}}'
