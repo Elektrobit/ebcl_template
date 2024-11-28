@@ -4,7 +4,7 @@ EB corbos Linux doesn’t support any amd64 hardware at the moment, but we provi
 Using amd64 for development may help to make your development flow much smoother since you don’t have to handle the tricky aspects of cross-building.
 
 For _amd64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
-The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation.
+The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation. Additionally there is an example image provided for application development. You can find more about application development in later chapters.
 
 ## The amd64 Jammy image
 
@@ -62,9 +62,10 @@ root_device: /dev/vda1
 # List of kernel modules
 modules:
   - kernel/drivers/block/virtio_blk.ko # virtio_blk is needed for QEMU
+  - kernel/fs/autofs/autofs4.ko # Wanted by systemd
 ```
 
-The _initrd.img_ loads the virt-IO block driver and then mounts _/dev/vda1_ as the root filesystem.
+The _initrd.img_ loads the virt-IO block and the autofs4 drivers and then mounts _/dev/vda1_ as the root filesystem.
 
 ```yaml
 # Derive values from base.yaml - relative path
@@ -112,21 +113,12 @@ The main differences between EBcL and Ubuntu are the release and qualification h
 # Kernel package to use
 kernel: linux-image-generic
 use_ebcl_apt: true
-# Additional apt repos
-apt_repos:
-  # Get latest security fixes
-  - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
-    components:
-      - main
-      - universe
 # CPU architecture
 arch: 'amd64'
 ```
 
 Again, the _base.yaml_ is used to define the kernel package, the apt repos and the CPU architecture.
 The EBcL repo can be added using the “use_ebcl_apt” flag.
-For experimenting and if we want the latest security patches without qualification, we can add the Ubuntu Jammy repositories.
 
 The _boot.yaml_ is not different to the one used for the Jammy images, and just extracts the kernel binary and configuration form the given kernel package.
 The _image.yaml_ and the _initrd.yaml_ are also identical to the ones used with the Jammy images.

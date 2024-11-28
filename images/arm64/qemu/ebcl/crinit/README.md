@@ -2,7 +2,7 @@
 
 This is a minimal example image showing how to build small and fast solutions using EB corbos Linux.
 
-The description of this this image is part of the EB corbos Linux SDK template, see _images/arm64/qemu/ebcl/crinit/debootstrap_ of https://github.com/Elektrobit/ebcl_template.
+The description of this this image is part of the EB corbos Linux SDK template, see _images/arm64/qemu/ebcl/crinit_ of https://github.com/Elektrobit/ebcl_template.
 
 ## Run the image
 

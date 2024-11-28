@@ -80,7 +80,7 @@ Alternatively, you could also login via ssh to the target and call the applicati
 This step is not required for the provided example applications, since both terminate directly and don't include any continuous loops.
 Nevertheless, your own applications, may behave differently.
 In order to stop the execution of an application you can either press CTRL-C in the corresponding terminal window or stop the parent task.
-To stop the parent task click on "■" (Stop icon) in the task `Run app from active build preset` to stop the application.
+To stop the parent task click on the Stop icon in the task `Run app from active build preset` to stop the application.
 
 ### Debugging demo applications
 
@@ -88,6 +88,16 @@ Visual Studio Code can be used as a gdb frontend for debugging.
 In order to debug the application from the current active preset press "F5".
 Before Visual Studio Code starts the gdb and after debugging, the following tasks are executed automatically.
 
-|Pre debug|Post debug|
-|---------|----------|
-|<ul><li>Build and check target connection</li><ul><li>Trigger incremental application build</li><li>Perform ssh connection test and update ssh keys, if needed</li></ul><li>Build and check target connection</li><li>Update application deployment</li><li>Prepare application specific gdbinit file</li><li>Start gdbserver on remote target</li></ul>|<ul><li>Stop gdbserver on remote target</li></ul>|
+Pre debug:
+
+* Build and check target connection
+* Trigger incremental application build
+* Perform ssh connection test and update ssh keys, if needed
+* Build and check target connection
+* Update application deployment
+* Prepare application specific gdbinit file
+* Start gdbserver on remote target
+
+Post debug:
+
+* Stop gdbserver on remote target
