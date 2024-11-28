@@ -3,7 +3,7 @@
 # This script is exectued in the host environment,
 # before the VS Code dev-container build.
 
-CONTAINER_TAG=$(cat .devcontainer/devcontainer.json | grep "linux.elektrobit.com" | awk -F ":" '{print $3}' | awk -F "\"" '{print $1}')
+CONTAINER_TAG=$(cat .devcontainer/devcontainer.json | grep "ghcr.io" | awk -F ":" '{print $3}' | awk -F "\"" '{print $1}')
 
 echo "Setting EBcL workspace up..."
 echo "Using EBcL container ${CONTAINER_TAG}."

@@ -19,5 +19,20 @@ apt_repos:
       - universe
       - multiverse
       - restricted
+  # Get Latest Community Tested Package Fixes
+  # This Repository is soley added for one reason:
+  # The flash-kernel postinstall script will try to execute
+  # and write files to memory. This will not work in our build env (chroot).
+  # flash-kernel will not do this on a system that is running in EFI Mode and
+  # in updated versions where it can detect the chroot environment better.
+  # Try running 'ls /sys/firmware/efi' if you have this dir, you can remove
+  # This repo safely.
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
 # CPU architecture
 arch: arm64
