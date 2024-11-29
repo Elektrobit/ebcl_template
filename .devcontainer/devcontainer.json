@@ -21,6 +21,9 @@
 	},
 	"remoteUser": "ebcl",
 	"privileged": true,
+	"runArgs": [
+		"--network=host"
+	],
 	"mounts": [
 		{
 			// Local storage for kiwi build VM images
