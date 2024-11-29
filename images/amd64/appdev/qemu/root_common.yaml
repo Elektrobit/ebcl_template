@@ -32,6 +32,11 @@ packages:
   - psmisc
   # rsync for app deployment during development
   - rsync
-# Add libjson package for app development example
+# Add packages for app development example
 sysroot_packages:
+  # Add libjson package
   - libjsoncpp-dev
+  # Add the qt packages
+  - qt6-base-dev
+  - qt6-base-dev-tools
+  - libgl1-mesa-dev

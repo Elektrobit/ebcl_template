@@ -10,6 +10,9 @@
 			"path": "apps/meminfo-reader"
 		},
 		{
+			"path": "apps/my-qt-app"
+		}
+		{
 			"path": "apps/common"
 		}
 	],
