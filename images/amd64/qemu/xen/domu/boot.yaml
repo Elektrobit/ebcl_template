@@ -1,0 +1,16 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Reset the kernel value - we don't want to download and extract it
+kernel: null
+# Do not pack the files as tar
+tar: yes
+# do not download and extract these packages, they are already installed in the boot_root.tar
+use_packages: false
+# Name of the boot root archive
+base_tarball: $$RESULTS$$/boot_root.tar
+
+files:
+  - boot/vmlinux
+scripts:
+  - name: config_boot.sh # Uncompress kernel for pvgrub
+    env: chroot
