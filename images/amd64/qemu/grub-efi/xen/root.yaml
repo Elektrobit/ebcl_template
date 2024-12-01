@@ -1,0 +1,22 @@
+base: ../base.yaml
+# Name of the archive.
+name: ebcl
+# CPU architecture
+arch: amd64
+# Packages to install in the root tarball
+packages:
+  - linux-image-generic
+  - systemd
+  - udev
+  - util-linux
+  - bash
+  - grub-efi
+  - linux-firmware
+  - xen-system-amd64
+  - bridge-utils
+# Include initrd image
+host_files:
+  - source: $$RESULTS$$/initrd.img
+    destination: boot
+  # Grub configuration
+  - source: config/*

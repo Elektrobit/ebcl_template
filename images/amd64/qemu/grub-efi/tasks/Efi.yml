@@ -24,9 +24,9 @@ tasks:
       # Install grub
       - sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck --no-nvram --removable"
       - sudo chroot {{.result_folder}}/mnt /bin/sh -c "update-grub"
+      - sudo sed -i 's/$(cat {{.result_folder}}/loop_device)p2/{{.boot_partition}}/g' {{.result_folder}}/mnt/boot/grub/grub.cfg
+      - sudo cp {{.result_folder}}/mnt/boot/grub/grub.cfg {{.result_folder}}/grub.cfg
       # Replace the grub config
-      - sudo ls -lah {{.result_folder}}/mnt/boot/ > {{.result_folder}}/boot_content
-      - sudo cp {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg {{.result_folder}}/grub.cfg
       - sudo rm -f {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
       - sudo cp {{.grub_config}} {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
       # Umount special file systems

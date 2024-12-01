@@ -14,3 +14,8 @@ apt_repos:
     components:
       - main
       - universe
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-updates
+    components:
+      - main
+      - universe

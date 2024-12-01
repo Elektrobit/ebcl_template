@@ -8,6 +8,7 @@ tasks:
 
     sources:
       - '{{.root_filesystem_spec}}'
+      - '{{.base_spec}}'
 
     generates:
       - '{{.result_folder}}/{{.base_tarball}}'
@@ -20,9 +21,11 @@ tasks:
 
     sources:
       - '{{.root_filesystem_spec}}'
-      - '{{.config_root_script}}'
+      - '{{.root_overlay}}'
+      - '{{.root_config_script}}'
       - '{{.result_folder}}/{{.base_tarball}}'
       - '{{.result_folder}}/{{.initrd_img}}'
+      - '{{.base_spec}}'
 
     generates:
       - '{{.result_folder}}/{{.root_tarball}}'

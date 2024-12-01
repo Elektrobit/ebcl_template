@@ -7,8 +7,10 @@ vars:
   base_spec: ../base.yaml
   root_filesystem_spec: root.yaml
   partition_layout: ../image.yaml
-  grub_config: ../grub.cfg
   initrd_spec: ../initrd.yaml
+  grub_config: ../grub.cfg
+  root_overlay: config/**/*
+  root_config_script: config_root.sh
   # Generated artifacts
   base_tarball: ebcl.tar
   root_tarball: ebcl.config.tar

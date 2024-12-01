@@ -1,0 +1,25 @@
+base: ../base.yaml
+# Name of the archive.
+name: ebcl
+# CPU architecture
+arch: amd64
+# Packages to install in the root tarball
+packages:
+  - linux-image-generic
+  - crinit
+  - crinit-ctl
+  - util-linux
+  - bash
+  - grub-efi
+# Include initrd image
+host_files:
+  - source: $$RESULTS$$/initrd.img
+    destination: boot
+  # Crinit configuration, including sbin/init
+  - source: config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment
+# Add EBcL apt repository
+use_ebcl_apt: true

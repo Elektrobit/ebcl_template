@@ -11,6 +11,7 @@ tasks:
 
     generates:
       - '{{.result_folder}}/{{.initrd_img}}'
+      - '{{.base_spec}}'
 
   install-initrd-img:
     cmds:
