@@ -1,0 +1,40 @@
+base: ../base.yaml
+name: ebcl_pi4
+packages:
+  - linux-firmware-raspi
+  - linux-raspi
+  - u-boot-rpi
+#  - flash-kernel
+  - systemd
+  - systemd-coredump
+  - systemd-timesyncd
+  - udev
+  - util-linux
+  - netbase
+  - locales
+  - file
+  - findutils
+  - kmod
+  - iproute2
+  - iptables
+  - iputils-ping
+  - vim
+  - nano
+  - strace
+  - apt
+  - openssh-server
+  - openssh-client
+  # UI
+  - weston
+# Scripts to configure the root tarball
+scripts:
+  - name: ../config_root.sh # Name of the script, relative path to this file
+    env: chroot
+  - name: config_systemd.sh # Name of the script, relative path to this file
+    env: chroot
+host_files:
+  - source: ../cmdline.txt
+    destination: boot
+  - source: ../config.txt
+    destination: boot
+  - source: systemd_config/* # Crinit configuration

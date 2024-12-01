@@ -69,3 +69,5 @@ fakedit
 /testing
 
 **/.task
+
+*.deb
