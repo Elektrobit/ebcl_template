@@ -1,0 +1,24 @@
+base: ../base.yaml
+# Name of the archive.
+name: ebcl
+# Packages to install in the root tarball
+packages:
+  # BB Firmware
+  # - bb-j721e-evm-firmware
+  # - bb-u-boot-beagleboneai64
+  # - bb-beagle-version
+  # Kernel
+  # - bbb.io-kernel-6.6-ti
+  # Drivers
+  # - ti-devmem2
+  # - ti-linux-firmware-sysfw
+  # - ti-sgx-23.3-firmware
+  # - ti-sgx-23.3-j721e-ddx-um
+  # - ti-zephyr-firmware
+  # Root FS
+  - systemd
+  - udev
+  - util-linux
+  - bash
+debootstrap_flags: " --include='ca-certificates' "
+

@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+  build-image:
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && embdgen -o {{.result_folder}}/{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.result_folder}}/{{.disc_image}}.log
+
+    sources:
+      - '{{.result_folder}}/{{.root_tarball}}'
+      - '{{.partition_layout}}'
+
+    generates:
+      - '{{.result_folder}}/{{.disc_image}}'

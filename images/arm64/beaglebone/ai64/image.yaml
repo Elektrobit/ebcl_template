@@ -1,0 +1,23 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: gpt
+  boot_partition: efi
+
+  parts:
+    - name: efi
+      type: partition
+      fstype: fat32
+      size: 500 MB
+      content:
+        type: fat32
+
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 4 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/ebcl.config.tar

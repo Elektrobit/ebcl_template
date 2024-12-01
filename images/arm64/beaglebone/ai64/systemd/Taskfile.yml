@@ -1,0 +1,35 @@
+version: '3'
+
+vars:
+  # Generic configuarion
+  result_folder: ./build
+  # Input config files
+  base_spec: ../base.yaml
+  root_filesystem_spec: root.yaml
+  partition_layout: ../image.yaml
+  # grub_config: ../grub.cfg
+  initrd_spec: ../initrd.yaml
+  # Generated artifacts
+  base_tarball: ebcl.tar
+  root_tarball: ebcl.config.tar
+  disc_image: image.raw
+  # efi_image: image.efi.raw
+  # initrd_img: initrd.img
+
+includes:
+  Generic: ../tasks/Generic.yml
+  RootGenerator: ../tasks/RootGenerator.yml
+  InitrdGenerator: ../tasks/InitrdGenerator.yml
+  Embdgen: ../tasks/Embdgen.yml
+  Efi: ../tasks/Efi.yml
+  Qemu: ../tasks/Qemu.yml
+
+tasks:
+  default:
+    cmds:
+      # - task: InitrdGenerator:build-initrd-img
+      - task: RootGenerator:build-root-filesystem-tarball
+      - task: RootGenerator:config-root-filesystem-tarball
+      # - task: Embdgen:build-image
+      # - task: Efi:install-grub
+      # - task: Qemu:run-qemu-efi-amd64

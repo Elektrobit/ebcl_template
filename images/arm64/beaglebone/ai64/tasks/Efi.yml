@@ -1,0 +1,50 @@
+version: '3'
+tasks:
+  install-grub:
+    cmds:
+      # Copy image
+      - rm -f {{.result_folder}}/{{.efi_image}}
+      - cp {{.result_folder}}/{{.disc_image}} {{.result_folder}}/{{.efi_image}}
+      # Mount image copy
+      - sudo losetup -fP --show {{.result_folder}}/{{.efi_image}} > {{.result_folder}}/loop_device
+      - echo "Using losetup device $(cat {{.result_folder}}/loop_device)..."
+      - mkdir -p {{.result_folder}}/mnt
+      # Mount root partition
+      - sudo mount $(cat {{.result_folder}}/loop_device)p2 {{.result_folder}}/mnt
+      # Mount efi partition
+      - sudo mkdir -p {{.result_folder}}/mnt/boot/efi
+      - sudo mount $(cat {{.result_folder}}/loop_device)p1 {{.result_folder}}/mnt/boot/efi
+      # Mount special file systems
+      - sudo mount --bind /dev {{.result_folder}}/mnt/dev
+      - sudo mkdir -p {{.result_folder}}/mnt/dev/pts
+      - sudo mount -t devpts /dev/pts {{.result_folder}}/mnt/dev/pts
+      - sudo mount -t proc proc {{.result_folder}}/mnt/proc
+      - sudo mount -t sysfs sysfs {{.result_folder}}/mnt/sys
+      - sudo mount -t tmpfs tmpfs {{.result_folder}}/mnt/tmp
+      # Install grub
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck --no-nvram --removable"
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "update-grub"
+      - sudo sed -i 's/$(cat {{.result_folder}}/loop_device)p2/{{.boot_partition}}/g' {{.result_folder}}/mnt/boot/grub/grub.cfg
+      - sudo cp {{.result_folder}}/mnt/boot/grub/grub.cfg {{.result_folder}}/grub.cfg
+      # Replace the grub config
+      - sudo rm -f {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
+      - sudo cp {{.grub_config}} {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
+      # Umount special file systems
+      - sudo umount {{.result_folder}}/mnt/dev/pts
+      - sudo umount {{.result_folder}}/mnt/dev      
+      - sudo umount {{.result_folder}}/mnt/proc
+      - sudo umount {{.result_folder}}/mnt/sys
+      - sudo umount {{.result_folder}}/mnt/tmp
+      # Umount efi partition
+      - sudo umount {{.result_folder}}/mnt/boot/efi
+      # Umount the root filesystem
+      - sudo umount {{.result_folder}}/mnt
+      # Unmount the image
+      - sudo losetup -d $(cat {{.result_folder}}/loop_device)
+
+    sources:
+      - '{{.grub_config}}'
+      - '{{.result_folder}}/{{.disc_image}}'
+
+    generates:
+      - '{{.result_folder}}/{{.efi_image}}'

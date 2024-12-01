@@ -1,0 +1,24 @@
+# CPU architecture
+arch: 'amd64'
+# Apt repositories to use
+apt_repos:
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy
+    components:
+      - main
+      - universe
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+  - apt_repo: http://repos.rcn-ee.com/debian-arm64/
+    distro: jammy
+    components:
+      - main
+    key: /workspace/images/arm64/beaglebone/ai64/repos.rcn-ee.net.gpg.key
