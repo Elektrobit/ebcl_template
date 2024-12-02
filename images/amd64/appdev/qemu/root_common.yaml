@@ -32,11 +32,25 @@ packages:
   - psmisc
   # rsync for app deployment during development
   - rsync
+  # Add the qt run time packages, might be more then required, will check later
+  - qt6-base-dev
+  - libgl1-mesa-dev
+  - mesa-common-dev 
+  - libglu1-mesa-dev
+  - gedit
+  - libqt6core6
+  - libqt6gui6
+  - libqt6widgets6
+
 # Add packages for app development example
 sysroot_packages:
   # Add libjson package
   - libjsoncpp-dev
-  # Add the qt packages
+  # Add the qt packages, might be more then required, will check later
   - qt6-base-dev
   - qt6-base-dev-tools
   - libgl1-mesa-dev
+  - build-essential
+  - libgl1-mesa-dev
+  - mesa-common-dev
+  - libglu1-mesa-dev
