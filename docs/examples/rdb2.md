@@ -12,7 +12,7 @@ arch: arm64
 use_ebcl_apt: true
 # Add repo with NXP RDB2 packages
 apt_repos:
-  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.4
     distro: ebcl_nxp_public
     components:
       - nxp_public
