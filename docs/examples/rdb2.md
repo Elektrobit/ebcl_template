@@ -5,7 +5,7 @@ The S32G2 has very specific storage layout requirements, and if you are interest
 
 ```yaml
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1034-s32-eb
+kernel: linux-image-unsigned-5.15.0-1034-s32-eb-optimized
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
