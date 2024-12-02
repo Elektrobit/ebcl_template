@@ -51,3 +51,37 @@ if [ ${COPY_SSH} -eq 1 ]; then
 else
     echo "Not copying SSH keys from host."
 fi
+
+echo ""
+echo "---------------------------------------------------------------------------"
+echo "Checking required tools on the development host"
+echo "---------------------------------------------------------------------------"
+
+check_package() {
+    if dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"; then
+        echo "Required package $1 is installed."
+    else
+        echo "Error: $1 is not installed."
+        echo "Please install it using 'sudo apt install $1'."
+        return 1
+    fi
+}
+
+required_packages=("python3" "python3-venv" "python-is-python3" "binfmt-support" "qemu-user-static")
+all_packages_installed=true
+
+echo "Checking packages..."
+for package in "${required_packages[@]}"; do
+    if ! check_package "$package"; then
+        all_packages_installed=false
+    fi
+done
+
+if [ "$all_packages_installed" = true ]; then
+    echo "Finished checking the host environment. You are good to go!"
+else
+    echo "Some required packages are missing. Please install them and try again."
+    echo "Please double check the recommended setup in https://elektrobit.github.io/ebcl_template/intro/setup.html"
+    exit 1
+fi
+echo "---------------------------------------------------------------------------"
