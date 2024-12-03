@@ -25,7 +25,7 @@ root_filesystem_spec = root.yaml
 # Specification how to get the kernel config
 kernel_config = kernel_config.yaml
 # Kernel source package name
-kernel_package = linux-buildinfo-5.15.0-1034-s32-eb
+kernel_package = linux-buildinfo-5.15.0-1034-s32-eb-optimized
 
 #-------------------------
 # Additional configuration
@@ -56,7 +56,7 @@ kconfig = $(result_folder)/config
 # Kernel source
 source = kernel
 # Path of the kernel sources
-kernel_dir = $(source)/linux-s32-eb-5.15.0
+kernel_dir = $(source)/linux-s32-eb-optimized-5.15.0
 # Kernel make arguments
 kernel_make_args = ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 
