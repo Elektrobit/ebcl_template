@@ -36,11 +36,16 @@ packages:
   - qt6-base-dev
   - libgl1-mesa-dev
   - mesa-common-dev 
-  - libglu1-mesa-dev
   - gedit
   - libqt6core6
   - libqt6gui6
   - libqt6widgets6
+  - weston
+  # driver
+  - mesa-utils
+  - libegl1-mesa
+  - kmscube
+  - kmod
 
 # Add packages for app development example
 sysroot_packages:
@@ -51,6 +56,5 @@ sysroot_packages:
   - qt6-base-dev-tools
   - libgl1-mesa-dev
   - build-essential
-  - libgl1-mesa-dev
   - mesa-common-dev
   - libglu1-mesa-dev
