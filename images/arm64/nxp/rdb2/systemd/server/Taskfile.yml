@@ -23,5 +23,11 @@ includes:
 
 tasks:
   default:
+    desc: Build raspberry NXP RDB2 image
     cmds:
+      - task: rdb2:build_initrd
+      - task: rdb2:build_boot_root
+      - task: rdb2:build_boot
+      - task: rdb2:build_root_base
+      - task: rdb2:build_rootfs
       - task: rdb2:build_image
