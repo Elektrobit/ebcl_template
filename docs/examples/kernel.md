@@ -100,7 +100,7 @@ vars:
   kernel_make_args: ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 
 includes:
-  rdb2:
+   
     taskfile: ../rdb2.yml
     flatten: false
 
@@ -209,12 +209,12 @@ tasks:
 
   clean:
     cmds:
-      - task: rdb2:clean
+      - task:  clean
       - rm -rf {{.source}}
 
   build_boot_root:
     cmds:
-      - task: rdb2:build_boot_root
+      - task:  build_boot_root
 
   build_image:
     cmds:
@@ -223,31 +223,31 @@ tasks:
       - task: build_kernel
       - task: build_modules
       - task: build_boot
-      - task: rdb2:build_image
+      - task:  build_image
   
   build_initrd:
     cmds:
-      - task: rdb2:build_initrd
+      - task:  build_initrd
 
   build_rootfs:
     cmds:
-      - task: rdb2:build_rootfs
+      - task:  build_rootfs
 
   edit_root:
     cmds:
-      - task: rdb2:edit_root
+      - task:  edit_root
 
   install_sysroot:
     cmds:
-      - task: rdb2:install_sysroot
+      - task:  install_sysroot
 
   mrproper:
     cmds:
-      - task: rdb2:mrproper
+      - task:  mrproper
       - task: clean
 
   sysroot_tarball:
     cmds:
-      - task: rdb2:sysroot_tarball
+      - task:  sysroot_tarball
 ```
 
