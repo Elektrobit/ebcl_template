@@ -80,7 +80,7 @@ You may notice that this image description requires three artifacts:
 - **ebcl_rdb2.config.tar**: This is a tarball containing the contents of our Linux root filesystem.
 
 Since the NXP S32G2 SoC is supported by EB corbos Linux, a FIP image and a kernel binary is provided as part of the releases and free download.
-The fip.s32 image is contained in the Debian package _arm-trusted-firmware-s32g_, and provided on https://linux.elektrobit.com/eb-corbos-linux/1.2 as part of the distribution _ebcl_nxp_public_ in the component _nxp_public_. The kernel binary and modules are provided by the same distro and component, packaged as _linux-image-unsigned-5.15.0-1023-s32-eb_, _linux-modules-5.15.0-1023-s32-eb_ and _linux-modules-extra-5.15.0-1023-s32-eb_. 
+The fip.s32 image is contained in the Debian package _arm-trusted-firmware-s32g_, and provided on https://linux.elektrobit.com/eb-corbos-linux/1.2 as part of the distribution _ebcl_nxp_public_ in the component _nxp_public_. The kernel binary and modules are provided by the same distro and component, packaged as _linux-image-unsigned-5.15.0-1034-s32-eb-optimized_, _linux-modules-5.15.0-1034-s32-eb-optimized_ and _linux-modules-extra-5.15.0-1034-s32-eb-optimized_. 
 
 The tooling to build the fitimage is contained in the packages _u-boot-s32-tools_, _arm-trusted-firmware-s32g_, _device-tree-compiler_, and  _nautilos-uboot-tools_. We need to install these tools in some environment to be able to build the fitimage.
 Adding them to the root filesystem would be a possibility, but not a good one, since this would bloat the root filesystem and also gives very useful tools to an attacker trying to hack our embedded solution.
@@ -91,14 +91,14 @@ Let’s first define some common settings used by our image overall, as _base.ya
 
 ```yaml
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1023-s32-eb
+kernel: linux-image-unsigned-5.15.0-1034-s32-eb-optimized
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
 use_ebcl_apt: true
 # Add repo with NXP RDB2 packages
 apt_repos:
-  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.4
     distro: ebcl_nxp_public
     components:
       - nxp_public
@@ -107,7 +107,7 @@ apt_repos:
 
 ```
 
-This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1023-s32-eb_, build an arm64 image, and make use of the default EBcL apt repository, and the EBcL NXP additions.
+This _base.yaml_ states that we want to use the kernel package _linux-image-unsigned-5.15.0-1034-s32-eb-optimized_, build an arm64 image, and make use of the default EBcL apt repository, and the EBcL NXP additions.
 Now we can base on this file and define our fitimage build environment as _boot_root.yaml_:
 
 ```yaml
@@ -117,9 +117,9 @@ base: base.yaml
 name: boot_root
 # Packages for boot_root.tar
 packages:
-  - linux-image-unsigned-5.15.0-1023-s32-eb
-  - linux-modules-5.15.0-1023-s32-eb
-  - linux-modules-extra-5.15.0-1023-s32-eb
+  - linux-image-unsigned-5.15.0-1034-s32-eb-optimized
+  - linux-modules-5.15.0-1034-s32-eb-optimized
+  - linux-modules-extra-5.15.0-1034-s32-eb-optimized
   - u-boot-s32-tools
   - arm-trusted-firmware-s32g
   - device-tree-compiler

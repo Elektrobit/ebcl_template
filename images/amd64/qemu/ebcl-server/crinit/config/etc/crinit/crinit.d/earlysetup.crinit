@@ -1,7 +1,7 @@
 # !LINKSTO ireq.config.hostname, 1
 NAME = earlysetup
 
-COMMAND = /usr/bin/hostname ebcl-server
+COMMAND = /usr/bin/hostname ebclserver
 
 PROVIDES = machine-id:wait
 RESPAWN = NO

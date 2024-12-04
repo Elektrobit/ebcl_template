@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Ensure init ie executable
+# Ensure init is executable
 chmod +x ./sbin/*
 
 # Create a fake machine-id
