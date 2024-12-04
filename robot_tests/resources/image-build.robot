@@ -4,12 +4,6 @@ Library    ../lib/CommManager.py    mode=Process
 Library    ../../.venv/lib/python3.10/site-packages/robot/libraries/String.py
 
 *** Keywords ***
-Run Make
-    [Arguments]    ${path}    ${target}    ${max_time}=2h
-    [Timeout]    ${max_time}
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${path}; make ${target}
-    RETURN    ${result}
-
 Build Image
     [Arguments]    ${path}    ${image}=image.raw    ${max_time}=1h
     [Timeout]    ${max_time}
@@ -17,24 +11,10 @@ Build Image
     ${results_folder}=    Evaluate    $full_path + '/build'
     
     # Remove old build artefacts - build from scratch
-    Run Make    ${full_path}    clean    2m 
-
-    # Build the initrd
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make initrd
-    # Check for boot generator log
-    Should Contain    ${result}    Image was written to
-
-    Sleep    1s
-
-    # Build the kernel
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make boot
-    # Check for boot generator log
-    Should Contain    ${result}    Results were written to
-
-    Sleep    1s
+    Execute   rm -rf ${results_folder} ${full_path}/.task
 
     # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make image
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task
     # Check for Embdgen log
     Should Contain    ${result}    Writing image to
 
@@ -47,22 +27,6 @@ Build Image
     # Clear the output queue
     Clear Lines    
     Sleep    1s
-
-Test That Make Does Not Rebuild
-    [Arguments]    ${path}
-    [Timeout]    1m
-    ${full_path}=    Evaluate    '/workspace/images/' + $path
-    ${output}=    Run Make    ${full_path}    image
-    Should Contain    ${output}    Nothing to be done for 'image'
-
-Run Image
-    [Arguments]    ${path}
-    [Timeout]    5m
-    ${full_path}=    Evaluate    '/workspace/images/' + $path
-    Send Message    source /build/venv/bin/activate; cd ${full_path}; make qemu
-    ${success}=    Login To Vm
-    Should Be True    ${success}
-
 Check For Startup Errors
     [Timeout]    2m
     # Filter known log containing the error search word.
