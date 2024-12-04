@@ -35,13 +35,13 @@ tasks:
     desc: |
            The root configurator is used to run the user configuration scripts
            as a separate step in the build process.
-    deps: [build_root_base]
     cmds: 
       - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
       - mkdir -p  {{.result_folder}}
       - set -o pipefail && root_configurator {{.root_filesystem_spec}} {{.base_tarball}} {{.root_tarball}} 2>&1 | tee {{.root_tarball}}.log
     preconditions: 
        - test -f {{.root_filesystem_spec}}
+       - test -f {{.base_tarball}}
     sources: 
        - ./{{.root_filesystem_spec}}
     generates:
@@ -49,13 +49,13 @@ tasks:
 
   build_image:
     desc: Use embdgen to build the disc image
-    deps: [build_rootfs]
     cmds: 
       - echo "Build image..."
       - mkdir -p  {{.result_folder}}
       - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
     preconditions: 
        - test -f {{.partition_layout}}
+       - test -f {{.root_tarball}}
     sources: 
        - ./{{.partition_layout}}
     generates: 
@@ -77,10 +77,11 @@ tasks:
 
   install_sysroot:
     desc: Install sysroot_tarball to workspace
-    deps: [sysroot_tarball]
     cmds: 
       - rm -rf /workspace/sysroot_{{.arch}}/*
       - tar xf {{.sysroot_tarball}} -C /workspace/sysroot_{{.arch}}/ || true
+    preconditions:
+      - test -f {{.sysroot_tarball}}
 
   edit_base:
     desc: Opens a shell for manual base root configuration

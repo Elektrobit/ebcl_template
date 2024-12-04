@@ -26,8 +26,12 @@ tasks:
   default:
     aliases: [run_qemu]
     desc: Build and run the qemu image
-    deps: [build_image, build_boot, build_initrd]
-    cmds:
+    cmds:   
+      - task: build_boot
+      - task: build_root_base
+      - task: build_rootfs
+      - task: build_initrd
+      - task: build_image
       - task: run_qemu_internal
   ssh:
     desc: Connect to the running qemu instance via ssh

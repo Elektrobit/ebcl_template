@@ -116,7 +116,6 @@ tasks:
       - ./{{.source}}
 
   kconfig:
-    deps: [source]
     cmds:
       - echo "Get kernel config..."
       - mkdir -p {{.result_folder}}
@@ -137,7 +136,6 @@ tasks:
        - ./{{.kconfig}}
 
   build_kernel:
-    deps: [kconfig]
     cmds:
       - echo "Compile kernel..."
       - cd {{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
@@ -150,7 +148,6 @@ tasks:
        - ./{{.kernel}}
 
   build_modules:
-    deps: [build_kernel]
     cmds:
       - echo "Get virtio driver..."
       - cd {{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
@@ -167,7 +164,6 @@ tasks:
       - test -d {{.kernel_dir}} 
 
   build_boot:
-    deps: [build_kernel, build_initrd]
     cmds:
       - echo "Get fitimage..."
       - mkdir -p {{.result_folder}}
@@ -221,8 +217,12 @@ tasks:
       - task: rdb2:build_boot_root
 
   build_image:
-    deps: [build_kernel, build_boot]
     cmds:
+      - task: source
+      - task: kconfig
+      - task: build_kernel
+      - task: build_modules
+      - task: build_boot
       - task: rdb2:build_image
   
   build_initrd:

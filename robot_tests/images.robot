@@ -171,22 +171,8 @@ Build Image
     # Remove old build artefacts - build from scratch
     Execute   rm -rf ${results_folder} ${full_path}/.task
 
-    # Build the initrd
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_initrd
-    # Check for initrd generator log
-    Should Contain    ${result}    Image was written to
-
-    Sleep    1s
-
-    # Build the kernel
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_boot
-    # Check for boot generator log
-    Should Contain    ${result}    Results were written to
-
-    Sleep    1s
-
     # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_image
+    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task
     # Check for Embdgen log
     Should Contain    ${result}    Writing image to
 

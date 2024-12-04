@@ -14,4 +14,6 @@ tasks:
   default:
     desc: Build raspberry pi 4 image
     cmds:
+      - task: rpi:build_root_base
+      - task: rpi:build_rootfs
       - task: rpi:build_image

@@ -328,7 +328,6 @@ tasks:
 
   build_boot:
     desc: The boot generator is used to extract the kernel image for a Debian package.
-    deps: [build_initrd, build_boot_root]
     cmds:
       - echo "Get fitimage..."
       - mkdir -p {{.result_folder}}
@@ -357,7 +356,6 @@ tasks:
 
   build_image:
     desc: Use embdgen to build the SD card image
-    deps: [build_rootfs, build_boot]
     cmds: 
       - echo "Build image..."
       - mkdir -p  {{.result_folder}}
@@ -440,7 +438,6 @@ vars:
     desc: |
            The root configurator is used to run the user configuration scripts
            as a separate step in the build process.
-    deps: [build_root_base]
     cmds: 
       - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
       - mkdir -p  {{.result_folder}}
@@ -468,8 +465,12 @@ vars:
 tasks:
   build_image:
     desc: Use embdgen to build the SD card image
-    deps: [build_rootfs, build_boot]
-    cmds: 
+    cmds:
+      - task: source
+      - task: kconfig
+      - task: build_kernel
+      - task: build_modules
+      - task: build_boot
       - echo "Build image..."
       - mkdir -p  {{.result_folder}}
       - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
