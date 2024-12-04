@@ -120,30 +120,6 @@ Build Image arm64/nxp/rdb2/kernel_src
     [Timeout]    90m
     Test Hardware Image    arm64/nxp/rdb2/kernel_src
 
-Build Image
-    [Arguments]    ${path}    ${image}=image.raw    ${max_time}=1h
-    [Timeout]    ${max_time}
-    ${full_path}=    Evaluate    '/workspace/images/' + $path
-    ${results_folder}=    Evaluate    $full_path + '/build'
-    
-    # Remove old build artefacts - build from scratch
-    Execute   rm -rf ${results_folder} ${full_path}/.task
-
-    # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task
-    # Check for Embdgen log
-    Should Contain    ${result}    Writing image to
-
-    Sleep    1s
-    
-    # Check that image file exists
-    ${file_info}=    Execute    cd ${results_folder}; file ${image}
-    Should Not Contain    ${file_info}    No such file
-    
-    # Clear the output queue
-    Clear Lines    
-    Sleep    1s
-
 Test That Task Does Not Rebuild
     [Arguments]    ${path}
     [Timeout]    1m
