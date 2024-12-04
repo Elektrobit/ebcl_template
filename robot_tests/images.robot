@@ -14,7 +14,7 @@ Build Image amd64/qemu/jammy
 # Tests for QEMU AMD64 EBcL images
 #==================================
 Build Image amd64/qemu/ebcl/systemd
-    [Tags]    amd64    qemu    berrymill    kiwi    ebcl    systemd
+    [Tags]    amd64    qemu     ebcl    systemd
     Test Systemd Image    amd64/qemu/ebcl/systemd
 
 Build Image amd64/qemu/ebcl/crinit
@@ -120,48 +120,6 @@ Build Image arm64/nxp/rdb2/kernel_src
     [Timeout]    90m
     Test Hardware Image    arm64/nxp/rdb2/kernel_src
 
-#==================================
-# Tests for old format images
-#==================================
-Build Image example-old-images/qemu/berrymill
-    [Tags]    amd64    qemu    berrymill    kiwi    ebcl    old
-    [Timeout]    60m
-    ${path}=    Set Variable    example-old-images/qemu/berrymill
-    # ---------------
-    # Build the image
-    # ---------------
-    ${full_path}=    Set Variable    /workspace/images/example-old-images/qemu/berrymill
-    ${results_folder}=    Evaluate    $full_path + '/build'
-    Connect
-    # Remove old build artefacts - build from scratch
-    Run Make    ${full_path}    clean    2m 
-    # Build the image
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make image
-    # Check for Embdgen log
-    Should Contain    ${result}    Image was written to
-    Sleep    1s
-    # Check that image file exists
-    ${file_info}=    Execute    cd ${results_folder}; file root.qcow2
-    Should Not Contain    ${file_info}    No such file
-    # Clear the output queue
-    Clear Lines    
-    Sleep    1s
-    # -------------
-    # Run the image
-    # -------------
-    Test That Make Does Not Rebuild    ${path}
-    Run Old Image    ${path}
-    Send Message    \ncrinit-ctl poweroff
-    Sleep    20s
-    Disconnect
-
-*** Keywords ***
-Run Make
-    [Arguments]    ${path}    ${target}    ${max_time}=2h
-    [Timeout]    ${max_time}
-    ${result}=    Execute    source /build/venv/bin/activate; cd ${path}; make ${target}
-    RETURN    ${result}
-
 Build Image
     [Arguments]    ${path}    ${image}=image.raw    ${max_time}=1h
     [Timeout]    ${max_time}
@@ -186,27 +144,12 @@ Build Image
     Clear Lines    
     Sleep    1s
 
-Test That Make Does Not Rebuild
-    [Arguments]    ${path}
-    [Timeout]    1m
-    ${full_path}=    Evaluate    '/workspace/images/' + $path
-    ${output}=    Execute    source /build/venv/bin/activate; cd ${full_path}; make
-    Should Contain    ${output}    is up to date
-
 Test That Task Does Not Rebuild
     [Arguments]    ${path}
     [Timeout]    1m
     ${full_path}=    Evaluate    '/workspace/images/' + $path
     ${output}=    Execute    source /build/venv/bin/activate; cd ${full_path}; task build_image
     Should Contain    ${output}    is up to date
-
-Run Old Image
-    [Arguments]    ${path}
-    [Timeout]    5m
-    ${full_path}=    Evaluate    '/workspace/images/' + $path
-    Send Message    source /build/venv/bin/activate; cd ${full_path}; make qemu
-    ${success}=    Login To Vm
-    Should Be True    ${success}
 
 Run Image
     [Arguments]    ${path}

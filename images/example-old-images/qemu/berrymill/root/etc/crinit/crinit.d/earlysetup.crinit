@@ -1,7 +1,0 @@
-NAME = earlysetup
-
-COMMAND = /bin/hostname qemucrinitvm
-
-PROVIDES = machine-id:wait
-RESPAWN = NO
-DEPENDS = ""
