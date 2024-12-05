@@ -1,0 +1,12 @@
+[Unit]
+Description=Weston Wayland compositor startup
+RequiresMountsFor=/run
+ 
+[Service]
+EnvironmentFile=-/etc/default/weston
+Environment="XDG_RUNTIME_DIR=/run/user/0"
+ExecStartPre=mkdir -p /run/user/0
+ExecStart=/usr/bin/openvt -v -w -s -- bash -c "/usr/bin/weston-launch -- -c /root/.config/weston.ini $OPTARGS 2>~/.weston-errors"
+ 
+[Install]
+WantedBy=graphical.target
