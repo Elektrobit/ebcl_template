@@ -103,7 +103,7 @@ $(source):
 	@echo "Get kernel sources..."
 	mkdir -p $(source)
 	cd $(source) && apt -y source $(kernel_package)
-	sudo apt -y build-dep $(kernel_package)
+	sudo DEBIAN_FRONTEND=noninteractive apt-get -yq build-dep $(kernel_package)
 	cd $(kernel_dir) && chmod +x scripts/*.sh
 
 # Get the kernel config form the configured kernel binary package.
