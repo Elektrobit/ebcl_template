@@ -5,16 +5,46 @@
         "minor": 21
     },
     "include": [
-        "/build/cmake/BasePresets.json"
+        "/build/cmake/ebclPresets.json"
     ],
     "configurePresets": [
         {
-            "name": "base-app-env",
-            "inherits": "base",
-            "hidden": true,
+            "name": "qemu-x86_64",
+            "inherits": "ebcl-x86_64",
             "environment": {
                 "APP_NAME": "my-json-app"
             }
+        },
+        {
+            "name": "qemu-aarch64",
+            "inherits": "ebcl-aarch64",
+            "environment": {
+                "APP_NAME": "my-json-app"
+            }
+        },
+        {
+            "name": "hardware",
+            "inherits": "ebcl-aarch64",
+            "environment": {
+                "APP_NAME": "my-json-app"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "qemu-x86_64",
+            "configurePreset": "qemu-x86_64",
+            "inherits": "base"
+        },
+        {
+            "name": "qemu-aarch64",
+            "configurePreset": "qemu-aarch64",
+            "inherits": "base"
+        },
+        {
+            "name": "hardware",
+            "configurePreset": "hardware",
+            "inherits": "base"
         }
     ]
 }
