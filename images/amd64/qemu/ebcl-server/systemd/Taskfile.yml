@@ -11,6 +11,11 @@ vars:
   root_tarball: build/ebcl.config.tar
   sysroot_tarball: build/ebcl_sysroot.tar
   qemu_net_append: ",hostfwd=tcp::2223-:22"
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  initrd_img: ./build/initrd.img
+  kernel: ./build/vmlinuz
+  kernel_cmdline_append: "rw"
 
 includes:
   qemu_x86_64:

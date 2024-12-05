@@ -4,7 +4,12 @@ vars:
   arch: 'aarch64'
   partition_layout: ../image.yaml
   root_filesystem_spec: root.yaml
-
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  base_tarball: build/ebcl_pi4.tar
+  root_tarball: build/ebcl_pi4.config.tar
+  sysroot_tarball: build/ebcl_pi4_sysroot.tar
+  
 includes:
   rpi:
     taskfile: ./../../../raspberry/raspberry.yml

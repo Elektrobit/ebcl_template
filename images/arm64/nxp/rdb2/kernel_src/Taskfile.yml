@@ -22,6 +22,10 @@ vars:
   source: kernel
   kernel_dir: kernel/linux-s32-eb-5.15.0
   kernel_make_args: ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+  kernel_cmdline_append: rw
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  initrd_img: ./build/initrd.img
 
 includes:
   rdb2:
