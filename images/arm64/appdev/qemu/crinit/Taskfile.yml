@@ -37,8 +37,10 @@ tasks:
       - task: build_initrd
       - task: build_image
       - task: run_qemu_internal
+    method: none
   ssh:
     desc: Connect to the running qemu instance via ssh
     cmds:
       - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2222"
       - ssh -p 2222 root@localhost
+    method: none

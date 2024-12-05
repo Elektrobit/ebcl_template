@@ -35,3 +35,4 @@ tasks:
       - task: build_initrd
       - task: build_image
       - task: run_qemu_internal
+    method: none
