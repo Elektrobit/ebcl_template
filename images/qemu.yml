@@ -1,12 +1,5 @@
 version: '3'
 
-vars:
-  kernel_cmdline_append: "rw"
-  result_folder: ./build
-  disc_image: ./build/image.raw
-  initrd_img: ./build/initrd.img
-  kernel: ./build/vmlinuz
-
 env:
   SHELL : /bin/bash
 

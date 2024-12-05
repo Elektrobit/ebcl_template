@@ -10,6 +10,10 @@ vars:
   base_tarball: build/ebcl.tar
   root_tarball: build/ebcl.config.tar
   sysroot_tarball: build/ebcl_sysroot.tar
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  initrd_img: ./build/initrd.img
+  kernel: ./build/vmlinuz
   kernel_cmdline_append: "rw"
 
 includes:

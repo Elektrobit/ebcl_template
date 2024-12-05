@@ -15,6 +15,10 @@ vars:
   fitimage_config: ../bootargs.its
   bootloader_config: ../bootargs-overlay.dts
   fitimage: ./build/fitimage
+  kernel_cmdline_append: rw
+  result_folder: ./build
+  disc_image: ./build/image.raw
+  initrd_img: ./build/initrd.img
 
 includes:
   nxp:
