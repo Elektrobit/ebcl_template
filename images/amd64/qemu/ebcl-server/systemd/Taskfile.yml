@@ -36,8 +36,10 @@ tasks:
       - task: build_initrd
       - task: build_image
       - task: run_qemu_internal
+    method: none
   ssh:
     desc: Build and run the qemu image
     cmds:
       - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2223"
       - ssh -p 2223 root@localhost
+    method: none
