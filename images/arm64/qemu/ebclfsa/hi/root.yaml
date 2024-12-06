@@ -1,0 +1,14 @@
+base: ../base.yaml
+# reset the kernel value
+kernel: null
+# Name of the archive.
+name: root
+# Packages to install in the root tarball (right now none)
+# packages:
+host_files:
+#  - source: root/*
+  - source: $$RESULTS$$/demo/install/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

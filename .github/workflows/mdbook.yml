@@ -8,7 +8,7 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: 
-      - main
+      - main*
       - SDK_1.3
 
   # Allows you to run this workflow manually from the Actions tab

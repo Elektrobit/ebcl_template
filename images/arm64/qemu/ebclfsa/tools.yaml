@@ -1,0 +1,14 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+kernel: none
+# Dowload dependencies of the kernel package - necessary if meta-package is specified
+download_deps: true
+# Name of the boot root archive
+name: tools
+# Packages for tools.tar
+packages:
+  - eb-hv-qemu-noml
+  - eb-hv-qemu-noml-config-extension
+  - eb-hv-qemu-tools
+  - device-tree-compiler
+  - uboot-qemu-bart

@@ -1,7 +1,11 @@
 #!/bin/sh
 
-# Link crinit as init
+# Ensure init is executable
 chmod +x ./sbin/*
+
+# Ensure modprobe.sh is executable
+chmod +x ./usr/sbin/load_modules.sh
+chmod +x ./usr/sbin/ntp_time.sh
 
 # Create a fake machine-id
 echo "04711" > ./etc/machine-id

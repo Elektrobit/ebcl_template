@@ -29,7 +29,7 @@
                   "Cmake build app from active build preset",
                   "Connection test",
               ],
-              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX rsync -rlptv -e \"ssh -p $SSH_PORT\" --exclude */include/* --exclude *.debug ${command:cmake.buildDirectory}/install/ $SSH_USER@$TARGET_IP:/",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX rsync -rlptv -e \"ssh -p $SSH_PORT\" --exclude */include/* --exclude *.debug ${command:cmake.buildDirectory}/install/ $SSH_USER@[$TARGET_IP]:/",
               "problemMatcher": []
           },
           {
@@ -38,7 +38,7 @@
               "type": "shell",
               "hide": true,
               "dependsOn": "Deploy app from active build preset",
-              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && touch ${command:cmake.buildDirectory}/.gdbinit && echo \"target extended-remote $TARGET_IP:$GDB_PORT\" > ${command:cmake.buildDirectory}/.gdbinit",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && touch ${command:cmake.buildDirectory}/.gdbinit && echo \"target extended-remote $GDB_TARGET_IP:$GDB_PORT\" > ${command:cmake.buildDirectory}/.gdbinit",
               "problemMatcher": []
           },
           {
@@ -47,7 +47,7 @@
               "type": "shell",
               "hide": true,
               "dependsOn": "Prepare gdb session",
-              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP \"gdbserver --multi :$GDB_PORT >/dev/null 2>/tmp/gdb.err &\"",
+              "command": "TARGET=${command:cmake.activeBuildPresetName} source ${workspaceFolder}/deployment.targets && $SSH_PREFIX ssh -p $SSH_PORT $SSH_USER@$TARGET_IP \"gdbserver --multi [::]:$GDB_PORT >/dev/null 2>/tmp/gdb.err &\"",
               "problemMatcher": []
           },
           {

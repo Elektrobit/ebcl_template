@@ -1,0 +1,28 @@
+base: base.yaml
+# Reset kernel package
+kernel: null
+# Name of the archive.
+name: ebcl
+# CPU architecture
+arch: amd64
+# Packages to install in the root tarball
+packages:
+  # SSH server
+  - openssh-server
+  # Other basic tools
+  - openssh-client
+  - locales
+  - bash
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - iproute2
+  - iptables
+  - iputils-ping
+  # Apt package manager
+  - apt
+  - gnupg
+  # Editors
+  - vim
+  - nano

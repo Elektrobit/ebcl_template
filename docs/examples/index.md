@@ -3,7 +3,7 @@ The _Makefile_ is SoC specific, should be only changed during SoC and board brin
 If different image variants are used, also parts of the image configuration can be shared.
 To avoid redundancy, the example images make use of this sharing.
 The example images are contained in the _images_ folder of the EB corbos Linux template workspace, and are structured by CPU architecture, distribution, init-manager and further variant descriptions.
-The example image for amd64 and the QEMU target, using the EBcL distribution, the crinit init-manager, and the debootstrap root filesystem builder is contained in _images/amd64/qemu/ebcl/crinit/debootstrap_, and you can build and run it by executing `make` in this folder.
+The example image for amd64 and the QEMU target, using the EBcL distribution, and the crinit init-manager is contained in _images/amd64/qemu/ebcl/crinit_, and you can build and run it by executing `make` in this folder.
 
 Please be aware that the example images are only considered for educational purposes.
 These images are not pre-qualified.

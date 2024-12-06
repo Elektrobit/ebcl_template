@@ -11,7 +11,7 @@ elif [ "$TARGET" == "qemu-aarch64" ] ; then
     SSH_PREFIX="sshpass -p linux"
     GDB_PORT=3333
 elif [ "$TARGET" == "hardware" ] ; then
-    TARGET_IP=[fd00::eb:2]
+    TARGET_IP=fd00::eb:2
     SSH_PORT=22
     SSH_USER=root
     SSH_PREFIX="sshpass -p linux"
@@ -20,3 +20,14 @@ else
     echo "Target \"$TARGET\" not supported!"
     exit -1
 fi
+
+is_ipv6_address() {
+  [[ $1 =~ ^([0-9a-fA-F]{0,4}:){0,7}[0-9a-fA-F]{1,4}$ ]]
+}
+
+GDB_SERVER_INTERFACE="[::]"
+
+# In case of an IPv6 connection towards the target,
+# we must use [] around the target IP address
+
+is_ipv6_address $TARGET_IP && GDB_TARGET_IP="[$TARGET_IP]" || GDB_TARGET_IP="$TARGET_IP"
