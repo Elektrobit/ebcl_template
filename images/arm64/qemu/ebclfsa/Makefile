@@ -67,6 +67,24 @@ bootstrap ?= build/bootstrap.uimage
 image_spec ?= image.yaml
 image ?= $(result_folder)/image.raw
 
+dist_archive ?= $(result_folder)/ebclfsa_qemu.tar.gz
+
+define qemu_command
+qemu-system-aarch64 \
+	-M virt,virtualization=true,gic-version=3 \
+	-cpu cortex-a57 \
+	-m 4096 \
+	-smp 8 \
+	-serial stdio \
+	-nographic \
+	-monitor none \
+	-kernel $(1) \
+	-drive if=none,format=raw,file=$(2),id=vd0 \
+	-device virtio-blk-device,drive=vd0 \
+	-netdev user,id=net0,net=192.168.7.0/24,dhcpstart=192.168.7.2,dns=192.168.7.3,host=192.168.7.5,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333 \
+	-device virtio-net-device,netdev=net0
+endef
+
 default: all
 
 $(li_demo_builddir)/Makefile:
@@ -75,7 +93,7 @@ $(li_demo_builddir)/Makefile:
 # Ensure that install is executed every time, otherwiese changes may be ignored
 .PHONY: li_demo_install
 li_demo_install: $(li_demo_builddir)/Makefile
-	make -C $(li_demo_builddir) install DESTDIR=install
+	+make -C $(li_demo_builddir) install DESTDIR=install
 
 $(li_demo_install): li_demo_install
 
@@ -118,7 +136,7 @@ $(hi_demo_builddir)/Makefile:
 # Ensure that install is executed every time, otherwiese changes may be ignored
 .PHONY: li_demo_install
 hi_demo_install: $(hi_demo_builddir)/Makefile
-	make -C $(hi_demo_builddir) install DESTDIR=install
+	+make -C $(hi_demo_builddir) install DESTDIR=install
 
 $(hi_demo_install): hi_demo_install
 
@@ -156,13 +174,17 @@ $(tools_root): $(tools_spec)
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(tools_spec) $(result_folder) 2>&1 | tee $@.log
 
-$(template_schema) $(uboot): $(tools_extract_spec) $(tools_root)
+$(template_schema): $(tools_extract_spec) $(tools_root)
 	@echo "Extracting required files from tools ..."
 	rm -rf $(template_extension_dir)
 	mkdir -p $(result_folder)
 	set -o pipefail && boot_generator $(tools_extract_spec) $(result_folder) 2>&1 | tee $(result_folder)/$(tools_extract_spec).log
 # Ensure that the extracted files are newer than the source
 	touch $@
+
+# uboot is extracted in the above task as well, but
+# making it an output results in the task being executed twice
+$(uboot): $(template_schema) $(tools_extract_spec) $(tools_root)
 
 $(hv_modules): $(template_schema) $(hv_config) $(hv_config_deps)
 	hypervisor_config -s $(template_extension_dir) $(hv_config) $(hv_config_dir)
@@ -181,19 +203,15 @@ $(image): $(bootstrap) $(li_root_tarball) $(hi_root_tarball) $(image_spec)
 all: $(image)
 
 qemu: $(image) $(uboot)
-	qemu-system-aarch64 \
-		-M virt,virtualization=true,gic-version=3 \
-		-cpu cortex-a57 \
-		-m 4096 \
-		-smp 8 \
-		-serial stdio \
-		-nographic \
-		-monitor none \
-		-kernel $(uboot) \
-		-drive if=none,format=raw,file=$(image),id=vd0 \
-		-device virtio-blk-device,drive=vd0 \
-		-netdev user,id=net0,net=192.168.7.0/24,dhcpstart=192.168.7.2,dns=192.168.7.3,host=192.168.7.5,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333 \
-		-device virtio-net-device,netdev=net0
+	$(call qemu_command,$(uboot),$(image))
+
+$(dist_archive): $(image) $(uboot)
+	@echo "$(call qemu_command,$(notdir $(uboot)),$(notdir $(image)))" > $(result_folder)/run_qemu.sh
+	chmod +x $(result_folder)/run_qemu.sh
+	tar -czf $@ --transform=s/Readme.dist/Readme/ Readme.dist -C $(result_folder) $(notdir $(uboot)) $(notdir $(image)) run_qemu.sh
+
+dist: $(dist_archive)
+
 
 # install the sysroot tarball
 .PHONY: sysroot_install
