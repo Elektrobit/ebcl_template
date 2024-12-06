@@ -156,13 +156,17 @@ $(tools_root): $(tools_spec)
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(tools_spec) $(result_folder) 2>&1 | tee $@.log
 
-$(template_schema) $(uboot): $(tools_extract_spec) $(tools_root)
+$(template_schema): $(tools_extract_spec) $(tools_root)
 	@echo "Extracting required files from tools ..."
 	rm -rf $(template_extension_dir)
 	mkdir -p $(result_folder)
 	set -o pipefail && boot_generator $(tools_extract_spec) $(result_folder) 2>&1 | tee $(result_folder)/$(tools_extract_spec).log
 # Ensure that the extracted files are newer than the source
 	touch $@
+
+# uboot is extracted in the above task as well, but
+# making it an output results in the task being executed twice
+$(uboot): $(template_schema) $(tools_extract_spec) $(tools_root)
 
 $(hv_modules): $(template_schema) $(hv_config) $(hv_config_deps)
 	hypervisor_config -s $(template_extension_dir) $(hv_config) $(hv_config_dir)
