@@ -67,6 +67,24 @@ bootstrap ?= build/bootstrap.uimage
 image_spec ?= image.yaml
 image ?= $(result_folder)/image.raw
 
+dist_archive ?= $(result_folder)/ebclfsa_qemu.tar.gz
+
+define qemu_command
+qemu-system-aarch64 \
+	-M virt,virtualization=true,gic-version=3 \
+	-cpu cortex-a57 \
+	-m 4096 \
+	-smp 8 \
+	-serial stdio \
+	-nographic \
+	-monitor none \
+	-kernel $(1) \
+	-drive if=none,format=raw,file=$(2),id=vd0 \
+	-device virtio-blk-device,drive=vd0 \
+	-netdev user,id=net0,net=192.168.7.0/24,dhcpstart=192.168.7.2,dns=192.168.7.3,host=192.168.7.5,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333 \
+	-device virtio-net-device,netdev=net0
+endef
+
 default: all
 
 $(li_demo_builddir)/Makefile:
@@ -185,19 +203,15 @@ $(image): $(bootstrap) $(li_root_tarball) $(hi_root_tarball) $(image_spec)
 all: $(image)
 
 qemu: $(image) $(uboot)
-	qemu-system-aarch64 \
-		-M virt,virtualization=true,gic-version=3 \
-		-cpu cortex-a57 \
-		-m 4096 \
-		-smp 8 \
-		-serial stdio \
-		-nographic \
-		-monitor none \
-		-kernel $(uboot) \
-		-drive if=none,format=raw,file=$(image),id=vd0 \
-		-device virtio-blk-device,drive=vd0 \
-		-netdev user,id=net0,net=192.168.7.0/24,dhcpstart=192.168.7.2,dns=192.168.7.3,host=192.168.7.5,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333 \
-		-device virtio-net-device,netdev=net0
+	$(call qemu_command,$(uboot),$(image))
+
+$(dist_archive): $(image) $(uboot)
+	@echo "$(call qemu_command,$(notdir $(uboot)),$(notdir $(image)))" > $(result_folder)/run_qemu.sh
+	chmod +x $(result_folder)/run_qemu.sh
+	tar -czf $@ --transform=s/Readme.dist/Readme/ Readme.dist -C $(result_folder) $(notdir $(uboot)) $(notdir $(image)) run_qemu.sh
+
+dist: $(dist_archive)
+
 
 # install the sysroot tarball
 .PHONY: sysroot_install
