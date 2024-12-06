@@ -1,0 +1,7 @@
+{
+    "customizations": {
+        "extensions": [
+            "ms-vscode-remote.remote-containers",
+        ]
+    }
+}
