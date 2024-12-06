@@ -75,7 +75,7 @@ $(li_demo_builddir)/Makefile:
 # Ensure that install is executed every time, otherwiese changes may be ignored
 .PHONY: li_demo_install
 li_demo_install: $(li_demo_builddir)/Makefile
-	make -C $(li_demo_builddir) install DESTDIR=install
+	+make -C $(li_demo_builddir) install DESTDIR=install
 
 $(li_demo_install): li_demo_install
 
@@ -118,7 +118,7 @@ $(hi_demo_builddir)/Makefile:
 # Ensure that install is executed every time, otherwiese changes may be ignored
 .PHONY: li_demo_install
 hi_demo_install: $(hi_demo_builddir)/Makefile
-	make -C $(hi_demo_builddir) install DESTDIR=install
+	+make -C $(hi_demo_builddir) install DESTDIR=install
 
 $(hi_demo_install): hi_demo_install
 
