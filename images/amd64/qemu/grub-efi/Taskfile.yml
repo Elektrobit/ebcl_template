@@ -30,5 +30,4 @@ tasks:
       - task: qemu:build_image
       - task: efi:install-grub
       - task: qemu_x86_64_efi:run_qemu_internal
-
-
+    method: none
