@@ -76,7 +76,7 @@ Pressing on this element will bring up the connection menu.
 ### Install required tools and clone ebcl_template repository
 
 
-If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io python3 python3-venv python-is-python3 binfmt-support qemu-user-static`
+If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io binfmt-support qemu-user-static`
 
 To use dev containers, your user (on the remote machine) needs to be able to create local Docker containers.
 To give your user these rights, you need to add the user to the docker group with the command: `sudo usermod -aG docker $USER`. The changes become active after a new login.

@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# Link crinit as init
+# Ensure init is executable
 chmod +x /sbin/init

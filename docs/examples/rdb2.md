@@ -5,14 +5,14 @@ The S32G2 has very specific storage layout requirements, and if you are interest
 
 ```yaml
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1034-s32-eb
+kernel: linux-image-unsigned-5.15.0-1034-s32-eb-optimized
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
 use_ebcl_apt: true
 # Add repo with NXP RDB2 packages
 apt_repos:
-  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.4
     distro: ebcl_nxp_public
     components:
       - nxp_public

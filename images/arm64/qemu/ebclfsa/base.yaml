@@ -1,0 +1,28 @@
+use_ebcl_apt: true
+# Additional apt repos
+apt_repos:
+ # Required for libarchive-zip-perl
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  # Get latest ebclfsa packages
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.4
+    gpg: /etc/apt/trusted.gpg.d/elektrobit.gpg
+    distro: ebclfsa
+    components:
+      - dev
+  # Get local & manually downloaded packages
+  - apt_repo: http://127.0.0.1:8000
+    gpg: /etc/apt/trusted.gpg.d/local.gpg
+    distro: local
+    components:
+      - main
+# CPU architecture
+arch: arm64

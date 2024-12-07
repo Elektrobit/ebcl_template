@@ -1,0 +1,93 @@
+/ {
+	#address-cells = <2>;
+	#size-cells = <2>;
+	model = "L4 VM";
+	compatible = "l4,virt", "linux,dummy-virt";
+	interrupt-parent = <&gic>;
+
+	chosen {};
+
+	aliases {};
+
+	psci {
+		compatible = "arm,psci-1.0";
+		method = "hvc";
+		status = "okay";
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <0>;
+			enable-method = "psci";
+			status = "okay";
+		};
+
+		cpu@1 {
+			device_type = "cpu";
+			compatible = "arm,cortex-a53", "arm,armv8";
+			reg = <1>;
+			enable-method = "psci";
+			status = "okay";
+		};
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x0>;
+		l4vmm,dscap = "ram";
+		status = "okay";
+	};
+
+	l4vmm {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		ranges = <0x0 0x0 0x10000 0x21000>;
+
+		virtio_net@10000 {
+			compatible = "virtio,mmio";
+			reg = <0x10000 0x200>;
+			interrupt-parent = <&gic>;
+			interrupts = <0x0 0x7b 0x4>;
+			l4vmm,vdev = "proxy";
+			l4vmm,virtiocap = "vnet_li_hi";
+			status = "okay";
+		};
+		virtio_uart@20000 {
+			compatible = "virtio,mmio";
+			reg = <0x20000 0x100>;
+			interrupt-parent = <&gic>;
+			interrupts = <0x0 0x7a 0x4>;
+			l4vmm,vdev = "console";
+			status = "okay";
+		};
+	};
+
+	icsoc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "simple-bus";
+		ranges;
+
+		gic: interrupt-controller@40000 {
+			compatible = "arm,gic-400", "arm,cortex-a15-gic", "arm,cortex-a9-gic";
+			#interrupt-cells = <3>;
+			#address-cells = <0>;
+			interrupt-controller;
+			reg = <0x40000 0x10000 0x50000 0x40000>;
+			status = "okay";
+		};
+	};
+
+	timer {
+		compatible = "arm,armv8-timer";
+		interrupts = <0x1 0xd 0xf08 0x1 0xe 0xf08 0x1 0xb 0xf08 0x1 0xa 0xf08>;
+		always-on;
+		status = "okay";
+	};
+};

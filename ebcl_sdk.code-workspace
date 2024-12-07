@@ -11,10 +11,14 @@
 		},
 		{
 			"path": "apps/common"
+		},
+		{
+			"path": "apps/ebclfsa-demo"
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"git.ignoreLimitWarning": true,
+		"terminal.integrated.sendKeybindingsToShell": true
 	},
 	"launch": {
 		"version": "0.2.0",
