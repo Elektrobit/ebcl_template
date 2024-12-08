@@ -20,7 +20,49 @@
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"git.ignoreLimitWarning": true,
+		"yaml.schemas": {
+			"https://taskfile.dev/schema.json": [
+				"file:///workspace/images/tasks/Generic.yml",
+				"file:///workspace/images/tasks/BootGenerator.yml"
+			]
+		},
+		"cSpell.words": [
+			"bootargs",
+			"buildinfo",
+			"childs",
+			"cmdline",
+			"configurator",
+			"cpid",
+			"Crinit",
+			"debootstrap",
+			"devpts",
+			"ebcl",
+			"embdgen",
+			"fakechroot",
+			"fakeedit",
+			"fakeroot",
+			"fakestate",
+			"fitimage",
+			"hostfwd",
+			"kconfig",
+			"menuconfig",
+			"mrproper",
+			"mynet",
+			"netdev",
+			"nographic",
+			"nvram",
+			"olddefconfig",
+			"ovmf",
+			"perr",
+			"pgrep",
+			"pipefail",
+			"sysfs",
+			"Taskfile",
+			"tmpfs",
+			"virt",
+			"virtio"
+		]
 	},
 	"launch": {
 		"version": "0.2.0",

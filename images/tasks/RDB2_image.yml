@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  efi: 'Efi.yml'
+  kernel: 'Kernel.yml'
+
+tasks:
+  build:
+    desc: Build NXP RDB2 image
+    vars:
+      boot_root_spec: '{{.boot_root_spec | default "boot_root.yaml"}}'
+      boot_tarball: '{{.boot_tarball | default "boot_root.tar"}}'
+    cmds:
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: '{{.boot_root_spec}}'
+          base_tarball: '{{.boot_tarball}}'
+      - task: boot:build_fitimage
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+    method: none
+  
+  build_with_local_kernel:
+    desc: Build NXP RDB2 image using a local built kernel binary from Debian package sources.
+    vars:
+      boot_root_spec: '{{.boot_root_spec | default "boot_root.yaml"}}'
+      boot_tarball: '{{.boot_tarball | default "boot_root.tar"}}'
+    cmds:
+      - task: kernel:build
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: '{{.boot_root_spec}}'
+          base_tarball: '{{.boot_tarball}}'
+      - task: boot:build_fitimage
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+    method: none

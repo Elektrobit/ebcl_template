@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  efi: 'Efi.yml'
+
+tasks:
+  build:
+    desc: Build and run the qemu image
+    cmds:   
+      - task: boot:extract_kernel
+      - task: root:build
+      - task: root:config
+      - task: initrd:build
+      - task: embdgen:build
+    method: none
+
+  build_efi:
+    desc: Build and run the qemu efi image
+    cmds:   
+      - task: initrd:build
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+      - task: efi:install-grub
+    method: none
