@@ -2,13 +2,15 @@
 version: '3'
 
 tasks:
-  build_qemu:
-    desc: Use embdgen to build the QEMU disc image
+  build:
+    desc: Use embdgen to build the disc image
     vars:
       result_folder: '{{.result_folder | default "./build/"}}'
       partition_layout: '{{.partition_layout | default "image.yaml"}}'
       disc_image: '{{.disc_image | default "image.raw"}}'
       root_tarball: '{{.root_tarball | default "root.config.tar"}}'
+      firmware: '{{.firmware | default "fip.s32"}}'
+      fitimage: '{{.fitimage | default "fitimage"}}'
     cmds: 
       - mkdir -p  {{.result_folder}}
       - set -o pipefail && embdgen -o {{.result_folder}}{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.result_folder}}{{.disc_image}}.log
@@ -17,5 +19,8 @@ tasks:
        - test -f {{.result_folder}}{{.root_tarball}}
     sources: 
        - '{{.partition_layout}}'
+       - '{{.result_folder}}{{.root_tarball}}'
+       - '{{.result_folder}}{{.firmware}}'
+       - '{{.result_folder}}{{.fitimage}}'
     generates: 
        - '{{.result_folder}}{{.disc_image}}'

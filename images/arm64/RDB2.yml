@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  arch: 'aarch64'
+  partition_layout: ../image.yaml
+  boot_root_spec: ../boot_root.yaml
+  base_spec: ../base.yaml
+  build_script: ../build_fitimage.sh
+  fitimage_config: ../bootargs.its
+  bootloader_config: ../bootargs-overlay.dts
+  boot_spec: ../boot.yaml
+
+includes:
+  gen: '{{.common_tasks}}Generic.yml'
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  rdb2_image: '{{.common_tasks}}RDB2_image.yml'
+
+tasks:
+  default:
+    aliases: [run_qemu]
+    desc: Build the NXP RDB2 image
+    cmds:   
+      - task: rdb2_image:build
+    method: none

@@ -1,8 +1,6 @@
 base: ../base.yaml
 # reset the kernel value
 kernel: null
-# Name of the archive.
-name: ebcl_rdb2
 apt_repos:
   # Get SELinux packages
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
