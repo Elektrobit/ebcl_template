@@ -20,3 +20,24 @@ tasks:
       - '{{.boot_spec}}'
     generates:
       - '{{.result_folder}}{{.kernel}}'
+
+  build_fitimage:
+    desc: The boot generator is used to build the fitimage.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      base_spec: '{{.base_spec | default "base.yaml"}}'
+      boot_spec: '{{.boot_spec | default "boot.yaml"}}'
+      fitimage: '{{.kernel | default "fitimage"}}'
+      build_script: '{{.build_script | default "build_fitimage.sh"}}'
+      fitimage_config: '{{.build_script | default "bootargs.its"}}'
+      bootloader_config: '{{.build_script | default "bootargs-overlay.dts"}}'
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.fitimage}}.log
+    preconditions:
+      - test -f {{.boot_spec}}
+    sources:
+      - '{{.base_spec}}'
+      - '{{.boot_spec}}'
+    generates:
+      - '{{.result_folder}}{{.kernel}}'

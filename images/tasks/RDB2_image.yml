@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  efi: 'Efi.yml'
+
+tasks:
+  build:
+    desc: Build NXP RDB2 image
+    vars:
+      boot_root_spec: '{{.boot_root_spec | default "boot_root.yaml"}}'
+      boot_tarball: '{{.boot_tarball | default "boot_root.tar"}}'
+      result_folder: '{{.result_folder | default "./build/"}}'
+    cmds:
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: '{{.boot_root_spec}}'
+          base_tarball: '{{.boot_tarball}}'
+      - task: boot:build_fitimage
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+    method: none

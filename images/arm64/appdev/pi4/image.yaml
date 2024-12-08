@@ -3,7 +3,7 @@
 contents:
   - name: archive
     type: split_archive
-    archive: build/ebcl_pi4.config.tar
+    archive: build/root.config.tar
     splits:
       - name: boot
         root: boot

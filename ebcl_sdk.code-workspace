@@ -25,13 +25,16 @@
 			]
 		},
 		"cSpell.words": [
+			"bootargs",
 			"cmdline",
 			"configurator",
+			"Crinit",
 			"devpts",
 			"ebcl",
 			"embdgen",
 			"fakeedit",
 			"fakeroot",
+			"fitimage",
 			"hostfwd",
 			"mrproper",
 			"mynet",

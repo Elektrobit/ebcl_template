@@ -55,4 +55,4 @@ image:
         type: ext4
         content:
           type: archive
-          archive: build/ebcl_rdb2.config.tar
+          archive: build/root.config.tar

@@ -45,14 +45,18 @@ tasks:
 
   clean:
     desc: Remove build artifacts
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
     cmds:
       - rm -rf {{.result_folder}}
     method: none
 
   mrproper:
     desc: Remove build artifacts and clean all caches
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
     cmds:
-      - rm -rf {{.result_folder}}
+      - sudo rm -rf {{.result_folder}}
       - rm -rf .task
       - rm -rf /workspace/state/*
     method: none
