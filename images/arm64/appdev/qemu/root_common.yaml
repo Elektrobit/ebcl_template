@@ -1,8 +1,6 @@
 base: base.yaml
 # Reset kernel package
 kernel: null
-# Name of the archive.
-name: ebcl
 # Packages to install in the root tarball
 packages:
   # SSH server

@@ -10,6 +10,7 @@ includes:
   gen: '{{.common_tasks}}Generic.yml'
   sysroot: '{{.common_tasks}}Sysroot.yml'
   qemu_image: '{{.common_tasks}}QEMU_image.yml'
+  qemu: '{{.common_tasks}}QEMU.yml'
 
 tasks:
   default:
@@ -17,4 +18,5 @@ tasks:
     desc: Build and run the qemu image
     cmds:   
       - task: qemu_image:build_efi
+      - task: qemu:run_amd64_efi
     method: none
