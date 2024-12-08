@@ -27,6 +27,7 @@
 		"cSpell.words": [
 			"cmdline",
 			"configurator",
+			"devpts",
 			"ebcl",
 			"embdgen",
 			"fakeedit",
@@ -35,8 +36,11 @@
 			"mynet",
 			"netdev",
 			"nographic",
+			"nvram",
 			"ovmf",
 			"pipefail",
+			"sysfs",
+			"tmpfs",
 			"virt",
 			"virtio"
 		]

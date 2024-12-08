@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  install-grub:
+    desc: Install grub-efi
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      disc_image: '{{.disc_image | default "image.raw"}}'
+      efi_image: '{{.efi_image | default "image.efi.raw"}}'
+      grub_config: '{{.grub_config | default "grub.cfg"}}'
+    cmds:
+      # Copy image
+      - rm -f {{.result_folder}}{{.efi_image}}
+      - cp {{.result_folder}}{{.disc_image}} {{.result_folder}}{{.efi_image}}
+      # Mount image copy
+      - sudo losetup -fP --show {{.result_folder}}{{.efi_image}} > {{.result_folder}}loop_device
+      - mkdir -p {{.result_folder}}mnt
+      # Mount root partition
+      - sudo mount $(cat {{.result_folder}}loop_device)p2 {{.result_folder}}mnt
+      # Mount efi partition
+      - sudo mkdir -p {{.result_folder}}mnt/boot/efi
+      - sudo mount $(cat {{.result_folder}}/loop_device)p1 {{.result_folder}}mnt/boot/efi
+      # Mount special file systems
+      - sudo mount --bind /dev {{.result_folder}}mnt/dev
+      - sudo mkdir -p {{.result_folder}}mnt/dev/pts
+      - sudo mount -t devpts /dev/pts {{.result_folder}}mnt/dev/pts
+      - sudo mount -t proc proc {{.result_folder}}mnt/proc
+      - sudo mount -t sysfs sysfs {{.result_folder}}mnt/sys
+      - sudo mount -t tmpfs tmpfs {{.result_folder}}mnt/tmp
+      # Install grub
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck --no-nvram --removable"
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "update-grub"
+      # Replace grub config
+      - sudo rm {{.result_folder}}mnt/boot/efi/EFI/BOOT/grub.cfg
+      - sudo cp {{.grub_config}} {{.result_folder}}mnt/boot/efi/EFI/BOOT/grub.cfg
+      # Umount special file systems
+      - defer: sudo umount {{.result_folder}}mnt/dev/pts
+      - defer: sudo umount {{.result_folder}}mnt/dev      
+      - defer: sudo umount {{.result_folder}}mnt/proc
+      - defer: sudo umount {{.result_folder}}mnt/sys
+      - defer: sudo umount {{.result_folder}}mnt/tmp
+      # Umount efi partition
+      - defer: sudo umount {{.result_folder}}/mnt/boot/efi
+      # Umount the root filesystem
+      - defer: sudo umount {{.result_folder}}/mnt
+      # Unmount the image
+      - defer: sudo losetup -d $(cat {{.result_folder}}/loop_device)
+    preconditions:
+      - test -f {{.result_folder}}{{.disc_image}}
+    sources:
+      - '{{.grub_config}}'
+      - '{{.result_folder}}{{.disc_image}}'
+    generates:
+      - '{{.result_folder}}{{.efi_image}}'

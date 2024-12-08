@@ -32,7 +32,7 @@ tasks:
     vars:
       qemu_net_append: '{{.qemu_net_append | default ""}}'
       result_folder: '{{.result_folder | default "./build/"}}'
-      efi_image: '{{.efi_image | default "image.raw"}}'
+      efi_image: '{{.efi_image | default "image.efi.raw"}}'
     cmds:
       - |
         qemu-system-x86_64 \
