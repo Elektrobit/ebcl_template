@@ -1,46 +1,32 @@
 version: '3'
 
 vars:
+  common_tasks: /workspace/images/tasks/
   arch: 'x86_64'
   partition_layout: ../image.yaml
-  root_filesystem_spec: root.yaml
   initrd_spec: ../initrd.yaml
   boot_spec: ../boot.yaml
-  config_root: config_root.sh
-  base_tarball: build/ebcl.tar
-  root_tarball: build/ebcl.config.tar
-  sysroot_tarball: build/ebcl_sysroot.tar
   qemu_net_append: ",ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,ipv6-dns=fd00::eb:3,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333"
   kernel_cmdline_append: "rw"
-  result_folder: ./build
-  disc_image: ./build/image.raw
-  initrd_img: ./build/initrd.img
-  kernel: ./build/vmlinuz
 
 includes:
-  qemu_x86_64:
-    taskfile: ../../../../qemu_x86_64.yml
-    flatten: true
-  qemu:
-    taskfile: ../../../../qemu.yml
-    flatten: true
+  gen: '{{.common_tasks}}Generic.yml'
+  root: '{{.common_tasks}}RootGenerator.yml'
+  boot: '{{.common_tasks}}BootGenerator.yml'
+  initrd: '{{.common_tasks}}InitrdGenerator.yml'
+  embdgen: '{{.common_tasks}}Embdgen.yml'
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  qemu: '{{.common_tasks}}QEMU.yml'
 
 tasks:
   default:
     aliases: [run_qemu]
     desc: Build and run the qemu image
     cmds:   
-      - task: build_boot
-      - task: build_root_base
-      - task: build_rootfs
-      - task: build_initrd
-      - task: build_image
-      - task: run_qemu_internal
+      - task: boot:extract_kernel
+      - task: root:build
+      - task: root:config
+      - task: initrd:build
+      - task: embdgen:build_qemu
+      - task: qemu:run_amd64
     method: none
-  ssh:
-    desc: Connect to the running qemu instance via ssh
-    cmds:
-      - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[localhost]:2222"
-      - ssh -p 2222 root@localhost
-    method: none
-

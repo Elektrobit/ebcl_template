@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+env:
+  SHELL : /bin/bash
+
+tasks:
+  edit_tarball:
+    desc: Opens a shell for editing of a filesystem tarball
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      tarball: '{{.tarball | default "root.tar"}}'
+      extract_dir: '{{.extract_dir | default "root"}}'
+    cmds: 
+      - mkdir -p {{.result_folder}}{{.extract_dir}}
+      - fakeroot -s {{.result_folder}}fakeedit -- tar xf {{.tarball}} -C {{.result_folder}}{{.extract_dir}}
+      - cd {{.result_folder}}{{.extract_dir}} && fakeroot -i ../fakeedit -s ../fakeedit
+      - rm -f {{.result_folder}}{{.tarball}}.old
+      - mv {{.result_folder}}{{.tarball}} {{.result_folder}}{{.tarball}}.old
+      - cd {{.result_folder}}{{.extract_dir}} && fakeroot -i ../fakeedit -s ../fakeedit -- tar cf ../{{.tarball}} .
+      - defer: rm -rf {{.result_folder}}{{.extract_dir}}
+    preconditions: 
+      - test -f {{.result_folder}}{{.tarball}}
+    method: none
+
+  edit_base:
+    desc: Opens a shell for manual base root configuration
+    vars:
+      tarball: '{{.base_tarball | default "root.tar"}}'
+    cmds: 
+      - task: .edit_tarball
+    preconditions: 
+      - test -f {{.result_folder}}{{.base_tarball}}
+    method: none
+
+  edit_root:
+    desc: Opens a shell for manual base root configuration
+    vars:
+      tarball: '{{.root_tarball | default "root.tar"}}'
+    cmds: 
+      - task: .edit_tarball
+    preconditions: 
+      - test -f {{.result_folder}}{{.root_tarball}}
+    method: none
+
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf {{.result_folder}}
+    method: none
+
+  mrproper:
+    desc: Remove build artifacts and clean all caches
+    cmds:
+      - rm -rf {{.result_folder}}
+      - rm -rf .task
+      - rm -rf /workspace/state/*
+    method: none
+
+  ssh:
+    desc: Connect to the running qemu instance via ssh
+    vars:
+      ssh_port: '{{.ssh_port | default "2222"}}'
+      ssh_host: '{{.ssh_host | default "localhost"}}'
+      ssh_user: '{{.ssh_user | default "root"}}'
+    cmds:
+      - ssh-keygen -f "/home/ebcl/.ssh/known_hosts" -R "[{{.ssh_host}}]:{{.ssh_port}}"
+      - ssh -p {{.ssh_port}} {{.ssh_user}}@{{.ssh_host}}
+    method: none
