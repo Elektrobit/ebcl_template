@@ -17,6 +17,4 @@ scripts:
     env: sudo
 # Files to copy form the host environment
 host_files:
-  - source: $$RESULTS$$/modules
-    destination: lib
-  - source: crinit_config/*
+  - source: config/*

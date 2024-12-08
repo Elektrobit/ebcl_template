@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  arch: 'aarch64'
+  partition_layout: ../image.yaml
+  initrd_spec: ../initrd.yaml
+  boot_spec: ../boot.yaml
+  additional_overlay: ../*.txt
+
+includes:
+  gen: '{{.common_tasks}}Generic.yml'
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  rpi_image: '{{.common_tasks}}RPi_image.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the Raspberry Pi 4 image
+    cmds:   
+      - task: rpi_image:build
+    method: none

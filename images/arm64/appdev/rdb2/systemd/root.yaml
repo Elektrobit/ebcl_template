@@ -10,6 +10,4 @@ scripts:
     env: chroot
 # Files to copy form the host environment
 host_files:
-  - source: $$RESULTS$$/modules
-    destination: lib
-  - source: systemd_config/*
+  - source: config/*

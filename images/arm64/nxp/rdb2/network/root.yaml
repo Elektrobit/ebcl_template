@@ -1,8 +1,6 @@
 base: ../base.yaml
 # reset the kernel value
 kernel: null
-# Name of the archive.
-name: ebcl_rdb2
 packages:
   - crinit
   - crinit-ctl
@@ -25,4 +23,4 @@ scripts:
 host_files:
   - source: $$RESULTS$$/modules
     destination: lib
-  - source: crinit_config/*
+  - source: config/*

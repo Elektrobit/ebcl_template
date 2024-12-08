@@ -1,5 +1,4 @@
 base: ../base.yaml
-name: ebcl_pi4
 packages:
   - linux-firmware-raspi
   - linux-raspi
