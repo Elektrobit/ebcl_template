@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  qemu: 'QEMU.yml'
+
+tasks:
+  build:
+    desc: Build and run the qemu image
+    cmds:   
+      - task: boot:extract_kernel
+      - task: root:build
+      - task: root:config
+      - task: initrd:build
+      - task: embdgen:build_qemu
+      - task: qemu:run_amd64
+    method: none
