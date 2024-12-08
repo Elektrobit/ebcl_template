@@ -1,38 +1,20 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
 vars:
+  common_tasks: /workspace/images/tasks/
   arch: 'x86_64'
-  partition_layout: image.yaml
-  root_filesystem_spec: root.yaml
-  initrd_spec: initrd.yaml
-  boot_spec: boot.yaml
-  config_root: config_root.sh
-  base_tarball: build/ubuntu.tar
-  root_tarball: build/ubuntu.config.tar
-  sysroot_tarball: build/ubuntu_sysroot.tar
-  result_folder: ./build
-  disc_image: ./build/image.raw
-  initrd_img: ./build/initrd.img
-  kernel: ./build/vmlinuz
   kernel_cmdline_append: "rw"
 
 includes:
-  qemu_x86_64:
-    taskfile: ../../../qemu_x86_64.yml
-    flatten: true
-  qemu:
-    taskfile: ../../../qemu.yml
-    flatten: true
+  gen: '{{.common_tasks}}Generic.yml'
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  qemu_image: '{{.common_tasks}}QEMU_image.yml'
 
 tasks:
   default:
     aliases: [run_qemu]
     desc: Build and run the qemu image
     cmds:   
-      - task: build_boot
-      - task: build_root_base
-      - task: build_rootfs
-      - task: build_initrd
-      - task: build_image
-      - task: run_qemu_internal
+      - task: qemu_image:build
     method: none

@@ -1,33 +1,20 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
 vars:
-  arch : 'x86_64'
-  partition_layout : image.yaml
-  root_filesystem_spec : root.yaml
-  initrd_spec : initrd.yaml
-  boot_spec : boot.yaml
-  config_root : config_root.sh
-  base_tarball : build/ebcl.tar
-  root_tarball : build/ebcl.config.tar
-  efi_image: build/image.efi.raw
-  # Image specific variables
-  grub_config: grub.cfg
-  result_folder: build
+  common_tasks: /workspace/images/tasks/
+  arch: 'x86_64'
+  kernel_cmdline_append: "rw"
 
 includes:
-  qemu_x86_64_efi: ../../../qemu_x86_64_efi.yml
-  qemu: ../../../qemu.yml
-  efi: efi.yml
+  gen: '{{.common_tasks}}Generic.yml'
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  qemu_image: '{{.common_tasks}}QEMU_image.yml'
 
 tasks:
   default:
     aliases: [run_qemu]
     desc: Build and run the qemu image
     cmds:   
-      - task: qemu:build_initrd
-      - task: qemu:build_root_base
-      - task: qemu:build_rootfs
-      - task: qemu:build_image
-      - task: efi:install-grub
-      - task: qemu_x86_64_efi:run_qemu_internal
+      - task: qemu_image:build_efi
     method: none
