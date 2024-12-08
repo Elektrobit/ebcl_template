@@ -17,7 +17,29 @@
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"git.ignoreLimitWarning": true,
+		"yaml.schemas": {
+			"https://taskfile.dev/schema.json": [
+				"file:///workspace/images/tasks/Generic.yml",
+				"file:///workspace/images/tasks/BootGenerator.yml"
+			]
+		},
+		"cSpell.words": [
+			"cmdline",
+			"configurator",
+			"ebcl",
+			"embdgen",
+			"fakeedit",
+			"fakeroot",
+			"mrproper",
+			"mynet",
+			"netdev",
+			"nographic",
+			"ovmf",
+			"pipefail",
+			"virt",
+			"virtio"
+		]
 	},
 	"launch": {
 		"version": "0.2.0",
