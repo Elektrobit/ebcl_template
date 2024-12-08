@@ -4,6 +4,9 @@ version: '3'
 vars:
   common_tasks: /workspace/images/tasks/
   arch: 'x86_64'
+  partition_layout: ../image.yaml
+  initrd_spec: ../initrd.yaml
+  boot_spec: ../boot.yaml
   kernel_cmdline_append: "rw"
 
 includes:

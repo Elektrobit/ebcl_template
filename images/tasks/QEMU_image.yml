@@ -8,7 +8,6 @@ includes:
   initrd: 'InitrdGenerator.yml'
   embdgen: 'Embdgen.yml'
   sysroot: 'Sysroot.yml'
-  qemu: 'QEMU.yml'
   efi: 'Efi.yml'
 
 tasks:
@@ -20,7 +19,6 @@ tasks:
       - task: root:config
       - task: initrd:build
       - task: embdgen:build_qemu
-      - task: qemu:run_amd64
     method: none
 
   build_efi:
@@ -31,5 +29,4 @@ tasks:
       - task: root:config
       - task: embdgen:build_qemu
       - task: efi:install-grub
-      - task: qemu:run_amd64_efi
     method: none
