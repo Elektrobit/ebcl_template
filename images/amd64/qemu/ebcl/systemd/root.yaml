@@ -1,6 +1,4 @@
 # not type -> use default image builder
-# Name of the archive.
-name: ebcl
 # CPU architecture
 arch: amd64
 # Add the EB corbos Linux apt repo to provide the boostrap package
