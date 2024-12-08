@@ -25,3 +25,4 @@ scripts:
 files:
   - boot/fip.s32
   - boot/fitimage
+  - lib/modules

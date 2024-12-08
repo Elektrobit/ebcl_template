@@ -11,6 +11,7 @@ vars:
   fitimage_config: ../bootargs.its
   bootloader_config: ../bootargs-overlay.dts
   boot_spec: ../boot.yaml
+  initrd_spec: ../initrd.yaml
 
 includes:
   gen: '{{.common_tasks}}Generic.yml'

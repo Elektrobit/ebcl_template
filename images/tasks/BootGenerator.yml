@@ -33,6 +33,8 @@ tasks:
       bootloader_config: '{{.build_script | default "bootargs-overlay.dts"}}'
     cmds:
       - mkdir -p {{.result_folder}}
+      # Delete old modules folder if exists
+      - sudo rm -rf {{.result_folder}}modules
       - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.fitimage}}.log
     preconditions:
       - test -f {{.boot_spec}}
