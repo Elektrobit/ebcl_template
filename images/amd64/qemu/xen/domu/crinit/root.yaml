@@ -1,0 +1,21 @@
+# not type -> use default image builder
+# Name of the archive.
+name: ebcl
+# CPU architecture
+arch: amd64
+# Add the EB corbos Linux apt repo to provide the boostrap package
+use_ebcl_apt: true
+# Packages to install in the root tarball
+packages:
+  - crinit
+  - crinit-ctl
+
+host_files:
+  - source: crinit_config/* # Crinit configuration, including sbin/init
+  - source: pvgrub_config/*
+    destination: boot
+
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment
