@@ -22,7 +22,7 @@ For the low integrity application the same toolchain is used as is used for norm
 The high integrity application uses musl and gcc and has to be compiled statically.
 
 The required toolchains are selected using cmake presets.
-To compile the application the vscode cmake integration can be used or just `cmake --preset li-app ...` for the low integrity application or `cmake --preset hi-app ...` for the high integrity application. For details on building and deploying applications see also [Debugging demo applications](index.md#developing-apps)).
+To compile the application the vscode cmake integration can be used or just `cmake --preset li-app ...` for the low integrity application or `cmake --preset hi-app ...` for the high integrity application. For details on building and deploying applications see also [Developing applications](index.md#developing-apps).
 The vscode integration also allows debugging of the low integrity application in gdb (See [Debugging demo applications](index.md#Debugging-demo-applications)).
 The high integrity application cannot be debugged right now.
 
