@@ -16,7 +16,7 @@ includes:
 
 tasks:
   default:
-    aliases: [run_qemu]
+    aliases: [build]
     desc: Build the Raspberry Pi 4 image
     cmds:   
       - task: rpi_image:build

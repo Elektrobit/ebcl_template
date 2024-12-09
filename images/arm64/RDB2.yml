@@ -20,7 +20,7 @@ includes:
 
 tasks:
   default:
-    aliases: [run_qemu]
+    aliases: [build]
     desc: Build the NXP RDB2 image
     cmds:   
       - task: rdb2_image:build

@@ -20,7 +20,13 @@ tasks:
   default:
     aliases: [run_qemu]
     desc: Build and run the qemu image
-    cmds:   
+    cmds:
       - task: qemu_image:build
       - task: qemu:run_amd64
+    method: none
+  
+  build:
+    desc: Build the image.
+    cmds:   
+      - task: qemu_image:build
     method: none

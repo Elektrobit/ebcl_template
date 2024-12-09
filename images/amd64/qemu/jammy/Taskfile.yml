@@ -20,3 +20,9 @@ tasks:
       - task: qemu_image:build
       - task: qemu:run_amd64
     method: none
+
+  build:
+    desc: Build the image.
+    cmds:   
+      - task: qemu_image:build
+    method: none
