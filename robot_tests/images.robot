@@ -74,10 +74,6 @@ Build Image arm64/raspberry/pi4/systemd
     [Tags]    arm64    pi4    hardware    debootstrap    ebcl    systemd
     Test Hardware Image    arm64/raspberry/pi4/systemd
 
-Build Image arm64/nxp/rdb2/systemd/server
-    [Tags]    arm64    pi4    hardware    debootstrap    ebcl    systemd    server
-    Test Hardware Image    arm64/nxp/rdb2/systemd/server
-
 #========================
 # Tests for appdev images
 #========================
