@@ -69,3 +69,6 @@ fakedit
 /testing
 
 **/.task
+
+
+/images/test_extensions/*.squashfs
