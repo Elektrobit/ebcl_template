@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """
 Abstraction layer for image communication.
 """
@@ -9,7 +10,7 @@ from subprocess import Popen
 from typing import Optional
 from uuid import uuid4
 
-from util.proc_io import ProcIO
+from util.proc_io import ProcIO # type: ignore[import-untyped]
 
 
 class TimeoutException(Exception):
