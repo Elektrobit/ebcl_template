@@ -14,6 +14,7 @@
     - [QEMU amd64](examples/qemu_amd64.md)
     - [QEMU arm64](examples/qemu_arm64.md)
     - [QEMU EBcLfSA image](examples/qemu_ebclfsa.md)
+    - [QEMU Xen image](examples/qemu_xen.md)
     - [Raspberry Pi 4 images](examples/rpi.md)
     - [NXP RDB2 images](examples/rdb2.md)
 - [Kernel development](examples/kernel.md)
