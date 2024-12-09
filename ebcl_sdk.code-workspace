@@ -27,6 +27,7 @@
 		"cSpell.words": [
 			"bootargs",
 			"buildinfo",
+			"childs",
 			"cmdline",
 			"configurator",
 			"cpid",
@@ -51,6 +52,7 @@
 			"olddefconfig",
 			"ovmf",
 			"perr",
+			"pgrep",
 			"pipefail",
 			"sysfs",
 			"Taskfile",
