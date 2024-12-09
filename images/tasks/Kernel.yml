@@ -1,0 +1,111 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  build:
+    desc: Build kernel form Debian package sources.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      base_spec: '{{.base_spec | default "base.yaml"}}'
+      kernel_config: '{{.kernel_config | default "kernel_config.yaml"}}'
+      kernel: '{{.kernel | default "vmlinuz"}}'
+    cmds:
+      - task: source
+      - task: kconfig
+      - task: build_kernel
+      - task: build_modules
+    preconditions:
+      - test -f {{.kernel_config}}
+    sources:
+      - '{{.base_spec}}'
+      - '{{.kernel_config}}'
+    generates:
+      - '{{.result_folder}}{{.kernel}}'
+
+  source:
+    desc: Get kernel sources.
+    vars:
+      source: '{{.source | default "./kernel/"}}'
+      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1034-s32-eb-optimized"}}'
+      kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
+    cmds:
+      - mkdir -p {{.source}}
+      - cd {{.source}} && apt -y source {{.kernel_package}}
+      - sudo apt -y build-dep {{.kernel_package}}
+      - cd {{.source}}{{.kernel_dir}} && chmod +x scripts/*.sh
+    generates:
+      - '{{.source}}'
+
+  kconfig:
+    desc: Extract kernel config from Debian package.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      source: '{{.source | default "./kernel/"}}'
+      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1034-s32-eb-optimized"}}'
+      kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
+      kernel_config: '{{.kernel_config | default "kernel_config.yaml"}}'
+      kconfig: '{{.kconfig | default "config"}}'
+      kernel_make_args: '{{.kernel_make_args | default "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-"}}'
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && boot_generator {{.kernel_config}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.kconfig}}.log
+      - rm -f {{.result_folder}}{{.kconfig}} || true
+      - mv {{.result_folder}}config-* {{.result_folder}}{{.kconfig}} || true
+      - cp {{.result_folder}}{{.kconfig}} {{.source}}{{.kernel_dir}}.config
+      - cd {{.source}}{{.kernel_dir}} && make {{.kernel_make_args}} olddefconfig
+      - cp {{.source}}{{.kernel_dir}}.config {{.result_folder}}olddefconfig
+    preconditions: 
+      - test -f {{.kernel_config}}
+    sources: 
+       - '{{.kernel_config}}'
+    generates: 
+       - '{{.result_folder}}{{.kconfig}}'
+
+  build_kernel:
+    desc: Build the kernel binary.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      source: '{{.source | default "./kernel/"}}'
+      kernel: '{{.kernel | default "vmlinuz"}}'
+      kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
+      kernel_make_args: '{{.kernel_make_args | default "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-"}}'
+    cmds:
+      - cd {{.source}}{{.kernel_dir}} && make {{.kernel_make_args}} -j 16 Image
+      - cp {{.source}}{{.kernel_dir}}arch/arm64/boot/Image {{.result_folder}}{{.kernel}}
+    preconditions: 
+      - test -f {{.source}}{{.kernel_dir}}.config
+    sources: 
+       - '{{.result_folder}}{{.kconfig}}'
+    generates: 
+       - '{{.result_folder}}{{.kernel}}'
+
+  build_modules:
+    desc: Build the kernel modules.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      source: '{{.source | default "./kernel/"}}'
+      kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
+      kernel_make_args: '{{.kernel_make_args | default "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-"}}'
+    cmds:
+      - echo "Get virtio driver..."
+      - cd {{.source}}{{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
+      - cd {{.source}}{{.kernel_dir}} && chmod +x debian/scripts/sign-module
+      - mkdir -p {{.result_folder}}
+      - cd {{.source}}{{.kernel_dir}} && INSTALL_MOD_PATH=../../{{.result_folder}} make {{.kernel_make_args}} modules_install
+    preconditions: 
+      - test -f {{.source}}{{.kernel_dir}}.config
+    sources: 
+       - '{{.result_folder}}{{.kconfig}}'
+    generates:
+      - '{{.result_folder}}{{.modules}}'
+
+  config:
+    desc: Configure the kernel.
+    vars:
+      source: '{{.source | default "./kernel/"}}'
+      kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
+      kernel_make_args: '{{.kernel_make_args | default "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-"}}'
+    cmds:
+      - cd {{.source}}{{.kernel_dir}} && make {{.kernel_make_args}} menuconfig
+    preconditions:
+      - test -d {{.source}}{{.kernel_dir}} 

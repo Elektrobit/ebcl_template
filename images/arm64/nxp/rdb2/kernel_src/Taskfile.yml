@@ -10,18 +10,19 @@ vars:
   build_script: ../build_fitimage.sh
   fitimage_config: ../bootargs.its
   bootloader_config: ../bootargs-overlay.dts
-  boot_spec: ../boot.yaml
+  boot_spec: boot.yaml
   initrd_spec: ../initrd.yaml
 
 includes:
   gen: '{{.common_tasks}}Generic.yml'
   sysroot: '{{.common_tasks}}Sysroot.yml'
   rdb2_image: '{{.common_tasks}}RDB2_image.yml'
+  kernel: '{{.common_tasks}}Kernel.yml'
 
 tasks:
   default:
     aliases: [run_qemu]
     desc: Build the NXP RDB2 image
     cmds:   
-      - task: rdb2_image:build
+      - task: rdb2_image:build_with_local_kernel
     method: none
