@@ -16,6 +16,10 @@ class TimeoutException(Exception):
     """ Command timeout. """
 
 
+class LoginFailedException(Exception):
+    """ Login to VM failed. """
+
+
 class Comm:
     """
     Comm provides generic functions for communicating with running EBcL images.
@@ -153,7 +157,7 @@ class Comm:
         self.io.clear_lines()
 
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
-                    shell_prompt: str = '.*#.*', timeout: int = 30) -> bool:
+                    shell_prompt: str = '.*#.*', timeout: int = 30):
         """ Login to VM. """
 
         logging.info("Waiting for login prompt...")
@@ -163,9 +167,11 @@ class Comm:
 
         self.send_key('\n')  # Press return to show the login prompt
 
+        success = False
         line = None
         try:
             line = self.wait_for_line("login:", timeout=timeout)
+            success = True
         except TimeoutException:
             logging.info("Trying to get login prompt by pressing enter...")
             for i in range(0, 30):
@@ -173,14 +179,14 @@ class Comm:
                 self.send_key('\n')
                 try:
                     line = self.wait_for_line("login:", timeout=3)
+                    success = True
                 except TimeoutException:
                     continue
-                break
 
-        if line:
+        if success:
             logging.info('Login prompt detected: %s', line)
         else:
-            return False
+            raise LoginFailedException()
 
         logging.info("Logging in with default credentials...")
         self.send_message(user)
@@ -193,15 +199,18 @@ class Comm:
 
         time.sleep(3)  # Give some time to process password
 
+        success = False
         for i in range(0, 30):
             logging.info('Try %d to get shell prompt...', i)
             self.send_key('\n')
             try:
                 m = self.wait_for_regex(shell_prompt, timeout=1)
+                success = True
             except TimeoutException:
                 continue
-            if m:
+            if success:
                 logging.info('Match for shell prompt: %s', str(m))
-                return True
+                logging.info('Login was successful.')
+                return
 
-        return False
+        raise LoginFailedException()

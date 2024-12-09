@@ -29,4 +29,3 @@ tasks:
     cmds:   
       - task: qemu_image:build
     method: none
-
