@@ -12,7 +12,7 @@ class ImageInterface(ABC):
     """
 
     @abstractmethod
-    def build(self, path: str) -> Optional[str]:
+    def build(self, path: str, build_cmd: Optional[str]) -> Optional[str]:
         """
         Build all parts of the image.
         """

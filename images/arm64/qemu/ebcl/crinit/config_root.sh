@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# Link crinit as init
-chmod +x /sbin/init
+# Link systemd as init
+ln -s /usr/bin/crinit ./sbin/init
