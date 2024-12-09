@@ -1,8 +1,6 @@
 base: base.yaml
 # reset the kernel value
 kernel: null
-# Name of the archive.
-name: ubuntu
 # Packages to install in the root tarball
 packages:
   - systemd

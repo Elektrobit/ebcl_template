@@ -1,0 +1,6 @@
+NAME = poweroff
+
+COMMAND = /usr/bin/crinit-ctl poweroff
+
+DEPENDS = @provided:tmpdir
+RESPAWN = NO
