@@ -72,3 +72,5 @@ fakedit
 
 
 /images/test_extensions/*.squashfs
+
+**/performance*.txt
