@@ -44,6 +44,7 @@
 			"hostfwd",
 			"kconfig",
 			"menuconfig",
+			"mksquashfs",
 			"mrproper",
 			"mynet",
 			"netdev",

@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  build_performance_test_overlay:
+    desc: Install grub-efi
+    vars:
+      test_extensions: '{{.test_extensions | default "/workspace/images/test_extensions/"}}'
+      test_modifications: '{{.test_modifications | default "performance/"}}'
+      test_overlay: '{{.test_overlay | default "performance.squashfs"}}'
+    cmds:
+      # Delete old squashfs image
+      - sudo rm -f {{.test_extensions}}{{.test_overlay}}
+      # Create new squashfs image
+      - mksquashfs  {{.test_extensions}}{{.test_modifications}} {{.test_extensions}}{{.test_overlay}} -all-root
+    preconditions:
+      - test -d {{.test_extensions}}{{.test_modifications}}
+    sources:
+      - '{{.test_extensions}}{{.test_modifications}}'
+    generates:
+      - '{{.test_extensions}}{{.test_overlay}}'

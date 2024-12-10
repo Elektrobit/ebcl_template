@@ -1,0 +1,13 @@
+Performance report:
+
+Image: /workspace/images/arm64/qemu/ebcl/crinit/build/image.raw
+Runs: 3
+
+Results:
+ms       name: test run results
+0.000000 qemu: 0.000000, 0.000000, 0.000000
+0.000164 kernel_start: 0.000191, 0.000176, 0.000124
+0.485528 early_userspace: 0.487252, 0.483577, 0.485755
+1.175186 crinit_start: 1.161566, 1.197034, 1.166957
+1.525091 first_service: 1.512694, 1.551343, 1.511236
+1.709829 finish_poweroff: 1.700424, 1.733544, 1.695518

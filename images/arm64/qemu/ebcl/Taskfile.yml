@@ -14,6 +14,7 @@ includes:
   sysroot: '{{.common_tasks}}Sysroot.yml'
   qemu_image: '{{.common_tasks}}QEMU_image.yml'
   qemu: '{{.common_tasks}}QEMU.yml'
+  test: '{{.common_tasks}}TestExtensions.yml'
 
 tasks:
   default:
@@ -28,4 +29,18 @@ tasks:
     desc: Build the image.
     cmds:   
       - task: qemu_image:build
+    method: none
+  
+  build_performance_test:
+    desc: Build the image used by the performance test.
+    cmds:
+      - task: qemu_image:build
+      - task: test:build_performance_test_overlay
+    method: none
+  
+  run_performance_test:
+    desc: Run the performance test variant of the image.
+    cmds:
+      - task: build_performance_test
+      - task: qemu:run_arm64_test
     method: none

@@ -33,6 +33,7 @@ class Fakeroot:
         check=True,
         capture_output=True,
         stderr_as_info=False,
+        timeout: Optional[float] = None,
     ) -> Tuple[Optional[str], Optional[str]]:
         """ Run command. """
         logging.info('CMD: %s', cmd)
@@ -47,7 +48,8 @@ class Fakeroot:
                 check=False,
                 shell=True,
                 stdout=PIPE if capture_output else None,
-                stderr=PIPE if capture_output else None)
+                stderr=PIPE if capture_output else None,
+                timeout=timeout)
 
             logging.info('Command %s completed with returncode %s.',
                         cmd, p.returncode)
