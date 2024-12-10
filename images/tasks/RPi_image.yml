@@ -1,0 +1,20 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  efi: 'Efi.yml'
+
+tasks:
+  build:
+    desc: Build Raspberry Pi 4 image
+    cmds:   
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+    method: none
