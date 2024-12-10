@@ -32,11 +32,11 @@ class Image:
                     f"Unknown communication interface '{x}' specified")
 
 
-    def build(self, path: str) -> Optional[str]:
+    def build(self, path: str, build_cmd: Optional[str] = None) -> Optional[str]:
         """
         Build all parts of the image.
         """
-        return self.interface.build(os.path.join(self.image_base, path))
+        return self.interface.build(os.path.join(self.image_base, path), build_cmd)
 
     def clear(self, path: str):
         """

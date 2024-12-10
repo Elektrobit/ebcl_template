@@ -2,9 +2,9 @@
 Taskfile implementation of the image interface.
 """
 import logging
-from pathlib import Path
 import sys
 
+from pathlib import Path
 from subprocess import PIPE, Popen
 from time import sleep
 from typing import Any, Optional

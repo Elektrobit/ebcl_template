@@ -18,11 +18,14 @@ class TaskBuild(ImageInterface):
     def __init__(self):
         self.fake = Fakeroot()
 
-    def build(self, path: str) -> Optional[str]:
+    def build(self, path: str, build_cmd: Optional[str] = None) -> Optional[str]:
         """
         Build all parts of the image.
         """
-        self.fake.run('task build', cwd=path, stderr_as_info=True)
+        if build_cmd is None:
+            build_cmd = 'task build'
+
+        self.fake.run(build_cmd, cwd=path, stderr_as_info=True)
 
         image = os.path.join(path, 'build', 'image.raw')
 

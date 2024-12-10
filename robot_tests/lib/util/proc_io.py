@@ -6,7 +6,7 @@ import logging
 from queue import Queue, Empty
 from subprocess import Popen, TimeoutExpired, check_output, run, CalledProcessError, DEVNULL
 from threading import Thread
-from time import sleep
+from time import sleep, time
 from typing import Tuple, Optional
 
 
@@ -36,7 +36,7 @@ def kill_process_tree(pid: str):
 def _enqueue_output(out, queue: Queue, label: str):
     """ Read and queue line. """
     for line in iter(out.readline, ''):
-        queue.put((line, label))
+        queue.put((line, label, time()))
     out.close()
 
 
@@ -44,11 +44,15 @@ class ProcIO:
     """
     Implements subprocess communication.
     """
-    def __init__(self, process: Popen):
+    def __init__(self, process: Popen, channel_prefix=False, timestamp_prefix=False):
         self.process = process
+        self.channel_prefix = channel_prefix
+        self.timestamp_prefix = timestamp_prefix
+
         self.err_thread = None
         self.out_thread = None
-        self.queue: Queue[Tuple[str, str]] = Queue()
+
+        self.queue: Queue[Tuple[str, str, float]] = Queue()
 
     def connect(self):
         """ Run input threads. """
@@ -120,21 +124,42 @@ class ProcIO:
         """
         Read next line of process output.
         """
+        res = self.read_line_raw(timeout)
+
+        if res:
+            (line, label, ts) = res
+
+            if self.channel_prefix:
+                line = f'{label}: {line}'
+
+            if self.timestamp_prefix:
+                ts *= 1000000
+                ts = int(ts)
+                line = f'{ts}: {line}'
+
+            return line
+        else:
+            return None
+
+    def read_line_raw(self, timeout: int = 1) -> Optional[Tuple[str, str, float]]:
+        """
+        Read next line of process output.
+        """
         if not self.process:
             logging.error('ProcIO: read_line: No process!')
             return None
 
-        line: str
+        line: Tuple[str, str, float]
         try:
             if timeout > 0:
-                (line, label) = self.queue.get(timeout=timeout)
+                line = self.queue.get(timeout=timeout)
             else:
-                (line, label) = self.queue.get()
+                line = self.queue.get()
         except Empty:
             logging.info('No line, queue is empty (timeout: %d)...', timeout)
             return None
 
-        logging.debug('%s: %s', label, line)
+        logging.debug('%s', str(line))
         return line
 
     def clear_lines(self):
