@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """
 Abstraction layer for power management.
 """
@@ -5,7 +6,7 @@ import logging
 
 from typing import Any
 
-from interfaces.power_qemu import PowerQemu
+from interfaces.power_qemu import PowerQemu # type: ignore[import-untyped]
 
 
 class Power:

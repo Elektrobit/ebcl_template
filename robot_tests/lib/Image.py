@@ -1,3 +1,4 @@
+# pylint: disable=invalid-name
 """
 Abstraction layer for image building.
 """
@@ -6,7 +7,7 @@ import os
 
 from typing import Optional
 
-from interfaces.image_task import TaskBuild
+from interfaces.image_task import TaskBuild # type: ignore[import-untyped]
 
 
 class Image:

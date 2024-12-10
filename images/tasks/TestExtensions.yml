@@ -2,7 +2,7 @@
 version: '3'
 
 tasks:
-  build_performance_test_overlay:
+  build_test_overlay:
     desc: Install grub-efi
     vars:
       test_extensions: '{{.test_extensions | default "/workspace/images/test_extensions/"}}'
@@ -19,3 +19,4 @@ tasks:
       - '{{.test_extensions}}{{.test_modifications}}'
     generates:
       - '{{.test_extensions}}{{.test_overlay}}'
+  
