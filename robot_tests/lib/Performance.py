@@ -1,14 +1,16 @@
+# pylint: disable=invalid-name
 """
 Helper for performance tests.
 """
 import logging
+import re
 import sys
 
 from pathlib import Path
 from subprocess import Popen, PIPE
-from typing import List, Tuple, Any
+from typing import List, Tuple, Pattern, Any
 
-from util.proc_io import ProcIO
+from util.proc_io import ProcIO # type: ignore[import-untyped]
 
 
 ON_POSIX = 'posix' in sys.builtin_module_names
@@ -31,13 +33,12 @@ class Performance:
 
     def __init__(
         self,
-        cycles=10,
-        run_cmd = 'task run_performance_test'
+        cycles=10
     ):
         logging.basicConfig(level=logging.DEBUG)
         self.image = None
+        self.run_cmd = None
         self.cycles = cycles
-        self.run_cmd = run_cmd
         self.measurement_points = []
 
     def set_image(self, image: str):
@@ -46,19 +47,25 @@ class Performance:
 
     def set_measurement_points(self, measurement_points: list[str]):
         """ Set measurement points. """
-        measurement_pairs: List[Tuple[str, str]] = []
+        measurement_pairs: List[Tuple[str, Pattern[Any]]] = []
 
         for i in range(0, len(measurement_points), 2):
             name = measurement_points[i]
             search = measurement_points[i+1]
-            measurement_pairs.append((name, search))
+            measurement_pairs.append((name, re.compile(search)))
 
         self.measurement_points = measurement_pairs
 
         logging.info('Measurement points:\n%s', self.measurement_points)
 
-    def run_test(self, file: str = 'performance_report.txt') -> None:
+    def run_test(
+        self,
+        file: str = 'performance_report.txt',
+        run_cmd = 'task run_performance_test'
+    ) -> None:
         """ Run the performance test. """
+        self.run_cmd = run_cmd
+
         points: List[List[Tuple[float, float, str, str]]] = []
 
         for i in range(0, self.cycles):
@@ -109,9 +116,9 @@ class Performance:
             logging.info('%.6f %s', ts, line)
 
         point_logs = []
-        for (name, search) in self.measurement_points:
+        for (name, regexp) in self.measurement_points:
             for (line, _, ts) in log:
-                if search in line:
+                if regexp.search(line):
                     point_logs.append((ts, name, line.strip()))
                     continue
 
@@ -164,7 +171,7 @@ class Performance:
         pio = ProcIO(process=proc)
         pio.connect()
 
-        # Run image and exit bash  
+        # Run image and exit bash
         pio.write(f'{self.run_cmd}; exit\n')
 
         # Wait for image run to complete

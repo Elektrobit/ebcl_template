@@ -35,7 +35,10 @@ tasks:
     desc: Build the image used by the performance test.
     cmds:
       - task: qemu_image:build
-      - task: test:build_performance_test_overlay
+      - task: test:build_test_overlay
+        vars:
+          test_modifications: performance/
+          test_overlay: performance.squashfs
     method: none
   
   run_performance_test:
@@ -43,4 +46,24 @@ tasks:
     cmds:
       - task: build_performance_test
       - task: qemu:run_arm64_test
+    method: none
+  
+  build_performance_test_systemd:
+    desc: Build the image used by the performance test.
+    cmds:
+      - task: qemu_image:build
+      - task: test:build_test_overlay
+        vars:
+          test_modifications: performance_systemd/
+          test_overlay: performance_systemd.squashfs
+    method: none
+  
+
+  run_performance_test_systemd:
+    desc: Run the performance test variant of the image.
+    cmds:
+      - task: build_performance_test_systemd
+      - task: qemu:run_arm64_test
+        vars:
+          test_overlay: performance_systemd.squashfs
     method: none

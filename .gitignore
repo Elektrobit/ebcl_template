@@ -61,7 +61,7 @@ initrd.img
 /images/ebcl-*
 
 
-fakedit
+fakeedit
 /work*
 
 .mypy_cache

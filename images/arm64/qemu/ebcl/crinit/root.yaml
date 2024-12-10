@@ -5,7 +5,7 @@ kernel: null
 packages:
   - crinit
   - crinit-ctl
-# Crinit configuration, including sbin/init
+# Crinit configuration
 host_files:
   - source: config/*
 # Scripts to configure the root tarball

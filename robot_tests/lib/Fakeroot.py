@@ -1,4 +1,4 @@
-# pylint: disable=C0103
+# pylint: disable=invalid-name
 """ Fakeroot functions for all tests. """
 import logging
 import os
