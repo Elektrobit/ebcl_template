@@ -67,7 +67,7 @@ check_package() {
     fi
 }
 
-required_packages=("python3" "python3-venv" "python-is-python3" "binfmt-support" "qemu-user-static")
+required_packages=("binfmt-support" "qemu-user-static")
 all_packages_installed=true
 
 echo "Checking packages..."
