@@ -1,0 +1,10 @@
+[Unit]
+Description=Start Ebcl-1 VM
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/sbin/xl create -f /etc/xen/ebcl.cfg
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

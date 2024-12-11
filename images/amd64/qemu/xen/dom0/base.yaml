@@ -1,0 +1,18 @@
+kernel: null
+use_ebcl_apt: true
+# Additional apt repos
+apt_repos:
+  # Get latest security fixes
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  # Needed for Xen
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+# CPU architecture
+arch: 'amd64'

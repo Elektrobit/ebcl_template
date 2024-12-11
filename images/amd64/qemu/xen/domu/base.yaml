@@ -1,0 +1,4 @@
+kernel: none
+use_ebcl_apt: true
+# CPU architecture
+arch: 'amd64'
