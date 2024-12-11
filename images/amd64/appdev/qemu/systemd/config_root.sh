@@ -6,6 +6,9 @@ ln -s /usr/lib/systemd/systemd /sbin/init
 # Create a hostname file
 echo "appdev" > ./etc/hostname
 
+# allow name resolution (needed for apt update)
+ln -s /usr/lib/systemd/resolv.conf /etc/resolv.conf
+
 # Create /etc/hosts
 cat >/etc/hosts <<- EOF
 127.0.0.1       localhost
