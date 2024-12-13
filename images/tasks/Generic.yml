@@ -58,7 +58,9 @@ tasks:
     cmds:
       - sudo rm -rf {{.result_folder}}
       - rm -rf .task
-      - rm -rf /workspace/state/*
+      - rm -rf /workspace/state/apt/*
+      - rm -rf /workspace/state/cache/*
+      - rm -rf /workspace/state/debootstrap/*
     method: none
 
   ssh:

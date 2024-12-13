@@ -61,6 +61,7 @@
 			"pipefail",
 			"poweroff",
 			"pycache",
+			"PYTHONPATH",
 			"squashfs",
 			"sysfs",
 			"Taskfile",

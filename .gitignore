@@ -74,3 +74,6 @@ fakeedit
 /images/test_extensions/*.squashfs
 
 **/performance*.txt
+**/test_report*.zip
+**/test_*
+

@@ -2,6 +2,7 @@
 Taskfile implementation of the image interface.
 """
 import logging
+import os
 import sys
 
 from pathlib import Path
@@ -39,6 +40,10 @@ class PowerQemu(PowerInterface):
 
         if not image:
             logging.error("No image given!")
+            return None
+
+        if not os.path.isfile(image):
+            logging.error("Image file does not exist!")
             return None
 
         path = Path(image)

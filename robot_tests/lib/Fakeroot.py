@@ -36,6 +36,7 @@ class Fakeroot:
         timeout: Optional[float] = None,
     ) -> Tuple[Optional[str], Optional[str]]:
         """ Run command. """
+        logging.info("Using Fakeroot from %s", __file__)
         logging.info('CMD: %s', cmd)
 
         pout = None
@@ -45,8 +46,8 @@ class Fakeroot:
             p = subprocess.run(
                 cmd,
                 cwd=cwd,
-                shell=True,
                 check=True,
+                shell=True,
                 stdout=PIPE if capture_output else None,
                 stderr=PIPE if capture_output else None,
                 timeout=timeout)
