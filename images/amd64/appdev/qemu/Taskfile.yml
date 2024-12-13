@@ -11,7 +11,9 @@ vars:
   kernel_cmdline_append: "rw"
 
 includes:
-  gen: '{{.common_tasks}}Generic.yml'
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
   sysroot: '{{.common_tasks}}Sysroot.yml'
   qemu_image: '{{.common_tasks}}QEMU_image.yml'
   qemu: '{{.common_tasks}}QEMU.yml'
