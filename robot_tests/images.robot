@@ -53,26 +53,31 @@ Build Image arm64/qemu/ebcl/crinit
 #======================
 Build Image arm64/nxp/rdb2/systemd
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    systemd
-    Test Hardware Image    arm64/nxp/rdb2/systemd
+    [Timeout]    1h
+    Test Hardware Image    arm64/nxp/rdb2/systemd    build_timeout=1h
 
 Build Image arm64/nxp/rdb2/crinit
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    crinit
-    Test Hardware Image    arm64/nxp/rdb2/crinit
+    [Timeout]    1h
+    Test Hardware Image    arm64/nxp/rdb2/crinit    build_timeout=1h
 
 Build Image arm64/nxp/rdb2/network
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    crinit    network
-    Test Hardware Image    arm64/nxp/rdb2/network
+    [Timeout]    1h
+    Test Hardware Image    arm64/nxp/rdb2/network    build_timeout=1h
 
 #================================
 # Tests for Raspberry Pi 4 images
 #================================
 Build Image arm64/raspberry/pi4/crinit
     [Tags]    arm64    pi4    hardware    debootstrap    ebcl    crinit    network
-    Test Hardware Image    arm64/raspberry/pi4/crinit
+    [Timeout]    1h
+    Test Hardware Image    arm64/raspberry/pi4/crinit    build_timeout=1h
 
 Build Image arm64/raspberry/pi4/systemd
     [Tags]    arm64    pi4    hardware    debootstrap    ebcl    systemd
-    Test Hardware Image    arm64/raspberry/pi4/systemd
+    [Timeout]    1h
+    Test Hardware Image    arm64/raspberry/pi4/systemd    build_timeout=1h
 
 #========================
 # Tests for appdev images
@@ -95,24 +100,28 @@ Build Image arm64/appdev/qemu/systemd
 
 Build Image arm64/appdev/pi4/crinit
     [Tags]    arm64    pi4    hardware    debootstrap    ebcl    crinit    appdev
-    Test Hardware Image    arm64/appdev/pi4/crinit
+    [Timeout]    1h
+    Test Hardware Image    arm64/appdev/pi4/crinit    build_timeout=1h
 
 Build Image arm64/appdev/pi4/systemd
     [Tags]    arm64    pi4    hardware    debootstrap    ebcl    systemd    appdev
-    Test Hardware Image    arm64/appdev/pi4/systemd
+    [Timeout]    1h
+    Test Hardware Image    arm64/appdev/pi4/systemd    build_timeout=1h
 
 Build Image arm64/appdev/rdb2/crinit
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    systemd    appdev
-    Test Hardware Image    arm64/appdev/rdb2/crinit
+    [Timeout]    1h
+    Test Hardware Image    arm64/appdev/rdb2/crinit    build_timeout=1h
 
 Build Image arm64/appdev/rdb2/systemd
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    crinit    appdev
-    Test Hardware Image    arm64/appdev/rdb2/systemd
+    [Timeout]    1h
+    Test Hardware Image    arm64/appdev/rdb2/systemd    build_timeout=1h
 
 #==========================================
 # Tests for images using local built kernel
 #==========================================
 Build Image arm64/nxp/rdb2/kernel_src
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    systemd    kernel_src
-    [Timeout]    90m
-    Test Hardware Image    arm64/nxp/rdb2/kernel_src
+    [Timeout]    2h
+    Test Hardware Image    arm64/nxp/rdb2/kernel_src    build_timeout=2h

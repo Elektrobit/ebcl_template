@@ -18,7 +18,7 @@ class ImageInterface(ABC):
         """
 
     @abstractmethod
-    def clear(self, path: str) -> None:
+    def clear(self, path: str, clear_cmd: Optional[str] = None) -> None:
         """
         Delete the build artifacts.
         """

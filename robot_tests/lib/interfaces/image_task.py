@@ -35,14 +35,17 @@ class TaskBuild(ImageInterface):
             return None
 
 
-    def clear(self, path: str) -> None:
+    def clear(self, path: str, clear_cmd: Optional[str] = None) -> None:
         """
         Delete the build artifacts.
         """
         if os.path.isfile(os.path.join(path, 'build', 'image.raw')):
             skip = os.getenv('SDK_ROBOT_SKIP_CLEAN', '0')
             if skip == '1':
-                logging.info('SDK_ROBOT_SKIP_CLEAN is 1, skipping image rebuild.')
+                logging.warning('SDK_ROBOT_SKIP_CLEAN is 1, skipping image rebuild.')
                 return
 
-        self.fake.run('task gen:clean', cwd=path, stderr_as_info=True)
+        if clear_cmd is None:
+            clear_cmd = 'task clean'
+
+        self.fake.run(clear_cmd, cwd=path, stderr_as_info=True)
