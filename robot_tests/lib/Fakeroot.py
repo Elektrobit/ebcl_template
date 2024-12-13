@@ -45,8 +45,8 @@ class Fakeroot:
             p = subprocess.run(
                 cmd,
                 cwd=cwd,
-                check=False,
                 shell=True,
+                check=True,
                 stdout=PIPE if capture_output else None,
                 stderr=PIPE if capture_output else None,
                 timeout=timeout)

@@ -14,7 +14,9 @@ vars:
   initrd_spec: ../initrd.yaml
 
 includes:
-  gen: '{{.common_tasks}}Generic.yml'
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
   sysroot: '{{.common_tasks}}Sysroot.yml'
   rdb2_image: '{{.common_tasks}}RDB2_image.yml'
   kernel: '{{.common_tasks}}Kernel.yml'
