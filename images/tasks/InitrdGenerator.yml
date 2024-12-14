@@ -10,7 +10,6 @@ tasks:
       initrd_spec: '{{.initrd_spec | default "initrd.yaml"}}'
       initrd_img: '{{.initrd_img | default "initrd.img"}}'
     cmds:
-      - echo "Build initrd.img..."
       - mkdir -p {{.result_folder}}
       - set -o pipefail && initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.initrd_img}}.log
     sources:

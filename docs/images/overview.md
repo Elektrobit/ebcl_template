@@ -6,7 +6,7 @@ EB corbos Linux is designed to build embedded high-performance controllers.
 Such systems typically use quite powerful and complex arm64 SoCs, and involve hypervisors, real-time operating systems, trusted execution environments, and a non-trivial boot process involving secure boot.
 The requirements from the SoC and the bootloaders to the required eMMC storage layout is often complex and quite different between different SoCs.
 To tackle this challenge, EB corbos Linux considers all the different boxes in the diagram above as separate build artifacts, which can be binary integrated into an overall image as the last build step.
-These build steps are organized using make, and the EB corbos Linux SDK provides [small helper tools](https://github.com/Elektrobit/ebcl_build_tools/) to create these artifacts.
+These build steps are organized using [Taskfile](https://taskfile.dev/), and the EB corbos Linux SDK provides [small helper tools](https://github.com/Elektrobit/ebcl_build_tools/) to create these artifacts.
 The integration, if needed, is done using [Embdgen](https://github.com/Elektrobit/embdgen), an Elektrobit-launched open-source tool, which is able to create binary images in various formats from different binary artifacts.
 
 Let’s take a closer look at this build for the very simple QEMU build target.
@@ -38,4 +38,4 @@ The output of these two steps is a tarball of the root filesystem content.
 [Embdgen](https://github.com/Elektrobit/embdgen) is used to convert this tarball into a disc image.
 The _initrd.yaml_ specifies the content of the _initrd.img_. For QEMU, we need to load the virt-IO block driver, to be able to mount the root filesystem.
 The _boot.yaml_ specifies the kernel which shall be used, and the boot generator is used to download the right Debian packages and extract the kernel binary.
-The chaining of these tools is done using a good old makefile.
+The chaining of these tools is done using [Taskfile](https://taskfile.dev/).

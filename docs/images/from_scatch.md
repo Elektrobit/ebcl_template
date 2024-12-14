@@ -297,108 +297,184 @@ Now we are prepared to build our fitimage, and get the fip.s32 binary.
 
 ![S32G2](../assets/S32G2.png)
 
-We can build the _boot_root.tar_ using the command `root_generator boot_root.yaml ./out`, then we can build the _initrd.img_ using the command `initrd_generator initrd.yaml ./out`, and finally we can build the _fitimage_ using the command `boot_generator boot.yaml ./out`.
+We can build the _initrd.img_ using the command `initrd_generator initrd.yaml ./build`,
+then we can build the _boot_root.tar_ using the command `root_generator boot_root.yaml ./build`,
+and finally we can build the _fitimage_ using the command `boot_generator boot.yaml ./build`.
 
-To avoid typing all these commands by hand, we can use task.
-The following _taskfile_ will do the job:
+To avoid typing all these commands by hand, we can use [Taskfile](https://taskfile.dev/).
+Most of these build steps are very generic, and it makes sense to use some template tasks to avoid repetition.
+You can find these template tasks at _images/tasks_. Let's make use of these tasks to build our image.
+
+To build the _initrd.img_, we can make use of the _build_ task of the _images/tasks/InitrdGenerator.yml_.
 
 ```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+tasks:
+  build:
+    desc: The initrd image is build using the initrd generator.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      base_spec: '{{.base_spec | default "base.yaml"}}'
+      initrd_spec: '{{.initrd_spec | default "initrd.yaml"}}'
+      initrd_img: '{{.initrd_img | default "initrd.img"}}'
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.initrd_img}}.log
+    sources:
+      - '{{.base_spec}}'
+      - '{{.initrd_spec}}'
+    generates:
+      - '{{.result_folder}}{{.initrd_img}}'
+```
+
+The default variable values fit for our image description, and we can build the _initrd.img_ by calling this task from your _Taskfile.yml_.
+
+```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: '3'
 
 vars:
-  kernel_cmdline_append: rw
-  result_folder: ./build
-  initrd_img: ./build/initrd.img
+  common_tasks: /workspace/images/tasks/
 
-
-env:
-  SHELL : /bin/bash
+includes:
+  initrd: '{{.common_tasks}}InitrdGenerator.yml'
 
 tasks:
-  build_initrd:
-    desc: The initrd image is build using the initrd generator.
-    cmds:
-      - echo "Build initrd.img..."
-      - mkdir -p {{.result_folder}}
-      - initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.initrd_img}}.log
-    sources:
-       - ./{{.initrd_spec}}
-    generates:
-       - ./{{.initrd_img}}
-
-  build_boot:
-    desc: The boot generator is used to extract the kernel image for a Debian package.
-    cmds:
-      - echo "Get fitimage..."
-      - mkdir -p {{.result_folder}}
-      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.fitimage}}.log
-    preconditions:
-       - test -f {{.boot_spec}}
-    sources:
-       - ./{{.boot_spec}}
-       - ./{{.fitimage_config}}
-       - ./{{.build_fitimage}}
-    generates:
-       - ./{{.fitimage}}
-
-  build_boot_root:
-    desc: The root generator is used to build a chroot enviroment which contains all tools for building the fitimage.
-    cmds:
-      - echo "Build boot root"
-      - mkdir -p {{.result_folder}}
-      - set -o pipefail && root_generator --no-config {{.boot_root_spec}} {{.result_folder}} 2>&1 | tee {{.boot_root}}.log
-    preconditions: 
-       - test -f {{.boot_root_spec}}
-    sources: 
-       - ./{{.boot_root_spec}}
-    generates: 
-       - ./{{.boot_root}}
-
-  build_image:
-    desc: Use embdgen to build the SD card image
-    cmds: 
-      - echo "Build image..."
-      - mkdir -p  {{.result_folder}}
-      - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
-    preconditions: 
-       - test -f {{.partition_layout}}
-    sources: 
-       - ./{{.partition_layout}}
-    generates: 
-       - ./{{.disc_image}}
-
-  sysroot_tarball:
-    desc: The root generator is used to build a sysroot variant of the root filesystem.
-    cmds: 
-      - echo "Build sysroot.tar..."
-      - mkdir -p {{.result_folder}}
-      - set -o pipefail && root_generator --sysroot --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.sysroot_tarball}}.log
-    preconditions: 
-      - test -f {{.root_filesystem_spec}}
-    sources: 
-       - ./{{.root_filesystem_spec}}
-    generates:
-       - ./{{.sysroot_tarball}}
+  default:
+    aliases: [build]
+    desc: Build the NXP RDB2 image
+    cmds:   
+      - task: initrd:build
+    method: none
 ```
 
-Now the board specific parts are done, and the only missing piece to build the image is the root filesystem.
-A minimal root filesystem making use of the _systemd_ init manager can be specified as: 
+Using a *common_tasks* variable makes it easy to change the template tasks location.
+The _default_ task, which is executed if we run `task` in the image folder,
+will make use of the _build_ task form the _initrd_ import, to build our _initrd.img_.
+The alias _build_ ensures that the default task is also executed when we run `task build`
+in the image folder.
+
+Next we need to prepare the _fitimage_ build environment, which we specified in _boot_root.yaml_.
+To do this, we can make use of the _build_ task of the template tasks file _images/tasks/RootGenerator.yml_.
 
 ```yaml
-base: base.yaml
-name: ebcl_rdb2
-type: debootstrap
+...
+
+tasks:
+  build:
+    desc: |
+            Use the root generator to build the base root filesystem tarball.
+            This fist step only installs the specified packages. User configuration
+            is done as a second step, because the build of this tarball is quite 
+            time consuming and configuration is fast. This is an optimization for 
+            the image development process.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      base_spec: '{{.base_spec | default "base.yaml"}}'
+      root_spec: '{{.root_spec | default "root.yaml"}}'
+      base_root_spec: '{{.base_root_spec | default "../root_common.yaml"}}'
+      base_tarball: '{{.base_tarball | default "root.tar"}}'
+    cmds:
+      - mkdir -p {{.result_folder}}
+      - set -o pipefail && root_generator --no-config {{.root_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.base_tarball}}.log
+    preconditions: 
+      - test -f {{.root_spec}}
+    sources: 
+      - '{{.base_spec}}'
+      - '{{.root_spec}}'
+      - '{{.base_root_spec}}'
+    generates: 
+      - '{{.result_folder}}{{.base_tarball}}'
+
+...
+```
+
+This time, we need to adapt some of the default variables.
+We can do this by defining the variables as part of the task step.
+
+```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+
+includes:
+  initrd: '{{.common_tasks}}InitrdGenerator.yml'
+  root: '{{.common_tasks}}RootGenerator.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the NXP RDB2 image
+    cmds:   
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: boot_root.yaml
+          base_tarball: boot_root.tar
+    method: none
+```
+
+Now, we are ready to run the _boot_generator_ and build the _fitimage_.
+Also for this step, we can make use of a template task.
+The file _images/tasks/BootGenerator.yml_ contains a fitting task.
+
+```yaml
+...
+tasks:
+  ...
+
+  build_fitimage:
+    desc: The boot generator is used to build the fitimage.
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      base_spec: '{{.base_spec | default "base.yaml"}}'
+      boot_spec: '{{.boot_spec | default "boot.yaml"}}'
+      fitimage: '{{.kernel | default "fitimage"}}'
+      build_script: '{{.build_script | default "build_fitimage.sh"}}'
+      fitimage_config: '{{.build_script | default "bootargs.its"}}'
+      bootloader_config: '{{.build_script | default "bootargs-overlay.dts"}}'
+    cmds:
+      - mkdir -p {{.result_folder}}
+      # Delete old modules folder if exists
+      - sudo rm -rf {{.result_folder}}modules
+      - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.fitimage}}.log
+    preconditions:
+      - test -f {{.boot_spec}}
+    sources:
+      - '{{.base_spec}}'
+      - '{{.boot_spec}}'
+    generates:
+      - '{{.result_folder}}{{.kernel}}'
+...
+```
+
+This will extract the _fip.s32_ Arm Trusted Firmware binary and build the _fitimage_,
+which includes the kernel binary and our _initrd.img_ binary.
+To complete the image, we need a root filesystem which provides an init manager.
+For this image, we make use of _systemd_ as init manager.
+In addition we add _udev_ to automatically create the device nodes,
+and _util-linux_ to provide the basic tools.
+The following _root.yaml_ specifies everything we need.
+
+```yaml
+base: ../base.yaml
 packages:
   - systemd
-  - udev
+  - udev        # udev will create the device node for ttyS0
   - util-linux
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
-    env: fake
+    env: sudo
 ```
 
-The _config_root.sh_ script is needed to link _systemd_ as _/sbin/init_.
+In addition to the packages, we need a config script to link our init manager
+as _/sbin/init_, which is the location expected by the kernel.
+The _config_root.sh_ takes care of this.
 
 ```bash
 #!/bin/sh
@@ -407,82 +483,109 @@ The _config_root.sh_ script is needed to link _systemd_ as _/sbin/init_.
 ln -s /usr/lib/systemd/systemd ./sbin/init
 ```
 
-To build the root filesystem tarball, we can run `root_generator root.yaml ./out`, or we extend our _taskfile_.
+To build the root filesystem tarball, we could run `root_generator root.yaml ./build`, or we extend our _Taskfile.yml_ to also take care of this artifact.
 
 ```yaml
-vars:
-  root_filesystem_spec: root.yaml
-  config_root: config_root.sh
-  base_tarball: build/ebcl_rdb2.tar
-  root_tarball: build/ebcl_rdb2.config.tar
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
 
- build_root_base:
-    desc: |
-            Use the root generator to build the base root filesystem tarball.
-            This fist step only installs the specified packages. User configuration
-            is done as a second step, because the build of this tarball is quite 
-            time consuming and configuration is fast. This is an optimization for 
-            the image development process.
-    cmds:
-      - echo "Build root.tar..."
-      - mkdir -p {{.result_folder}}
-      - set -o pipefail && root_generator --no-config {{.root_filesystem_spec}} {{.result_folder}} 2>&1 | tee {{.base_tarball}}.log
-    preconditions: 
-       - test -f {{.root_filesystem_spec}}
-    sources: 
-       - ./{{.root_filesystem_spec}}
-    generates:
-       - ./{{.base_tarball}}
-  
-  build_rootfs:
-    desc: |
-           The root configurator is used to run the user configuration scripts
-           as a separate step in the build process.
-    cmds: 
-      - echo "Configuring {{.base_tarball}} as {{.root_tarball}}..."
-      - mkdir -p  {{.result_folder}}
-      - set -o pipefail && root_configurator {{.root_filesystem_spec}} {{.base_tarball}} {{.root_tarball}} 2>&1 | tee {{.root_tarball}}.log
-    preconditions: 
-       - test -f {{.root_filesystem_spec}}
-    sources: 
-       - ./{{.root_filesystem_spec}}
-       - ./{{.config_root}}
-    generates:
-       - ./{{.root_tarball}}
+vars:
+  common_tasks: /workspace/images/tasks/
+
+includes:
+  initrd: '{{.common_tasks}}InitrdGenerator.yml'
+  root: '{{.common_tasks}}RootGenerator.yml'
+  boot: '{{.common_tasks}}BootGenerator.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the NXP RDB2 image
+    cmds:   
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: boot_root.yaml
+          base_tarball: boot_root.tar
+      - task: boot:build_fitimage
+      - task: root:build
+      - task: root:config
+    method: none
 ```
 
-The above taskfile splits the image installation and the configuration step of building the root tarball.
-This is useful if you expect changes for the configuration, because the installation step is quite time consuming, and the configuration step is quite fast.
+The template tasks splits the image installation and the configuration step of building the root tarball.
+This is useful if you expect changes for the configuration,
+because the installation step is quite time consuming,
+and the configuration step is quite fast.
 This optimization can save you a lot of build time.
 
 Finally we need to run embdgen to build our binary image.
-This can be done manually running `embdgen image.yaml ./out`, but we can also add it to our _taskfile_.
+This can be done manually running `embdgen image.yaml ./build`,
+but we can also add it to our _Taskfile.yaml_.
+We can make use of the template task provided in _images/tasks/Embdgen.yml_ to run Embdgen.
 
 ```yaml
-vars:
-  partition_layout: ../image.yaml
-
 tasks:
-  build_image:
-    desc: Use embdgen to build the SD card image
-    cmds:
-      - task: source
-      - task: kconfig
-      - task: build_kernel
-      - task: build_modules
-      - task: build_boot
-      - echo "Build image..."
+  build:
+    desc: Use embdgen to build the disc image
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      partition_layout: '{{.partition_layout | default "image.yaml"}}'
+      disc_image: '{{.disc_image | default "image.raw"}}'
+      root_tarball: '{{.root_tarball | default "root.config.tar"}}'
+      firmware: '{{.firmware | default "fip.s32"}}'
+      fitimage: '{{.fitimage | default "fitimage"}}'
+    cmds: 
       - mkdir -p  {{.result_folder}}
-      - set -o pipefail && embdgen -o ./{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.disc_image}}.log
+      - set -o pipefail && embdgen -o {{.result_folder}}{{.disc_image}} {{.partition_layout}} 2>&1 | tee {{.result_folder}}{{.disc_image}}.log
     preconditions: 
        - test -f {{.partition_layout}}
+       - test -f {{.result_folder}}{{.root_tarball}}
     sources: 
-       - ./{{.partition_layout}}
+       - '{{.partition_layout}}'
+       - '{{.result_folder}}{{.root_tarball}}'
+       - '{{.result_folder}}{{.firmware}}'
+       - '{{.result_folder}}{{.fitimage}}'
     generates: 
-       - ./{{.disc_image}}
+       - '{{.result_folder}}{{.disc_image}}'
 ```
 
+The complete build process is then given in the following _Taskfile.yml_:
+
+```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+
+includes:
+  initrd: '{{.common_tasks}}InitrdGenerator.yml'
+  root: '{{.common_tasks}}RootGenerator.yml'
+  boot: '{{.common_tasks}}BootGenerator.yml'
+  boot: '{{.common_tasks}}Embdgen.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the NXP RDB2 image
+    cmds:   
+      - task: initrd:build
+      - task: root:build
+        vars:
+          root_spec: boot_root.yaml
+          base_tarball: boot_root.tar
+      - task: boot:build_fitimage
+      - task: root:build
+      - task: root:config
+      - task: embdgen:build
+    method: none
+```
+
+
+
 Now you have an image which you can flash to your NXP RDB2 board.
-The overall build flow with the changes above is:
+
+The overall build flow of our final NXP RDB2 image is:
 
 ![S32G2](../assets/S32G2_full.png)

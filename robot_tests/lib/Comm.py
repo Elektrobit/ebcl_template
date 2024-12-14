@@ -125,7 +125,7 @@ class Comm:
                 logging.info('Match: %s\nFor line: %s', str(m), line)
                 return m
 
-    def execute(self, message, timeout: int = -1, has_echo=True) -> str:
+    def execute(self, message, timeout: int = -1) -> str:
         """
         Read all lines produced by the given message
         """
@@ -141,11 +141,14 @@ class Comm:
         logging.info('Running command %s...', message)
         self.io.write(f'{message}; echo {ter}\n')
 
-        if has_echo:
+        line = self.wait_for_line(ter, timeout=timeout)
+        if f'echo {ter}' in line:
+            logging.info('Skipping command echo: %s', line)
             line = self.wait_for_line(ter, timeout=timeout)
-            logging.info('Command echo: %s', line)
 
-        return self.wait_for_line(ter, timeout=timeout)
+        logging.info('Command result: %s', line)
+
+        return line
 
     def read_line(self, timeout: int = -1) -> Optional[str]:
         """ Read the next line. """
