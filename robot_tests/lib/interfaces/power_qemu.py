@@ -27,7 +27,7 @@ class PowerQemu(PowerInterface):
         self.shell = shell
         self.qemu_cmd = qemu_cmd
 
-    def power_on(self, image: Optional[str]) -> Any:
+    def power_on(self, image: Optional[str], cmd: Optional[str] = None) -> Any:
         """
         Run the image.
         """
@@ -56,13 +56,20 @@ class PowerQemu(PowerInterface):
 
         sleep(0.2)
 
-        self.process.stdin.write(f'{self.qemu_cmd}\n')
+        qemu_cmd = self.qemu_cmd
+        if cmd is not None:
+            logging.info('Using QEMU command: %s', qemu_cmd)
+            qemu_cmd = cmd
+
+        self.process.stdin.write(f'{qemu_cmd}\n')
 
         return self.process
 
-    def power_off(self):
+    def power_off(self, cmd: Optional[str] = None):
         """
         Stop the image by "power-cut".
         """
         if self.process:
+            if cmd is not None:
+                logging.info('Power off kills the process, "%s" is not used.', cmd)
             kill_process_tree(self.process.pid)

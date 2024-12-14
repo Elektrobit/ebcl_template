@@ -17,7 +17,6 @@
     - [Raspberry Pi 4 images](examples/rpi.md)
     - [NXP RDB2 images](examples/rdb2.md)
 - [Kernel development](examples/kernel.md)
-- [Building old images](images/old_images.md)
 - [Developing apps](apps/index.md)
      - [EBcLfSA demo application](apps/ebclfsa_demo.md)
 - [Packaging apps](apps/packaging.md)
@@ -28,3 +27,5 @@
     - [Boot generator](tools/boot.md)
     - [Embdgen](tools/embdgen.md)
     - [Hypervisor configurator](tools/hypervisor.md)
+- [Testing](tests/index.md)
+    - [Performance tests](tests/performance.md)
