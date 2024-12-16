@@ -97,7 +97,7 @@ class Performance:
         report_vals.sort(key=lambda l: l[1])
 
         report = f'Performance report:\n\nImage: {self.image}\n'
-        report += f'Runs: {self.cycles}\n\nResults:\nms       name: test run results\n'
+        report += f'Runs: {self.cycles}\n\nResults:\ns       name: test run results\n'
         for (name, avg, deltas) in report_vals:
             ds = ', '.join([f'{d:.6f}' for d in deltas])
             report += f'{avg:.6f} {name}: {ds}\n'
@@ -140,7 +140,7 @@ class Performance:
             delta = ts - offset
             points.append((delta, ts, name, line))
 
-        logging.info('Measurement points: %s', str(points))
+        logging.info('Measurement points:\n%s', '\n'.join([str(p) for p in points]))
 
         eval_report = ''
         for point in points:

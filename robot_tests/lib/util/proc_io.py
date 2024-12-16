@@ -84,22 +84,20 @@ class ProcIO:
 
         try:
             self.process.stdin.write('exit\n')
+
+            logging.info('Waiting for the shell to exit...')
+            try:
+                self.process.wait(timeout=30)
+            except TimeoutExpired as e:
+                logging.info(
+                    'Waiting for bash to terminate after exit failed: %s', e)
         except Exception as e:
             logging.info('Sending exit failed. %s', e)
-
-        logging.info('Waiting for the shell to exit...')
-        try:
-            self.process.wait(timeout=30)
-        except TimeoutExpired as e:
-            logging.info(
-                'Waiting for bash to terminate after exit failed: %s', e)
 
         rc = self.process.poll()
         logging.info('Shell return code: %s', rc)
 
-        if rc is not None:
-            logging.info('Shell session ended with returncode %d.', rc)
-        else:
+        if rc is None:
             logging.info('Killing shell and subprocesses...')
             kill_process_tree(self.process.pid)
 

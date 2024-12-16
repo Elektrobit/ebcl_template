@@ -42,6 +42,7 @@
 			"hostfwd",
 			"htmlcov",
 			"iputils",
+			"Journaling",
 			"JSONCPP",
 			"kconfig",
 			"keygen",
