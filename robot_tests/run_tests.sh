@@ -40,3 +40,11 @@ done
 
 zip -r $report_archive ${log_dir}/* 1>/dev/null
 rm -f images_*.log
+
+rm -f report.html
+rm -f log.html
+rm -f output.xml
+
+ln -s ${log_dir}/report.html .
+ln -s ${log_dir}/log.html .
+ln -s ${log_dir}/output.xml .
