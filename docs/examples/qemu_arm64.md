@@ -6,11 +6,13 @@ To ease development and testing we also provide QEMU arm64 images.
 For _arm64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
 The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation. Additionally there is an example image provided for application development. You can find more about application development in later chapters.
 
+The build flow used for the arm64 QEMU images is similar to the build flow for amd64 QEMU images.
+For more details take a look at [Build-flow for QEMU images](qemu_amd64.html#build-flow-for-qemu-images) 
 
 ## The arm64 Jammy image
 
 In _images/arm64/qemu/jammy_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
-This folder contains the configuration of the example, and makes use of the QEMU _images/qemu*.mk_ include makefiles.
+The _base.yml_ looks like:
 
 ```yaml
 # Kernel package to use
@@ -42,7 +44,7 @@ EB corbos Linux (EBcL) is an embedded Linux distribution targeting automotive an
 The main differences between EBcL and Ubuntu are the release and qualification handling, and some additional components added by EBcL which allow building more lightweight and better performing embedded images.
 The code is again very similar to the amd64 QEMU images.
 
-The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in _*.mk_ files.
+The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in the _Taskfile.yml_ files.
 
 ### Supported images
 

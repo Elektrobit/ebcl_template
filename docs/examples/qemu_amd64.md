@@ -6,10 +6,53 @@ Using amd64 for development may help to make your development flow much smoother
 For _amd64/qemu_ we provide example images for EB corbos Linux (EBcL) and for Ubuntu Jammy.
 The difference between EBcl and Jammy is, that EBcL provides some additional components, like the _crinit_ init-manager and the _elos_ logging and event framework, and that EBcL provides a qualified security maintenance release every three months, while Jammy is proving updates continuously, using less strict qualification and documentation. Additionally there is an example image provided for application development. You can find more about application development in later chapters.
 
+## Build-flow for QEMU images
+
+QEMU requires three artifacts to run an image. These artifacts are a _kernel_ binary,
+a _initrd.img_ binary, and a disc image providing a root filesystem.
+The build flow, to get these artifacts, is the same for all QEMU images,
+and we defined int in _images/tasks/QEMU_image.yml_.
+
+```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+includes:
+  gen: 'Generic.yml'
+  root: 'RootGenerator.yml'
+  boot: 'BootGenerator.yml'
+  initrd: 'InitrdGenerator.yml'
+  embdgen: 'Embdgen.yml'
+  sysroot: 'Sysroot.yml'
+  efi: 'Efi.yml'
+
+tasks:
+  build:
+    desc: Build and run the qemu image
+    cmds:   
+      - task: boot:extract_kernel
+      - task: root:build
+      - task: root:config
+      - task: initrd:build
+      - task: embdgen:build
+    method: none
+...
+```
+
+The build steps are:
+
+- The _extract_kernel_ task of the _BootGenerator.yml_ runs the _boot_generator_ to extract the kernel.
+- The _build_ task of the _RootGenerator.yml_ runs the _root_generator_ to install the defined packages.
+- The _config_ task of the _RootGenerator.yml_ runs the _root_generator_ to apply the configuration.
+- The _build_ task of the _InitrdGenerator.yml_ runs the _initrd_generator_ build the _initrd.img_.
+- The _build_ task of the _Embdgen.yml_ runs the _Embdgen_ to generate the _image.raw_ disc image.
+
+This generic QEMU build task is used by all QEMU image _Taskfile.yml_ files.
+
 ## The amd64 Jammy image
 
 In _images/amd64/qemu/jammy_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
-This folder contains the configuration and makes use of the QEMU _images/qemu*.mk_ include makefiles.
+The _base.yml_ looks like:
 
 ```yaml
 # Kernel package to use
@@ -30,8 +73,8 @@ apt_repos:
 arch: 'amd64'
 ```
 
-The example makes use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package.
-The Canonical Ubuntu apt repositories are used to build the example.
+It makes use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package.
+The Canonical Ubuntu apt repositories are used to build the image.
 
 ```yaml
 # Partition layout of the image
@@ -88,8 +131,6 @@ In addition, the kernel config is extracted.
 base: base.yaml
 # Reset the kernel - should not be installed
 kernel: null
-# Name of the archive.
-name: ubuntu
 # Packages to install in the root tarball
 packages:
   - systemd
@@ -102,7 +143,58 @@ scripts:
 ```
 
 The _root.yaml_ defines the root filesystem configuration of the example image.
-It uses “ubuntu” as name, by default has a minimal root filesystem only consisting of _debootstrap_ and _systemd_, _udev_, and _util-linux_ additionally installed, and use the _config_root.sh_ as configuration, which links _systemd_ as _/sbin/init_.
+It has a minimal root filesystem only consisting of _debootstrap_ and _systemd_, _udev_, and _util-linux_ additionally installed,
+and use the _config_root.sh_ as configuration, which links _systemd_ as _/sbin/init_.
+
+```yaml
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  arch: 'x86_64'
+  kernel_cmdline_append: "rw"
+
+includes:
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
+  sysroot: '{{.common_tasks}}Sysroot.yml'
+  qemu_image: '{{.common_tasks}}QEMU_image.yml'
+  qemu: '{{.common_tasks}}QEMU.yml'
+
+tasks:
+  default:
+    aliases: [run_qemu]
+    desc: Build and run the qemu image
+    cmds:   
+      - task: qemu_image:build
+      - task: qemu:run_amd64
+    method: none
+
+  build:
+    desc: Build the image.
+    cmds:   
+      - task: qemu_image:build
+    method: none
+```
+
+The _Taskfile.yml_ set the _arch_ variable and uses _kernel_cmdline_append_ to writeable mount the root filesystem,
+since this is expected by the out-of-the-box systemd configuration.
+It also includes the tasks from _images/tasks/Generic.yml_, which are image independent generic tasks like _clean_ and _mrproper_.
+To avoid a prefix, the file is _flatten_ included.
+The included _images/tasks/Sysroot.yml_ provides the tasks for building and installing the sysroot,
+which is needed for application development.
+The image build flow is included from _images/tasks/QEMU_image.yml_,
+and the tasks to finally run QEMU are included from _images/tasks/QEMU.yml_.
+The _default_ task, which is executed by running `task` without parameters,
+will build the image and then run it using QEMU.
+This task is also executed by running `task run_qemu`.
+Taskfile makes use of caching, and if an artifact is up-to-date, according to the selected
+source files and results, the task is not executed again.
+Therefore, running _qemu_image:build_ as part of the _default_ task will only build
+the image if it doesn't exist.
+The additional _build_ task allows to build the image, without running it, by running the `task build` command.
 
 ## The amd64 EB corbos Linux images
 
@@ -123,27 +215,50 @@ The EBcL repo can be added using the “use_ebcl_apt” flag.
 The _boot.yaml_ is not different to the one used for the Jammy images, and just extracts the kernel binary and configuration form the given kernel package.
 The _image.yaml_ and the _initrd.yaml_ are also identical to the ones used with the Jammy images.
 
+The structure of the config files of all EBcL QEMU images is similar. This allows using a central _images/amd64/qemu/Taskfile.yml_,
+which is symlinked into all image folders, to provide the right build working directory.
+The only difference to the amd64 Jammy image _Taskfile.yml_ is that some specification files are used from
+the one level higher folder, since there is no difference between the _crinit_ and _systemd_ variant.
+To use the generic tasks, the variables pointing to these inputs are explicitly given,
+which overwrites the defaults defined in the generic tasks.
+
 ### The amd64 EB corbos Linux systemd image
 
-EBcL supports the _systemd_ init-manager and if startup time and the resource footprint are not too critical, it’s a quite good choice because all of the Ubuntu packages are fully compatible with it, and all services come with their configs for _systemd_. To run _systemd_ without providing the init-manager using the kernel command line, we can link it as _/sbin/init_. This is done using the _config_root.sh_ script.
+EBcL supports the _systemd_ init-manager and if startup time and the resource footprint
+are not too critical, it’s a quite good choice because all of the Ubuntu packages are
+fully compatible with it, and all services come with their configs for _systemd_.
+To run _systemd_ without providing the init-manager using the kernel command line,
+we can link it as _/sbin/init_. This is done using the _config_root.sh_ script.
 The _amd64/qemu/ebcl/systemd_ defines a QEMU image using _debootstrap_ for building the root filesystem.
-This root filesystem is a very minimal one, only providing _systemd_, _udev_ and the default command line tools.
+This root filesystem is a very minimal one, only providing _systemd_,
+_udev_ and the default command line tools.
 
 ### The amd64 EB corbos Linux crinit image
 
-EBcL adds [crinit](https://github.com/Elektrobit/crinit) init-manger, as an alternative to _systemd_. [Crinit](https://github.com/Elektrobit/crinit) is a much more lightweight init-manager, compared with _systemd_, and tailored to embedded.
-Since all the hardware and use-cases are very well known in advance for an embedded system, many dynamic configuration and detection features of _systemd_ can be skipped, which results in a faster and much more lightweight solution.
-The drawback of using _crinit_ is that the Ubuntu packages are not prepared for _crinit_, and all service and startup configuration needs to be done by the user.
+EBcL adds [crinit](https://github.com/Elektrobit/crinit) init-manger, as an alternative to _systemd_.
+[Crinit](https://github.com/Elektrobit/crinit) is a much more lightweight init-manager, compared with _systemd_, and tailored to embedded.
+Since all the hardware and use-cases are very well known in advance for an embedded system,
+many dynamic configuration and detection features of _systemd_ can be skipped,
+which results in a faster and much more lightweight solution.
+The drawback of using _crinit_ is that the Ubuntu packages are not prepared for _crinit_,
+and all service and startup configuration needs to be done by the user.
 
-The necessary minimal configuration to use _crinit_ is contained in _images/amd64/qemu/ebcl/crinit/crinit_config_, and this folder is copied as overlay to the root filesystem using the _root.yaml_. The script _config_root.sh_ ensures that the _sbin/init_ script, provided in the overlay, is executable.
+The necessary minimal configuration to use _crinit_ is contained in 
+_images/amd64/qemu/ebcl/crinit/crinit_config_,
+and this folder is copied as overlay to the root filesystem using the _root.yaml_.
+The script _config_root.sh_ ensures that the _sbin/init_ script,
+provided in the overlay, is executable.
 Instead of _systemd_, _crinit_ and its command line client _crinit-ctl_ is installed.
 
 Let’s take a closer look at the _crinit_config_ overlay.
 The _sbin/init_ mounts the _/proc_ filesystem and then runs the _crinit_ init-manager.
 The _/etc_ folder contains a minimal _crinit_ configuration.
-The file _/etc/crinit/default.series_ is the main configuration file, and the folder _/etc/crinit/crinit.d_ contains the services we want to run.
-The task _/etc/crinit/crinit.d/agetty-ttyS0.crinit_ runs _agetty_ on the serial console _ttyS0_, so that we can login using the QEMU serial console.
-The task _/etc/crinit/crinit.d/earlysetup.crinit_ sets the hostname, so that we get proper logs.
+The file _/etc/crinit/default.series_ is the main configuration file,
+and the folder _/etc/crinit/crinit.d_ contains the services we want to run.
+The task _/etc/crinit/crinit.d/agetty-ttyS0.crinit_ runs _agetty_ on the serial console _ttyS0_,
+so that we can login using the QEMU serial console.
+The task _/etc/crinit/crinit.d/earlysetup.crinit_ sets the hostname,
+so that we get proper logs.
 The task _/etc/crinit/crinit.d/mount.crinit_ takes care of mounting the additional filesystems.
 
 The _amd64/qemu/ebcl/crinit_ defines a QEMU image using _debootstrap_ for building the root filesystem.
@@ -152,34 +267,46 @@ This root filesystem is a very minimal one, only providing _crinit_.
 ## The amd64 EB corbos Linux server images
 
 The previous images were all very minimal images, only providing enough to boot and login to the system.
-For developing an embedded system this is the right place to start development, but for exploring and playing with the system it’s too less.
-The server images provide a more complete user experience and add logging, network, _apt_ and _ssh_.
+For developing an embedded system this is the right place to start development,
+but for exploring and playing with the system it’s too less.
+The server images provide a more complete user experience and add logging,
+network, _apt_ and _ssh_.
 
 ### The amd64 EB corbos Linux server crinit image
 
-The _crinit_ variant of the server image is contained in _images/amd64/qemu/ebcl-server/crinit_. In addition to _crinit_, it provides the [elos](https://github.com/Elektrobit/elos) logging and event manager, which is a lightweight replacement of _journald_ and _dbus_, which allows automatic log evaluation and event handling.
-To manage the network interfaces, _netifd_ from the OpenWRT world is used.
+The _crinit_ variant of the server image is contained in _images/amd64/qemu/ebcl-server/crinit_.
+In addition to _crinit_, it provides the [elos](https://github.com/Elektrobit/elos) logging and event manager,
+which is a lightweight replacement of _journald_ and _dbus_,
+which allows automatic log evaluation and event handling.
+To manage the network interfaces, _netifd_ from the OpenWRT project is used.
 It’s a very powerful and nevertheless lightweight network manager used in many router solutions.
 Als NTP client _ntpdate_ is used.
 To allow remote login _openssh-server_ is added.
-The image also contains _apt_ to allow easy installation of additional packages, and the typical Linux tools and editors for playing and exploring.
+The image also contains _apt_ to allow easy installation of additional packages,
+and the typical Linux tools and editors for playing and exploring.
 
 The _root_common.yaml_ is the shared root specification of all the EBcL server variants.
-It defines the name, the architecture and the common tools and services, like _openssh-server_. The _root.yaml_ extends the package list with the _crinit_ and _elos_ specific packages, and defines the overlay for the _crinit_ configuration and the config script for the _crinit_ variant.
+It defines the name, the architecture and the common tools and services, like _openssh-server_.
+The _root.yaml_ extends the package list with the _crinit_ and _elos_ specific packages,
+and defines the overlay for the _crinit_ configuration and the config script for the _crinit_ variant.
 This _config_root.sh_ sets a machine ID, required by _elos_, and generates a _/etc/hosts_ file.
 
 Let’s take a look at the server configuration.
 In addition to the _/usr/sbin/init_, which runs _crinit_, a _ntp_time.sh_ is provided.
-This _ntp_time.sh_ does a one-shot NTP time update, as soon as the network is up, to avoid issues with apt and other time sensitive services.
+This _ntp_time.sh_ does a one-shot NTP time update, as soon as the network is up,
+to avoid issues with apt and other time sensitive services.
 The _/etc/apt_ folder provides the apt repository configuration for EBcL and Ubuntu Jammy.
 The file _/etc/config/network/network_ is evaluated by _netifd_ to bring up the network interfaces.
 This configuration makes use of an static IPv6 and a dynamic IPv4 configuration.
-The _crinit_ tasks are extended with tasks to run _elos_, bring up the network, run the SSH service, and trigger the NTP time update.
+The _crinit_ tasks are extended with tasks to run _elos_, bring up the network,
+run the SSH service, and trigger the NTP time update.
 The file _/etc/elos/elosd.json_ contains some basic _elos_ configuration, to use it as syslog demon.
 The config _/etc/ssh/sshd_config.d/10-root-login.conf_ enables SSH login is root.
-The config _/etc/gai.conf_ ensures that IPv4 DNS is preferred over IPv6. The other config files just set some reasonable defaults.
+The config _/etc/gai.conf_ ensures that IPv4 DNS is preferred over IPv6.
+The other config files just set some reasonable defaults.
 
 ### The amd64 EB corbos Linux server systemd image
 
-The folder _images/amd64/qemu/ebcl-server/systemd_ contains a variant of the EBcL server image using _systemd_ as init manager.
+The folder _images/amd64/qemu/ebcl-server/systemd_ contains a variant of the EBcL server image
+using _systemd_ as init manager.
 It’s mainly provided as a reference, to compare the configuration and performance.

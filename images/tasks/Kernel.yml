@@ -87,7 +87,6 @@ tasks:
       kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
       kernel_make_args: '{{.kernel_make_args | default "ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-"}}'
     cmds:
-      - echo "Get virtio driver..."
       - cd {{.source}}{{.kernel_dir}} && make {{.kernel_make_args}} modules -j 16
       - cd {{.source}}{{.kernel_dir}} && chmod +x debian/scripts/sign-module
       - mkdir -p {{.result_folder}}

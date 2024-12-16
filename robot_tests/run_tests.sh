@@ -3,6 +3,8 @@
 if [ -n "$FORCE_CLEAN_REBUILD" ]; then
     echo "Enforcing image rebuild..."
     export SDK_ROBOT_SKIP_CLEAN="0"
+else
+    echo "Enforced image rebuild is off..."
 fi
 
 test_lib_folder=$(realpath ./lib)
