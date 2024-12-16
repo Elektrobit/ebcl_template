@@ -28,7 +28,10 @@ The _image.yaml_ describes the required storage layout, the _initrd.yaml_ is a v
 The _boot_root.yaml_ defines the environment used for building the _fitimage_. The _bootargs*_ files are the S32G2 specific configurations for the _fitimage_ layout and kernel command line.
 The script _build_fitimage.sh_ is executed in the mentioned chroot environment, and automates the fitimage building.
 The _boot.yaml_ wraps all the before mentioned, and is used together with the _boot generator_ to automatically build the fitimage.
-The _rdb2.mk_ defines the default build flow for the RDB2 images, and is included and extended if needed by the makefiles of the different image variants.
+
+The build flow for all NXP RDB2 images is specified in _images/tasks/RDB2_image.yml_,
+included by the _Taskfile.yml_ of the different image descriptions,
+and described in detail in [Building an image from scratch](../images/from_scatch.md).
 
 ## EBcL RDB2 systemd image
 

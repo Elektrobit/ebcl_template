@@ -16,7 +16,6 @@
     - [Raspberry Pi 4 images](examples/rpi.md)
     - [NXP RDB2 images](examples/rdb2.md)
 - [Kernel development](examples/kernel.md)
-- [Building old images](images/old_images.md)
 - [Developing apps](apps/index.md)
 - [Packaging apps](apps/packaging.md)
 - [The build tools](tools/index.md)
@@ -25,3 +24,5 @@
     - [Root configurator](tools/root_config.md)
     - [Boot generator](tools/boot.md)
     - [Embdgen](tools/embdgen.md)
+- [Testing](tests/index.md)
+    - [Performance tests](tests/performance.md)
