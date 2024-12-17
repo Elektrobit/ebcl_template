@@ -12,13 +12,13 @@ class PowerInterface(ABC):
     """
 
     @abstractmethod
-    def power_on(self, image: Optional[str]) -> Any:
+    def power_on(self, image: Optional[str], cmd: Optional[str] = None) -> Any:
         """
         Run the image.
         """
 
     @abstractmethod
-    def power_off(self):
+    def power_off(self, cmd: Optional[str] = None):
         """
         Stop the image by "power-cut".
         """

@@ -9,8 +9,7 @@ Library    robot/libraries/String.py
 Build Image
     [Arguments]    ${path}    ${max_time}=15m
     [Timeout]    ${max_time}
-
-    Clear    ${path}
+    Clear    ${path}    task mrproper
     ${image}=    Build    ${path}
     Should Not Be Empty    ${image}
     RETURN    ${image}
@@ -77,6 +76,6 @@ Test Crinit Image
     Disconnect
 
 Test Hardware Image
-    [Arguments]    ${path}
-    ${image}=    Build Image    ${path}
+    [Arguments]    ${path}    ${build_timeout}=15m
+    ${image}=    Build Image    ${path}    max_time=${build_timeout}
     Should Not Be Empty    ${image}

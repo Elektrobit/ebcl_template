@@ -18,12 +18,6 @@
 	],
 	"settings": {
 		"git.ignoreLimitWarning": true,
-		"yaml.schemas": {
-			"https://taskfile.dev/schema.json": [
-				"file:///workspace/images/tasks/Generic.yml",
-				"file:///workspace/images/tasks/BootGenerator.yml"
-			]
-		},
 		"cSpell.words": [
 			"BINDIR",
 			"bootargs",
@@ -31,11 +25,13 @@
 			"childs",
 			"cmdline",
 			"configurator",
+			"corbos",
 			"CPACK",
 			"cpid",
 			"Crinit",
 			"debootstrap",
 			"DESTDIR",
+			"devicetrees",
 			"devpts",
 			"ebcl",
 			"embdgen",
@@ -47,8 +43,11 @@
 			"gitmodules",
 			"hostfwd",
 			"htmlcov",
+			"iputils",
+			"Journaling",
 			"JSONCPP",
 			"kconfig",
+			"keygen",
 			"losetup",
 			"menuconfig",
 			"mksquashfs",
@@ -65,12 +64,15 @@
 			"pipefail",
 			"poweroff",
 			"pycache",
+			"PYTHONPATH",
 			"squashfs",
 			"sysfs",
 			"Taskfile",
+			"taskfiles",
 			"tmpfs",
 			"userspace",
 			"venv",
+			"veritysetup",
 			"virt",
 			"virtio"
 		]

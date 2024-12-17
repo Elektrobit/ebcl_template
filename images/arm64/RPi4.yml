@@ -10,7 +10,9 @@ vars:
   additional_overlay: ../*.txt
 
 includes:
-  gen: '{{.common_tasks}}Generic.yml'
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
   sysroot: '{{.common_tasks}}Sysroot.yml'
   rpi_image: '{{.common_tasks}}RPi_image.yml'
 
