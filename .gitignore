@@ -59,7 +59,7 @@ initrd.img
 /images/extra
 /apps/extra
 /images/ebcl-*
-
+/images/arm64/beaglebone/ai64/linux
 
 fakedit
 /work*

@@ -1,0 +1,38 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: mbr
+  boot_partition: boot
+  parts:          
+    - name: boot
+      type: partition
+      start: 2048 B
+      fstype: fat32
+      content:
+        type: fat32
+        content:
+          type: files
+          files:
+            - resources/boot/*
+            - build/Image
+            - build/dtbs/*
+            - build/dtbs/ti/k3*
+            - build/initrd.img
+      size: 256 MB
+
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 3 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/root.config.tar
+
+
+
+
+
+
+

@@ -1,0 +1,26 @@
+# CPU architecture
+arch: arm64
+apt_repos:
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+use_ebcl_apt: true
