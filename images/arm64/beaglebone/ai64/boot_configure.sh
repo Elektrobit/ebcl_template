@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# The outdir is created and populated in such a way so it adheres to the boot partition filesystem layout
+# boot_extract will extract toplevel files directly and files that need to be in specific subfolders from /outdir
+# e.g expected layout:
+#       extlinux
+#          |------ extlinux.conf
+
 mkdir -p outdir/extlinux
 
 cp opt/u-boot/bb-u-boot-beagleboneai64/microsd-extlinux.conf outdir/extlinux/extlinux.conf

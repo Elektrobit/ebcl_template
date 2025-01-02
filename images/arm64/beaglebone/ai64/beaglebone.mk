@@ -53,11 +53,12 @@ boot_root ?= $(result_folder)/boot_root.tar
 
 boot_contents ?= $(result_folder)/boot.tar
 
-beaglebone_repo_key ?= $(result_folder)/bbbio.gpg
-beaglebone_repo_key_src ?= $(result_folder)/bbbio.asc
+beaglebone_repo_key ?= $(repo_key_folder)/bbbio.gpg
+beaglebone_repo_key_src ?= $(repo_key_folder)/bbbio.asc
 
 $(beaglebone_repo_key): 
-	@echo "Downloading BeagleBone Repo Key"
+	@echo "Downloading BeagleBone Repo Key to $(repo_key_folder)"
+	mkdir -p $(repo_key_folder)
 	wget -O $(beaglebone_repo_key_src) "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xd284e608a4c46402"
 	gpg --dearmor -o $(beaglebone_repo_key) $(beaglebone_repo_key_src)
 
@@ -92,7 +93,7 @@ $(root_tarball): $(base_tarball) $(config_root) $(beaglebone_repo_key)
 
 # The initrd image is build using the initrd generator.
 # initrd_spec: specification of the initrd image.
-$(initrd_img): $(initrd_spec)
+$(initrd_img): $(initrd_spec) $(beaglebone_repo_key)
 	@echo "Build initrd.img..."
 	mkdir -p $(result_folder)
 	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
@@ -121,7 +122,7 @@ $(boot_contents): $(boot_extract_spec) $(boot_root) $(initrd_img)
 	@echo "Extracting required files from boot_root ..."
 	mkdir -p $(result_folder)
 	set -o pipefail && boot_generator $(boot_extract_spec) $(result_folder) 2>&1 | tee $(boot_contents).log
-	
+
 #--------------------------------------
 # Open a shell for manual configuration
 #--------------------------------------
