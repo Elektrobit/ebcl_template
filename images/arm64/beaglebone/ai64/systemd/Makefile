@@ -13,6 +13,10 @@ root_filesystem_spec ?= root.yaml
 
 config_root ?= config_root.sh
 
+boot_extract_spec ?= ../boot_extract.yaml
+
+boot_root_spec ?= ../boot_root.yaml
+
 variant=systemd
 #-------------------------
 # Additional configuration

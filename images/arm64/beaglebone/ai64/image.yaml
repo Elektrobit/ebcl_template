@@ -11,19 +11,14 @@ image:
       content:
         type: fat32
         content:
-          type: files
-          files:
-            - resources/boot/*
-            - build/Image
-            - build/dtbs/*
-            - build/dtbs/ti/k3*
-            - build/initrd.img
+          type: archive
+          archive: build/boot.tar
       size: 256 MB
 
     - name: root
       type: partition
       fstype: ext4
-      size: 3 GB
+      size: 2 GB
       content:
         type: ext4
         content:

@@ -12,5 +12,5 @@ ff02::2         ip6-allrouters
 EOF
 
 # Activate services
-# systemctl enable systemd-networkd
-# systemctl enable systemd-resolved
+systemctl enable systemd-networkd
+systemctl enable systemd-resolved

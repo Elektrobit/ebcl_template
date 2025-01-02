@@ -16,11 +16,9 @@ apt_repos:
       - universe
       - multiverse
       - restricted
-  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-updates
+  - apt_repo: http://debian.beagleboard.org/arm64
+    gpg: /build/beaglebone-ai64/build_tools/bbbio.gpg
+    distro: jammy
     components:
       - main
-      - universe
-      - multiverse
-      - restricted
 use_ebcl_apt: true

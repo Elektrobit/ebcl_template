@@ -23,19 +23,15 @@ SHELL := /bin/bash
 # Image specifications
 #---------------------
 
-# Specification of the partition layout of the image.raw
-partition_layout ?= image.yaml
-# Specification of the initrd.img
-initrd_spec ?= initrd.yaml
-# Specification of the root filesystem content and configuration
-root_filesystem_spec ?= root.yaml
-
-#-------------------------
-# Additional configuration
-#-------------------------
-
 # Config script for root filesystem
 config_root ?= config_root.sh
+
+#--------------------
+# Generated artifacts
+#--------------------
+
+# The ifeqs allow overwriting the values
+# if the makefile is used as include.
 
 # Disc image
 disc_image ?= $(result_folder)/image.raw
@@ -52,23 +48,21 @@ initrd_img ?= $(result_folder)/initrd.img
 # Sysroot tarball
 sysroot_tarball ?= $(result_folder)/root_sysroot.tar
 
-#---------------------
-# Kernel specifications
-#---------------------
 
-# Kernel image
-kernel = $(result_folder)/Image
-# Path of the kernel sources
-kernel_dir = ../linux
-# Kernel make arguments
-kernel_make_args = ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+boot_root ?= $(result_folder)/boot_root.tar
 
-linux_repo=https://github.com/beagleboard/linux.git
+boot_contents ?= $(result_folder)/boot.tar
 
-linux_branch=v6.6.32-ti-arm64-r10
+beaglebone_repo_key ?= $(result_folder)/bbbio.gpg
+beaglebone_repo_key_src ?= $(result_folder)/bbbio.asc
+
+$(beaglebone_repo_key): 
+	@echo "Downloading BeagleBone Repo Key"
+	wget -O $(beaglebone_repo_key_src) "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xd284e608a4c46402"
+	gpg --dearmor -o $(beaglebone_repo_key) $(beaglebone_repo_key_src)
 
 # Embdgen is used to build the SD card image.
-$(disc_image): $(root_tarball) $(partition_layout)
+$(disc_image): $(initrd_img) $(root_tarball) $(partition_layout)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
 	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
@@ -81,7 +75,8 @@ $(disc_image): $(root_tarball) $(partition_layout)
 # is done as a second step, because the build of this tarball is quite 
 # time consuming and configuration is fast. This is an optimization for 
 # the image development process.
-$(base_tarball): $(root_filesystem_spec) kernel_beagle_build
+# TODO kernel_beagle_build
+$(base_tarball): $(root_filesystem_spec) $(boot_contents)
 	@echo "Build root.tar..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
@@ -90,24 +85,17 @@ $(base_tarball): $(root_filesystem_spec) kernel_beagle_build
 # as a separate step in the build process.
 # base_tarball: tarball which is configured
 # config_root: the used configuration script
-$(root_tarball): $(base_tarball) $(config_root)
+$(root_tarball): $(base_tarball) $(config_root) $(beaglebone_repo_key)
 	@echo "Configuring ${base_tarball} as ${root_tarball}..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
 
-
-# Build the initrd
-.PHONY: initrd
-initrd:
-	@echo "No initrd implemented"
-	@echo "Fake target to be interface compliant"
-	@echo "Image was written to"
 # The initrd image is build using the initrd generator.
 # initrd_spec: specification of the initrd image.
-# $(initrd_img): $(initrd_spec)
-#	@echo "Build initrd.img..."
-#	mkdir -p $(result_folder)
-#	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
+$(initrd_img): $(initrd_spec)
+	@echo "Build initrd.img..."
+	mkdir -p $(result_folder)
+	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
 
 # The root generator is used to build a sysroot variant of the root filesystem.
 # root_filesystem_spec: specification of the root filesystem
@@ -118,6 +106,22 @@ $(sysroot_tarball): $(root_filesystem_spec)
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --sysroot --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
 
+
+# The root generator is used to build a chroot enviroment which contains all tools for building the fitimage.
+# boot_root_spec: specification of the fitimage build environment
+#
+# A separate image build is used for the fitimage build environment, to not bloat the
+# root filesystem with this stuff.
+$(boot_root): $(boot_root_spec) $(beaglebone_repo_key)
+	@echo "Build $(boot_root) from $(boot_root_spec)..."
+	mkdir -p $(result_folder)
+	set -o pipefail && root_generator --no-config $(boot_root_spec) $(result_folder) 2>&1 | tee $(boot_root).log
+
+$(boot_contents): $(boot_extract_spec) $(boot_root) $(initrd_img)
+	@echo "Extracting required files from boot_root ..."
+	mkdir -p $(result_folder)
+	set -o pipefail && boot_generator $(boot_extract_spec) $(result_folder) 2>&1 | tee $(boot_contents).log
+	
 #--------------------------------------
 # Open a shell for manual configuration
 #--------------------------------------
@@ -150,43 +154,6 @@ edit_root:
 	cd $(result_folder)/root && fakeroot -i ../fakedit -s ../fakedit -- tar cf ../../$(root_tarball) .
 	rm -rf $(result_folder)/root
 
-.PHONY: kernel_beagle_build
-kernel_beagle_build:
-#   Clone kernel source tracked by submodule
-ifeq ($(shell [ -d "$(kernel_dir)/.git" ] && echo yes || echo no),yes)
-	@echo "$(kernel_dir) is a Git repository"
-else
-ifeq ($(shell [ -d "$(kernel_dir)" ] && echo yes || echo no),yes)
-	@echo "$(kernel_dir) exists but is not a Git repository. Removing it."
-	@rm -rf $(kernel_dir)
-endif
-	@echo "Cloning $(linux_repo) (branch: $(linux_branch))..."
-	@git clone -b $(linux_branch) $(linux_repo) $(kernel_dir)
-endif
-	cd $(kernel_dir) && chmod +x scripts/*
-	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 bb.org_defconfig
-##   Image Build
-	@echo "Build kernel binary..."
-	mkdir -p $(result_folder)
-	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 Image
-	cp $(kernel_dir)/arch/arm64/boot/Image $(kernel)
-	@echo "Results were written to $(kernel)"
-##   modules Build
-	mkdir -p $(result_folder)
-	@echo "Build kernel modules..."
-	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 modules
-	cd $(kernel_dir) && INSTALL_MOD_PATH=../$(variant)/$(result_folder) $(MAKE) $(kernel_make_args) modules_install
-	@echo "Results were written to $(result_folder)"
-##   Dtbs compile
-	mkdir -p $(result_folder)/dtbs/ti
-	mkdir -p $(result_folder)/dtbs/overlays
-	@echo "Build dtbs .."
-	cd $(kernel_dir) && $(MAKE) $(kernel_make_args) -j 16 dtbs
-	cp $(kernel_dir)/arch/arm64/boot/dts/ti/k3-j721e-beagleboneai64.dtb  $(result_folder)/dtbs/ti
-	cp $(kernel_dir)/arch/arm64/boot/dts/ti/k3-*.dtbo  $(result_folder)/dtbs/overlays
-	@echo "Results were written to $(result_folder)/dtbs"
-	cd -
-
 #--------------------------------
 # Default make targets for images
 #--------------------------------
@@ -200,8 +167,8 @@ image: $(disc_image)
 root: $(base_tarball)
 
 # build of the initrd.img(s)
-# .PHONY: initrd
-# initrd: $(initrd_img)
+.PHONY: initrd
+initrd: $(initrd_img)
 
 # config the root tarball
 .PHONY: config

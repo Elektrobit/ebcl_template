@@ -1,6 +1,6 @@
 base: ../base.yaml
 # reset the kernel value
-kernel: null
+kernel: bbb.io-kernel-5.10-ti-k3-j721e
 # Packages to install in the root tarball
 packages:
   - kmod # requried to load modules
@@ -16,8 +16,9 @@ packages:
   - openssh-server
   # Other basic tools
   - openssh-client
-  - locales
   - bash
+  - apt 
+  - ca-certificates
   - util-linux
   - cron
   - file
@@ -25,15 +26,11 @@ packages:
   - iproute2
   - iptables
   - iputils-ping
-  # Apt package manager
-  - apt
   - gnupg
   # Editors
   - vim
-  - nano
-  # network tools
-  - wget
-  - curl
+  - python3
+  - bb-j721e-evm-firmware
 # Scripts to configure the root tarball
 # Scripts to configure the root tarball
 host_files:
@@ -41,8 +38,8 @@ host_files:
     uid: 0
     gid: 0
     mode: 755
-  - source: $$RESULTS$$/lib/*
-    destination: lib
+#  - source: $$RESULTS$$/lib/*
+#    destination: lib
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chroot # Type of execution environment
