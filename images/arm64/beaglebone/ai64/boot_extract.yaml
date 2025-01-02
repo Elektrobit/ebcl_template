@@ -2,7 +2,7 @@
 base: base.yaml
 # Reset the kernel value - we don't want to download and extract it
 kernel: null
-# Do not pack the files as tar
+# Do pack the files as tar
 tar: true
 # do not download and extract these packages, they are already installed in the tools.tar
 use_packages: false
