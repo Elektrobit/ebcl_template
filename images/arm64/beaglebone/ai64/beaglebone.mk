@@ -187,9 +187,6 @@ endif
 	@echo "Results were written to $(result_folder)/dtbs"
 	cd -
 
-## 	Run Build SD
-##  PoC of how to build firmware and uboot components ourselves
-##	build_tools/prepare_sd.sh $(result_folder)
 #--------------------------------
 # Default make targets for images
 #--------------------------------
