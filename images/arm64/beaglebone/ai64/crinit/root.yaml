@@ -3,31 +3,36 @@ base: ../base.yaml
 kernel: bbb.io-kernel-5.10-ti-k3-j721e
 # Packages to install in the root tarball
 packages:
-  - kmod # requried to load modules
-  - systemd
-  - systemd-timesyncd
-  - systemd-coredump
-  - udev
-  - dbus
-  # network helpers
-  - iproute2
-  - iputils-ping
-  # SSH server
-  - openssh-server
-  # Other basic tools
-  - openssh-client
-  - bash
-  - apt 
-  - ca-certificates
+  - crinit
+  - crinit-ctl
+  # Elos for logging
+  - elos
+  - elos-coredump
+  - elos-plugin-backend-json
+  - elos-plugin-backend-dummy
+  - elos-plugin-scanner-kmsg
+  - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
+  - netifd
+  - udhcpc
+  - ubus
   - util-linux
-  - cron
+  - netbase
+  - locales
   - file
   - findutils
+  - kmod
   - iproute2
   - iptables
   - iputils-ping
-  - gnupg
-  # Editors
+  - vim
+  - nano
+  - strace
+  - ntpdate
+  - apt
+  - openssh-server
+  - openssh-client
   - vim
   - python3
   - bb-j721e-evm-firmware

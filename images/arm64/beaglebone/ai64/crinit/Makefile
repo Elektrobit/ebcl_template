@@ -19,7 +19,7 @@ boot_root_spec ?= ../boot_root.yaml
 
 repo_key_folder ?= ../repo_keys/
 
-variant = systemd
+variant = crinit
 #-------------------------
 # Additional configuration
 #-------------------------
