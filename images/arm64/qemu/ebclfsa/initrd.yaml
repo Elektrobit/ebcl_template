@@ -4,4 +4,4 @@ base: base.yaml
 root_device: /dev/vda1
 # List of kernel modules
 modules:
-  - kernel/drivers/block/virtio_blk.ko # virtio_blk is needed for QEMU
+  - virtio_blk # virtio_blk is needed for QEMU

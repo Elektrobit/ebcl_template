@@ -4,10 +4,6 @@ base: base.yaml
 root_device: /dev/vda1
 # List of kernel modules
 modules:
-  - kernel/drivers/virtio/virtio.ko 
-  - kernel/drivers/virtio/virtio_ring.ko 
-  - kernel/drivers/block/virtio_blk.ko 
-  - kernel/net/core/failover.ko 
-  - kernel/drivers/net/net_failover.ko 
-  - kernel/drivers/net/virtio_net.ko
-  - kernel/fs/autofs/autofs4.ko # Wanted by systemd
+  - virtio_blk
+  - virtio_net
+  - autofs4 # Wanted by systemd
