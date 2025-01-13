@@ -1,3 +1,5 @@
+# EB corbos Linux Images
+
 As described in the previous chapters, a EB corbos Linux image typically consists of a _Taskfile_ and specification yaml files.
 The build steps for different SoCs have many similarities, and generic build steps are provided as template tasks in _images/tasks_.
 This folder also contains central image build descriptions for QEMU, Raspberry Pi and NXP RDB2, to minimize the redundancy between the image taskfiles.
