@@ -87,7 +87,7 @@ The test keywords provided by _Comm_ are:
   which has the `echo` command.
 - _Wait For Line_: This keyword reads the lines appearing at the serial terminal,
   and search for the given substring in the lines. If a match is found, all lines
-  until the match, inculding the matching line, is returned. It can be used to
+  until the match, including the matching line, is returned. It can be used to
   wait for a given log signalling an expected system state.
 - _Wait for Regex_: This keyword is like _Wait For Line_, but searches using
   a regular expression. This may be necessary if the searched log is more complex.
