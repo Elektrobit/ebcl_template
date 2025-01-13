@@ -17,7 +17,7 @@ apt_repos:
       - multiverse
       - restricted
   - apt_repo: http://debian.beagleboard.org/arm64
-    gpg: ./repo_keys/bbbio.gpg
+    gpg: /tmp/bbbio.gpg
     distro: jammy
     components:
       - main

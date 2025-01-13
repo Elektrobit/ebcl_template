@@ -17,8 +17,6 @@ boot_extract_spec ?= ../boot_extract.yaml
 
 boot_root_spec ?= ../boot_root.yaml
 
-repo_key_folder ?= ../repo_keys/
-
 variant = crinit
 #-------------------------
 # Additional configuration

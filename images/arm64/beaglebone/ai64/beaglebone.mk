@@ -53,12 +53,12 @@ boot_root ?= $(result_folder)/boot_root.tar
 
 boot_contents ?= $(result_folder)/boot.tar
 
+repo_key_folder ?= /tmp
 beaglebone_repo_key ?= $(repo_key_folder)/bbbio.gpg
 beaglebone_repo_key_src ?= $(repo_key_folder)/bbbio.asc
 
 $(beaglebone_repo_key): 
 	@echo "Downloading BeagleBone Repo Key to $(repo_key_folder)"
-	mkdir -p $(repo_key_folder)
 	wget -O $(beaglebone_repo_key_src) "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xd284e608a4c46402"
 	gpg --dearmor -o $(beaglebone_repo_key) $(beaglebone_repo_key_src)
 
@@ -189,5 +189,5 @@ sysroot_install: $(sysroot_tarball)
 # clean - delete the generated artifacts
 .PHONY: clean
 clean:
-	rm -rf $(result_folder)
+	rm -rf $(result_folder) $(beaglebone_repo_key_src) $(beaglebone_repo_key)
 	sync -f
