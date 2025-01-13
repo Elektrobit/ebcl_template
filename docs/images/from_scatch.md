@@ -483,7 +483,7 @@ The _config_root.sh_ takes care of this.
 ln -s /usr/lib/systemd/systemd ./sbin/init
 ```
 
-To build the root filesystem tarball, we can could run `root_generator root.yaml ./build`, or we extend our _Taskfile.yml_ to also take care of this artifact.
+To build the root filesystem tarball, we could run `root_generator root.yaml ./build`, or we extend our _Taskfile.yml_ to also take care of this artifact.
 
 ```yaml
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
