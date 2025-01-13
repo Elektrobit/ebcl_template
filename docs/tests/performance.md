@@ -30,7 +30,7 @@ make use of the _Image_ class to build the test-specific images.
 For a CI or hardware setup, this step needs to be separated,
 but for the local QEMU build it helps to simplify the tests.
 
-For exectuing the tests, the _Performance_ class is used.
+For executing the tests, the _Performance_ class is used.
 This class runs the image, and expects that the image shuts down automatically.
 During the run, the logs are collected by _ProcIO_ and extended with host timestamps.
 After the run, the _Performance_ class collects the logs,
