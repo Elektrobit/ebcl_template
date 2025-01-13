@@ -2,7 +2,7 @@
 
 The EBcL test library provides a very simple setup for performance tests.
 The idea of those performance tests are to implement a continuous monitoring, and detecting changes early.
-It is not the idea to provide precise and stable performance measuements for the system under test.
+It is not the idea to provide precise and stable performance measurements for the system under test.
 
 The performance tests require speical images,
 which are configured to automatically shutdown when the startup is completed.
