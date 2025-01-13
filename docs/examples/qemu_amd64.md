@@ -8,7 +8,7 @@ The difference between EBcl and Jammy is, that EBcL provides some additional com
 
 ## The amd64 Jammy image
 
-In _images/amd64/qemu/jammy_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
+In _images/amd64/qemu/noble_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
 This folder contains the configuration and makes use of the QEMU _images/qemu*.mk_ include makefiles.
 
 ```yaml
@@ -17,12 +17,12 @@ kernel: linux-image-generic
 # Apt repositories to use
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe

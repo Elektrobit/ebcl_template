@@ -9,7 +9,7 @@ The difference between EBcl and Jammy is, that EBcL provides some additional com
 
 ## The arm64 Jammy image
 
-In _images/arm64/qemu/jammy_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
+In _images/arm64/qemu/noble_ you can find a basic example image demonstrating how to use the EB corbos Linux SDK.
 This folder contains the configuration of the example, and makes use of the QEMU _images/qemu*.mk_ include makefiles.
 
 ```yaml
@@ -18,12 +18,12 @@ kernel: linux-image-generic
 # Apt repositories to use
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe
@@ -34,7 +34,7 @@ arch: 'arm64'
 The example makes use of the kernel “linux-image-generic”. This is a meta-package and always takes the latest available Ubuntu Jammy package.
 The Canonical Ubuntu apt repositories are used to build the examples.
 
-Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further yaml files for the arm64 Jammy image are identical to the amd64 QEMU jammy image, and hence documented already in the previous section.
+Note that the only difference to the corresponding amd64 image is the arch specification in the last line, all further yaml files for the arm64 Jammy image are identical to the amd64 QEMU noble image, and hence documented already in the previous section.
 
 ## The arm64 EB corbos Linux images
 

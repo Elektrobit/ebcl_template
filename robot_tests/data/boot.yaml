@@ -1,11 +1,11 @@
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe

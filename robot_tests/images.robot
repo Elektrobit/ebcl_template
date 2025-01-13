@@ -6,9 +6,9 @@ Test Timeout    45m
 #==================================
 # Tests for QEMU AMD64 Jammy images
 #==================================
-Build Image amd64/qemu/jammy
-    [Tags]    amd64    qemu    debootstrap    jammy    systemd
-    Test Systemd Image    amd64/qemu/jammy
+Build Image amd64/qemu/noble
+    [Tags]    amd64    qemu    debootstrap    noble    systemd
+    Test Systemd Image    amd64/qemu/noble
 
 #==================================
 # Tests for QEMU AMD64 EBcL images
@@ -32,9 +32,9 @@ Build Image amd64/qemu/ebcl-server/systemd
 #==================================
 # Tests for QEMU ARM64 Jammy images
 #==================================
-Build Image arm64/qemu/jammy
-    [Tags]    arm64    qemu    debootstrap    jammy    systemd
-    Test Systemd Image    arm64/qemu/jammy
+Build Image arm64/qemu/noble
+    [Tags]    arm64    qemu    debootstrap    noble    systemd
+    Test Systemd Image    arm64/qemu/noble
 
 #==================================
 # Tests for QEMU ARM64 EBcL images

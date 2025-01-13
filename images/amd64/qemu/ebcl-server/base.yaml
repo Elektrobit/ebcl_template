@@ -5,13 +5,13 @@ use_ebcl_apt: true
 apt_repos:
   # Get additional packages not provided by EBcL
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   # Get latest security fixes
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe

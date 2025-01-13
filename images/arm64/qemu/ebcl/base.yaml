@@ -5,7 +5,7 @@ use_ebcl_apt: true
 apt_repos:
   # Get latest security fixes
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe

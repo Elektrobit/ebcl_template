@@ -11,7 +11,7 @@ use_ebcl_apt: true
 apt_repos:
   # Get Ubuntu Raspberry Pi packages
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
@@ -19,7 +19,7 @@ apt_repos:
       - restricted
   # Get latest security fixes
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe

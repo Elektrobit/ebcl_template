@@ -14,12 +14,12 @@ kernel: linux-generic
 # Apt repositories to use
 apt_repos:
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe
