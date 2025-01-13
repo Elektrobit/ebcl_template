@@ -44,7 +44,7 @@ EB corbos Linux (EBcL) is an embedded Linux distribution targeting automotive an
 The main differences between EBcL and Ubuntu are the release and qualification handling, and some additional components added by EBcL which allow building more lightweight and better performing embedded images.
 The code is again very similar to the amd64 QEMU images.
 
-The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in teh _Taskfile.yml_ files.
+The differences for aarch64 are the adaption of the architecture in _base.yaml_ and in the _Taskfile.yml_ files.
 
 ### Supported images
 
