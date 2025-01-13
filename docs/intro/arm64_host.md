@@ -29,7 +29,7 @@ and select the "Reopen in container" command.
 
 Now you can build arm64 images.
 Open the folder containing the image description you want to build,
-e.g. _/workspace/images/arm64/qemu/ebcl/crinit/debootstrap_,
+e.g. _/workspace/images/arm64/qemu/ebcl/crinit_,
 in the integrated terminal in the dev container.
 Then run `make` to build the image.
 The build results are stored in a new created _build_ subfolder.
@@ -43,5 +43,5 @@ On Ubuntu, you can install it by running: `sudo apt install binfmt-support qemu 
 
 Then you can build the image in the same was as the arm64 images.
 Open the image folder in the terminal in the dev container,
-e.g. _/workspace/images/amd64/qemu/ebcl/crinit/debootstrap_.
+e.g. _/workspace/images/amd64/qemu/ebcl/crinit_.
 Then run the image build by executing `make` in the folder.
