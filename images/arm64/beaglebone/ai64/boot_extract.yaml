@@ -1,0 +1,22 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Reset the kernel value - we don't want to download and extract it
+kernel: null
+# Do pack the files as tar
+tar: true
+# do not download and extract these packages, they are already installed in the tools.tar
+use_packages: false
+# Name of the boot root archive
+base_tarball: $$RESULTS$$/boot_root.tar
+host_files:
+  - source: $$RESULTS$$/initrd.img 
+files:
+  - opt/u-boot/bb-u-boot-beagleboneai64/sysfw.itb
+  - opt/u-boot/bb-u-boot-beagleboneai64/tiboot3.bin
+  - opt/u-boot/bb-u-boot-beagleboneai64/tispl.bin
+  - opt/u-boot/bb-u-boot-beagleboneai64/u-boot.img
+  - initrd.img
+  - outdir/*
+
+scripts:
+  - name: boot_configure.sh

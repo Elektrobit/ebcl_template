@@ -1,0 +1,11 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Name of the boot root archive
+name: boot_root
+# Packages for boot_root.tar
+packages:
+  - bbb.io-kernel-5.10-ti-k3-j721e
+  - bb-u-boot-beagleboneai64
+  - ti-sgx-23.1-j721e-modules-5.10.168-ti-arm64-r115
+  - bb-j721e-evm-firmware
+  - generic-sys-mods
