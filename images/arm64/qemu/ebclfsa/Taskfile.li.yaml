@@ -1,0 +1,107 @@
+version: "3"
+
+vars:
+  li_result_folder: "{{.result_folder}}/li"
+  li_root_spec: li/root.yaml
+  li_base_tarball: "{{.li_result_folder}}/root.tar"
+  li_config_root: li/config_root.sh
+  li_root_files: li/**/*
+  li_root_tarball: "{{.li_result_folder}}/root.config.tar"
+  li_sysroot_tarball: "{{.li_result_folder}}/root_sysroot.tar"
+
+  li_demo_builddir: "{{.li_result_folder}}/demo"
+  li_demo_install_dir: "{{.li_demo_builddir}}/install"
+
+  li_boot_spec: li/boot.yaml
+  li_kernel: "{{.li_result_folder}}/Image_li"
+
+  li_initrd_spec: li/initrd.yaml
+  li_initrd_img: "{{.li_result_folder}}/initrd.img"
+
+
+tasks:
+  build_dir:
+    internal: true
+    desc: Creat the build directory
+    cmds:
+      - mkdir -p {{.li_result_folder}}
+    status:
+      - test -d {{.hi_result_folder}}
+
+  demo_app:
+    desc: Build the low integrity part of the demo application
+    generates:
+      - "{{.li_demo_install_dir}}/**/*"
+    cmds:
+      - cmake -S {{.demo_app}} -B {{.li_demo_builddir}} --preset li-app
+      - make -C {{.li_demo_builddir}} install DESTDIR=install
+
+  root_base:
+    desc: Build the base low integrity root file system
+    deps: 
+      - demo_app
+      - build_dir
+    sources:
+      - "{{.li_root_spec}}"
+    generates: ["{{.li_base_tarball}}"]
+    cmds:
+      - set -o pipefail && root_generator --no-config {{.li_root_spec}} {{.li_result_folder}} 2>&1 | tee {{.li_base_tarball}}.log
+
+  root:
+    desc: Build the low integrity root filesystem
+    deps: 
+      - root_base
+      - build_dir
+    sources:
+      - "{{.li_root_spec}}"
+      - "{{.li_config_root}}"
+      - "{{.li_demo_install_dir}}/**/*"
+      - "{{.li_root_files}}"
+    generates: ["{{.li_root_tarball}}"]
+    cmds:
+      - set -o pipefail && root_configurator {{.li_root_spec}} {{.li_base_tarball}} {{.li_root_tarball}} 2>&1 | tee {{.li_root_tarball}}.log
+
+  kernel:
+    desc: Fetch the low integrity kernel
+    deps:
+      - build_dir
+    sources:
+      - "{{.li_boot_spec}}"
+    generates:
+      - "{{.li_kernel}}"
+    cmds:
+      - rm -f {{.li_result_folder}}vmlinuz*
+      - set -o pipefail && boot_generator {{.li_boot_spec}} {{.li_result_folder}} 2>&1 | tee {{.li_kernel}}.log
+      - zcat {{.li_result_folder}}/vmlinuz* > {{.li_kernel}}
+
+  initrd:
+    desc: Build the initial ramdisk for the low integrity vn
+    deps: 
+      - build_dir
+    sources:
+      - "{{.li_initrd_spec}}"
+    generates:
+      - "{{.li_initrd_img}}"
+    cmds:
+      - set -o pipefail && initrd_generator {{.li_initrd_spec}} {{.li_result_folder}} 2>&1 | tee {{.li_initrd_img}}.log
+
+  sysroot_build:
+    desc: Build a sysroot archive for low integrity app development
+    deps:
+      - build_dir
+    sources:
+      - "{{.li_root_spec}}"
+    generates:
+      - "{{.li_sysroot_tarball}}"
+    cmds:
+      - set -o pipefail && root_generator --sysroot --no-config {{.li_root_spec}} {{.li_result_folder}} 2>&1 | tee {{.li_sysroot_tarball}}.log
+
+  sysroot:
+    desc: Install the sysroot archive into {{.sysroot_install}}
+    deps:
+      - sysroot_build
+    sources:
+      - "{{.li_sysroot_tarball}}"
+    cmds:
+      - rm -rf {{.sysroot_install}}*
+      - tar -xf {{.li_sysroot_tarball}} -C {{.sysroot_install}} >> /dev/null

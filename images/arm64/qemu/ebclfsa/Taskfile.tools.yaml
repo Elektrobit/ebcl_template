@@ -1,0 +1,43 @@
+version: "3"
+
+vars:
+  tools_spec: tools.yaml
+  tools_root: "{{.result_folder}}/tools.tar"
+  tools_extract_spec: tools_extract.yaml
+  uboot: "{{.result_folder}}/uboot-qemu-bart.elf"
+
+tasks:
+  build_dir:
+    internal: true
+    desc: Create the build directory
+    cmds:
+      - mkdir -p {{.result_folder}}
+    status:
+      - test -d {{.result_folder}}
+
+  root:
+    desc: Create the tools archive used for building the hypervisor and fetching uboot
+    deps:
+      - build_dir
+    sources:
+      - "{{.tools_spec}}"
+    generates:
+      - "{{.tools_root}}"
+    cmds:
+      - set -o pipefail && root_generator --no-config {{.tools_spec}} {{.result_folder}} 2>&1 | tee {{.tools_root}}.log
+
+  extract:
+    desc: Extract the hypervisor binary and uboot from the tools archive
+    aliases: [uboot]
+    deps:
+      - root
+      - build_dir
+    sources:
+      - "{{.tools_root}}"
+      - "{{.tools_extract_spec}}"
+    generates:
+      - "{{.hv_template_extension_dir}}/*"
+      - "{{.uboot}}"
+    cmds:
+      - rm -rf {{.hv_template_extension_dir}}
+      - set -o pipefail && boot_generator {{.tools_extract_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}/{{.tools_extract_spec}}.log
