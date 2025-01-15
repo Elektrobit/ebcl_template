@@ -1,5 +1,4 @@
 base: ../root_common.yaml
-name: ebcl_pi4
 packages:
   - systemd
   - systemd-coredump
@@ -16,4 +15,4 @@ host_files:
     destination: boot
   - source: ../config.txt
     destination: boot
-  - source: systemd_config/* # Crinit configuration
+  - source: config/* # Crinit configuration

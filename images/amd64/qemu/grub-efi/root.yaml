@@ -1,6 +1,4 @@
 base: base.yaml
-# Name of the archive.
-name: ebcl
 # CPU architecture
 arch: amd64
 # Packages to install in the root tarball

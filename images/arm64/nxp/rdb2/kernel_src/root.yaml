@@ -1,5 +1,4 @@
 base: ../base.yaml
-name: ebcl_rdb2
 packages:
   - systemd
   - udev        # udev will create the device node for ttyS0
