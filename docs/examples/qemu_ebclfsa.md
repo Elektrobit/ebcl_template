@@ -37,7 +37,7 @@ For the included applications see: [EBcLfSA Demo Application](../apps/ebclfsa_de
 3. In the terminal enter `gen_sign_key && GNUPGHOME=/workspace/gpg-keys/.gnupg gen_app_apt_repo && serve_packages` (If this was executed already previously, it will ask if the files *Release.gpg* and *InRelease* should be overwritten. This has to be confirmed with `y`).
    This creates an apt repository and serves the packages on *http://localhost:8000*.
 4. Navigate to *images/arm64/qemu/ebclfsa* in the explorer view, right click on ebclfsa and select "Open in Integrated Terminal"
-5. In the new terminal run `make qemu`. This will build the image and run it in qemu.
+5. In the new terminal run `task`. This will build the image and run it in qemu.
 6. Refer to the [EBcLfSA Demo Application](../apps/ebclfsa_demo.md) documentation for further information.
 
 

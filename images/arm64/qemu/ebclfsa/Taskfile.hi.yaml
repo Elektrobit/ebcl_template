@@ -1,0 +1,70 @@
+version: "3"
+
+vars:
+  hi_result_folder: "{{.result_folder}}/hi"
+  hi_root_spec: hi/root.yaml
+  hi_base_tarball: "{{.hi_result_folder}}/root.tar"
+  hi_config_root: hi/config_root.sh
+  hi_root_files: hi/root/**/*
+  hi_root_tarball: "{{.hi_result_folder}}/root.config.tar"
+
+  hi_boot_spec: hi/boot.yaml
+  hi_kernel: "{{.hi_result_folder}}/Image_hi"
+
+  hi_demo_builddir: "{{.hi_result_folder}}/demo"
+  hi_demo_install_dir: "{{.hi_demo_builddir}}/install"
+
+tasks:
+  build_dir:
+    internal: true
+    desc: Creat the build directory
+    cmds:
+      - mkdir -p {{.hi_result_folder}}
+    status:
+      - test -d {{.hi_result_folder}}
+
+  demo_app:
+    desc: Build the high integrity part of the demo application
+    generates:
+      - "{{.hi_demo_install_dir}}/**/*"
+    cmds:
+      - cmake -S {{.demo_app}} -B {{.hi_demo_builddir}} --preset hi-app
+      - make -C {{.hi_demo_builddir}} install DESTDIR=install
+
+  root_base:
+    desc: Build the base high integrity root file system
+    deps: 
+      - demo_app
+      - build_dir
+    sources:
+      - "{{.hi_root_spec}}"
+    generates: ["{{.hi_base_tarball}}"]
+    cmds:
+      - set -o pipefail && root_generator --no-config {{.hi_root_spec}} {{.hi_result_folder}} 2>&1 | tee {{.hi_base_tarball}}.log
+
+  root:
+    desc: Build the high integrity root filesystem
+    deps: 
+      - root_base
+      - build_dir
+    sources:
+      - "{{.hi_root_spec}}"
+      - "{{.hi_config_root}}"
+      - "{{.hi_demo_install_dir}}/**/*"
+      - "{{.hi_root_files}}"
+    generates: ["{{.hi_root_tarball}}"]
+    cmds:
+      - set -o pipefail && root_configurator {{.hi_root_spec}} {{.hi_base_tarball}} {{.hi_root_tarball}} 2>&1 | tee {{.hi_root_tarball}}.log
+
+  kernel:
+    desc: Fetch the high integrity kernel
+    deps:
+      - build_dir
+    sources:
+      - "{{.hi_boot_spec}}"
+    generates:
+      - "{{.hi_kernel}}"
+    cmds:
+      - rm -f {{.hi_result_folder}}vmlinuz*
+      - set -o pipefail && boot_generator {{.hi_boot_spec}} {{.hi_result_folder}} 2>&1 | tee {{.hi_kernel}}.log
+      - mv {{.hi_result_folder}}/vmlinux* {{.hi_kernel}}
