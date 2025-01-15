@@ -1,0 +1,84 @@
+version: "3"
+
+run: when_changed
+
+vars:
+  result_folder: ./build
+  demo_app: /workspace/apps/ebclfsa-demo
+  hv_template_extension_dir: "{{.result_folder}}/noml"
+  image_spec: image.yaml
+  image: "{{.result_folder}}/image.raw"
+  sysroot_install: /workspace/sysroot_aarch64/
+  dist_archive: "{{.result_folder}}/ebclfsa_qemu.tar.gz"
+  qemu_cmdline: |
+    qemu-system-aarch64 \
+      -M virt,virtualization=true,gic-version=3 \
+      -cpu cortex-a57 \
+      -m 4096 \
+      -smp 8 \
+      -serial stdio \
+      -nographic \
+      -monitor none \
+      -device virtio-blk-device,drive=vd0 \
+      -netdev user,id=net0,net=192.168.7.0/24,dhcpstart=192.168.7.2,dns=192.168.7.3,host=192.168.7.5,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333 \
+      -device virtio-net-device,netdev=net0 \
+      -kernel @@uboot@@ \
+      -drive if=none,format=raw,file=@@image@@,id=vd0
+
+includes:
+  tools: Taskfile.tools.yaml
+  li: Taskfile.li.yaml
+  hi: Taskfile.hi.yaml
+  hv: Taskfile.hv.yaml
+
+env:
+  SHELL : /bin/bash
+
+
+tasks:
+  image:
+    desc: Build the image
+    deps:
+      - hv:build
+      - li:root
+      - hi:root
+    sources:
+      - "{{.image_spec}}"
+      - "{{.hi_root_tarball}}"
+      - "{{.li_root_tarball}}"
+      - "{{.bootstrap}}"
+    generates:
+      - "{{.image}}"
+    cmds:
+      - set -o pipefail && embdgen {{.image_spec}} -o {{.image}} 2>&1 || tee {{.image}}.log
+
+  qemu:
+    desc: Run the image in qemu
+    aliases: [default]
+    deps:
+      - image
+      - tools:uboot
+    cmds:
+      - '{{.qemu_cmdline | replace "@@image@@" .image | replace "@@uboot@@" .uboot}}'
+
+  dist:
+    desc: Build a standalone tar archive
+    deps:
+      - image
+      - tools:uboot
+    sources:
+      - "{{.uboot}}"
+      - "{{.image}}"
+      - Readme.dist
+    generates:
+      - "{{.dist_archive}}"
+    cmds:
+      - 'echo {{.qemu_cmdline | replace "@@image@@" (.image | osBase) | replace "@@uboot@@" (.uboot | osBase) | trim}} > {{.result_folder}}/run_qemu.sh'
+      - chmod +x {{.result_folder}}/run_qemu.sh
+      - tar -czf {{.dist_archive}} --transform=s/Readme.dist/Readme/ Readme.dist -C {{.result_folder}} {{.uboot | osBase}} {{.image | osBase}} run_qemu.sh
+
+  clean:
+    desc: Remove all generated files
+    cmds:
+      - rm -rf {{.result_folder}}
+      - rm -rf .task
