@@ -1,0 +1,26 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Reset the kernel value - we don't want to download and extract it
+kernel: null
+# Do not pack the files as tar
+tar: false
+# do not download and extract these packages, they are already installed in the tools.tar
+use_packages: false
+# Name of the boot root archive
+base_tarball: $$RESULTS$$/tools.tar
+host_files:
+  - source: build/hv_config
+    destination: config
+  - source: build/li/Image_li
+    destination: config/hv_config
+  - source: build/hi/Image_hi
+    destination: config/hv_config
+  - source: build/li/initrd.img
+    destination: config/hv_config/ramdisk_base
+  - source: hv/*.dts*
+    destination: config
+scripts:
+  - name: config_hypervisor.sh
+    env: chroot
+files:
+  - bootstrap.uimage

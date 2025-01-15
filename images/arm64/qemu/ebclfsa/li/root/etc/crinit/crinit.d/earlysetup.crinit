@@ -1,0 +1,7 @@
+NAME = earlysetup
+
+COMMAND = /bin/hostname ebclfsa-li
+          
+PROVIDES = machine-id:wait
+RESPAWN = NO
+DEPENDS = ""

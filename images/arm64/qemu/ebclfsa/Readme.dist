@@ -1,0 +1,46 @@
+# EB corbos Linux for Safety Applications demo image
+
+This is a qemu demo image for EB corbos Linux for Safety Applications (EBcLfSA).
+It boots the EB corbos hypervisor with two virtual machines.
+One of them is running a normal EB corbos Linux (low integrity VM) and
+the second one (high integrity VM) is running only a special linux kernel
+with the high integrity applications.
+
+## How to run
+It is recommended to run the image on a ubuntu 24.04 although other versions of linux could work.
+Note: Performance can be considerably lower if linux is run as a virtual machine without hardware support.
+In order to run the image qemu is required. It can be installed on ubuntu using `apt install qemu-system`.
+
+Once qemu is available, the image can be started by running `run_qemu.sh`.
+Booting can take up to a minute and when it is done the linux prompt from the
+low integrity partiton is shown ("root@ebclfsa-li:~#").
+
+Now it is possible to run the low integrity application of the demo by executing `li_demo`.
+It shows communication over shared memory and will print something like this:
+
+```
+li_demo: INFO: Hello from ebclfsa low integrity demo application
+li_demo: DEBUG: Base addr of hv_proxycomshm is: 0x4a1fa000 - 0x4a3f9fff
+li_demo: DEBUG: Opened /dev/mem: 3
+li_demo: DEBUG: Mapped shared memory: 0x0000ffff93180000
+li_demo: DEBUG: Base addr of hv_fbshm is: 0x471fa000 - 0x4a1f9fff
+li_demo: DEBUG: Opened /dev/mem: 3
+li_demo: DEBUG: Mapped shared memory: 0x0000ffff90180000
+li_demo: INFO: Waiting for high integrity apps to start...
+li_demo: INFO: high integrity app is available, starting communication
+li_demo: INFO: Sending 'Hello hi_app 0'
+vm-hi | hi_main: DEBUG: Received 'Hello hi_app 0' from li
+vm-hi | hi_forward: DEBUG: Received 'You said 'Hello hi_app 0', I say 'hello li_app 1'' from hi_demo
+li_demo: INFO: Got response: YOU SAID 'HELLO HI_APP 0', I SAY 'HELLO LI_APP 1'
+li_demo: INFO: Sending 'Hello hi_app 1'
+vm-hi | hi_main: DEBUG: Received 'Hello hi_app 1' from li
+vm-hi | hi_forward: DEBUG: Received 'You said 'Hello hi_app 1', I say 'hello li_app 2'' from hi_demo
+li_demo: INFO: Got response: YOU SAID 'HELLO HI_APP 1', I SAY 'HELLO LI_APP 2'
+[...]
+```
+
+
+
+For more information refer to the full documentation:
+ * https://elektrobit.github.io/ebcl_template/examples/qemu_ebclfsa.html
+ * https://elektrobit.github.io/ebcl_template/apps/ebclfsa_demo.html

@@ -1,0 +1,45 @@
+version: "3"
+
+vars:
+  hv_config: hv/hv-qemu.yaml
+  hv_config_deps: hv/hv-base.yaml
+  hv_config_dir: "{{.result_folder}}/hv_config"
+  hv_modules: "{{.hv_config_dir}}/modules.list"
+  hv_device_trees: hv/*.dts*
+
+  hv_spec: hv.yaml
+  bootstrap: "{{.result_folder}}/bootstrap.uimage"
+
+tasks:
+  config:
+    desc: Create the hypervisor configuration
+    deps:
+      - :tools:extract
+    sources:
+      - "{{.hv_template_extension_dir}}/*"
+      - "{{.hv_config}}"
+    generates:
+      - "{{.hv_config_dir}}/*"
+    cmds:
+      - hypervisor_config -s {{.hv_template_extension_dir}} {{.hv_config}} {{.hv_config_dir}}
+
+  build:
+    desc: Build the configured hypervisor binary
+    deps:
+      - config
+      - :hi:kernel
+      - :li:kernel
+      - :li:initrd
+    sources:
+      - "{{.li_kernel}}"
+      - "{{.li_initrd_img}}"
+      - "{{.hi_kernel}}"
+      - "{{.hv_spec}}"
+      - config_hypervisor.sh
+      - "{{.hv_config_dir}}/*"
+      - "{{.hv_device_trees}}"
+    generates:
+      - "{{.bootstrap}}"
+    cmds:
+      - set -o pipefail && boot_generator {{.hv_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}/{{.hv_spec}}.log
+      - rm -rf {{.result_folder}}/config # We do not need the config folder copied back....

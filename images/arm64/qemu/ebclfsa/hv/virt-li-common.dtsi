@@ -1,0 +1,25 @@
+/include/ "virt-common.dtsi"
+
+/ {
+	l4vmm {
+		virtio_ser@0 {
+			compatible = "virtio,mmio";
+			reg = <0x0 0x200>;
+			interrupt-parent = <&gic>;
+			interrupts = <0 0x7c 4>;
+			l4vmm,vdev = "proxy";
+			l4vmm,virtiocap = "root_server";
+			status = "okay";
+		};
+
+		virtio_ser@1000 {
+			compatible = "virtio,mmio";
+			reg = <0x1000 0x200>;
+			interrupt-parent = <&gic>;
+			interrupts = <0 0x7d 4>;
+			l4vmm,vdev = "proxy";
+			l4vmm,virtiocap = "data_server";
+			status = "okay";
+		};
+	};
+};

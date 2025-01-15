@@ -1,0 +1,28 @@
+base:
+  - ./hv-base.yaml
+
+shms:
+  - name:    wdgshm
+    size:    0x1000
+    address: 0x40173000
+
+vbus:
+  - name: vm_hw
+    devices:
+      - name: virtio1
+        compatible: virtio,mmio
+        mmios:
+          - address: 0xa003c00
+            size:  0x200
+        irqs:
+          - irq: 46
+            trigger: level_high
+
+      - name: virtio2
+        compatible: virtio,mmio
+        mmios:
+          - address: 0xa003e00
+            size:  0x200
+        irqs:
+          - irq: 47
+            trigger: level_high

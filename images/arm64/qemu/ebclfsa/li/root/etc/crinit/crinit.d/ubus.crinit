@@ -1,0 +1,5 @@
+NAME = ubus
+
+COMMAND = /usr/sbin/ubusd
+DEPENDS = ""
+RESPAWN = YES

@@ -1,0 +1,5 @@
+NAME = vda_vio_hi_data
+
+COMMAND = /usr/sbin/e2fsck -y /dev/vda4
+COMMAND = /usr/sbin/vio_filed -F -w -f /dev/vda4 -d /dev/hvc2
+RESPAWN = NO

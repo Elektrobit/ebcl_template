@@ -1,0 +1,33 @@
+base: ./base.yaml
+# reset the kernel value
+kernel: null
+# Name of the archive.
+name: root
+# Packages to install in the root tarball
+packages:
+  - crinit-sysv
+  - crinit-ctl
+  - netifd
+  - udhcpc
+  - elos
+  - elos-coredump
+  - elos-plugin-backend-json
+  - elos-plugin-backend-dummy
+  - elos-plugin-scanner-kmsg
+  - elos-plugin-scanner-syslog
+  - elos-plugin-scanner-shmem
+  - elos-plugin-client-tcp
+  - openssh-server
+  - netbase
+  - eb-hv-qemu-vio-filed
+  - rsync
+  - gdbserver
+
+# Crinit configuration, including sbin/init
+host_files:
+  - source: root/*
+  - source: $$RESULTS$$/demo/install/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

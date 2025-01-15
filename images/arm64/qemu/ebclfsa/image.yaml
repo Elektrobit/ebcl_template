@@ -1,0 +1,58 @@
+type: mbr
+
+parts:
+  - name: uboot.env
+    type:  raw
+    start: 0x1e0000 B
+    size:  0x2000 B
+    content:
+      type:  uboot_env
+      vars:
+        loadaddr:     "0x41000000"
+        bootmode:     "1"
+        set_bootmode: "mw 0x7b000000 ${bootmode}"
+        bootcmd:      "fatload virtio 0:1 ${loadaddr} bootstrap.uimage; bootm"
+        bootdelay:    "0"
+
+  - name: boot
+    type: partition
+    fstype: fat32
+    size: 150 MB
+    content:
+      type: fat32
+      content:
+        type: files
+        files:
+          - build/bootstrap.uimage
+
+  - name: root
+    type: partition
+    fstype: ext4
+    size: 200 MB
+    content:
+      type: ext4
+      content:
+        type: archive
+        archive: build/li/root.config.tar
+
+
+  - name: hi_root
+    type: partition
+    fstype: ext4
+    size: 128 MB
+    content:
+      type: ext4
+      content:
+        type: archive
+        archive: build/hi/root.config.tar
+
+  - name: hi_data
+    type: partition
+    fstype: ext4
+    size: 100 MB
+    content:
+      type: ext4
+      content:
+        type: files
+        files:
+          - empty
