@@ -1,0 +1,42 @@
+base: ../base.yaml
+# reset the kernel value
+kernel: bbb.io-kernel-5.10-ti-k3-j721e
+# Packages to install in the root tarball
+packages:
+  - kmod # requried to load modules
+  - systemd
+  - systemd-timesyncd
+  - systemd-coredump
+  - udev
+  - dbus
+  # network helpers
+  - iproute2
+  - iputils-ping
+  # SSH server
+  - openssh-server
+  # Other basic tools
+  - openssh-client
+  - bash
+  - apt 
+  - ca-certificates
+  - util-linux
+  - cron
+  - file
+  - findutils
+  - iproute2
+  - iptables
+  - iputils-ping
+  - gnupg
+  # Editors
+  - vim
+  - python3
+  - bb-j721e-evm-firmware
+# Scripts to configure the root tarball
+host_files:
+  - source: system_config/*
+    uid: 0
+    gid: 0
+    mode: 755
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

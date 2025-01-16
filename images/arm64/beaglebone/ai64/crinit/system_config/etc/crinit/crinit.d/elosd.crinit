@@ -1,0 +1,20 @@
+# loads the event log scanner (elos)
+NAME = elosd
+
+COMMAND = /usr/bin/elosd
+
+# We need a writable tmpdir for elos to work and a machine-id for log tags.
+DEPENDS = @provided:tmpdir
+
+PROVIDES = elos:spawn syslog:spawn
+
+RESPAWN = YES
+# So we don't land in an infinite loop if there is an elos misconfiguration
+RESPAWN_RETRIES = 3
+
+# uncomment lines below to override values of the /etc/elos/elosd.json
+#ENV_SET = ELOS_STORAGE_BACKEND_JSON_FILE "/tmp/elosd_event.log"
+#ENV_SET = ELOS_LOG_LEVEL "INFO"
+#ENV_SET = ELOS_SCANNER_PATH "/usr/lib/aarch64-linux-gnu/elos/scanner"
+#ENV_SET = ELOS_BACKEND_PATH "/usr/lib/aarch64-linux-gnu/elos/backend"
+
