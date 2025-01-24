@@ -30,6 +30,23 @@ apt_repos:
 ```
 In addition, an armored public key file or URL can be given as “key”, and a unarmored gpg file can be given as “gpg”, to authenticate the package sources.
 
+NOTE:
+
+If apt repositories require credentials, please store the [credential files](https://manpages.debian.org/testing/apt/apt_auth.conf.5.de.html) (\*.conf files in netrc format) under ~/.ebcl_config/auth.d/ (or) directly create/copy files under the /workspace/tools/user_config/auth.d directory of devcontainer.
+
+Example: when use apt repos from artifactory-central.elektrobit.com (protected by credentials) as apt_repo in any of the config file.
+
+a) Generate access token by clicking *Generate an Identity token* button in artifactory's [user_profile](https://artifactory-central.elektrobit.com/ui/user_profile)
+
+b) Add a credential file called artifactory.conf like below under ~/.ebcl_config/auth.d/ of host machine (or) /workspace/tools/user_config/auth.d of devcontainer before starting the image creation operation
+
+```
+machine artifactory-central.elektrobit.com
+login <UserID>
+password <Access token generated in first step>
+```
+
+
 - **use_ebcl_apt** _(boot/initrd/root)_  \[default: No \]: If yes, the public apt repository of the EB corbos Linux will be added.
 By default, the latest release will be used if the _ebcl_version_ parameter is not given.
 This is a convenience feature, but be aware that this public apt repository doesn’t provide customer specific or proprietary packages.
