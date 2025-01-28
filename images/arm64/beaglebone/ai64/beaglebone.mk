@@ -171,6 +171,10 @@ root: $(base_tarball)
 .PHONY: initrd
 initrd: $(initrd_img)
 
+# build of the initrd.img(s)
+.PHONY: boot
+boot: $(boot_contents)
+
 # config the root tarball
 .PHONY: config
 config: $(root_tarball)

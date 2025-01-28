@@ -82,11 +82,11 @@ Build Image arm64/nxp/rdb2/systemd/server
 #======================
 Build Image arm64/beaglebone/ai64/crinit
     [Tags]    arm64    ai64    hardware    debootstrap    ebcl    crinit    network
-    Test Systemd Image    arm64/beaglebone/ai64/crinit
+    Test Hardware Image    arm64/beaglebone/ai64/crinit
 
 Build Image arm64/beaglebone/ai64/systemd
     [Tags]    arm64    ai64    hardware    debootstrap    ebcl    systemd
-    Test Crinit Image    arm64/beaglebone/ai64/crinit
+    Test Hardware Image    arm64/beaglebone/ai64/crinit
 
 #========================
 # Tests for appdev images
