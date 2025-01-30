@@ -1,15 +1,15 @@
 #!/bin/sh
 
-# Ensure init ie executable
+# Ensure scripts are executable
 chmod +x ./sbin/*
 
-# Create a fake machine-id
-echo "04711" > ./etc/machine-id
+# Link crinit as init
+rm -f /sbin/init
+ln -s /usr/bin/crinit /sbin/init
 
-# Create /etc/hosts
-cat >/etc/hosts <<- EOF
-127.0.0.1       localhost
-::1             localhost ip6-localhost ip6-loopback
-ff02::1         ip6-allnodes
-ff02::2         ip6-allrouters
-EOF
+# Set localtime of image
+rm -f /etc/localtime
+ln -s /usr/share/zoneinfo/UTC /etc/localtime
+
+# Ensure netifd is used for DNS
+ln -sf /var/run/resolv.conf.netifd /etc/resolv.conf
