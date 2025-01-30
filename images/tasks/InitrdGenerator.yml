@@ -9,11 +9,13 @@ tasks:
       base_spec: '{{.base_spec | default "base.yaml"}}'
       initrd_spec: '{{.initrd_spec | default "initrd.yaml"}}'
       initrd_img: '{{.initrd_img | default "initrd.img"}}'
+      init_script: '{{.init_script | default "init.sh"}}'
     cmds:
       - mkdir -p {{.result_folder}}
       - set -o pipefail && initrd_generator {{.initrd_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.initrd_img}}.log
     sources:
       - '{{.base_spec}}'
       - '{{.initrd_spec}}'
+      - '{{.init_script}}'
     generates:
       - '{{.result_folder}}{{.initrd_img}}'

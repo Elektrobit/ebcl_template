@@ -1,4 +1,3 @@
-# !LINKSTO ireq.config.hostname, 1
 NAME = earlysetup
 
 COMMAND = /usr/bin/hostname appdev

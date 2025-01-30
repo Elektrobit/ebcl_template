@@ -4,9 +4,42 @@ base: base.yaml
 root_device: /dev/vda1
 # List of kernel modules
 modules:
-  - kernel/drivers/virtio/virtio.ko 
-  - kernel/drivers/virtio/virtio_ring.ko 
-  - kernel/drivers/block/virtio_blk.ko 
-  - kernel/net/core/failover.ko 
-  - kernel/drivers/net/net_failover.ko 
-  - kernel/drivers/net/virtio_net.ko
+  # dm-verity dependencies
+  - xor-neon
+  - dm-integrity
+  # virtio modules
+  - virtio_blk
+  - failover
+  - net_failover
+  - virtio_net
+  - veth
+  # bridge support - requried by dockerd and podman
+  - br_netfilter
+  # nttabes kernel modules - required by dockerd and podman
+  - nft_compat
+  - xt_addrtype
+  - nft_counter
+  - nf_conntrack_netlink
+  - nft_chain_nat
+  - xt_conntrack
+  - xt_comment
+  - xt_MASQUERADE
+  - overlay
+  - xfrm_user
+  # dm-verity modules
+  - dm-verity
+  # graphics support
+  - sysimgblt
+  - sysfillrect
+  - syscopyarea
+  - fb_sys_fops
+  - drm
+  - cec
+  - drm_kms_helper
+  - virtio-gpu
+template: init.sh
+packages:
+  # Tools for checking ext4 partitions.
+  - e2fsprogs
+  # !status proposed
+  - cryptsetup

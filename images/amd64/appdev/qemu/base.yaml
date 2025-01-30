@@ -13,6 +13,7 @@ apt_repos:
     components:
       - main
       - universe
+  # Use latest updates, which will go into next EBcL release
   - apt_repo: http://archive.ubuntu.com/ubuntu
     distro: jammy-updates
     components:

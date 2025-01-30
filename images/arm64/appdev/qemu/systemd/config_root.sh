@@ -18,3 +18,6 @@ EOF
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
+
+# Ensure netifd is used for DNS
+ln -sf /run/systemd/resolve/stub-resolv.conf /etc/resolv.conf
