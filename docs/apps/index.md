@@ -30,12 +30,13 @@ This file may belong to the application folder or any of its subfolders.
 
 ### Build
 
-Before you can build any of the example applications, please make sure to run `make sysroot_install` for the used image configuration.
+Before you can build any of the example applications, please make sure to run `task sysroot:build` and `task sysroot:install` for the used image configuration.
 As an example, for the amd64 qemu image with crinit as init daemon, building the sysroot would be done like this:
 
 ```{bash}
 cd /workspace/images/amd64/appdev/qemu/crinit
-make sysroot_install
+task sysroot:build
+task sysroot:install
 ```
 
 In order to build the applications, use the Visual Studio Code CMake extension on the Visual Studio Code bottom ribbon:
@@ -63,7 +64,7 @@ The following command will start the qemu instance, as well as builds the image 
 
 ```{bash}
 cd /workspace/images/amd64/appdev/qemu/crinit
-make
+task
 ```
 
 Afterwards, you can run task `Deploy app from active build preset` to deploy the required artifacts for the currently active build preset.

@@ -1,4 +1,3 @@
-# !LINKSTO ireq.config.getty, 1
 NAME = getty-ttyS0
 
 COMMAND = /usr/bin/setsid /usr/sbin/getty 115200 ttyS0

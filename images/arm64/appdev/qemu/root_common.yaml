@@ -30,6 +30,15 @@ packages:
   - psmisc
   # rsync for app deployment during development
   - rsync
-# Add libjson package for app development example
+  # required for example my-qt-app
+  - qt6-base-dev
+  - weston
+  - qt6-wayland
+  # Container tools
+  - docker.io
+  - podman
 sysroot_packages:
+  # Add libjson package
   - libjsoncpp-dev
+  # Add the qt packages
+  - qt6-base-dev

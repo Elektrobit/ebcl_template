@@ -1,5 +1,7 @@
 NAME = ntptime
 
 COMMAND = /usr/sbin/ntp_time.sh
-DEPENDS = @provided:tmpdir
+
+PROVIDES = ntptime:wait
+DEPENDS = @provided:network
 RESPAWN = NO

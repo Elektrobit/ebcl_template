@@ -34,11 +34,11 @@ packages:
   - qt6-base-dev
   - weston
   - qt6-wayland
-
-# Add packages for app development example
+  # Container tools
+  - docker.io
+  - podman
 sysroot_packages:
   # Add libjson package
   - libjsoncpp-dev
   # Add the qt packages
   - qt6-base-dev
-  

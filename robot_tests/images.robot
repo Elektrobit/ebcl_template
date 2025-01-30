@@ -1,5 +1,5 @@
 *** Settings ***
-Resource    image.resource
+Resource    resources/image.resource
 Test Timeout    15m
 
 *** Test Cases ***
