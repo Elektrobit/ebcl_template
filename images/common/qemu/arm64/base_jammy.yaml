@@ -1,0 +1,19 @@
+base:
+  - base.yaml
+# CPU architecture
+apt_repos:
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe

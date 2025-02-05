@@ -1,5 +1,0 @@
-# Kernel package to use
-kernel: linux-image-generic
-use_ebcl_apt: true
-# CPU architecture
-arch: 'amd64'

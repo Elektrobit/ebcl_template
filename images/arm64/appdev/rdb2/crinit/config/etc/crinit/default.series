@@ -1,3 +1,0 @@
-TASKDIR = /etc/crinit/crinit.d
-USE_SYSLOG = YES
-DEBUG = NO

@@ -1,0 +1,38 @@
+# CPU architecture
+arch: arm64
+# Kernel package to use
+kernel: linux-image-raspi
+use_ebcl_apt: true
+# Additional apt repos
+apt_repos:
+  # Get Ubuntu Raspberry Pi packages
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  # Get Latest Community Tested Package Fixes
+  # This Repository is soley added for one reason:
+  # The flash-kernel postinstall script will try to execute
+  # and write files to memory. This will not work in our build env (chroot).
+  # flash-kernel will not do this on a system that is running in EFI Mode and
+  # in updated versions where it can detect the chroot environment better.
+  # Try running 'ls /sys/firmware/efi' if you have this dir, you can remove
+  # This apt_repo safely.
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted

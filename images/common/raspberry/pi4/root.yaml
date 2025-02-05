@@ -1,0 +1,19 @@
+# Reset kernel package
+kernel: null
+# Packages to install in the root tarball
+packages:
+  # Pi firmware and bootloader
+  - linux-firmware-raspi
+  - linux-raspi
+  - u-boot-rpi
+  - flash-kernel
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh
+    env: chroot
+host_files:
+  - source: cmdline.txt
+    destination: boot
+  - source: config.txt
+    destination: boot
+

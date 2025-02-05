@@ -1,0 +1,8 @@
+# Download dependencies of the kernel package - necessary if meta-package is specified
+download_deps: true
+# Files to copy from the packages
+files:
+  - boot/vmlinuz*
+  - boot/config*
+# Do not pack the files as tar - we need to provide the kernel binary to QEMU
+tar: false
