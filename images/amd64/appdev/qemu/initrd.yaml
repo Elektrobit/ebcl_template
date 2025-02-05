@@ -2,3 +2,4 @@ base:
   # First import base to set the arch, then import the common initrd spec
   - ../../../common/qemu/amd64/base_jammy.yaml
   - ../../../common/qemu/initrd.yaml
+  - ../../../common/qemu/initrd_jammy.yaml
