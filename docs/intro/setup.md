@@ -82,7 +82,19 @@ Pressing on this element will bring up the connection menu.
 ### Install required tools and clone ebcl_template repository
 
 
-If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io python3 python3-venv python-is-python3 binfmt-support qemu-user-static`
+If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io binfmt-support qemu-user-static`
+
+**WARNING**:
+When using a distribution that provides qemu in a version greater or equal to 8.1.1 (like Ubuntu 24.04) building for arm64 targets is broken due to a [bug](https://gitlab.com/qemu-project/qemu/-/issues/1913) in qemu. It will fail with a message like `W: Failure trying to run: chroot "/tmp/tmpp7s0kahl" /sbin/ldconfig`.
+We recommend either switching to Ubuntu 22.04 or downgrade qemu (and hold back updates).
+his can be done for example using:
+```sh
+sudo apt remove qemu-user-static
+wget http://launchpadlibrarian.net/690251791/qemu-user-static_8.0.4+dfsg-1ubuntu3_amd64.deb
+sudo apt install ./qemu-user-static_8.0.4+dfsg-1ubuntu3_amd64.deb
+sudo apt-mark hold qemu-user-static
+```
+The current version of qemu can be checked using `qemu-aarch64-static --version`.
 
 To use dev containers, your user (on the remote machine) needs to be able to create local Docker containers.
 To give your user these rights, you need to add the user to the docker group with the command: `sudo usermod -aG docker $USER`. The changes become active after a new login.
