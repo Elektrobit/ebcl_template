@@ -11,7 +11,7 @@ on:
 jobs:
   prepare-sdk:
     name: Prepare SDK for Robot Testing
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       # Names of every Test Case defined
       test_cases: ${{ steps.get_tests.outputs.test_cases }}
