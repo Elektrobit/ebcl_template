@@ -80,7 +80,7 @@ If you start from a plain Ubuntu 22.04 installation, you can install the needed 
 
 **WARNING**:
 When using a distribution that provides qemu in a version greater or equal to 8.1.1 (like Ubuntu 24.04) building for arm64 targets is broken due to a [bug](https://gitlab.com/qemu-project/qemu/-/issues/1913) in qemu. It will fail with a message like `W: Failure trying to run: chroot "/tmp/tmpp7s0kahl" /sbin/ldconfig`.
-We recommend either using switching to Ubuntu 22.04 or downgrade qemu (and hold back updates).
+We recommend either switching to Ubuntu 22.04 or downgrade qemu (and hold back updates).
 his can be done for example using:
 ```sh
 sudo apt remove qemu-user-static
