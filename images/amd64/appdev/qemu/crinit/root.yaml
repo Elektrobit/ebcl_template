@@ -1,3 +1,4 @@
 base:
   - ../../../../common/qemu/amd64/base_jammy.yaml
   - ../../../../common/amd64/crinit/root.yaml
+  - ../../../../common/appdev.yaml

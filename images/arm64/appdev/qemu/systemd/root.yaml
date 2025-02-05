@@ -1,3 +1,4 @@
 base:
   - ../../../../common/qemu/arm64/base_jammy.yaml
   - ../../../../common/systemd/root.yaml
+  - ../../../../common/appdev.yaml
