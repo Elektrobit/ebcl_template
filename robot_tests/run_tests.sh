@@ -1,5 +1,15 @@
 #!/bin/bash
 
+function run_test_classes {
+    echo "Running $# test classes $@ for image ${EBCL_TC_IMAGE}..."
+    for TEST_CLASS in $@;
+    do
+        echo "Running test class ${TEST_CLASS} for image ${EBCL_TC_IMAGE}..."
+        mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}
+        robot --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS} ${TEST_CLASS}.robot
+    done
+}
+
 if [ -n "$FORCE_CLEAN_REBUILD" ]; then
     echo "Enforcing image rebuild..."
     export SDK_ROBOT_SKIP_CLEAN="0"
@@ -10,6 +20,10 @@ fi
 test_lib_folder=$(realpath ./lib)
 
 export PYTHONPATH="${test_lib_folder}:${PYTHONPATH}"
+
+if [ -f "test.env" ]; then
+    source test.env
+fi
 
 rm -f output.xml
 rm -f report.html
@@ -28,7 +42,34 @@ log_dir="test_logs_${current_date}_${commit_id}"
 mkdir -p ${log_dir}
 
 if [[ $# -eq 0 ]] ; then
-    robot --outputdir ${log_dir} *.robot
+    export EBCL_TC_IMAGE="images"
+    run_test_classes "images"
+
+    export EBCL_TC_IMAGE="amd64/appdev/qemu/crinit"
+    export EBCL_TC_SHUTDOWN_COMMAND="crinit-ctl poweroff"
+    export EBCL_TC_SHUTDOWN_TARGET="Power down"
+
+    run_test_classes "crinit" "docker" "podman"
+
+    export EBCL_TC_IMAGE="arm64/appdev/qemu/crinit"
+
+    run_test_classes "crinit" "docker" "podman"
+
+    export EBCL_TC_IMAGE="amd64/appdev/qemu/systemd"
+    export EBCL_TC_SHUTDOWN_COMMAND="systemctl poweroff"
+    export EBCL_TC_SHUTDOWN_TARGET="System Power Off"
+
+    run_test_classes "docker" "podman"
+
+    export EBCL_TC_IMAGE="arm64/appdev/qemu/systemd"
+
+    run_test_classes "docker" "podman"
+
+    export EBCL_TC_IMAGE="performance"
+    run_test_classes "performance"
+
+    # Generate merged report
+    pushd . ; cd ${log_dir} ; rebot $(find . -name "output.xml") ; popd
 else
     echo "Running robot with arguments: \"$@\""
     robot  --outputdir ${log_dir} "$@"
@@ -49,4 +90,3 @@ rm -f output.xml
 
 ln -s ${log_dir}/report.html .
 ln -s ${log_dir}/log.html .
-ln -s ${log_dir}/output.xml .

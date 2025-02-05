@@ -1,7 +1,7 @@
 *** Settings ***
 Library    Comm.py
 Library    Power.py
-Library    Image.py    image_base=/workspace/images
+Library    Image.py
 Library    Util.py
 Resource    ./image.resource
 
@@ -12,22 +12,25 @@ File Should Exist
     Should Not Contain    ${rc}  No such file or directory  msg="File doesn't exist"
 
 Setup Suite
-    [Arguments]    ${path}
     [Timeout]    15m
-    ${image}=    Build Image    ${path}
+    ${image}=    Build Image
     Should Not Be Empty    ${image}
     ${process}=    Power On    ${image}
     Connect    ${process}
     Login To Vm
+    Sleep    30s    # Give the system some time to bring up network.
 
 Teardown Suite
     [Timeout]    2m
-    Shutdown Crinit Image
+    Shutdown Image
     Disconnect
     Power Off
 
-Teardown Suite Systemd
+Shutdown Image
     [Timeout]    2m
-    Shutdown Systemd Image
-    Disconnect
-    Power Off
+    ${command}=    Get Env    variable=EBCL_TC_SHUTDOWN_COMMAND    default=poweroff
+    ${target}=    Get Env    variable=EBCL_TC_SHUTDOWN_TARGET    default=Power down
+    log    Shutting down the image using ${command} and waiting for ${target}...
+    Send Message    \n${command}
+    Wait For Line    ${target}
+    Sleep    1s
