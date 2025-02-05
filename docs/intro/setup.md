@@ -86,7 +86,7 @@ his can be done for example using:
 sudo apt remove qemu-user-static
 wget http://launchpadlibrarian.net/690251791/qemu-user-static_8.0.4+dfsg-1ubuntu3_amd64.deb
 sudo apt install ./qemu-user-static_8.0.4+dfsg-1ubuntu3_amd64.deb
-echo "qemu-user-static hold" | sudo dpkg --set-selections
+sudo apt-mark hold qemu-user-static
 ```
 The current version of qemu can be checked using `qemu-aarch64-static --version`.
 
