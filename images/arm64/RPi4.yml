@@ -4,10 +4,7 @@ version: '3'
 vars:
   common_tasks: /workspace/images/tasks/
   arch: 'aarch64'
-  partition_layout: ../image.yaml
-  initrd_spec: ../initrd.yaml
-  boot_spec: ../boot.yaml
-  additional_overlay: ../*.txt
+  partition_layout: ../../../common/raspberry/pi4/image.yaml
 
 includes:
   gen:

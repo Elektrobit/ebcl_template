@@ -4,7 +4,7 @@ version: '3'
 vars:
   common_tasks: /workspace/images/tasks/
   arch: 'x86_64'
-  partition_layout: ../image.yaml
+  partition_layout: ../../../../common/qemu/image.yaml
   initrd_spec: ../initrd.yaml
   boot_spec: ../boot.yaml
   qemu_net_append: ",ipv6-net=fd00::eb/64,ipv6-host=fd00::eb:1,ipv6-dns=fd00::eb:3,hostfwd=tcp::2222-:22,hostfwd=tcp::3333-:3333"

@@ -1,0 +1,4 @@
+base: ../../crinit/root.yaml
+# Crinit configuration
+host_files:
+  - source: config/*

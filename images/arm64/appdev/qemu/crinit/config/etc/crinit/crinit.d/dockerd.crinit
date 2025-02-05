@@ -1,6 +1,0 @@
-NAME = dockerd
-
-COMMAND = /usr/bin/bash -c "PATH=/usr/sbin:/usr/bin:/sbin/bin dockerd 2>&1 | logger"
-
-DEPENDS = @provided:containerd
-PROVIDES = dockerd:spawn
