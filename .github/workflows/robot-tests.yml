@@ -38,7 +38,7 @@ jobs:
           echo "test_cases=$(./robot_tests/tools/extract_cases_names.py ./robot_tests/images.robot)" >> $GITHUB_OUTPUT
 
   Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare-sdk
     strategy:
       fail-fast: false
