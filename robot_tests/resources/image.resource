@@ -7,9 +7,9 @@ Library    robot/libraries/String.py
 
 *** Keywords ***
 Build Image
-    [Arguments]    ${path}    ${max_time}=15m
+    [Arguments]    ${path}=    ${max_time}=15m
     [Timeout]    ${max_time}
-    Clear    ${path}    task mrproper
+    Clear    ${path}
     ${image}=    Build    ${path}
     Should Not Be Empty    ${image}
     RETURN    ${image}

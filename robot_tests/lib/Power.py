@@ -3,6 +3,7 @@
 Abstraction layer for power management.
 """
 import logging
+import os
 
 from typing import Any, Optional
 
@@ -16,13 +17,14 @@ class Power:
 
     ROBOT_LIBRARY_SCOPE = 'SUITE'
 
-    def __init__(self, mode="QEMU") -> None:
+    def __init__(self) -> None:
         logging.basicConfig(level=logging.DEBUG)
 
-        logging.info('Setting up CommManager with interface %s...', mode)
-
-        self.mode = mode
-        match mode:
+        self.mode = os.getenv('EBCL_TF_POWER_MODE', 'QEMU')
+        
+        logging.info('Setting up CommManager with interface %s...', self.mode)
+        
+        match self.mode:
             case "QEMU":
                 self.interface = PowerQemu()
             case x:
