@@ -1,0 +1,3 @@
+base:
+  - ../../../common/qemu/arm64/base.yaml
+  - ../../../common/arm64/crinit/root.yaml
