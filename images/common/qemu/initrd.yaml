@@ -7,31 +7,13 @@ modules:
   - failover
   - net_failover
   - virtio_net
-  - veth
-  # bridge support - requried by dockerd and podman
-  - br_netfilter
-  # nttabes kernel modules - required by dockerd and podman
-  - nft_compat
-  - xt_addrtype
-  - nft_counter
-  - nf_conntrack_netlink
-  - nft_chain_nat
-  - xt_conntrack
-  - xt_comment
-  - xt_MASQUERADE
-  - overlay
-  - xfrm_user
-  # dm-verity modules
-  - dm-verity
   # graphics support
   - sysimgblt
   - sysfillrect
   - syscopyarea
   - fb_sys_fops
   - drm
-  - cec
   - drm_kms_helper
-  - virtio-gpu
 template: init.sh
 packages:
   # Tools for checking ext4 partitions.

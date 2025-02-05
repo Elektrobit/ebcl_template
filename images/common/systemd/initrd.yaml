@@ -1,0 +1,3 @@
+# List of kernel modules
+modules:
+  - autofs4

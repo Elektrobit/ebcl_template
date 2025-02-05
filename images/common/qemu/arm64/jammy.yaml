@@ -1,6 +1,8 @@
+# CPU architecture
+arch: 'arm64'
 # Kernel package to use
 kernel: linux-image-generic
-# Apt repositories to use
+# CPU architecture
 apt_repos:
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
     distro: jammy
@@ -12,5 +14,8 @@ apt_repos:
     components:
       - main
       - universe
-# CPU architecture
-arch: arm64
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe

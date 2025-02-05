@@ -65,11 +65,27 @@ if [[ $# -eq 0 ]] ; then
 
     run_test_classes "docker" "podman"
 
+    export EBCL_TC_IMAGE="images/arm64/qemu/ebcl"
+    export EBCL_TC_SHUTDOWN_COMMAND="crinit-ctl poweroff"
+    export EBCL_TC_SHUTDOWN_TARGET="Power down"
+
+    run_test_classes "crinit" "docker"
+
+    export EBCL_TC_IMAGE="images/arm64/qemu/jammy"
+    export EBCL_TC_SHUTDOWN_COMMAND="systemctl poweroff"
+    export EBCL_TC_SHUTDOWN_TARGET="System Power Off"
+
+    run_test_classes "docker"
+
+    export EBCL_TC_IMAGE="images/arm64/qemu/noble"
+
+    run_test_classes "docker"
+
     export EBCL_TC_IMAGE="performance"
     run_test_classes "performance"
 
     # Generate merged report
-    pushd . ; cd ${log_dir} ; rebot $(find . -name "output.xml") ; popd
+    cd ${log_dir} ; rebot $(find . -name "output.xml") ; cd ..
 else
     echo "Running robot with arguments: \"$@\""
     robot  --outputdir ${log_dir} "$@"
@@ -88,5 +104,5 @@ rm -f report.html
 rm -f log.html
 rm -f output.xml
 
-ln -s ${log_dir}/report.html .
-ln -s ${log_dir}/log.html .
+ln -sf ${log_dir}/report.html .
+ln -sf ${log_dir}/log.html .
