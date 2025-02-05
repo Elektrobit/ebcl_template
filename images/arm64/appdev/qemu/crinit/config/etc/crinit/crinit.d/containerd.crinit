@@ -1,6 +1,0 @@
-NAME = containerd
-
-COMMAND = /usr/bin/bash -c "PATH=/usr/sbin:/usr/bin:/sbin/bin containerd 2>&1 | logger"
-
-DEPENDS = @provided:ntptime @provided:network
-PROVIDES = containerd:spawn

@@ -1,9 +1,0 @@
-NAME = sshd
-
-COMMAND = /bin/mkdir -p /run/sshd
-          /usr/sbin/sshd -D
-
-DEPENDS = @provided:network
-
-RESPAWN = YES
-RESPAWN_RETRIES = 3

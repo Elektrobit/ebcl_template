@@ -1,45 +1,4 @@
-# Derive values from base.yaml - relative path
-base: base.yaml
-# Root device to mount
-root_device: /dev/vda1
-# List of kernel modules
-modules:
-  # dm-verity dependencies
-  - xor-neon
-  - dm-integrity
-  # virtio modules
-  - virtio_blk
-  - failover
-  - net_failover
-  - virtio_net
-  - veth
-  # bridge support - requried by dockerd and podman
-  - br_netfilter
-  # nttabes kernel modules - required by dockerd and podman
-  - nft_compat
-  - xt_addrtype
-  - nft_counter
-  - nf_conntrack_netlink
-  - nft_chain_nat
-  - xt_conntrack
-  - xt_comment
-  - xt_MASQUERADE
-  - overlay
-  - xfrm_user
-  # dm-verity modules
-  - dm-verity
-  # graphics support
-  - sysimgblt
-  - sysfillrect
-  - syscopyarea
-  - fb_sys_fops
-  - drm
-  - cec
-  - drm_kms_helper
-  - virtio-gpu
-template: init.sh
-packages:
-  # Tools for checking ext4 partitions.
-  - e2fsprogs
-  # !status proposed
-  - cryptsetup
+base: 
+  # First import base to set the arch, then import the common initrd spec
+  - ../../../common/qemu/arm64/base_jammy.yaml
+  - ../../../common/qemu/initrd.yaml
