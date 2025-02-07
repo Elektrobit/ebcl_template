@@ -58,7 +58,7 @@ echo "Checking required tools on the development host"
 echo "---------------------------------------------------------------------------"
 
 check_package() {
-    if dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"; then
+    if dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "ok installed"; then
         echo "Required package $1 is installed."
     else
         echo "Error: $1 is not installed."
