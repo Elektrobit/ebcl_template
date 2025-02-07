@@ -1,0 +1,6 @@
+# reset the kernel value
+kernel: null
+packages:
+  - kmod
+  - linux-modules-5.15.0-1034-s32-eb-optimized
+  - linux-modules-extra-5.15.0-1034-s32-eb-optimized

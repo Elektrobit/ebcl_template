@@ -1,0 +1,4 @@
+packages:
+  - nxp-llce-firmware
+  - nxp-pfeng-firmware
+  - nxp-sja1110-firmware

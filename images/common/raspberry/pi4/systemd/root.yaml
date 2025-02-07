@@ -1,0 +1,3 @@
+base:
+  - ../root.yaml
+  - ../../../systemd/root.yaml

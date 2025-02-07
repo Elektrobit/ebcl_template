@@ -1,4 +1,4 @@
 base: 
   - ../../../common/qemu/arm64/noble.yaml
   - ../../../common/qemu/initrd.yaml
-  # - ../../../common/qemu/initrd_noble.yaml
+  - ../../../common/qemu/initrd_noble.yaml

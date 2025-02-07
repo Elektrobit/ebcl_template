@@ -33,6 +33,11 @@ cmdline=$(cat /proc/cmdline)
 echo "Kernel commandline: ${cmdline}"
 
 # Load kernel modules
+which depmod
+if [ $? -eq 0 ]; then
+    depmod -a
+fi
+
 {% for mod in mods %}
 modprobe {{ mod }}
 {% endfor %}

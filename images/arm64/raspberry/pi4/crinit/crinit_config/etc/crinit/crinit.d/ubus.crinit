@@ -1,6 +1,0 @@
-NAME = ubus
-
-COMMAND = /sbin/ubusd
-
-DEPENDS = @provided:tmpdir
-RESPAWN = YES

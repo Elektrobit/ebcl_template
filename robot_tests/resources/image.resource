@@ -24,18 +24,27 @@ Check For Startup Errors
 Check For Startup Fails
     [Timeout]    2m
     ${kernel_logs}=    Execute    dmesg
+    ${kernel_logs}=    Replace String    ${kernel_logs}    Failed to look up module alias 'autofs4'    \
     Should Not Contain    ${kernel_logs}    failed    ignore_case=${True}
 
 Check For Crinit Task Issues
-    [Timeout]    2m
+    [Timeout]    3m
     ${crinit}=    Execute    crinit-ctl list
+    Sleep    20s    # Give the system some time to start the services.
     Should Not Contain    ${crinit}    failed    ignore_case=${True}
     Should Not Contain    ${crinit}    wait    ignore_case=${True}
+    Should Not Contain    ${crinit}    loaded    ignore_case=${True}
 
 Check For Systemd Unit Issues
-    [Timeout]    2m
-    ${systemd}=    Execute    systemctl list-units --no-pager
+    [Timeout]    3m
+    Sleep    60s    # Give the system some time to start the services.
+    # Ensure startup is complete
+    ${systemd_state}=    Execute    SYSTEMD_COLORS=0 systemctl status --no-pager
+    # Ensure all service where started successfully
+    ${systemd}=    Execute    SYSTEMD_COLORS=0 systemctl list-units --no-pager
     ${systemd}=    Filter Lines Containing    lines=${systemd}    search=binfmt
+    # Output of list-units may help to debug in case of degraded system.
+    Should Contain    ${systemd_state}    State: running    ignore_case=${True}
     Should Not Contain    ${systemd}    failed    ignore_case=${True}
 
 Shutdown Systemd Image

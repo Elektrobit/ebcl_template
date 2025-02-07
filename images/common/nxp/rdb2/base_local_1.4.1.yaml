@@ -1,0 +1,18 @@
+# Add repo with NXP RDB2 packages
+apt_repos:
+  - apt_repo: http://10.0.76.41:8000/
+    distro: jammy
+    components:
+      - main
+    key: file:///build/keys/elektrobit.pub
+  - apt_repo: http://10.0.76.41:8000/
+    distro: ebcl
+    components:
+      - dev
+      - prod
+    key: file:///build/keys/elektrobit.pub
+  - apt_repo: http://10.0.76.41:8000/
+    distro: ebcl_nxp
+    components:
+      - nxp
+    key: file:///build/keys/elektrobit.pub

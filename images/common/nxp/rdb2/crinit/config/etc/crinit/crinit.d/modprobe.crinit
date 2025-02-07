@@ -1,0 +1,6 @@
+# loads the needed kernel modules
+NAME = modprobe
+
+COMMAND = /usr/sbin/load_modules.sh
+
+RESPAWN = NO

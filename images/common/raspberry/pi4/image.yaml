@@ -25,7 +25,7 @@ image:
     - name: root
       type: partition
       fstype: ext4
-      size: 4 GB
+      size: 5 GB
       content:
         type: ext4
         content: archive.root

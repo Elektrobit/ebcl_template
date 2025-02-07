@@ -1,4 +1,0 @@
-base:
-  - ../../../common/raspberry/pi4/base.yaml
-  - ../../../common/raspberry/pi4/crinit/root.yaml
-  - ../../../../common/appdev.yaml

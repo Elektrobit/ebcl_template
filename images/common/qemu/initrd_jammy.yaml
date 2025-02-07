@@ -20,3 +20,5 @@ modules:
   # graphics support
   - cec
   - virtio-gpu
+  # systemd
+  - autofs4
