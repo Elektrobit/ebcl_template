@@ -1,3 +1,2 @@
 base:
   - ../../../common/nxp/rdb2/base.yaml
-  - ../../../common/nxp/rdb2/boot.yaml

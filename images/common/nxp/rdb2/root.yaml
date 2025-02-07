@@ -1,0 +1,9 @@
+# reset the kernel value
+kernel: null
+packages:
+  - kmod
+# Files to copy form the host environment
+host_files:
+  - source: $$RESULTS$$/modules
+    destination: lib
+  - source: config/*

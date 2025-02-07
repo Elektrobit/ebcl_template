@@ -1,0 +1,4 @@
+base:
+  - ../../../common/nxp/rdb2/base.yaml
+  - ../../../common/crinit/root.yaml
+  - ../../../common/nxp/rdb2/root.yaml

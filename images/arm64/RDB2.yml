@@ -4,14 +4,10 @@ version: '3'
 vars:
   common_tasks: /workspace/images/tasks/
   arch: 'aarch64'
-  partition_layout: ../image.yaml
-  boot_root_spec: ../boot_root.yaml
-  base_spec: ../base.yaml
-  build_script: ../build_fitimage.sh
-  fitimage_config: ../bootargs.its
-  bootloader_config: ../bootargs-overlay.dts
-  boot_spec: ../boot.yaml
-  initrd_spec: ../initrd.yaml
+  partition_layout: ../../../common/nxp/rdb2/image.yaml
+  build_script: ../../../common/nxp/rdb2/build_fitimage.sh
+  fitimage_config: ../../../common/nxp/rdb2/bootargs.its
+  bootloader_config: ../../../common/nxp/rdb2/bootargs-overlay.dts
 
 includes:
   gen:

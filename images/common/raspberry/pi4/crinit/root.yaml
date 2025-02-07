@@ -1,5 +1,4 @@
 base:
-  - ../base.yaml
   - ../root.yaml
   - ../../../crinit/root.yaml
 host_files:
