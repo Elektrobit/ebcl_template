@@ -52,6 +52,15 @@ else
     echo "Not copying SSH keys from host."
 fi
 
+# Check if we are in a CODESPACES environment
+if [ "${CODESPACES}" = "true" ]; then
+    echo "CODESPACES environment detected."
+
+    echo "Installing package dependencies..."
+    sudo apt-get update -y
+    sudo apt-get install -y binfmt-support qemu-user-static
+fi
+
 echo ""
 echo "---------------------------------------------------------------------------"
 echo "Checking required tools on the development host"
