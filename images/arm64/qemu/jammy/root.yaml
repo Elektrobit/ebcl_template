@@ -1,3 +1,6 @@
 base:
   - ../../../common/qemu/arm64/jammy.yaml
   - ../../../common/systemd/root.yaml
+# Image specific systemd configuration
+host_files:
+  - source: config/*

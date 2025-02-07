@@ -1,0 +1,26 @@
+# List of kernel modules
+modules:
+  # virtio modules
+  - veth
+  # bridge support - requried by dockerd and podman
+  - br_netfilter
+  # nttabes kernel modules - required by dockerd and podman
+  - nft_compat
+  - xt_addrtype
+  - nf_conntrack_netlink
+  - nft_chain_nat
+  - xt_conntrack
+  - xt_comment
+  - xt_MASQUERADE
+  - overlay
+  - xfrm_user
+  # dm-verity modules
+  - dm-verity
+  # graphics support
+  - cec
+  - virtio-gpu
+  # systemd
+  - autofs4
+busybox: busybox
+packages:
+  - kmod

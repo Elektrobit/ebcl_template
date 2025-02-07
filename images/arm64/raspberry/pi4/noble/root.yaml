@@ -1,0 +1,4 @@
+base:
+  - ../../../../common/raspberry/pi4/base_noble.yaml
+  - ../../../../common/raspberry/pi4/systemd/root.yaml
+  

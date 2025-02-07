@@ -6,7 +6,7 @@ function run_test_classes {
     do
         echo "Running test class ${TEST_CLASS} for image ${EBCL_TC_IMAGE}..."
         mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}
-        robot --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS} ${TEST_CLASS}.robot
+        robot ${EBCL_TC_ROBOT_PARAMS} --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS} ${TEST_CLASS}.robot
     done
 }
 
@@ -42,53 +42,27 @@ log_dir="test_logs_${current_date}_${commit_id}"
 mkdir -p ${log_dir}
 
 if [[ $# -eq 0 ]] ; then
-    export EBCL_TC_IMAGE="images"
-    run_test_classes "images"
-
-    export EBCL_TC_IMAGE="amd64/appdev/qemu/crinit"
-    export EBCL_TC_SHUTDOWN_COMMAND="crinit-ctl poweroff"
-    export EBCL_TC_SHUTDOWN_TARGET="Power down"
-
-    run_test_classes "crinit" "docker" "podman"
-
-    export EBCL_TC_IMAGE="arm64/appdev/qemu/crinit"
-
-    run_test_classes "crinit" "docker" "podman"
-
-    export EBCL_TC_IMAGE="amd64/appdev/qemu/systemd"
-    export EBCL_TC_SHUTDOWN_COMMAND="systemctl poweroff"
-    export EBCL_TC_SHUTDOWN_TARGET="System Power Off"
-
-    run_test_classes "docker" "podman"
-
-    export EBCL_TC_IMAGE="arm64/appdev/qemu/systemd"
-
-    run_test_classes "docker" "podman"
-
-    export EBCL_TC_IMAGE="images/arm64/qemu/ebcl"
-    export EBCL_TC_SHUTDOWN_COMMAND="crinit-ctl poweroff"
-    export EBCL_TC_SHUTDOWN_TARGET="Power down"
-
-    run_test_classes "crinit" "docker"
-
-    export EBCL_TC_IMAGE="images/arm64/qemu/jammy"
-    export EBCL_TC_SHUTDOWN_COMMAND="systemctl poweroff"
-    export EBCL_TC_SHUTDOWN_TARGET="System Power Off"
-
-    run_test_classes "docker"
-
-    export EBCL_TC_IMAGE="images/arm64/qemu/noble"
-
-    run_test_classes "docker"
-
-    export EBCL_TC_IMAGE="performance"
-    run_test_classes "performance"
+    for TEST_ENV in $(find . -name "*.test.env");
+    do
+        source ${TEST_ENV}
+        run_test_classes ${EBCL_TC_ROBOT_FILES}
+    done
 
     # Generate merged report
     cd ${log_dir} ; rebot $(find . -name "output.xml") ; cd ..
 else
-    echo "Running robot with arguments: \"$@\""
-    robot  --outputdir ${log_dir} "$@"
+    if [[ $1 == *.test.env ]]
+    then
+        echo "Running test env: $1"
+        source $1
+        run_test_classes ${EBCL_TC_ROBOT_FILES}
+    else
+        echo "Running robot with arguments: \"$@\""
+        robot  --outputdir ${log_dir} "$@"
+    fi
+
+    # Generate merged report
+    cd ${log_dir} ; rebot $(find . -name "output.xml") ; cd ..
 fi
 
 for log in $(find ../images -type f -name "*.log" -not -path "*/extra/*" -not -path "*/user/*"); do

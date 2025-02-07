@@ -1,0 +1,7 @@
+# mount special file systems
+NAME = mount
+
+COMMAND = /bin/mount -t cgroup2 none /sys/fs/cgroup
+
+PROVIDES = cgroup2fs:wait
+RESPAWN = NO

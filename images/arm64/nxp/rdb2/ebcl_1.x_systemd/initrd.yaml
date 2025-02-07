@@ -1,0 +1,3 @@
+base:
+  - base.yaml
+  - ../../../../common/nxp/rdb2/initrd.yaml

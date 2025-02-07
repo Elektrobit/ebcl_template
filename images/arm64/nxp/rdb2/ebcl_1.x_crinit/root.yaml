@@ -1,0 +1,8 @@
+base:
+  - base.yaml
+  # Base for local repo containing EBcL 1.4.1
+  # - ../../../../common/nxp/rdb2/base_local_1.4.1.yaml
+  - ../../../../common/crinit/root.yaml
+  - ../../../../common/nxp/rdb2/crinit/root.yaml
+  # Install firmware for PFE and LLCE
+  # - ../../../../common/nxp/rdb2/root_firmware.yaml

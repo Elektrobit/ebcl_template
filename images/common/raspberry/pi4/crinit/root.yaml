@@ -1,6 +1,7 @@
 base:
-  - ../base.yaml
   - ../root.yaml
   - ../../../crinit/root.yaml
+packages:
+  - kmod
 host_files:
   - source: config/*

@@ -1,9 +1,0 @@
-base: ../base.yaml
-packages:
-  - systemd
-  - udev        # udev will create the device node for ttyS0
-  - util-linux
-# Scripts to configure the root tarball
-scripts:
-  - name: config_root.sh # Name of the script, relative path to this file
-    env: sudo
