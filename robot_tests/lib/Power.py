@@ -21,12 +21,18 @@ class Power:
         logging.basicConfig(level=logging.DEBUG)
 
         self.mode = os.getenv('EBCL_TF_POWER_MODE', 'QEMU')
-        
+
         logging.info('Setting up CommManager with interface %s...', self.mode)
-        
+
         match self.mode:
             case "QEMU":
                 self.interface = PowerQemu()
+            case "QEMU_EXPLICT_OPTION":
+                qemu_cmd = os.getenv('EBCL_QEMU_CMDLINE', '')
+                if qemu_cmd == '':
+                    raise ValueError(
+                        "QEMU_EXPLICT_OPTION specified but no qemu command given")
+                self.interface = PowerQemu(qemu_cmd=qemu_cmd)
             case x:
                 raise ValueError(
                     f"Unknown communication interface '{x}' specified")
