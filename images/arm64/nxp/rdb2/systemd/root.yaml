@@ -1,9 +1,27 @@
 base: ../base.yaml
 packages:
   - systemd
+  - systemd-coredump
+  - systemd-timesyncd
   - udev        # udev will create the device node for ttyS0
   - util-linux
+  - locales
+  - kmod
+  - iproute2
+  - iptables
+  - iputils-ping
+  - iperf3
+  - vim
+  - nano
+  - strace
+  - apt
+  - openssh-server
+  - openssh-client
+  - linux-modules-5.15.0-1034-s32-eb-optimized
+  - linux-modules-extra-5.15.0-1034-s32-eb-optimized
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: sudo
+host_files:
+  - source: config/*

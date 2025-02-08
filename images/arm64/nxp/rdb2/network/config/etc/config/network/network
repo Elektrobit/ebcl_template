@@ -21,4 +21,4 @@ config interface ipv6
 config interface dhcp4
     option device       eth0
     option proto        udhcp
-    
+    option dns          8.8.8.8
