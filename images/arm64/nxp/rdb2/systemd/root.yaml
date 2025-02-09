@@ -1,4 +1,4 @@
-base: ../base.yaml
+base: base.yaml
 packages:
   - systemd
   - systemd-coredump
@@ -19,6 +19,13 @@ packages:
   - openssh-client
   - linux-modules-5.15.0-1034-s32-eb-optimized
   - linux-modules-extra-5.15.0-1034-s32-eb-optimized
+  - nxp-llce-firmware
+  - nxp-llce-firmware-initramfs
+  - nxp-pfeng-firmware
+  - nxp-pfeng-dkms
+  - nxp-pfeng-dkms
+  - nxp-pfeng-firmware
+  - nxp-sja1110-firmware-initramfs
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file

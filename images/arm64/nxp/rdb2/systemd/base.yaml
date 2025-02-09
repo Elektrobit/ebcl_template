@@ -1,0 +1,11 @@
+base: ../base.yaml
+# CPU architecture
+arch: arm64
+# Add local repo with NXP firmware
+apt_repos:
+  - apt_repo: http://192.168.42.168:8000/
+    distro: ebcl_nxp
+    components:
+      - nxp
+    key: file:///build/keys/elektrobit.pub
+    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
