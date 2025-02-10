@@ -5,7 +5,7 @@ import logging
 import os
 import requests
 
-from typing import Optional
+from typing import Optional, Tuple
 
 from Fakeroot import Fakeroot
 from interfaces.image_interface import ImageInterface
@@ -34,21 +34,33 @@ class DirectDownload(ImageInterface):
 
         if not os.path.exists(path):
             os.makedirs(path)
+        elif Util().get_env('FORCE_CLEAN_REBUILD', '0') == '1':
+            for fname in os.listdir(path):
+                if Util().get_env('EBCL_ROOT_IMAGE_FILE_NAME', '') in fname:
+                    # TODO: also env here?
+                    image_path = os.path.join(path, fname)
+                    logging.warning('FORCE_CLEAN_REBUILD set to 1, image already exists, skipping download.')
+                    return image_path
 
         return self._download_and_extract_image(session, image_url, path)
 
-    def clear(self, path: str, clear_cmd: Optional[str] = None) -> None:
+    def clear(self, path: str, clear_cmd: Optional[str] = None) -> Tuple[Optional[str], Optional[str]]:
         """
         Delete the downloaded files.
         """
 
         if os.path.exists(path):
-            skip = os.getenv('SDK_ROBOT_SKIP_CLEAN', '0')
-            if skip == '1':
-                logging.warning('SDK_ROBOT_SKIP_CLEAN is 1, skipping image rebuild.')
-                return
+            for fname in os.listdir(path):
+                if Util().get_env('EBCL_ROOT_IMAGE_FILE_NAME', '') in fname:
+                    skip = os.getenv('FORCE_CLEAN_REBUILD', '0')
+                    if skip == '1':
+                        logging.warning('FORCE_CLEAN_REBUILD is 1, skipping image deleting.')
+                        return
 
-            os.remove(path)
+            if clear_cmd is None:
+                clear_cmd = 'rm -rf ${path}'
+
+            self.fake.run(clear_cmd, cwd=path, stderr_as_info=True)
 
     def _get_credentials(self) -> tuple:
         image_url = Util().get_env('EBCL_IMAGE_BUNDLE_URL', '')
@@ -77,29 +89,38 @@ class DirectDownload(ImageInterface):
         if response.ok:
             bundle_filename = os.path.basename(image_url)
             bundle_path = os.path.join(path, bundle_filename)
+            image = None
             try:
                 with open(bundle_path, 'wb') as file:
                     file.write(response.content)
 
-                    # Decompress the tarball
+                    # Decompress the tarball and check for 'image' file
                     if tarfile.is_tarfile(bundle_path):
                         with tarfile.open(bundle_path, 'r:*') as tar:
-                            tar.extractall(path=path)
-                        os.remove(bundle_path)
+                            members = tar.getmembers()
+                            image_member = None
+                            for member in members:
+                                if member.isfile() and 'image.' in os.path.basename(member.name):
+                                    image_member = member
+                                    break
+
+                            if image_member:
+                                for member in members:
+                                    if member.isfile():
+                                        member.name = os.path.basename(member.name)
+                                        tar.extract(member, path=path)
+                                        if member == image_member:
+                                            image = os.path.join(path, member.path)
+                                return image
+                            else:
+                                logging.error("No 'image' file found in the tarball.")
+                                return None
                     else:
                         logging.error(f"The downloaded file {bundle_filename} is not a valid tarball.")
                         return None
             except (OSError, tarfile.TarError) as e:
                 logging.error(f"An error occurred while handling the file: {e}")
                 return None
-
-            for root, dirs, files in os.walk(path):
-                for file in files:
-                    if 'image' in file:
-                        return os.path.join(root, file)
-
-            logging.error("No file containing 'image' found in the specified path.")
-            return None
         else:
-            logging.error(f"Failed to download image from {image_url} with error code: {response.status_code}")
+            logging.error(f"Failed to download the image from {image_url}.")
             return None
