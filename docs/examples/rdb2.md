@@ -1,4 +1,4 @@
-# EB corbos Linux example images for the NXP RDB2 board
+# 5.6. NXP RDB2 images
 
 The folder_images/arm64/nxp/rdb2_ contains the EB corbos Linux (EBcL) example images for the NXP RDB2 development board, which is equipped with an NXP S32G2 SoC.
 The S32G2 has very specific storage layout requirements, and if you are interested into more details about required base configuration, take a look at [Building an image from scratch](../images/from_scatch.md).

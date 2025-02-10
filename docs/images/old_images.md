@@ -1,4 +1,4 @@
-# Building old Berrymill images
+# 7. Building old images
 
 The previous versions of the EBcL SDK used _kiwi-ng_ for building images.
 Using _kiwi-ng_ was a quite pragmatic choice, since it’s an established tool to build images from binary IT distribution packages. Nevertheless, it turned out that _kiwi-ng_ is not flexible enough to build typical embedded images.

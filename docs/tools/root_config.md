@@ -1,4 +1,4 @@
-# Root configurator
+# 10.3. Root configurator
 
 A root tarball can be configured with user scripts by the root generator.
 

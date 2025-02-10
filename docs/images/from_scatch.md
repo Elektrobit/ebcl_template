@@ -1,4 +1,4 @@
-# Building an image from scratch
+# 4.4. Building an image from scratch
 
 Let’s develop a new EB corbos Linux image step by step, for the NXP RDB2 board using the NXP S32G2 SoC.
 According to the NXP S32G2 user manual, the following bootloader layout is required:

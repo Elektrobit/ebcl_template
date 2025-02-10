@@ -1,4 +1,4 @@
-# Boot generator
+# 10.4. Boot generator
 
 An initrd can be generated with the initrd generator.
 

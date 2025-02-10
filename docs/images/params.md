@@ -1,4 +1,4 @@
-# Configuration parameters
+# 4.3. Configuration parameters
 
 The following list gives an overview of the supported configuration parameters for the EB corbos Linux build helper tools.
 In the round brackets it is noted for which files which option is applicable.
