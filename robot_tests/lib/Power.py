@@ -27,14 +27,14 @@ class Power:
 
         match self.mode:
             case "QEMU":
-                self.interface = PowerQemu()
-            case "QEMU_EXPLICT_OPTION":
-                qemu_cmd_expr = os.getenv('EBCL_QEMU_CMDLINE', '')
-                qemu_cmd = string.Template(qemu_cmd_expr).substitute(os.environ)
-                qemu_cmd = " ".join(qemu_cmd.split())
-                if qemu_cmd.strip() == '':
-                    raise ValueError(
-                        "QEMU_EXPLICT_OPTION specified but no qemu command given")
+                qemu_cmd = ''
+                if os.getenv('EBCL_QEMU_CMDLINE', ''):
+                    qemu_cmd_expr = os.getenv('EBCL_QEMU_CMDLINE', '')
+                    qemu_cmd = string.Template(qemu_cmd_expr).substitute(os.environ)
+                    qemu_cmd = " ".join(qemu_cmd.split())
+                    if qemu_cmd.strip() == '':
+                        raise ValueError(
+                            "Environment variable EBCL_QEMU_CMDLINE is not set in correct format")
                 self.interface = PowerQemu(qemu_cmd=qemu_cmd)
             case x:
                 raise ValueError(

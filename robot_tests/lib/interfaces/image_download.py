@@ -9,7 +9,6 @@ from typing import Optional, Tuple
 
 from Fakeroot import Fakeroot
 from interfaces.image_interface import ImageInterface
-from Util import Util
 import tarfile
 
 
@@ -25,22 +24,22 @@ class DirectDownload(ImageInterface):
         """
         Download the image from the specified URL and save it to the output directory.
         """
+        if build_cmd != '':
+            logging.warning(f"Ignoring build command for DirectDownload interface {build_cmd}.")
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+        elif os.getenv('FORCE_CLEAN_REBUILD', '0') == '0':
+            image = os.path.join(path, 'image.raw')
+            if os.path.isfile(image):
+                return image
+
         image_url, arti_user, arti_token = self._get_credentials()
         if not image_url or not arti_user or not arti_token:
             return None
 
         session = requests.Session()
         session.auth = (arti_user, arti_token)
-
-        if not os.path.exists(path):
-            os.makedirs(path)
-        elif Util().get_env('FORCE_CLEAN_REBUILD', '0') == '1':
-            for fname in os.listdir(path):
-                if Util().get_env('EBCL_ROOT_IMAGE_FILE_NAME', '') in fname:
-                    # TODO: also env here?
-                    image_path = os.path.join(path, fname)
-                    logging.warning('FORCE_CLEAN_REBUILD set to 1, image already exists, skipping download.')
-                    return image_path
 
         return self._download_and_extract_image(session, image_url, path)
 
@@ -49,24 +48,23 @@ class DirectDownload(ImageInterface):
         Delete the downloaded files.
         """
 
-        if os.path.exists(path):
-            for fname in os.listdir(path):
-                if Util().get_env('EBCL_ROOT_IMAGE_FILE_NAME', '') in fname:
-                    skip = os.getenv('FORCE_CLEAN_REBUILD', '0')
-                    if skip == '1':
-                        logging.warning('FORCE_CLEAN_REBUILD is 1, skipping image deleting.')
-                        return
+        if os.path.isfile(os.path.join(path, 'image.raw')):
+            refetch = os.getenv('FORCE_CLEAN_REBUILD', '0')
+            if refetch == '0':
+                logging.warning('FORCE_CLEAN_REBUILD is 0, skipping image downloading.')
+                return
 
-            if clear_cmd is None:
-                clear_cmd = 'rm -rf ${path}'
 
-            self.fake.run(clear_cmd, cwd=path, stderr_as_info=True)
+        if clear_cmd is None:
+            clear_cmd = 'rm -rf *'
+
+        self.fake.run(clear_cmd, cwd=path, stderr_as_info=True)
 
     def _get_credentials(self) -> tuple:
-        image_url = Util().get_env('EBCL_IMAGE_BUNDLE_URL', '')
-        arti_user = Util().get_env('ARTIFACTORY_USER', '')
-        arti_token = Util().get_env('ARTIFACTORY_IDENTITY_TOKEN', '')
-        arti_token_file = Util().get_env('ARTIFACTORY_IDENTITY_TOKEN_FILE', '')
+        image_url = os.getenv('EBCL_TC_IMAGE_BUNDLE_URL', '')
+        arti_user = os.getenv('ARTIFACTORY_USER', '')
+        arti_token = os.getenv('ARTIFACTORY_IDENTITY_TOKEN', '')
+        arti_token_file = os.getenv('ARTIFACTORY_IDENTITY_TOKEN_FILE', '')
 
         if not arti_user or not arti_token:
             try:
@@ -111,6 +109,8 @@ class DirectDownload(ImageInterface):
                                         tar.extract(member, path=path)
                                         if member == image_member:
                                             image = os.path.join(path, member.path)
+                                # Remove the downloaded tarball after extraction
+                                os.remove(bundle_path)
                                 return image
                             else:
                                 logging.error("No 'image' file found in the tarball.")
