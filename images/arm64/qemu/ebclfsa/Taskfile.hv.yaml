@@ -6,6 +6,8 @@ vars:
   hv_config_dir: "{{.result_folder}}/hv_config"
   hv_modules: "{{.hv_config_dir}}/modules.list"
   hv_device_trees: hv/*.dts*
+  hv_specialization_package: eb-hv-qemu-noml-config-extension
+  hv_repo_config: base.yaml
 
   hv_spec: hv.yaml
   bootstrap: "{{.result_folder}}/bootstrap.uimage"
@@ -14,14 +16,15 @@ tasks:
   config:
     desc: Create the hypervisor configuration
     deps:
-      - :tools:extract
+      - :tools:build_dir
     sources:
-      - "{{.hv_template_extension_dir}}/*"
+      - "{{.hv_repo_config}}"
       - "{{.hv_config}}"
+      - "{{.hv_repo_config}}"
     generates:
       - "{{.hv_config_dir}}/*"
     cmds:
-      - hypervisor_config -s {{.hv_template_extension_dir}} {{.hv_config}} {{.hv_config_dir}}
+      - hypervisor_config --specialization-package {{.hv_specialization_package}} --repo-config {{.hv_repo_config}} {{.hv_config}} {{.hv_config_dir}}
 
   build:
     desc: Build the configured hypervisor binary
@@ -30,6 +33,7 @@ tasks:
       - :hi:kernel
       - :li:kernel
       - :li:initrd
+      - :tools:root
     sources:
       - "{{.li_kernel}}"
       - "{{.li_initrd_img}}"
