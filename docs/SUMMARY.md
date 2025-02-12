@@ -3,6 +3,7 @@
 [EB corbos Linux SDK](intro/README.md)
 
 - [Overview](intro/overview.md)
+    - [Safety concepts](intro/safety_concepts.md)
 - [Setup](intro/setup.md)
 - [SDK on arm64](intro/arm64_host.md)
 - [Developing images](images/index.md)
