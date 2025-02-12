@@ -5,7 +5,6 @@ run: when_changed
 vars:
   result_folder: ./build
   demo_app: /workspace/apps/ebclfsa-demo
-  hv_template_extension_dir: "{{.result_folder}}/noml"
   image_spec: image.yaml
   image: "{{.result_folder}}/image.raw"
   sysroot_install: /workspace/sysroot_aarch64/
