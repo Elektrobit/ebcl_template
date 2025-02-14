@@ -2,9 +2,12 @@ name: Robot Test images
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main*
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main*
+
 
 jobs:
   prepare-sdk:
