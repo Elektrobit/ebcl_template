@@ -1,4 +1,4 @@
-# EB corbos Linux example images for the Raspberry Pi 4
+# 5.5. Raspberry Pi 4 images
 
 EB corbos Linux comes with development support for the Raspberry Pi 4. This means, you can use a Raspberry Pi 4 board for early development and demos, and you get support, but it's not qualified for mass production.
 The Raspberry Pi 4 example images make use of the kernel and firmware packages provided by [Ubuntu Ports](http://ports.ubuntu.com/ubuntu-ports/).

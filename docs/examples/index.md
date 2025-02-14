@@ -1,3 +1,5 @@
+# 5. The example images
+
 As described in the previous chapters, a EB corbos Linux image typically consists of a _Makefile_ and specification yaml files.
 The _Makefile_ is SoC specific, should be only changed during SoC and board bring-up, and can be shared with all images for the SoC.
 If different image variants are used, also parts of the image configuration can be shared.

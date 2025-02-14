@@ -1,4 +1,4 @@
-# Kernel development
+# 6. Kernel development
 
 If you do the bring-up for a new board, you may need to adapt the kernel configuration.
 This section continues where "Building an image from scratch" ended.

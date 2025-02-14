@@ -1,4 +1,4 @@
-# Hypervisor Configurator
+# 10.6. Hypervisor Configurator
 
 Creates a configuration for the hypervisor
 

@@ -1,4 +1,4 @@
-# Root generator
+# 10.2. Root generator
 
 A root tarball can be generated with the root generator.
 

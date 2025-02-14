@@ -1,4 +1,4 @@
-# Packaging applications for EB corbos Linux
+# 9. Packaging apps
 
 EB corbos Linux makes use of Debian packages, which are described in full detail in the [Debian Policy Manual](https://www.debian.org/doc/debian-policy/ch-archive.html). On a high level, there are two types of packages, source packages and binary packages.
 

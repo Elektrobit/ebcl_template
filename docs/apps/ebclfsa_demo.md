@@ -1,6 +1,6 @@
-# EB corbos Linux for Safety Applications Demo Application
+# 8.1. EBcLfSA demo application
 
-The demo application (located in *ebclfsa-demo*) shows the basics of EBcLfSA and shared memory communication.
+The EB corbos Linux for Safety Applications Demo Application (located in *ebclfsa-demo*) shows the basics of EBcLfSA and shared memory communication.
 It consists of three separate binaries.
 Two of them are high integrity applications (*hi_main* and *hi_forward*) and one is a low integrity application (*li_demo*).
 This is used to demonstrate three core concepts:

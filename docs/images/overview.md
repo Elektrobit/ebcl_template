@@ -1,4 +1,4 @@
-# Image concept
+# 4.1. Image concept
 
 ![Embedded Systems](../assets/EmbeddedHPC.drawio.png)
 

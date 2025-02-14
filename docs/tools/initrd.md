@@ -1,4 +1,4 @@
-# Initrd generator
+# 10.1. Initrd generator
 
 An initrd can be generated with the initrd generator.
 

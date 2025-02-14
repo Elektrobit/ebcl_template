@@ -3,6 +3,7 @@
 [EB corbos Linux SDK](intro/README.md)
 
 - [Overview](intro/overview.md)
+    - [Safety concepts](intro/safety_concepts.md)
 - [Setup](intro/setup.md)
 - [SDK on arm64](intro/arm64_host.md)
 - [Developing images](images/index.md)
@@ -20,7 +21,7 @@
 - [Kernel development](examples/kernel.md)
 - [Building old images](images/old_images.md)
 - [Developing apps](apps/index.md)
-     - [EBcLfSA demo application](apps/ebclfsa_demo.md)
+    - [EBcLfSA demo application](apps/ebclfsa_demo.md)
 - [Packaging apps](apps/packaging.md)
 - [The build tools](tools/index.md)
     - [Initrd generator](tools/initrd.md)

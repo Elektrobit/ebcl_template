@@ -1,4 +1,4 @@
-# Using EB corbos Linux SDK on arm64
+# 3. SDK on arm64
 
 The EB corbos Linux SDK is primary developed and tested on amd64 Linux hosts,
 but it is also possible to use it on arm64 hosts.
