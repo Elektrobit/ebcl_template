@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
 	"name": "EB corbos Linux SDK 2.0.0",
-	"image": "ghcr.io/elektrobit/ebcl_dev_container:v1.4.12",
+	"image": "ghcr.io/elektrobit/ebcl_dev_container:v1.4.13",
 	"initializeCommand": "${PWD}/init_workspace",
 	"postCreateCommand": "${PWD}/init_container",
 	"postStartCommand": "${PWD}/enter_container",
