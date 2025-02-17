@@ -9,5 +9,4 @@ use_packages: false
 # Name of the boot root archive
 base_tarball: $$RESULTS$$/tools.tar
 files:
-  - usr/share/fiasco/qemu/config/noml
   - boot/uboot-qemu-bart.elf

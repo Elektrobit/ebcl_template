@@ -30,7 +30,7 @@ static void check_and_signal_watchdog(struct shmlib_watchdog* const watchdog,
     }
 }
 
-static int start_hi_forward_child(void*)
+static int start_hi_forward_child(void *arg __attribute__((unused)))
 {
     char* const argv[] = {NULL};
     char* const envp[] = {NULL};
