@@ -1,4 +1,4 @@
-# 5.4. QEMU Xen image
+# QEMU Xen image
 
 The Xen Hypervisor EB corbos Linux image (located in *images/amd64/qemu/xen*) is an example utilizing Xen Hypervisor ([https://xenproject.org/](https://xenproject.org/)).
 It generates a host image (Dom0, the initial priviledged domain) with the Xen Hypervisor that starts and runs one guest (DomU, unpriviledged domain) image.

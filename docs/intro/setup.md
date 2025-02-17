@@ -1,4 +1,4 @@
-# 2. Setup
+# Setup
 
 The EB corbos Linux template workspace is tested using Ubuntu 22.04 and Ubuntu 24.04 host environments on x86_64 machines.
 It is not compatible with other host CPU architectures, but arm64 host support is planned for a future release.

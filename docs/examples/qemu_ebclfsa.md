@@ -1,4 +1,4 @@
-# 5.3. QEMU EBcLfSA image
+# QEMU EBcLfSA image
 
 The EB corbos Linux for Safety Applications image (located in *images/arm64/qemu/ebclfsa*) is an example for a typical EBcLfSA image.
 It generates an image with the EB corbos Hypervisor running two virtual machines.

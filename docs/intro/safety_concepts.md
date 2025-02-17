@@ -1,4 +1,4 @@
-# 1.1 Safety concepts
+# Safety concepts
 
 EB corbos Linux for Safety Applications (EBcLfSA) is the safety-dedicated SDK built on top of EB corbos Linux.
 

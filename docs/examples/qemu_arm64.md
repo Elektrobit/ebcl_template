@@ -1,4 +1,4 @@
-# 5.2. QEMU arm64
+# QEMU arm64
 
 EB corbos Linux comes with arm64 based example images for rpi4 and nxp s32g boards at the moment.
 To ease development and testing we also provide QEMU arm64 images.

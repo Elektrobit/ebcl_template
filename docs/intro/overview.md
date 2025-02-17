@@ -1,4 +1,4 @@
-# 1. Overview
+# Overview
 
 EB corbos Linux built on Ubuntu is a long-term maintained embedded Linux distribution focused on automotive ECUs.
 Elektrobit can provide security patches for a frozen package set for up to 15 years on quite low pricing.

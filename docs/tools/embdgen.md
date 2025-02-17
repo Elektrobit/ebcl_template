@@ -1,4 +1,4 @@
-# 10.5. Embdgen
+# Embdgen
 
 Creates a disk image for embedded devices
 

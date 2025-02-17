@@ -1,4 +1,4 @@
-# 8. Developing apps
+# Developing apps
 The workspace provides two simple applications to explain the development workflow and interactions with the operating system.
 
  <!--- EXPLAIN BOTH APPS HERE! -->

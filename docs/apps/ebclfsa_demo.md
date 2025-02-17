@@ -1,4 +1,4 @@
-# 8.1. EBcLfSA demo application
+# EBcLfSA demo application
 
 The EB corbos Linux for Safety Applications Demo Application (located in *ebclfsa-demo*) shows the basics of EBcLfSA and shared memory communication.
 It consists of three separate binaries.

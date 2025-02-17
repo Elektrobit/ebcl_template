@@ -1,4 +1,4 @@
-# 4.2. Image specification
+# Image specification
 
 Let's take a look at this QEMU build flow example in detail and see how the details of this solution are specified and the roles of the different [build helper tools](https://github.com/Elektrobit/ebcl_build_tools/).
 

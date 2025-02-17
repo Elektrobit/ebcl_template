@@ -1,4 +1,4 @@
-# 5.1. QEMU amd64
+# QEMU amd64
 
 EB corbos Linux doesn’t support any amd64 hardware at the moment, but we provide some QEMU amd64 images.
 Using amd64 for development may help to make your development flow much smoother since you don’t have to handle the tricky aspects of cross-building.

@@ -1,4 +1,4 @@
-# 4. Developing images
+# Developing images
 
 EB corbos Linux is intended as an embedded Linux distribution build kit, like Yocto.
 Instead of starting from a pre-defined and pre-configured already integrated image, the user can describe the image needed to solve the problem in an easy, clean and maintainable way, and the EB corbos Linux SDK will build exactly this image.
