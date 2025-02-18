@@ -22,6 +22,11 @@ a {
     color: green !important;
 }
 
+.active {
+    color: white !important;
+    background-color: green;
+}
+
 img[Elektrobit] {
     width: 300px;
 }
