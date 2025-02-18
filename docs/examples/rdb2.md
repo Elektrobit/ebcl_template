@@ -21,10 +21,10 @@ apt_repos:
 ```
 
 The packages for the NXP RDB2 board are provided as a separate distribution, called _ebcl_nxp_public_, as component _nxp_public_. For the RDB2 images, the kernel package _linux-image-unsigned-5.15.0-1034-s32-eb_ is used.
-This package contains a Linux kernel image for the S32G2, and has slightly different kernel  configuration as the Ubuntu Jammy default.
+This package contains a Linux kernel image for the S32G2, and has slightly different kernel configuration than the Ubuntu Jammy default.
 
 Please be aware that the firmware for different peripherals, like the LLCE and the PFE, is proprietary
-and we are not allow to distribute it publicly, so if you build image using the public EB corbos Linux repository,
+and we are not allow to distribute it publicly, so if you build an image using the public EB corbos Linux repository,
 you will not be able to make use of the CAN ports attached to the LLCE, or the network ports attached to the PFE.
 If you are a paying customer, and have signed the NXP redistribution agreement, you will get access to _ebcl_nxp_,
 which is identical to _ebcl_nxp_public_, except the fact that it also provides these proprietary firmware.
