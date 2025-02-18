@@ -11,7 +11,6 @@
     - [Configuration parameters](images/params.md)
     - [Building an image from scratch](images/from_scatch.md)
 - [The example images](examples/index.md)
-    - [QEMU amd64](examples/qemu_amd64.md)
     - [QEMU arm64](examples/qemu_arm64.md)
     - [QEMU EBcLfSA image](examples/qemu_ebclfsa.md)
     - [Raspberry Pi 4 images](examples/rpi.md)

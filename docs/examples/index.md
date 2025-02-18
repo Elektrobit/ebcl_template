@@ -5,13 +5,18 @@ The build steps for different SoCs have many similarities, and generic build ste
 This folder also contains central image build descriptions for QEMU, Raspberry Pi and NXP RDB2, to minimize the redundancy between the image taskfiles.
 
 The example images are contained in the _images_ folder of the EB corbos Linux template workspace,
-and are structured by CPU architecture, distribution, init-manager and further variant descriptions.
-The example image for amd64 and the QEMU target, using the EBcL distribution,
-and the crinit init-manager is contained in _images/amd64/qemu/ebcl/crinit_,
+and are structured by CPU architecture, distribution and further variant descriptions.
+The example image for arm64 and the QEMU target, using the 1.x line of the EBcL distribution
+is contained in _images/arm64/qemu/ebcl_1.x_,
 and you can build and run it by executing `task` in this folder.
 
+The runtime configuration of Linux is highly independent form the hardware,
+and the final runtime configuration of the different images is very similar.
+To avoid redundancy, most aspects if the image descriptions are centralized in _images/common_.
+For more details about the structuring of this configuration, take a look at the _README.md_ contained in the folder.
+
 Please be aware that the example images are only considered for educational purposes.
-These images are not pre-qualified.
+These images are not pre-qualified and provide a userland for interactive usage and exploration.
 If you are an EB corbos Linux customer, and want to start a new industrial embedded Linux project
 which requires qualification and maintenance, please choose one of the provided _reference images_ as a starting point.
-These images are already pre-qualified and get up to 15 years of maintenance.
+These images provide a minimized userland, are already pre-qualified and get up to 15 years of maintenance.
