@@ -20,7 +20,7 @@
 - [Kernel development](examples/kernel.md)
 - [Building old images](images/old_images.md)
 - [Developing apps](apps/index.md)
-     - [EBcLfSA demo application](apps/ebclfsa_demo.md)
+    - [EBcLfSA demo application](apps/ebclfsa_demo.md)
 - [Packaging apps](apps/packaging.md)
 - [The build tools](tools/index.md)
     - [Initrd generator](tools/initrd.md)
