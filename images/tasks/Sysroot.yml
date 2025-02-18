@@ -28,6 +28,7 @@ tasks:
       sysroot_location: '{{.sysroot_location | default "/workspace/sysroot_"}}'
       arch: '{{.arch | default "aarch64"}}'
    cmds: 
+      - task: build
       - rm -rf {{.sysroot_location}}{{.arch}}/*
       - tar xf {{.result_folder}}{{.sysroot}} -C {{.sysroot_location}}{{.arch}}/ || true
    preconditions:
