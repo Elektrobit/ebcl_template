@@ -18,7 +18,7 @@
     - [NXP RDB2 images](examples/rdb2.md)
 - [Kernel development](examples/kernel.md)
 - [Developing apps](apps/index.md)
-     - [EBcLfSA demo application](apps/ebclfsa_demo.md)
+    - [EBcLfSA demo application](apps/ebclfsa_demo.md)
 - [Packaging apps](apps/packaging.md)
 - [The build tools](tools/index.md)
     - [Initrd generator](tools/initrd.md)
