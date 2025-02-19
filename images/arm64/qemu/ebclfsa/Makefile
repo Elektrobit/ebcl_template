@@ -50,13 +50,13 @@ tools_extract_spec ?= tools_extract.yaml
 tools_spec ?= tools.yaml
 tools_root ?= $(result_folder)/tools.tar
 
-template_extension_dir ?= $(result_folder)/noml
 uboot ?= $(result_folder)/uboot-qemu-bart.elf
-template_schema ?= $(template_extension_dir)/schema.yaml
 hv_config ?= hv/hv-qemu.yaml
 hv_config_deps ?= hv/hv-base.yaml
 hv_config_dir ?= $(result_folder)/hv_config
 hv_modules ?= $(hv_config_dir)/modules.list
+hv_ext_package ?= eb-hv-qemu-noml-config-extension
+hv_repo_config ?= base.yaml
 hv_device_trees ?= $(wildcard hv/*.dts hv/*.dtsi)
 
 hv_spec ?= hv.yaml
@@ -174,22 +174,18 @@ $(tools_root): $(tools_spec)
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(tools_spec) $(result_folder) 2>&1 | tee $@.log
 
-$(template_schema): $(tools_extract_spec) $(tools_root)
+$(uboot): $(tools_extract_spec) $(tools_root)
 	@echo "Extracting required files from tools ..."
-	rm -rf $(template_extension_dir)
 	mkdir -p $(result_folder)
 	set -o pipefail && boot_generator $(tools_extract_spec) $(result_folder) 2>&1 | tee $(result_folder)/$(tools_extract_spec).log
 # Ensure that the extracted files are newer than the source
 	touch $@
 
-# uboot is extracted in the above task as well, but
-# making it an output results in the task being executed twice
-$(uboot): $(template_schema) $(tools_extract_spec) $(tools_root)
+$(hv_modules): $(template_schema) $(hv_config) $(hv_config_deps) $(hv_repo_config)
+	mkdir -p $(result_folder)
+	hypervisor_config --specialization-package $(hv_ext_package) --repo-config $(hv_repo_config) $(hv_config) $(hv_config_dir)
 
-$(hv_modules): $(template_schema) $(hv_config) $(hv_config_deps)
-	hypervisor_config -s $(template_extension_dir) $(hv_config) $(hv_config_dir)
-
-$(bootstrap): $(hv_spec) $(hv_modules) $(hi_kernel) $(li_kernel) $(li_initrd_img) $(hv_device_trees)
+$(bootstrap): $(hv_spec) $(hv_modules) $(hi_kernel) $(li_kernel) $(li_initrd_img) $(hv_device_trees) $(tools_root)
 	@echo "Build ..."
 	set -o pipefail && boot_generator $(hv_spec) $(result_folder) 2>&1 | tee $(result_folder)/$(hv_spec).log
 # We do not need the config folder copied back....
