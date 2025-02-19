@@ -21,9 +21,9 @@ class Power:
         logging.basicConfig(level=logging.DEBUG)
 
         self.mode = os.getenv('EBCL_TF_POWER_MODE', 'QEMU')
-        
+
         logging.info('Setting up CommManager with interface %s...', self.mode)
-        
+
         match self.mode:
             case "QEMU":
                 self.interface = PowerQemu()

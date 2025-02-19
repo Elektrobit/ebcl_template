@@ -12,8 +12,9 @@ File Should Exist
     Should Not Contain    ${rc}  No such file or directory  msg="File doesn't exist"
 
 Setup Suite
-    [Timeout]    15m
-    ${image}=    Build Image
+    [Timeout]    45m
+    [Arguments]    ${max_time}=30m
+    ${image}=    Build Image    \    ${max_time}
     Should Not Be Empty    ${image}
     ${process}=    Power On    ${image}
     Connect    ${process}

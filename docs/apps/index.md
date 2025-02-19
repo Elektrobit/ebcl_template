@@ -30,12 +30,11 @@ This file may belong to the application folder or any of its subfolders.
 
 ### Build
 
-Before you can build any of the example applications, please make sure to run `task sysroot:build` and `task sysroot:install` for the used image configuration.
+Before you can build any of the example applications, please make sure to run `task sysroot:install` for the used image configuration.
 As an example, for the amd64 qemu image with crinit as init daemon, building the sysroot would be done like this:
 
 ```{bash}
 cd /workspace/images/amd64/appdev/qemu/crinit
-task sysroot:build
 task sysroot:install
 ```
 

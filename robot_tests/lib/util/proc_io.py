@@ -14,7 +14,7 @@ def kill_process_tree(pid: str):
     """ Kill all processes belonging to the subtree of the given pid. """
     
     pid_value = int(pid)
-    assert pid_value > 1       
+    assert pid_value > 1
     
     # Get child processes
     try:
