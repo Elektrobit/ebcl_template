@@ -58,9 +58,9 @@ class PowerQemu(PowerInterface):
 
         qemu_cmd = self.qemu_cmd
         if cmd is not None:
-            logging.info('Using QEMU command: %s', qemu_cmd)
             qemu_cmd = cmd
 
+        logging.info('Using Power On command: %s', qemu_cmd)
         self.process.stdin.write(f'{qemu_cmd}\n')
 
         return self.process

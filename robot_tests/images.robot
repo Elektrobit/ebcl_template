@@ -45,13 +45,13 @@ Build Image arm64/appdev/raspberry/pi4
 #======================
 Build Image arm64/nxp/rdb2/ebcl_1.x_crinit
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    crinit    network
-    [Timeout]    1h
+    [Timeout]    90m
     Test Hardware Image    arm64/nxp/rdb2/ebcl_1.x_crinit    build_timeout=1h
 
 Build Image arm64/nxp/rdb2/ebcl_1.x_systemd
     [Tags]    arm64    rdb2    hardware    debootstrap    ebcl    crinit    network
-    [Timeout]    1h
-    Test Hardware Image    arm64/nxp/rdb2/ebcl_1.x_systemd    build_timeout=1h
+    [Timeout]    2h
+    Test Hardware Image    arm64/nxp/rdb2/ebcl_1.x_systemd    build_timeout=90m
 
 
 #==================================
@@ -67,7 +67,7 @@ Build Image arm64/qemu/jammy
 
 Build Image arm64/qemu/noble
     [Tags]    arm64    qemu    debootstrap    noble    systemd
-    Test Systemd Image    arm64/qemu/noble
+    Test Systemd Image    arm64/qemu/noble    30m
 
 
 #================================

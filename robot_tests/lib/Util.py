@@ -21,13 +21,13 @@ class Util:
 
     def set_env(self, variable: str, value: str) -> None:
         """
-        Set a environment variable
+        Set an environment variable
         """
         os.environ[variable] = value
-        
+
     def get_env(self, variable: str, default: str) -> str:
         """
-        Get a environment variable
+        Get an environment variable
         """
         logging.info('Getting environment variable %s...', variable)
         return os.getenv(variable, default)
