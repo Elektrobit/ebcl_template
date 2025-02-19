@@ -13,7 +13,7 @@ apt_repos:
       - main
       - universe
   # Get latest ebclfsa packages
-      - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.5
+  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.5
     gpg: /etc/apt/trusted.gpg.d/elektrobit.gpg
     distro: ebclfsa
     components:
