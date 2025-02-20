@@ -1,0 +1,32 @@
+base: base.yaml
+# Packages to install in the root tarball
+packages:
+  - linux-xilinx
+  - flash-kernel
+  - dfx-mgr
+  - fancontrol
+  - systemd
+  - udev
+  - util-linux
+  - netbase
+  - locales
+  - file
+  - findutils
+  - kmod
+  - iproute2
+  - iptables
+  - iputils-ping
+  - vim
+  - nano
+  - strace
+  - apt
+  - openssh-server
+  - openssh-client
+host_files:
+  - source: config/*
+  - source: bins/*
+    destination: boot
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment - chfake means fakechroot

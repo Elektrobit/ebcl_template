@@ -1,0 +1,21 @@
+# CPU architecture
+arch: 'arm64'
+# Distro for debootstrap
+primary_distro: noble
+apt_repos:
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: noble
+    components:
+      - main
+      - universe
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: noble-security
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: noble-updates
+    components:
+      - main
+      - universe

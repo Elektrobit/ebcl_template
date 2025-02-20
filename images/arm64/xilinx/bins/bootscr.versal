@@ -1,0 +1,111 @@
+fitimage_name=image.ub
+kernel_name=vmlinuz
+ramdisk_name=ramdisk.cpio.gz.u-boot
+rootfs_name=rootfs.cpio.gz.u-boot
+
+
+
+for boot_target in ${boot_targets};
+do
+	echo "Trying to load boot images from ${boot_target}"
+	if test "${boot_target}" = "jtag" ; then
+		fdt addr 0x00001000
+		fdt get value bootargs /chosen bootargs
+		setenv bootargs $bootargs  root=/dev/ram0 rw
+		booti 0x00200000 0x04000000 0x00001000
+	fi
+	if test "${boot_target}" = "mmc0" || test "${boot_target}" = "mmc1" || test "${boot_target}" = "usb0" || test "${boot_target}" = "usb1"; then
+		if test "${boot_target}" = "mmc0" || test "${boot_target}" = "mmc1"; then
+			setenv bootdev mmcblk${devnum}p
+		fi
+		if test "${boot_target}" = "usb0" || test "${boot_target}" = "usb1"; then
+			setenv bootdev sda
+		fi
+
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /uEnv.txt; then
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x00200000 uEnv.txt;
+			echo "Importing environment(uEnv.txt) from ${boot_target}..."
+			env import -t 0x00200000 $filesize
+			if test -n $uenvcmd; then
+				echo "Running uenvcmd ...";
+				run uenvcmd;
+			fi
+		fi
+		echo "Checking for /${fitimage_name}"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${fitimage_name}; then
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x10000000 ${fitimage_name};
+			echo "Kernel root filesystem parameter needs to be set for FITIMAGE boot if not defined in DTB"
+			bootm 0x10000000;
+		fi
+		echo "Checking for /${kernel_name}"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${kernel_name}; then
+			echo "Loading ${kernel_name} at 0x00200000";
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x00200000 ${kernel_name};
+		fi
+		echo "Checking for /system.dtb"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /system.dtb; then
+			echo "Loading system.dtb at 0x00001000";
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x00001000 system.dtb;
+		fi
+		echo "Checking for /devicetree/openamp.dtbo"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /devicetree/openamp.dtbo; then
+			echo "Loading and merging openamp.dtbo into device tree at 0x1f01000";
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x1f01000 devicetree/openamp.dtbo;
+			fdt addr 0x00001000
+			fdt resize 8192
+			fdt apply 0x1f01000
+		fi
+		echo "Checking for /${ramdisk_name}"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${ramdisk_name} && test "${skip_tinyramdisk}" != "yes"; then
+			echo "Loading ${ramdisk_name} at 0x04000000";
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x04000000 ${ramdisk_name};
+			fdt addr 0x00001000
+			fdt get value bootargs /chosen bootargs
+			setenv bootargs $bootargs  root=/dev/ram0 rw
+			booti 0x00200000 0x04000000 0x00001000
+		fi
+		echo "Checking for /${rootfs_name}"
+		if test -e ${devtype} ${devnum}:${distro_bootpart} /${rootfs_name} && test "${skip_ramdisk}" != "yes"; then
+			echo "Loading ${rootfs_name} at 0x04000000";
+			fatload ${devtype} ${devnum}:${distro_bootpart} 0x04000000 ${rootfs_name};
+			fdt addr 0x00001000
+			fdt get value bootargs /chosen bootargs
+			setenv bootargs $bootargs  root=/dev/ram0 rw
+			booti 0x00200000 0x04000000 0x00001000
+		fi
+		fdt addr 0x00001000
+		fdt get value bootargs /chosen bootargs
+		setenv bootargs $bootargs  root=/dev/${bootdev}2 ro rootwait
+		booti 0x00200000 - 0x00001000
+	fi
+	if test "${boot_target}" = "xspi0" || test "${boot_target}" = "qspi" || test "${boot_target}" = "qspi0"; then
+		sf probe 0 0 0;
+		sf read 0x10000000 0xF40000 0x6400000
+		echo "Kernel root filesystem parameter needs to be set for FITIMAGE boot if not defined in DTB"
+		bootm 0x10000000;
+		echo "Booting using Fit image failed"
+
+		sf read 0x00200000 0xF00000 0x1D00000
+		sf read 0x04000000 0x2E00000 0x4000000
+		fdt addr 0x00001000
+		fdt get value bootargs /chosen bootargs
+		setenv bootargs $bootargs  root=/dev/ram0 rw
+		booti 0x00200000 0x04000000 0x00001000;
+		echo "Booting using Separate images failed"
+	fi
+	if test "${boot_target}" = "nand" || test "${boot_target}" = "nand0"; then
+		nand info;
+		nand read 0x10000000 0x4180000 0x6400000
+		echo "Kernel root filesystem parameter needs to be set for FITIMAGE boot if not defined in DTB"
+		bootm 0x10000000;
+		echo "Booting using Fit image failed"
+
+		nand read 0x00200000 0x4100000 0x3200000
+		nand read 0x04000000 0x8200000 0x3200000
+		fdt addr 0x00001000
+		fdt get value bootargs /chosen bootargs
+		setenv bootargs $bootargs  root=/dev/ram0 rw
+		booti 0x00200000 0x04000000 0x00001000;
+		echo "Booting using Separate images failed"
+	fi
+done

@@ -1,0 +1,32 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+contents:
+  - name: archive
+    type: split_archive
+    archive: build/root.config.tar
+    splits:
+      - name: boot
+        root: boot
+    remaining: root
+
+image:
+  type: mbr
+  boot_partition: boot
+
+  parts:
+    - name: boot
+      type: partition
+      start: 0x1000 B
+      fstype: fat32
+      size: 256 MB
+      content:
+        type: fat32
+        content: archive.boot
+
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 4 GB
+      content:
+        type: ext4
+        content: archive.root
