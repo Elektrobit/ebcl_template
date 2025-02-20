@@ -1,0 +1,20 @@
+# CPU architecture
+arch: 'amd64'
+apt_repos:
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy
+    components:
+      - main
+      - universe
+  # Get latest security fixes
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  # Needed for Xen
+  - apt_repo: http://archive.ubuntu.com/ubuntu
+    distro: jammy-updates
+    components:
+      - main
+      - universe

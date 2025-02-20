@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  kernel_cmdline_append: "rw"
+  result_folder: '{{.result_folder | default "./build/"}}'
+  qemu_net_append: '{{.qemu_net_append | default ""}}'
+  efi_image: '{{.efi_image | default "image.raw"}}'
+
+includes:
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
+  root: '{{.common_tasks}}RootGenerator.yml'
+  embdgen: '{{.common_tasks}}Embdgen.yml'
+  qemu: '{{.common_tasks}}QEMU.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the Dom0 QEMU image
+    cmds:
+      # Prepare root filesystem
+      - task: root:build
+      - task: root:config
+      # Generate Dom0 image
+      - task: embdgen:build
+      - task: config_grub
+    method: none
+
+  run_qemu:
+    desc: Run the Dom0 image in QEMU
+    vars:
+      qemu_net_append: '{{.qemu_net_append | default ""}}'
+      efi_image: '{{.efi_image | default "image.raw"}}'
+    cmds:
+      - task: qemu:run_amd64_efi
+        vars:
+          efi_image: '{{.efi_image}}'
+    method: none
+
+  config_grub:
+    desc: Config the grub bootloader in the Dom0 image
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      disc_image: '{{.disc_image | default "image.raw"}}'
+      dom0_config_grub: '{{.dom0_config_grub | default "config_grub.sh"}}'
+    cmds:
+      # Configure the grub bootloader
+      - set -o pipefail && ./{{.dom0_config_grub}} {{.result_folder}}{{.disc_image}} 2>&1 | tee {{.result_folder}}{{.disc_image}}.grub.log
+    preconditions: 
+      - test -f {{.dom0_config_grub}}
+    sources: 
+      - '{{.dom0_config_grub}}'
+      - '{{.result_folder}}{{.disc_image}}'
+    generates: 
+      - '{{.result_folder}}{{.disc_image}}'
