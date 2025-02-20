@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  result_folder: '{{.result_folder | default "./build/"}}'
+
+includes:
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
+  root: '{{.common_tasks}}RootGenerator.yml'
+  embdgen: '{{.common_tasks}}Embdgen.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the Xilinx image
+    cmds:
+      # Prepare root filesystem
+      - task: root:build
+      - task: root:config
+      # Generate Dom0 image
+      - task: embdgen:build
+    method: none

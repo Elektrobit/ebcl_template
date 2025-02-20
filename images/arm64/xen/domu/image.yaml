@@ -1,0 +1,26 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: gpt
+  boot_partition: boot
+
+  parts:
+    - name: boot
+      type: partition
+      fstype: fat32
+      content:
+        type: fat32
+        content:
+          type: files
+          files:
+            - build/vmlinux
+      size: 256 MB
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 2 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/root.config.tar

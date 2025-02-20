@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  common_tasks: /workspace/images/tasks/
+  result_folder: '{{.result_folder | default "./build/"}}'
+
+includes:
+  gen:
+    taskfile: '{{.common_tasks}}Generic.yml'
+    flatten: true
+  root: '{{.common_tasks}}RootGenerator.yml'
+  boot: '{{.common_tasks}}BootGenerator.yml'
+  embdgen: '{{.common_tasks}}Embdgen.yml'
+
+tasks:
+  default:
+    aliases: [build]
+    desc: Build the VM image
+    vars:
+      boot_root_spec: '{{.boot_root_spec | default "boot_root.yaml"}}'
+      boot_tarball: '{{.boot_tarball | default "boot_root.tar"}}'
+      root_tarball: '{{.root_tarball | default "boot_root.config.tar"}}'
+      kernel: '{{.kernel | default "vmlinux"}}'
+      disc_image: '{{.disc_image | default "domu.img"}}'
+    cmds:
+      # Prepare kernel binary
+      - task: root:build
+        vars:
+          root_spec: '{{.boot_root_spec}}'
+          base_tarball: '{{.boot_tarball}}'
+      - task: root:config
+        vars:
+          root_spec: '{{.boot_root_spec}}'
+          base_tarball: '{{.boot_tarball}}'
+          root_tarball: '{{.root_tarball}}'
+      - task: boot:extract_kernel
+        vars:
+          kernel: '{{.kernel}}'
+      # Prepare root filesystem
+      - task: root:build
+      - task: root:config
+      # Generate DomU image from artifacts
+      - task: embdgen:build
+        vars:
+          disc_image: '{{.disc_image}}'
+    method: none

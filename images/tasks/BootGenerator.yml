@@ -8,11 +8,11 @@ tasks:
       result_folder: '{{.result_folder | default "./build/"}}'
       base_spec: '{{.base_spec | default "base.yaml"}}'
       boot_spec: '{{.boot_spec | default "boot.yaml"}}'
-      kernel: '{{.kernel | default "vmlinuz"}}'
+      kernel: '{{.kernel | default "vmlinuz-"}}'
     cmds:
       - mkdir -p {{.result_folder}}
       - set -o pipefail && boot_generator {{.boot_spec}} {{.result_folder}} 2>&1 | tee {{.result_folder}}{{.kernel}}.log
-      - mv {{.result_folder}}{{.kernel}}-* {{.result_folder}}{{.kernel}} || true
+      - mv {{.result_folder}}{{.kernel}}* {{.result_folder}}{{.kernel}} || true
     preconditions:
       - test -f {{.boot_spec}}
     sources:

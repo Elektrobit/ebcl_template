@@ -1,0 +1,23 @@
+base: ../base.yaml
+# CPU architecture
+arch: amd64
+# Add the EB corbos Linux apt repo to provide the boostrap package
+use_ebcl_apt: true
+# Packages to install in the root tarball
+packages:
+  - systemd
+  - udev
+  - util-linux
+  - grub-efi-amd64
+  - linux-image-generic
+  - xen-system-amd64
+host_files:
+  - source: ../domu/build/domu.img
+    destination: opt/images/domu.img
+  - source: grub_config/*
+  - source: systemd_config/*
+  - source: xen_config/*
+# Scripts to configure the root tarball
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment - chfake means fakechroot
