@@ -4,10 +4,19 @@ packages:
   - systemd
   - udev
   - util-linux
+  - lsb-release
+   - grub2
+   - libfile-basedir-perl
+   - libnuma1
+   - kmod
+   - pciutils
+
 host_files:
+  - source: transfer/*
   - source: crinit_config/* # Crinit configuration, including sbin/init
   - source: pvgrub_config/*
     destination: boot
+
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
