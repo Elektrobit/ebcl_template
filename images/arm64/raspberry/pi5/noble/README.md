@@ -1,1 +1,0 @@
-TODO: Rasperry Pi 5 image using Ubuntu 24.04 packages and systemd
