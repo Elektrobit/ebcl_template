@@ -1,7 +1,3 @@
-# Sample workflow for building and deploying a mdBook site to GitHub Pages
-#
-# To get started with mdBook see: https://rust-lang.github.io/mdBook/index.html
-#
 name: Deploy mdBook site to Pages
 
 on:
@@ -9,7 +5,6 @@ on:
   push:
     branches: 
       - main*
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -26,14 +21,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        branch: [main_1.x, main_2.x]
     env:
       MDBOOK_VERSION: 0.4.37
       MDBOOK_IMAGE_SIZE_VERSION: 0.1.0
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
       - name: Install mdBook
         run: |
           curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf -y | sh
@@ -42,17 +41,14 @@ jobs:
       - name: Install mdbook-image-size
         run: |
           cargo install --version ${MDBOOK_IMAGE_SIZE_VERSION} mdbook-image-size
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
       - name: Build with mdBook
         run: mdbook build
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ./book
+          name: ${{ matrix.branch }}
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
@@ -60,6 +56,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
+      # Download all artifacts, folder names are artifact names
+      - uses: actions/download-artifact@v4
+      - run: echo '<meta http-equiv="refresh" content="0;url=main_2.x">' > index.html
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
