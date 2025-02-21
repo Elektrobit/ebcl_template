@@ -13,8 +13,8 @@ We can get the kernel sources and build dependencies using apt:
 ```bash
 mkdir -p kernel
 cd kernel
-apt -y source linux-buildinfo-5.15.0-1034-s32-eb-optimized
-sudo apt -y build-dep linux-buildinfo-5.15.0-1034-s32-eb-optimized
+apt -y source linux-buildinfo-5.15.0-1041-s32-eb-optimized
+sudo apt -y build-dep linux-buildinfo-5.15.0-1041-s32-eb-optimized
 ```
 
 For extracting the kernel config, we can again make use of the _boot generator_:
@@ -81,7 +81,7 @@ We can add this to our _Makefile_ with the following changes:
 # Specification how to get the kernel config
 kernel_config = kernel_config.yaml
 # Kernel source package name
-kernel_package = linux-buildinfo-5.15.0-1034-s32-eb-optimized
+kernel_package = linux-buildinfo-5.15.0-1041-s32-eb-optimized
 
 #--------------------
 # Generated artifacts
