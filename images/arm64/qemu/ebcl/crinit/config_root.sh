@@ -1,4 +1,4 @@
 #!/bin/sh
 
-# Link systemd as init
+# Link crinit as init
 ln -s /usr/bin/crinit ./sbin/init
