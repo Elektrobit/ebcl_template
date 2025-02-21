@@ -5,17 +5,31 @@ arch: amd64
 use_ebcl_apt: true
 # Packages to install in the root tarball
 packages:
-  - systemd
-  - udev
-  - util-linux
   - grub-efi-amd64
   - linux-image-generic
   - xen-system-amd64
+  - systemd
+  - udev
+  - util-linux
+  - netbase
+  - locales
+  - file
+  - findutils
+  - kmod
+  - iproute2
+  - iptables
+  - iputils-ping
+  - vim
+  - nano
+  - strace
+  - apt
+  - openssh-server
+  - openssh-client
 host_files:
   - source: ../domu/build/domu.img
     destination: opt/images/domu.img
   - source: grub_config/*
-  - source: systemd_config/*
+  - source: config/*
   - source: xen_config/*
 # Scripts to configure the root tarball
 scripts:

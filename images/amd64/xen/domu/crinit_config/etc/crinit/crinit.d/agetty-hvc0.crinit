@@ -1,5 +1,0 @@
-NAME = agetty-hvc0
-COMMAND = /usr/bin/setsid /usr/sbin/agetty 115200 hvc0
-
-RESPAWN = YES
-RESPAWN_RETRIES = 3

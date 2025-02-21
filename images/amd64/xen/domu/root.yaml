@@ -1,19 +1,41 @@
-base: ../base.yaml
+base: 
+  - ../base.yaml
 # Packages to install in the root tarball
 packages:
+  - linux-image-generic
+  - linux-source
+  - zstd
+  - grub-efi-amd64
   - systemd
+  - systemd-coredump
+  - systemd-timesyncd
   - udev
   - util-linux
+  - netbase
+  - locales
+  - file
+  - findutils
+  - kmod
+  - iproute2
+  - iptables
+  - iputils-ping
+  - vim
+  - nano
+  - strace
+  - apt
+  - openssh-server
+  - openssh-client
+  # AMD dependencies
   - lsb-release
-   - grub2
-   - libfile-basedir-perl
-   - libnuma1
-   - kmod
-   - pciutils
+  - libfile-basedir-perl
+  - libnuma1
+  - kmod
+  - pciutils
+  - apt-utils
 
 host_files:
-  - source: transfer/*
-  - source: crinit_config/* # Crinit configuration, including sbin/init
+  - source: transfer/* # AMD packages and install script
+  - source: config/* # Systemd configuration
   - source: pvgrub_config/*
     destination: boot
 
@@ -21,3 +43,5 @@ host_files:
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chroot # Type of execution environment
+  # - name: extract_kernel.sh # Name of the script, relative path to this file
+  #   env: chroot # Type of execution environment

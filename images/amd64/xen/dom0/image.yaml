@@ -14,7 +14,7 @@ image:
     - name: root
       type: partition
       fstype: ext4
-      size: 8 GB
+      size: 12 GB
       content:
         type: ext4
         content:
