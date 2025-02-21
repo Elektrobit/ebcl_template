@@ -25,7 +25,7 @@ root_filesystem_spec = root.yaml
 # Specification how to get the kernel config
 kernel_config = kernel_config.yaml
 # Kernel source package name
-kernel_package = linux-buildinfo-5.15.0-1034-s32-eb-optimized
+kernel_package = linux-buildinfo-5.15.0-1041-s32-eb-optimized
 
 #-------------------------
 # Additional configuration
