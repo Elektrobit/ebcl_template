@@ -12,7 +12,7 @@ on:
 jobs:
   prepare-sdk:
     name: Prepare SDK for Robot Testing
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       # Names of every Test Case defined
       test_cases: ${{ steps.get_tests.outputs.test_cases }}
@@ -39,7 +39,7 @@ jobs:
           echo "test_cases=$(./robot_tests/tools/extract_cases_names.py ./robot_tests/images.robot)" >> $GITHUB_OUTPUT
 
   Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: prepare-sdk
     strategy:
       fail-fast: false
