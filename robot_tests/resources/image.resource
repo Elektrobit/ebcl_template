@@ -7,7 +7,7 @@ Library    robot/libraries/String.py
 
 *** Keywords ***
 Build Image
-    [Arguments]    ${path}=    ${max_time}=15m
+    [Arguments]    ${path}=    ${max_time}=25m
     [Timeout]    ${max_time}
     Log    Using build timeout of ${max_time}.
     Clear    ${path}

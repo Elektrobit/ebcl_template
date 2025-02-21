@@ -7,6 +7,8 @@ function run_test_classes {
         echo "Running test class ${TEST_CLASS} for image ${EBCL_TC_IMAGE}..."
         mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}
         robot ${EBCL_TC_ROBOT_PARAMS} --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS} ${TEST_CLASS}.robot
+        return_code=$(($return_code + $?))
+        echo "Test ${TEST_CLASS} for image ${EBCL_TC_IMAGE} executed. Return code: ${return_code}"
     done
 }
 
@@ -20,6 +22,8 @@ fi
 test_lib_folder=$(realpath ./lib)
 
 export PYTHONPATH="${test_lib_folder}:${PYTHONPATH}"
+
+export return_code=0
 
 if [ -f "test.env" ]; then
     source test.env
@@ -46,6 +50,8 @@ if [[ $# -eq 0 ]] ; then
     do
         source ${TEST_ENV}
         run_test_classes ${EBCL_TC_ROBOT_FILES}
+        # Reset robot flags
+        export EBCL_TC_ROBOT_PARAMS=""
     done
 
     # Generate merged report
@@ -53,12 +59,17 @@ if [[ $# -eq 0 ]] ; then
 else
     if [[ $1 == *.test.env ]]
     then
-        echo "Running test env: $1"
-        source $1
-        run_test_classes ${EBCL_TC_ROBOT_FILES}
+        for test in $@; do
+            echo "Running test env: $1"
+            source $1
+            run_test_classes ${EBCL_TC_ROBOT_FILES}
+            # Reset robot flags
+            export EBCL_TC_ROBOT_PARAMS=""
+        done
     else
         echo "Running robot with arguments: \"$@\""
         robot  --outputdir ${log_dir} "$@"
+        return_code=$(($return_code + $?))
     fi
 
     # Generate merged report
@@ -80,3 +91,7 @@ rm -f output.xml
 
 ln -sf ${log_dir}/report.html .
 ln -sf ${log_dir}/log.html .
+
+echo "Tests executed. Overall return code: ${return_code}"
+
+exit $return_code

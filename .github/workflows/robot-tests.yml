@@ -33,10 +33,7 @@ jobs:
       - name: Generate Test Matrix
         id: get_tests
         run: |
-          sudo apt-get update && sudo apt-get install -y python3 python3-venv python3-pip
-          python3 -m pip install --upgrade pip
-          pip install robotframework
-          echo "test_cases=$(./robot_tests/tools/extract_cases_names.py ./robot_tests/images.robot)" >> $GITHUB_OUTPUT
+          echo "test_cases=$(cat ./robot_tests/ci_tests.json)" >> $GITHUB_OUTPUT
 
   Test:
     runs-on: ubuntu-22.04
@@ -60,21 +57,13 @@ jobs:
         id: pull_dev
         run: docker pull ghcr.io/elektrobit/ebcl_dev_container:${{ needs.prepare-sdk.outputs.container_tag }}
       
-      # Replace '/' in Test Case Names with '_'
-      # '/' not allowed in File Names
-      - name: Sanitize Test Name
-        id: sanitize
-        run: |
-          test_name="${{ matrix.test_case }}"
-          sanitized_test_name=$(echo "$test_name" | tr '/' '_')  # Replace slashes with underscores
-          echo "sanitized_test_name=$sanitized_test_name" >> $GITHUB_ENV
-        
       - name: Run Robot Test in dev container
         id: robot
         uses: devcontainers/ci@v0.3
         with:
           runCmd: |
-            robot --outputdir ./robot_tests --test "${{ matrix.test_case }}" ./robot_tests/images.robot
+            cd robot_tests
+            FORCE_CLEAN_REBUILD=1 ./run_tests.sh "${{ matrix.test_case }}"
       
       - name: Upload test report
         # Upload artifacts always when Robot Test failed but never when prepare steps fail.
@@ -82,7 +71,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "report-${{ env.sanitized_test_name }}"
-          path: |
-            ./robot_tests/report.html
-            ./robot_tests/output.xml
-            ./robot_tests/log.html
+          path: "robot_tests/*.zip"
