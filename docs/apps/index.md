@@ -34,7 +34,7 @@ Before you can build any of the example applications, please make sure to run `t
 As an example, for the amd64 qemu image with crinit as init daemon, building the sysroot would be done like this:
 
 ```{bash}
-cd /workspace/images/amd64/appdev/qemu/crinit
+cd /workspace/images/amd64/appdev/qemu/ebcl_1.x_crinit
 task sysroot:install
 ```
 
@@ -62,7 +62,7 @@ Again, we take the amd64 qemu crinit image as example.
 The following command will start the qemu instance, as well as builds the image beforehand if needed:
 
 ```{bash}
-cd /workspace/images/amd64/appdev/qemu/crinit
+cd /workspace/images/amd64/appdev/qemu/ebcl_1.x_crinit
 task
 ```
 

@@ -1,1 +1,0 @@
-TODO: BeagleBone AI64 Image using Beaglebone Debian packages

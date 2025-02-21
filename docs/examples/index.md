@@ -12,7 +12,7 @@ and you can build and run it by executing `task` in this folder.
 
 The runtime configuration of Linux is highly independent form the hardware,
 and the final runtime configuration of the different images is very similar.
-To avoid redundancy, most aspects if the image descriptions are centralized in _images/common_.
+To avoid redundancy, most aspects of the image descriptions are centralized in _images/common_.
 For more details about the structuring of this configuration, take a look at the _README.md_ contained in the folder.
 
 Please be aware that the example images are only considered for educational purposes.
