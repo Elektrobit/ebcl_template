@@ -126,3 +126,23 @@ Now you can use the VS Code build tasks (_Ctrl_ + _Shift_ + _B_) to build the ex
 If you don’t want to use VS Code, or you want to integrate the EBcL SDK in your CI workflows, you can use the dev container stand-alone.
 For more details on how to do this, take a look at [dev container](https://github.com/Elektrobit/ebcl_dev_container).
 
+### EBcL SDK setup custimisation
+
+When the workspace container is initialized environment  ~/.ebcl_config/.env from your host will be sourced. You can specifiy environment Variables there to customize the setup of the EBcL SDK. Among those are:
+
+- **`USER_APP_REPO`** is a comma-separated list of application git repositories to be cloned into `/workspace/apps/user`.
+
+Example:
+
+```bash
+  `USER_APP_REPO=https://github.com/user/app1.git,https://github.com/user/app2.git`
+```
+
+- **`USER_IMAGE_REPO`** is a comma-separated list of application git repositories to be cloned into `/workspace/apps/image`.
+
+
+Example:
+
+```bash
+    - Example: `USER_IMAGE_REPO=https://github.com/user/image1.git,https://github.com/user/image2.git`
+```

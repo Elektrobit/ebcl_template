@@ -3,6 +3,24 @@
 # This script is exectued in the container environment,
 # after the VS Code dev-container build.
 
+clone_repos() {
+    local repo_type=$1
+    local repo_list=$2
+    local target_dir=$3
+
+    if [ ! -z "$repo_list" ]; then
+        echo "Cloning ${repo_type} repos..."
+        mkdir -p $target_dir
+        cd $target_dir
+        IFS=","
+        for repo in $repo_list
+        do
+            git clone $repo
+        done
+        cd -
+    fi
+}
+
 echo "EBcL template ${WS_VERSION}"
 echo "Setting EBcL container up..."
 
@@ -62,29 +80,11 @@ do
     fi
 done
 
-# Clone additional images
-if [ ! -z "$IMAGE_REPO" ]; then
-    echo "Cloning additional image repo..."
-    git clone $IMAGE_REPO /workspace/images/extra
-fi
-
-# Clone additional apps
-if [ ! -z "$APP_REPO" ]; then
-    echo "Cloning additional apps repo..."
-    git clone $APP_REPO /workspace/apps/extra
-fi
+# Clone user apps
+clone_repos "user apps" "$USER_APP_REPO" "/workspace/apps/user"
 
 # Clone user images
-if [ ! -z "$USER_IMAGE_REPO" ]; then
-    echo "Cloning user image repo..."
-    git clone $USER_IMAGE_REPO /workspace/images/user
-fi
-
-# Clone user apps
-if [ ! -z "$USER_APP_REPO" ]; then
-    echo "Cloning user apps repo..."
-    git clone $USER_APP_REPO /workspace/apps/user
-fi
+clone_repos "user images" "$USER_IMAGE_REPO" "/workspace/images/user"
 
 # Generate VS Code build tasks
 generate_build_tasks
