@@ -27,6 +27,9 @@ packages:
   - apt
   - openssh-server
   - openssh-client
+  # Firmware for XEN
+  - seabios
+  - ovmf
 host_files:
   - source: ../domu/build/domu.img
     destination: opt/images/domu.img
