@@ -1,18 +1,14 @@
 #!/bin/bash
 
-set -e
-
-IMAGE=$1
+IMAGE="build/image.raw"
 DEVICE=$(losetup -f)
-
-[ -z "${IMAGE}" ] && echo "Usage $0 /path/to/image" && exit 1
 
 echo "Selected device is ${DEVICE}"
 
 sudo losetup ${DEVICE} -P ${IMAGE}
 
+ROOTFS=$(mktemp -d /tmp/edit_domu.XXXXXX)
 
-ROOTFS=$(mktemp -d /tmp/config_grub.XXXXXX)
 mkdir -p ${ROOTFS}
 
 echo "Mount OS partition"
@@ -28,16 +24,13 @@ do
     sudo mount -o bind /${i} ${ROOTFS}/${i}
 done
 
-echo "Entering chroot to configure Grub"
-cat << EOF | sudo chroot ${ROOTFS}
-  set -e
+sudo cp -f /etc/resolv.conf ${ROOTFS}/etc/resolv.conf
+sudo cp -f /etc/gai.conf ${ROOTFS}/etc/gai.conf
+sudo cp -f /proc/mounts ${ROOTFS}/etc/mtab
 
-  # setup grub on the efi partition
-  export DEBIAN_FRONTEND=noninteractive
-  grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=GRUB --removable
-  update-grub
+echo "Entering chroot..."
 
-EOF
+sudo chroot ${ROOTFS}
 
 echo "Unmount filesystems"
 for i in dev/pts dev proc sys tmp efi
@@ -51,4 +44,3 @@ rmdir ${ROOTFS}
 sudo losetup -d ${DEVICE}
 
 echo "Done"
-

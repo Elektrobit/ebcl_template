@@ -33,10 +33,11 @@ tasks:
       qemu_net_append: '{{.qemu_net_append | default ""}}'
       result_folder: '{{.result_folder | default "./build/"}}'
       efi_image: '{{.efi_image | default "image.efi.raw"}}'
+      memory: '{{.memory | default "4096"}}'
     cmds:
       - |
         qemu-system-x86_64 \
-        -m 4096 \
+        -m {{.memory}} \
         -nographic \
         --bios /usr/share/ovmf/OVMF.fd \
         -netdev user,id=mynet0{{.qemu_net_append}} \

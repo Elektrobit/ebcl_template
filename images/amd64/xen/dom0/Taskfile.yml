@@ -26,7 +26,7 @@ tasks:
       - task: root:config
       # Generate Dom0 image
       - task: embdgen:build
-      - task: config_grub
+      - ./run_grub_install.sh
     method: none
 
   run_qemu:
@@ -38,21 +38,5 @@ tasks:
       - task: qemu:run_amd64_efi
         vars:
           efi_image: '{{.efi_image}}'
+          memory: '8192'
     method: none
-
-  config_grub:
-    desc: Config the grub bootloader in the Dom0 image
-    vars:
-      result_folder: '{{.result_folder | default "./build/"}}'
-      disc_image: '{{.disc_image | default "image.raw"}}'
-      dom0_config_grub: '{{.dom0_config_grub | default "config_grub.sh"}}'
-    cmds:
-      # Configure the grub bootloader
-      - set -o pipefail && ./{{.dom0_config_grub}} {{.result_folder}}{{.disc_image}} 2>&1 | tee {{.result_folder}}{{.disc_image}}.grub.log
-    preconditions: 
-      - test -f {{.dom0_config_grub}}
-    sources: 
-      - '{{.dom0_config_grub}}'
-      - '{{.result_folder}}{{.disc_image}}'
-    generates: 
-      - '{{.result_folder}}{{.disc_image}}'

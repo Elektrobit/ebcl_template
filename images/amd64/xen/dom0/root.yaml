@@ -9,6 +9,8 @@ packages:
   - linux-image-generic
   - xen-system-amd64
   - systemd
+  - systemd-coredump
+  - systemd-timesyncd
   - udev
   - util-linux
   - netbase
@@ -28,7 +30,6 @@ packages:
 host_files:
   - source: ../domu/build/domu.img
     destination: opt/images/domu.img
-  - source: grub_config/*
   - source: config/*
   - source: xen_config/*
 # Scripts to configure the root tarball

@@ -15,8 +15,6 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 locale-gen en_US.UTF-8
 
-ls -lah /dev/*
-
 # Install AMD stuff
 apt update
 cd /amd
