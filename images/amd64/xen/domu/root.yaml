@@ -36,8 +36,8 @@ packages:
 host_files:
   - source: transfer/* # AMD packages and install script
   - source: config/* # Systemd configuration
-  - source: pvgrub_config/*
-    destination: boot
+  #- source: pvgrub_config/*
+  #  destination: boot
 
 # Scripts to configure the root tarball
 scripts:
