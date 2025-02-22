@@ -36,12 +36,10 @@ packages:
 host_files:
   - source: transfer/* # AMD packages and install script
   - source: config/* # Systemd configuration
-  #- source: pvgrub_config/*
-  #  destination: boot
+  # - source: grub_qemu/*
+  - source: grub_xen/*
 
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chroot # Type of execution environment
-  # - name: extract_kernel.sh # Name of the script, relative path to this file
-  #   env: chroot # Type of execution environment
