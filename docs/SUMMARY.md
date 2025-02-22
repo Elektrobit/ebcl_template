@@ -1,5 +1,12 @@
 # Summary
 
+<details>
+<summary>Version</summary>
+<a href="https://elektrobit.github.io/ebcl_template/main_2.x/">2.x</a>
+
+<a href="https://elektrobit.github.io/ebcl_template/main_1.x/">1.x</a>
+</details>
+
 [EB corbos Linux SDK](intro/README.md)
 
 - [Overview](intro/overview.md)
