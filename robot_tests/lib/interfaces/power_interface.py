@@ -12,7 +12,12 @@ class PowerInterface(ABC):
     """
 
     @abstractmethod
-    def power_on(self, image: Optional[str], cmd: Optional[str] = None) -> Any:
+    def power_on(
+        self,
+        image: Optional[str],
+        cmd: Optional[str] = None,
+        env: dict[str, str] = []
+    ) -> Any:
         """
         Run the image.
         """

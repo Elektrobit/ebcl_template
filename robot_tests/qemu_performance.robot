@@ -24,6 +24,7 @@ Test Timeout    30m
 
 QEMU Performance Test For arm64/qemu/ebcl/crinit
     [Tags]    arm64    qemu    crinit    performance
+    Skip    Test overlay concept requires rework.
     ${image}=    Build    path=arm64/qemu/ebcl/crinit    build_cmd=task build_performance_test
     Set Image    ${image}
     Set Measurement Points    ${QEMU_CRINIT_PERFORMANCE_KEYWORDS}
@@ -31,6 +32,7 @@ QEMU Performance Test For arm64/qemu/ebcl/crinit
 
 QEMU Performance Test For arm64/qemu/ebcl/systemd
     [Tags]    arm64    qemu    systemd    performance
+    Skip    Test overlay concept requires rework.
     ${image}=    Build    path=arm64/qemu/ebcl/systemd    build_cmd=task build_performance_test_systemd
     Set Image    ${image}
     Set Measurement Points    ${QEMU_SYSTEMD_PERFORMANCE_KEYWORDS}
