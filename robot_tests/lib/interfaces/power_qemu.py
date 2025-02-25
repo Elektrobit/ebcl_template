@@ -22,12 +22,17 @@ class PowerQemu(PowerInterface):
     Taskfile implementation of the image interface.
     """
 
-    def __init__(self, shell="bash", qemu_cmd="task run_qemu"):
+    def __init__(self, shell="bash", qemu_cmd="./run_qemu.sh"):
         self.process = None
         self.shell = shell
         self.qemu_cmd = qemu_cmd
 
-    def power_on(self, image: Optional[str], cmd: Optional[str] = None) -> Any:
+    def power_on(
+        self,
+        image: Optional[str],
+        cmd: Optional[str] = None,
+        env: dict[str, str] = [],
+    ) -> Any:
         """
         Run the image.
         """
@@ -46,13 +51,18 @@ class PowerQemu(PowerInterface):
             logging.error("Image file does not exist!")
             return None
 
-        path = Path(image)
+        image = Path(image)
 
-        cwd = path.parent.parent.absolute()
+        env = os.environ
+        env['EBCL_TC_IMAGE_KERNEL'] = str(image.parent / 'vmlinuz')
+        env['EBCL_TC_IMAGE_INITRD'] = str(image.parent / 'initrd.img')
+        env['EBCL_TC_IMAGE_DISC'] = str(image)
 
-        self.process = Popen(self.shell, stdout=PIPE, stderr=PIPE, stdin=PIPE,
-                             bufsize=1, close_fds=ON_POSIX, shell=True, encoding='utf-8',
-                             cwd=cwd)
+        for key, value in env.items():
+            env[key] = value
+
+        self.process = Popen(self.shell, stdout=PIPE, stderr=PIPE, stdin=PIPE, env=env,
+                             bufsize=1, close_fds=ON_POSIX, shell=True, encoding='utf-8')
 
         sleep(0.2)
 
