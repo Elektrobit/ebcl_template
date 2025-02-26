@@ -128,7 +128,9 @@ For more details on how to do this, take a look at [dev container](https://githu
 
 ### EBcL SDK setup custimisation
 
-When the workspace container is initialized environment  ~/.ebcl_config/.env from your host will be sourced. You can specifiy environment Variables there to customize the setup of the EBcL SDK. Among those are:
+When the workspace container is initialized the file ~/.ebcl_config/.env from your host will be sourced.
+You can specify environment variables to customize the setup of the EBcL SDK.
+Some of the available environment variables for this customization include:
 
 - **`USER_APP_REPO`** is a comma-separated list of application git repositories to be cloned into `/workspace/apps/user`.
 
