@@ -26,7 +26,7 @@ tasks:
     desc: Get kernel sources.
     vars:
       source: '{{.source | default "./kernel/"}}'
-      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1034-s32-eb-optimized"}}'
+      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1041-s32-eb-optimized"}}'
       kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
     cmds:
       - mkdir -p {{.source}}
@@ -41,7 +41,7 @@ tasks:
     vars:
       result_folder: '{{.result_folder | default "./build/"}}'
       source: '{{.source | default "./kernel/"}}'
-      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1034-s32-eb-optimized"}}'
+      kernel_package: '{{.kernel_package | default "linux-buildinfo-5.15.0-1041-s32-eb-optimized"}}'
       kernel_dir: '{{.kernel_dir | default "linux-s32-eb-optimized-5.15.0/"}}'
       kernel_config: '{{.kernel_config | default "kernel_config.yaml"}}'
       kconfig: '{{.kconfig | default "config"}}'

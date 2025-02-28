@@ -2,8 +2,8 @@
 kernel: null
 packages:
   - kmod
-  - linux-modules-5.15.0-1034-s32-eb-optimized
-  - linux-modules-extra-5.15.0-1034-s32-eb-optimized
+  - linux-modules-5.15.0-1041-s32-eb-optimized
+  - linux-modules-extra-5.15.0-1041-s32-eb-optimized
 # Files to copy form the host environment
 host_files:
   - source: config/*

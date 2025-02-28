@@ -16,8 +16,8 @@ We can get the kernel sources and build dependencies using apt:
 ```bash
 mkdir -p kernel
 cd kernel
-apt -y source linux-buildinfo-5.15.0-1034-s32-eb
-sudo apt -y build-dep linux-buildinfo-5.15.0-1034-s32-eb
+apt -y source linux-buildinfo-5.15.0-1041-s32-eb
+sudo apt -y build-dep linux-buildinfo-5.15.0-1041-s32-eb
 ```
 
 For extracting the kernel config, we can again make use of the _boot generator_:

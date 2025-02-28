@@ -2,9 +2,9 @@
 name: boot_root
 # Packages for boot_root.tar
 packages:
-  - linux-image-unsigned-5.15.0-1034-s32-eb-optimized
-  - linux-modules-5.15.0-1034-s32-eb-optimized
-  - linux-modules-extra-5.15.0-1034-s32-eb-optimized
+  - linux-image-unsigned-5.15.0-1041-s32-eb-optimized
+  - linux-modules-5.15.0-1041-s32-eb-optimized
+  - linux-modules-extra-5.15.0-1041-s32-eb-optimized
   - arm-trusted-firmware-s32
   - u-boot-s32-tools
   - device-tree-compiler

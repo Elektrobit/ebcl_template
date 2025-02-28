@@ -1,13 +1,24 @@
 # Kernel package to use
-kernel: linux-image-unsigned-5.15.0-1034-s32-eb-optimized
+kernel: linux-image-unsigned-5.15.0-1041-s32-eb-optimized
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
-use_ebcl_apt: true
+use_ebcl_apt: false
 # Add repo with NXP RDB2 packages
 apt_repos:
-  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.4
+  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.5
     distro: ebcl_nxp_public
     components:
       - nxp_public
+    key: file:///build/keys/elektrobit.pub
+  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.5
+    distro: ebcl
+    components:
+      - prod
+      - dev
+    key: file:///build/keys/elektrobit.pub
+  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.5
+    distro: jammy
+    components:
+      - main
     key: file:///build/keys/elektrobit.pub
