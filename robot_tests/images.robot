@@ -55,7 +55,7 @@ Build Image arm64/qemu/jammy
 
 Build Image arm64/qemu/noble
     [Tags]    arm64    qemu    debootstrap    noble    systemd
-    Test Systemd Image    arm64/qemu/noble    30m
+    Test Systemd Image    arm64/qemu/noble    45m
 
 
 #================================

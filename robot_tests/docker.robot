@@ -11,7 +11,8 @@ Documentation  Appdev image tests.
 *** Test Cases ***
 
 Test Name Resolution
-    Execute    ping -c 1 google.de
+    ${output}=    Execute    ping -c 1 google.de
+    Should Contain    ${output}    icmp_seq=1
 
 Test Ubuntu Docker Image
     [Tags]    qemu    appdev    crinit    docker

@@ -12,4 +12,5 @@ rm -f /etc/localtime
 ln -s /usr/share/zoneinfo/UTC /etc/localtime
 
 # Ensure netifd is used for DNS
+rm -f /etc/resolv.conf
 ln -sf /var/run/resolv.conf.netifd /etc/resolv.conf
