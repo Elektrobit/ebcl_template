@@ -18,12 +18,12 @@ Example:
 ```yaml
 apt_repos:
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
   - apt_repo: http://archive.ubuntu.com/ubuntu
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe
@@ -32,7 +32,7 @@ In addition, an armored public key file or URL can be given as “key”, and a 
 
 NOTE:
 
-If apt repositories require authentication, [credential files](https://manpages.ubuntu.com/manpages/jammy/man5/netrc-ssl.5.html) (\*.conf files in netrc format) can be placed in ~/.ebcl_config/auth.d/ on the host before the container is started or directly created in the /workspace/tools/user_config/auth.d directory of the devcontainer.
+If apt repositories require authentication, [credential files](https://manpages.ubuntu.com/manpages/noble/man5/netrc-ssl.5.html) (\*.conf files in netrc format) can be placed in ~/.ebcl_config/auth.d/ on the host before the container is started or directly created in the /workspace/tools/user_config/auth.d directory of the devcontainer.
 
 Example when using apt repositories from artifactory-central.elektrobit.com:
 
@@ -175,7 +175,7 @@ If this flag is set to false, kiwi-ng will be called without the berrymill wrapp
 - **use_bootstrap_package** _(root)_  \[default: True \]: Flag if a bootstrap package shall be used for kiwi-ng builds.
 If this flag is set to True, one of the specified repositories needs to provide the bootstrap package.
 
-- **bootstrap_package** _(root)_  \[default: bootstrap-root-ubuntu-jammy \]: Name of the bootstrap package for the kiwi-ng build.
+- **bootstrap_package** _(root)_  \[default: bootstrap-root-ubuntu-noble \]: Name of the bootstrap package for the kiwi-ng build.
 
 - **bootstrap** _(root)_  \[default: None \]: List of additional bootstrap packages for the kiwi-ng build.
 
@@ -195,7 +195,7 @@ The supported generators are "debootstrap" and "kiwi".
 - **primary_repo** _(root)_  \[default: auto selected Ubuntu Jammy repository \]: The primary apt repository for the debootstrap or kiwi-ng build.
 The main component of this repository is used for _debootstrap_.
 
-- **primary_distro** _(root)_  \[default: jammy \]: The name of the distribution used for _debootstrap_.
+- **primary_distro** _(root)_  \[default: noble \]: The name of the distribution used for _debootstrap_.
 
 - **root_password** _(root)_  \[default: linux \]: The root password of the generated root filesystem.
 

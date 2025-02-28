@@ -7,7 +7,7 @@ use_ebcl_apt: true
 apt_repos:
   # Get Ubuntu Raspberry Pi packages
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy
+    distro: noble
     components:
       - main
       - universe
@@ -15,7 +15,7 @@ apt_repos:
       - restricted
   # Get latest security fixes
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-security
+    distro: noble-security
     components:
       - main
       - universe
@@ -30,7 +30,7 @@ apt_repos:
   # Try running 'ls /sys/firmware/efi' if you have this dir, you can remove
   # This apt_repo safely.
   - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-    distro: jammy-updates
+    distro: noble-updates
     components:
       - main
       - universe
