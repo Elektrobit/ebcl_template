@@ -5,8 +5,9 @@ function run_test_classes {
     for TEST_CLASS in $@;
     do
         echo "Running test class ${TEST_CLASS} for image ${EBCL_TC_IMAGE}..."
-        mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}
-        robot ${EBCL_TC_ROBOT_PARAMS} --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS} ${TEST_CLASS}.robot
+        time_stamp=$(date +%s)
+        mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}/${time_stamp}
+        robot ${EBCL_TC_ROBOT_PARAMS} --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}/${time_stamp} ${TEST_CLASS}.robot
         return_code=$(($return_code + $?))
         echo "Test ${TEST_CLASS} for image ${EBCL_TC_IMAGE} executed. Return code: ${return_code}"
     done
