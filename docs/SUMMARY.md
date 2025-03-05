@@ -4,6 +4,7 @@
 
 - [Overview](intro/overview.md)
 - [Setup](intro/setup.md)
+- [Devcontainer-cli](intro/dev_container.md)
 - [SDK on arm64](intro/arm64_host.md)
 - [Developing images](images/index.md)
     - [Image concept](images/overview.md)
