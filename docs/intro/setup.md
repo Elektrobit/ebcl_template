@@ -82,7 +82,8 @@ Pressing on this element will bring up the connection menu.
 ### Install required tools and clone ebcl_template repository
 
 
-If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io binfmt-support qemu-user-static`
+If you start from a plain Ubuntu 22.04 installation, you can install the needed dependencies using the following command: `sudo apt install docker.io binfmt-support qemu-user-static`.
+This should install `qemu-aarch64` version 6.2.0.
 
 **WARNING**:
 When using a distribution that provides qemu in a version greater or equal to 8.1.1 (like Ubuntu 24.04) building for arm64 targets is broken due to a [bug](https://gitlab.com/qemu-project/qemu/-/issues/1913) in qemu. It will fail with a message like `W: Failure trying to run: chroot "/tmp/tmpp7s0kahl" /sbin/ldconfig`.
