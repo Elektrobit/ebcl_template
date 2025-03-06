@@ -1,0 +1,19 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "Building and running the first EBcL image",
+  "steps": [
+    {
+      "directory": "images",
+      "description": "Image descriptions are located in directory \"images\". There are descriptions for amd64 and arm64 architectures."
+    },
+    {
+      "directory": "images/arm64/qemu/noble",
+      "description": "Here we have an image description for Ubuntu Noble Qemu arm64."
+    },
+    {
+      "file": "images/arm64/qemu/noble/Taskfile.yml",
+      "description": "The images are build and run using task files (https://taskfile.dev/). The tasks can be run using integrated terminal. For example this task defines a task \"run_qemu\" which builds the qemu image and then runs it in integrated terminal.\nYou can build and run your first image by clicking the link below: \n\n>> cd /workspace/images/arm64/qemu/noble && task run_qemu\n\nNote: Ending the tour will close the terminal!",
+      "line": 1
+    }
+  ]
+}
