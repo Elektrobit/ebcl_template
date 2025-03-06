@@ -161,7 +161,7 @@ class Comm:
         self.io.clear_lines()
 
     def login_to_vm(self, user: str = 'root', password: str = 'linux',
-                    shell_prompt: str = '.*#.*', timeout: int = 30):
+                    shell_prompt: str = '.*#.*', timeout: int = 60):
         """ Login to VM. """
 
         logging.info("Waiting for login prompt...")
