@@ -16,7 +16,7 @@ Build Image amd64/appdev/qemu/ebcl_1.x_systemd
     Test Systemd Image    amd64/appdev/qemu/ebcl_1.x_systemd
 
 Build Image arm64/appdev/qemu/ebcl_1.x_crinit
-    [Tags]    arm64    qemu    debootstrap    crinit    ebcl    appdev    CI
+    [Tags]    arm64    qemu    debootstrap    crinit    ebcl    appdev
     Test Crinit Image    arm64/appdev/qemu/ebcl_1.x_crinit
 
 Build Image arm64/appdev/qemu/ebcl_1.x_systemd
