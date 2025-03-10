@@ -54,34 +54,14 @@ fi
 
 echo ""
 echo "---------------------------------------------------------------------------"
-echo "Checking required tools on the development host"
+echo "Checking binfmt support"
 echo "---------------------------------------------------------------------------"
 
-check_package() {
-    if dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"; then
-        echo "Required package $1 is installed."
-    else
-        echo "Error: $1 is not installed."
-        echo "Please install it using 'sudo apt install $1'."
-        return 1
-    fi
-}
-
-required_packages=("binfmt-support" "qemu-user-static")
-all_packages_installed=true
-
-echo "Checking packages..."
-for package in "${required_packages[@]}"; do
-    if ! check_package "$package"; then
-        all_packages_installed=false
-    fi
-done
-
-if [ "$all_packages_installed" = true ]; then
-    echo "Finished checking the host environment. You are good to go!"
+if [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 || -e /proc/sys/fs/binfmt_misc/qemu-x86_64 ]; then
+    echo "QEMU binfmt support is already enabled."
 else
-    echo "Some required packages are missing. Please install them and try again."
-    echo "Please double check the recommended setup in https://elektrobit.github.io/ebcl_template/intro/setup.html"
-    exit 1
+    echo "Enabling QEMU binfmt support..."
+    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
 fi
+
 echo "---------------------------------------------------------------------------"
