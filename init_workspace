@@ -57,7 +57,7 @@ echo "--------------------------------------------------------------------------
 echo "Checking binfmt support"
 echo "---------------------------------------------------------------------------"
 
-if [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 || -e /proc/sys/fs/binfmt_misc/qemu-x86_64 ]; then
+if [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ] || [ -e /proc/sys/fs/binfmt_misc/qemu-x86_64 ]; then
     echo "QEMU binfmt support is already enabled."
 else
     echo "Enabling QEMU binfmt support..."
