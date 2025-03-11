@@ -57,11 +57,16 @@ echo "--------------------------------------------------------------------------
 echo "Checking binfmt support"
 echo "---------------------------------------------------------------------------"
 
-if [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ] || [ -e /proc/sys/fs/binfmt_misc/qemu-x86_64 ]; then
+ARCH=$(uname -m)
+if [ "$ARCH" = "aarch64" ] ||  [ "$ARCH" = "arm64" ]; then
+    echo "ARM platform detected. No QEMU binfmt support is required."
+elif [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ] && [ -e /usr/bin/qemu-aarch64-static ]; then
     echo "QEMU binfmt support is already enabled."
 else
-    echo "Enabling QEMU binfmt support..."
-    docker run --rm --privileged multiarch/qemu-user-static --reset -p yes --credential yes
+    echo "Error: QEMU binfmt support is missing. Please install the required packages and try again."
+    echo "On Ubuntu run: sudo apt install qemu-user-static binfmt-support"
+    echo "On Arch run: sudo pacman -S qemu-user-static qemu-user-static-binfmt"
+    exit 1
 fi
 
 echo "---------------------------------------------------------------------------"
