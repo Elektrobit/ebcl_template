@@ -1,6 +1,6 @@
-# The dev container-cli
+# The dev container CLI
 
-The dev-container cli uses a devcontainer.json, like the one in this workspace, and creates and configures a dev container based on it.
+The dev container CLI uses a devcontainer.json, like the one in this workspace, and creates and configures a dev container based on it.
 This is handy for using the SDK without VS Code UI.
 
 ## Installation
@@ -21,7 +21,7 @@ sudo apt-get update
 sudo apt-get install nodejs
 ```
 
-Then install devcontainers-cli itself
+Then install dev container CLI itself
 
 ```bash
 sudo apt install npm
