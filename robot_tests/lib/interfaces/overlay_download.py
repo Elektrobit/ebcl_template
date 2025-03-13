@@ -4,13 +4,12 @@ Taskfile implementation of the image interface.
 import logging
 import os
 import requests
+import tarfile
 from time import sleep
-
 from typing import Optional, Tuple
 
 from Fakeroot import Fakeroot
 from interfaces.image_interface import ImageInterface
-import tarfile
 
 
 class DirectDownload(ImageInterface):
@@ -21,7 +20,7 @@ class DirectDownload(ImageInterface):
     def __init__(self):
         self.fake = Fakeroot()
 
-    def build(self, path: str, build_cmd: Optional[str] = None) -> Optional[str]:
+    def build(self, path: str, build_target: str, result_file: str,  build_cmd: Optional[str] = None) -> Optional[str]:
         """
         Download the image from the specified URL and save it to the output directory.
         """
@@ -31,10 +30,11 @@ class DirectDownload(ImageInterface):
         if not os.path.exists(path):
             os.makedirs(path)
         elif os.getenv('FORCE_CLEAN_REBUILD', '0') == '0':
-            image = os.path.join(path, 'image.raw')
+            image = os.path.join(path, result_file)
             if os.path.isfile(image):
                 return image
 
+        # TODO: test overlay URL
         image_url, arti_user, arti_token = self._get_credentials()
         if not image_url or not arti_user or not arti_token:
             return None
