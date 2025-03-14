@@ -125,7 +125,7 @@ Now you can use the VS Code build tasks (_Ctrl_ + _Shift_ + _B_) to build the ex
 ### Using the EBcL SDK container stand-alone.
 
 If you don’t want to use VS Code, or you want to integrate the EBcL SDK in your CI workflows, you can use the dev container stand-alone.
-For more details on how to do this, take a look at [dev container](https://github.com/Elektrobit/ebcl_dev_container).
+For more details on how to do this, take a look at [dev container CLI](dev_container.md).
 
 ### EBcL SDK setup customisation
 

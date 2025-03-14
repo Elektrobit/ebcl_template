@@ -22,6 +22,7 @@ tasks:
 
   install:
    desc: Install sysroot_tarball to workspace
+   deps: [build]
    vars:
       result_folder: '{{.result_folder | default "./build/"}}'
       sysroot: '{{.sysroot | default "root_sysroot.tar"}}'
