@@ -73,6 +73,6 @@ echo "-:root:ALL" >> /etc/security/access.conf
 echo "auth required pam_access.so" >> /etc/pam.d/login
 
 #add info that the image is for security demonstaration
-echo "EB corbos Linux – built on Ubuntu" >> /etc/issue
+echo "EB corbos Linux - built on Ubuntu" >> /etc/issue
 echo "Secured by security requirements meeting the industry regulations" >> /etc/issue
 
