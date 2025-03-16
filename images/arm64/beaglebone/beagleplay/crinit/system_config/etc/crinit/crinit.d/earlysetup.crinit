@@ -1,0 +1,11 @@
+NAME = earlysetup
+
+COMMAND = /bin/hostname ebclbeagleplay
+          /bin/mount -o remount,rw /
+          /usr/sbin/ip link set eth0 up
+          /usr/sbin/udhcpc -i eth0
+          /usr/sbin/ntpdate -u pool.ntp.org
+
+PROVIDES = machine-id:wait
+RESPAWN = NO
+DEPENDS = ""

@@ -11,10 +11,9 @@ base_tarball: $$RESULTS$$/boot_root.tar
 host_files:
   - source: $$RESULTS$$/initrd.img 
 files:
-  - opt/u-boot/bb-u-boot-beagleboneai64/sysfw.itb # Y
-  - opt/u-boot/bb-u-boot-beagleboneai64/tiboot3.bin # Y
-  - opt/u-boot/bb-u-boot-beagleboneai64/tispl.bin # Y
-  - opt/u-boot/bb-u-boot-beagleboneai64/u-boot.img # Y
+  - opt/u-boot/bb-u-boot-beagleplay/tiboot3.bin
+  - opt/u-boot/bb-u-boot-beagleplay/tispl.bin
+  - opt/u-boot/bb-u-boot-beagleplay/u-boot.img
   - initrd.img
   - outdir/*
 

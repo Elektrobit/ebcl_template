@@ -1,0 +1,61 @@
+base: ../base.yaml
+# reset the kernel value
+#kernel: bbb.io-kernel-6.12-ti
+kernel: bbb.io-kernel-5.10-ti
+# Packages to install in the root tarball
+packages:
+  - apt
+  - bash
+  - bb-beagle-flasher
+  - bb-beagle-version
+  - bb-customizations
+  - bb-u-boot-beagleboneai64
+  - bb-u-boot-beagleplay
+  - bb-usb-gadgets
+  #- bb-wlan0-defaults
+  - bbb.io-clickid-manifests
+  #- bbb.io-kernel-6.12-ti
+  - bbb.io-kernel-5.10-ti
+  - bbb.io-keyring
+  - ca-certificates
+  - cron
+  - dbus
+  - file
+  - findutils
+  - generic-sys-mods
+  - gnupg
+  - gt
+  - iproute2
+  - iptables
+  - iputils-ping
+  - kmod # required to load modules
+  - libusbgx
+  - linux-firmware
+  - nano
+  - neofetch
+  - openssh-client
+  - openssh-server
+  - python3
+  - systemd
+  - systemd-coredump
+  - systemd-timesyncd
+  - ti-linux-firmware-sysfw
+  - ti-psdk-firmware-09.02.00.05
+  - ti-zephyr-firmware # for m4 core we can try classic Autosar using custome Zephyr instead AutocoreOS
+  - udev
+  - ufw
+  - util-linux
+  - vim
+  - wireguard-tools #vpn
+  - wireless-tools
+  - wpasupplicant
+  - zstd
+# Scripts to configure the root tarball
+host_files:
+  - source: system_config/*
+    uid: 0
+    gid: 0
+    mode: 755
+scripts:
+  - name: config_root.sh # Name of the script, relative path to this file
+    env: chroot # Type of execution environment

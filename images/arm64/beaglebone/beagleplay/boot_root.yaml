@@ -1,0 +1,30 @@
+# Derive values from base.yaml - relative path
+base: base.yaml
+# Name of the boot root archive
+name: boot_root
+# Packages for boot_root.tar
+packages:
+###########################################################
+  #- bbb.io-kernel-5.10-ti
+  #- ti-sgx-23.1-am62-modules-5.10.168-ti-arm64-r118
+  #- bbb.io-kernel-6.12-ti
+  #- bbb.io-kernel-6.12-ti-k3-am62
+  #- ti-sgx-24.2-am62-modules-6.12.13-ti-arm64-r23
+  #- bb-u-boot-beagleplay
+###########################################################
+  #- bbb.io-clickid-manifests
+  - bbb.io-kernel-5.10-ti
+  - ti-sgx-23.1-am62-modules-5.10.168-ti-arm64-r118
+  ##- bbb.io-keyring
+  ##- bb-beagle-flasher
+  #- bb-beagle-version
+  #- bb-customizations
+  #- bb-usb-gadgets
+  - bb-u-boot-beagleplay
+  ##- bb-wlan0-defaults
+  ##- generic-sys-mods
+  #- gt
+  #- libusbgx
+  ##- ti-linux-firmware-sysfw
+  #- bb-j721e-evm-firmware
+  #- ufw

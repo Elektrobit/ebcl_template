@@ -15,12 +15,13 @@ export KERNEL_VERSION=$(ls boot/dtbs/ | sort | tail -n 1)
 echo "Using kernel version: ${KERNEL_VERSION}"
 
 mkdir -p outdir/extlinux
+mkdir -p outdir/ti
 
-cp opt/u-boot/bb-u-boot-beagleboneai64/microsd-extlinux.conf outdir/extlinux/extlinux.conf
+cp opt/u-boot/bb-u-boot-beagleplay/microsd-extlinux.conf outdir/extlinux/extlinux.conf
 sed -i 's:init=[^ ]*:init=/usr/bin/init:g' outdir/extlinux/extlinux.conf
 
-cp boot/dtbs/${KERNEL_VERSION}/*/k3-j721e-sk.dtb outdir/ # Y
-cp boot/dtbs/${KERNEL_VERSION}/*/k3-j721e-beagleboneai64.dtb outdir/ # Y 
+cp boot/dtbs/${KERNEL_VERSION}/*/k3-am625-*.dtb outdir/
+cp boot/dtbs/${KERNEL_VERSION}/*/k3-am625-*.dtb outdir/ti
 
 cp boot/vmlinuz-${KERNEL_VERSION} outdir/
 mv outdir/vmlinuz* outdir/Image.gz
