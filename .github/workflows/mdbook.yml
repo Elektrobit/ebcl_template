@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        branch: [main_1.x, main_2.x]
+        branch: [main_1.x, main]
     env:
       MDBOOK_VERSION: 0.4.37
       MDBOOK_IMAGE_SIZE_VERSION: 0.1.0
@@ -61,7 +61,7 @@ jobs:
         uses: actions/configure-pages@v5
       # Download all artifacts, folder names are artifact names
       - uses: actions/download-artifact@v4
-      - run: echo '<meta http-equiv="refresh" content="0;url=main_2.x">' > index.html
+      - run: echo '<meta http-equiv="refresh" content="0;url=main">' > index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
