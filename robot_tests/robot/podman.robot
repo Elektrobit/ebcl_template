@@ -1,21 +1,23 @@
 *** Settings ***
 Resource          resources/common.resource
 
-Suite Setup    Setup Suite
+Suite Setup    Setup
 Suite Teardown    Teardown Suite
 
 Test Timeout      1m
 
-Documentation  Appdev image tests.
+Documentation  Podman tests.
+
+*** Keywords ***
+
+Setup
+    Set Env Qemu
+    Setup Suite
 
 *** Test Cases ***
 
-Test Name Resolution
-    ${output}=    Execute    ping -c 1 google.de
-    Should Contain    ${output}    icmp_seq=1
-
 Test Busybox Podman Image
-    [Tags]    qemu    appdev    crinit    podman
+    [Tags]    crinit    podman
     [Timeout]    5m
     Pull Podman Image    busybox
     Run Podman Container    busybox    bb24

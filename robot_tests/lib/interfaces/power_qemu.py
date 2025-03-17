@@ -53,6 +53,8 @@ class PowerQemu(PowerInterface):
 
         image = Path(image)
 
+        logging.info("Running image: %s", image)
+
         env = os.environ
         env['EBCL_TC_IMAGE_KERNEL'] = str(image.parent / 'vmlinuz')
         env['EBCL_TC_IMAGE_INITRD'] = str(image.parent / 'initrd.img')

@@ -1,16 +1,47 @@
 #!/bin/bash
 
-function run_test_classes {
-    echo "Running $# test classes $@ for image ${EBCL_TC_IMAGE}..."
-    for TEST_CLASS in $@;
-    do
-        echo "Running test class ${TEST_CLASS} for image ${EBCL_TC_IMAGE}..."
-        time_stamp=$(date +%s)
-        mkdir -p ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}/${time_stamp}
-        robot ${EBCL_TC_ROBOT_PARAMS} --outputdir ${log_dir}/${EBCL_TC_IMAGE}/${TEST_CLASS}/${time_stamp} ${TEST_CLASS}.robot
-        return_code=$(($return_code + $?))
-        echo "Test ${TEST_CLASS} for image ${EBCL_TC_IMAGE} executed. Return code: ${return_code}"
-    done
+function run_tests {
+    if [ -z ${EBCL_TC_IMAGE+x} ]; then
+        echo "Test env file $1 is invalid, the parameter EBCL_TC_IMAGE is missing!"
+        exit 1
+    fi
+
+    if [ -z ${EBCL_TC_ROBOT_TAGS+x} ]; then
+        # Some tests require specific env paramters. Running all tests at one makes no sense.
+        echo "Test env file $1 is invalid, the parameter EBCL_TC_ROBOT_TAGS is missing!"
+        exit 1
+    fi
+
+    if [ -z ${EBCL_IMAGE_TYPE+x} ]; then
+        echo "No image type defined."
+    fi
+
+    if [ -z ${EBCL_IMAGE_ARCH+x} ]; then
+        echo "No image arch defined!"
+    fi
+
+    if [ -z ${EBCL_TC_ROBOT_FILES+x} ]; then
+        echo "Using all avaiable robot files."
+        EBCL_TC_ROBOT_FILES="*.robot"
+    else
+        EBCL_TC_ROBOT_FILES=$(echo ${EBCL_TC_ROBOT_TAGS} | tr " " " ${TEST_ROBOT_FOLDER}/")
+        echo "Using only robot file ${EBCL_TC_ROBOT_FILES}."
+    fi
+
+    if [ -z ${EBCL_TF_TEST_OVERLAY_FOLDER+x} ]; then
+        TEST_OVERLAY_FOLDER="--variable TEST_OVERLAY_FOLDER:${EBCL_TF_TEST_OVERLAY_FOLDER}"
+        echo "Using test overlay folder: ${EBCL_TF_TEST_OVERLAY_FOLDER}"
+    else
+        TEST_OVERLAY_FOLDER=""
+    fi
+
+    TAGS=$(echo ${EBCL_TC_ROBOT_TAGS} | sed -r 's/ / -i /g')
+
+    echo "Running tests with tags ${EBCL_TC_ROBOT_TAGS} for image ${EBCL_TC_IMAGE} (type=${EBCL_IMAGE_TYPE}, arch=${EBCL_IMAGE_ARCH})..."
+    mkdir -p ${log_dir}/${EBCL_TC_IMAGE}
+    robot ${EBCL_TC_ROBOT_PARAMS} -i $TAGS ${TEST_OVERLAY_FOLDER} --variable IMAGE_TYPE:${EBCL_IMAGE_TYPE} --variable IMAGE_ARCH:${EBCL_IMAGE_ARCH}  --outputdir ${log_dir}/${EBCL_TC_IMAGE} ${TEST_ROBOT_FOLDER}/${EBCL_TC_ROBOT_FILE}
+    EXIT_CODE=$((EXIT_CODE+$?))
+    echo "Overall exit code: ${EXIT_CODE}"
 }
 
 if [ -n "$FORCE_CLEAN_REBUILD" ]; then
@@ -20,11 +51,14 @@ else
     echo "Enforced image rebuild is off..."
 fi
 
-test_lib_folder=$(realpath ./lib)
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+TEST_LIB_FOLDER=$(realpath ${SCRIPT_DIR}/lib)
+TEST_ROBOT_FOLDER=$(realpath ${SCRIPT_DIR}/robot)
+TEST_ENV_FOLDER=$(realpath ${SCRIPT_DIR}/image.env)
 
-export PYTHONPATH="${test_lib_folder}:${PYTHONPATH}"
+cd $SCRIPT_DIR
 
-export return_code=0
+export PYTHONPATH="${TEST_LIB_FOLDER}:${TEST_ROBOT_FOLDER}:${PYTHONPATH}"
 
 if [ -f "test.env" ]; then
     source test.env
@@ -46,13 +80,14 @@ log_dir="test_logs_${current_date}_${commit_id}"
 
 mkdir -p ${log_dir}
 
+EXIT_CODE=0
+
 if [[ $# -eq 0 ]] ; then
-    for TEST_ENV in $(find . -name "*.test.env");
+    for TEST_ENV in $(find ${TEST_ENV_FOLDER} -name "*.test.env");
     do
+        echo "Running tests for env ${TEST_ENV}."
         source ${TEST_ENV}
-        run_test_classes ${EBCL_TC_ROBOT_FILES}
-        # Reset robot flags
-        export EBCL_TC_ROBOT_PARAMS=""
+        run_tests ${TEST_ENV}
     done
 
     # Generate merged report
@@ -60,17 +95,12 @@ if [[ $# -eq 0 ]] ; then
 else
     if [[ $1 == *.test.env ]]
     then
-        for test in $@; do
-            echo "Running test env: $1"
-            source $1
-            run_test_classes ${EBCL_TC_ROBOT_FILES}
-            # Reset robot flags
-            export EBCL_TC_ROBOT_PARAMS=""
-        done
+        echo "Running test env: $1"
+        source $1
+        run_tests $1
     else
         echo "Running robot with arguments: \"$@\""
         robot  --outputdir ${log_dir} "$@"
-        return_code=$(($return_code + $?))
     fi
 
     # Generate merged report
@@ -93,6 +123,4 @@ rm -f output.xml
 ln -sf ${log_dir}/report.html .
 ln -sf ${log_dir}/log.html .
 
-echo "Tests executed. Overall return code: ${return_code}"
-
-exit $return_code
+exit ${EXIT_CODE}

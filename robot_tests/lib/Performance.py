@@ -5,12 +5,14 @@ Helper for performance tests.
 import logging
 import re
 import sys
+import os
 
 from pathlib import Path
 from subprocess import Popen, PIPE
 from typing import List, Tuple, Pattern, Any
 
 from util.proc_io import ProcIO # type: ignore[import-untyped]
+from interfaces.power_qemu import PowerQemu # type: ignore[import-untyped]
 
 
 ON_POSIX = 'posix' in sys.builtin_module_names
@@ -33,17 +35,29 @@ class Performance:
 
     def __init__(
         self,
-        cycles=10
+        cycles=10,
+        image_raw = "build/image.raw"
     ):
         logging.basicConfig(level=logging.DEBUG)
-        self.image = None
+        
+        self.image = os.getenv('EBCL_TC_IMAGE', None)
+        self.image_base = os.getenv('EBCL_TF_IMAGE_BASE', None)
+        self.image_raw = image_raw
+
         self.run_cmd = None
         self.cycles = cycles
         self.measurement_points = []
+        
+        self.mode = os.getenv('EBCL_TF_POWER_MODE', 'QEMU')
 
-    def set_image(self, image: str):
-        """ Set the image to test. """
-        self.image = image
+        logging.info('Setting up Performance with interface %s...', self.mode)
+
+        match self.mode:
+            case "QEMU":
+                self.interface = PowerQemu()
+            case x:
+                raise ValueError(
+                    f"Unknown communication interface '{x}' specified")
 
     def set_measurement_points(self, measurement_points: list[str]):
         """ Set measurement points. """
@@ -58,13 +72,10 @@ class Performance:
 
         logging.info('Measurement points:\n%s', self.measurement_points)
 
-    def run_test(
-        self,
-        file: str = 'performance_report.txt',
-        run_cmd = 'task run_performance_test'
-    ) -> None:
+    def run_test(self) -> None:
         """ Run the performance test. """
-        self.run_cmd = run_cmd
+        file = str(self.image).replace(os.path.sep, "_")
+        file = f'{file}_performance.txt'
 
         points: List[List[Tuple[float, float, str, str]]] = []
 
@@ -160,30 +171,29 @@ class Performance:
             logging.error('Performance: No image!')
             raise ImageRunFailed()
 
-        path = Path(self.image)
-        cwd = path.parent.parent.absolute()
+        image = (Path(self.image_base) / self.image / self.image_raw).absolute()
+        
+        # Run image and exit bash
+        cmd = self.interface.qemu_cmd + "; exit\n"
+        logging.info("Running image %s using command %s.", image, cmd)
+        proc = self.interface.power_on(image=image, cmd=cmd)
 
-        # open shell
-        proc = Popen('bash', stdout=PIPE, stderr=PIPE, stdin=PIPE,
-                     bufsize=1, close_fds=ON_POSIX, shell=True, encoding='utf-8',
-                     cwd=cwd)
         # open IO threads for log timestamps
         pio = ProcIO(process=proc)
         pio.connect()
 
-        # Run image and exit bash
-        pio.write(f'{self.run_cmd}; exit\n')
-
         # Wait for image run to complete
         rc = proc.wait(timeout=timeout)
-        # Check that run was OK
-        if rc != 0:
-            logging.error('Performance: Return code was %d!', rc)
-            raise ImageRunFailed()
-
+        
         # Collect all logs
         logs = []
         while pio.queue.qsize() > 0:
             logs.append(pio.queue.get())
+            
+        # Check that run was OK
+        if rc != 0:
+            output = '\n'.join([f'{log[1]}: {log[0]}' for log in logs])
+            logging.error('Performance: Return code was %d!\n%s', rc, output)            
+            raise ImageRunFailed()
 
         return logs

@@ -7,7 +7,7 @@ Library    robot/libraries/String.py
 
 *** Keywords ***
 Build Image
-    [Arguments]    ${path}=    ${max_time}=25m
+    [Arguments]    ${path}=    ${max_time}=15m
     [Timeout]    ${max_time}
     Log    Using build timeout of ${max_time}.
     Clear    ${path}
@@ -55,8 +55,8 @@ Shutdown Systemd Image
     Sleep    1s
 
 Test Systemd Image
-    [Arguments]    ${path}    ${max_time}=15m
-    ${image}=    Build Image    ${path}    ${max_time}
+    [Arguments]    ${path}
+    ${image}=    Build Image    ${path}
     Should Not Be Empty    ${image}
     ${process}=    Power On    ${image}
     Connect    ${process}
