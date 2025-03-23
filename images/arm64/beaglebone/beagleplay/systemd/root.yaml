@@ -30,7 +30,6 @@ packages:
   - iptables
   - iputils-ping
   - kmod # required to load modules
-  - libjsoncpp-dev
   - libusbgx
   - linux-firmware
   - nano
