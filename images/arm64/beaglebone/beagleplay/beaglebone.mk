@@ -46,7 +46,7 @@ root_tarball ?= $(result_folder)/root.config.tar
 initrd_img ?= $(result_folder)/initrd.img
 
 # Sysroot tarball
-sysroot_tarball ?= $(result_folder)/root_sysroot.tar
+sysroot_tarball ?= root_sysroot.tar
 
 
 boot_root ?= $(result_folder)/boot_root.tar

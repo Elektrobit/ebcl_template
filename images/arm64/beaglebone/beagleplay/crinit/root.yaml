@@ -29,6 +29,7 @@ packages:
   - elos-plugin-scanner-shmem
   - elos-plugin-client-tcp
   - dbus
+  - docker.io
   - file
   - findutils
   - generic-sys-mods

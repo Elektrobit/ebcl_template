@@ -17,3 +17,7 @@ ln -sf /var/run/resolv.conf.netifd ./etc/resolv.conf
 
 # Create a fake machine-id
 echo "04711" > ./etc/machine-id
+
+#create eb user
+useradd -m -d /home/eb -s /bin/bash "eb"
+echo "eb:elektrobit" | chpasswd
