@@ -21,6 +21,7 @@ packages:
   - ntpdate
 # Crinit configuration
 host_files:
+  - source: apt_config/*
   - source: config/*
 # Scripts to configure the root tarball
 scripts:

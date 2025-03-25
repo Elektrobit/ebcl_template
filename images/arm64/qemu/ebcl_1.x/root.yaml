@@ -1,3 +1,27 @@
 base:
   - ../../../common/qemu/arm64/base.yaml
   - ../../../common/arm64/crinit/root.yaml
+
+packages:
+  - nano
+
+apt_repos:
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-updates
+    components:
+      - main
+      - universe
+
+host_files:
+  - source: apt_config/*
+    destination: etc/apt
