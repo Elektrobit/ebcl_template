@@ -1,22 +1,23 @@
 *** Settings ***
 Resource          resources/common.resource
 
-Suite Setup    Setup Suite
+Suite Setup    Setup
 Suite Teardown    Teardown Suite
 
-Test Timeout      1m
+Test Timeout      5m
 
-Documentation  Appdev image tests.
+Documentation  Docker tests.
+
+*** Keywords ***
+
+Setup
+    Set Env Qemu
+    Setup Suite
 
 *** Test Cases ***
 
-Test Name Resolution
-    ${output}=    Execute    ping -c 1 google.de
-    Should Contain    ${output}    icmp_seq=1
-
 Test Ubuntu Docker Image
-    [Tags]    qemu    appdev    crinit    docker
-    [Timeout]    5m
+    [Tags]    docker
     Docker Daemon Is Running
     Pull Docker Image    ubuntu
     Run Docker Container    ubuntu    ub24

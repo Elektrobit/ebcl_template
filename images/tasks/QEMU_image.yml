@@ -1,19 +1,19 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
-version: '3'
+version: "3"
 
 includes:
-  gen: 'Generic.yml'
-  root: 'RootGenerator.yml'
-  boot: 'BootGenerator.yml'
-  initrd: 'InitrdGenerator.yml'
-  embdgen: 'Embdgen.yml'
-  sysroot: 'Sysroot.yml'
-  efi: 'Efi.yml'
+  gen: "Generic.yml"
+  root: "RootGenerator.yml"
+  boot: "BootGenerator.yml"
+  initrd: "InitrdGenerator.yml"
+  embdgen: "Embdgen.yml"
+  sysroot: "Sysroot.yml"
+  efi: "Efi.yml"
 
 tasks:
   build:
     desc: Build and run the qemu image
-    cmds:   
+    cmds:
       - task: boot:extract_kernel
       - task: root:build
       - task: root:config
@@ -23,10 +23,22 @@ tasks:
 
   build_efi:
     desc: Build and run the qemu efi image
-    cmds:   
+    cmds:
       - task: initrd:build
       - task: root:build
       - task: root:config
       - task: embdgen:build
       - task: efi:install-grub
+    method: none
+
+  pack_image:
+    desc: Pack the image as image bundle
+    vars:
+      result_folder: '{{.result_folder | default "./build/"}}'
+      kernel: '{{.kernel | default "vmlinuz"}}'
+      initrd_img: '{{.initrd_img | default "initrd.img"}}'
+      disc_image: '{{.disc_image | default "image.raw"}}'
+      archive: '{{.archive | default "image_bundle.tar"}}'
+    cmds:
+      - cd {{.result_folder}} && tar -cvf {{.archive}} {{.kernel}} {{.disc_image}} {{.initrd_img}}
     method: none
