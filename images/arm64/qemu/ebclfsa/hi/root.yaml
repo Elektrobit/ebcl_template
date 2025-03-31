@@ -7,8 +7,7 @@ name: root
 # packages:
 host_files:
 #  - source: root/*
-  - source: $$RESULTS$$/demo/install/*
-# Scripts to configure the root tarball
-scripts:
-  - name: config_root.sh # Name of the script, relative path to this file
-    env: chroot # Type of execution environment
+  - source: $$RESULTS$$/app/install/bin/*
+    destination: bin/
+  # Install li components as well (The path is strange, I think there is a bug in the path parser)
+  - source: $$RESULTS$$/../../build/li/app/install/*

@@ -1,0 +1,6 @@
+NAME = li-ut-server
+
+COMMAND = /usr/bin/li-ut-server
+DEPENDS = ""
+
+RESPAWN = NO

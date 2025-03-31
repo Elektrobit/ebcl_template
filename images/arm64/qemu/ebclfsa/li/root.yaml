@@ -26,7 +26,7 @@ packages:
 # Crinit configuration, including sbin/init
 host_files:
   - source: root/*
-  - source: $$RESULTS$$/demo/install/*
+  - source: $$RESULTS$$/app/install/*
 # Scripts to configure the root tarball
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file

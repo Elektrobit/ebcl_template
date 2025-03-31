@@ -21,6 +21,7 @@ tasks:
       - "{{.hv_repo_config}}"
       - "{{.hv_config}}"
       - "{{.hv_repo_config}}"
+      - "{{.hv_config_deps}}"
     generates:
       - "{{.hv_config_dir}}/*"
     cmds:

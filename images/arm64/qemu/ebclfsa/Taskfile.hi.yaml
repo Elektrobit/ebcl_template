@@ -1,7 +1,7 @@
 version: "3"
 
+
 vars:
-  hi_result_folder: "{{.result_folder}}/hi"
   hi_root_spec: hi/root.yaml
   hi_base_tarball: "{{.hi_result_folder}}/root.tar"
   hi_config_root: hi/config_root.sh
@@ -10,9 +10,6 @@ vars:
 
   hi_boot_spec: hi/boot.yaml
   hi_kernel: "{{.hi_result_folder}}/Image_hi"
-
-  hi_demo_builddir: "{{.hi_result_folder}}/demo"
-  hi_demo_install_dir: "{{.hi_demo_builddir}}/install"
 
 tasks:
   build_dir:
@@ -23,18 +20,10 @@ tasks:
     status:
       - test -d {{.hi_result_folder}}
 
-  demo_app:
-    desc: Build the high integrity part of the demo application
-    generates:
-      - "{{.hi_demo_install_dir}}/**/*"
-    cmds:
-      - cmake -S {{.demo_app}} -B {{.hi_demo_builddir}} --preset hi-app
-      - make -C {{.hi_demo_builddir}} install DESTDIR=install
-
   root_base:
     desc: Build the base high integrity root file system
     deps: 
-      - demo_app
+      - :app:build_hi
       - build_dir
     sources:
       - "{{.hi_root_spec}}"

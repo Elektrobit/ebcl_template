@@ -33,7 +33,7 @@ vms:
     kernel: "Image_hi"
     ram:     128
     cpus:    0xc
-    cmdline: "console=hvc0 ip=192.168.7.100::192.168.7.1:255.255.255.0 root=/dev/vda ro sdk_enable init=/hi_main"
+    cmdline: "console=hvc0 ip=192.168.7.100::192.168.7.1:255.255.255.0 root=/dev/vda ro sdk_enable init=/bin/hi-ut-server"
     dtb:     virt-hi.dtb
     vnets:   [vnet_li_hi]
     shms:

@@ -4,7 +4,8 @@ run: when_changed
 
 vars:
   result_folder: ./build
-  demo_app: /workspace/apps/ebclfsa-demo
+  hi_result_folder: "{{.result_folder}}/hi"
+  li_result_folder: "{{.result_folder}}/li"
   image_spec: image.yaml
   image: "{{.result_folder}}/image.raw"
   sysroot_install: /workspace/sysroot_aarch64/
@@ -29,6 +30,7 @@ includes:
   li: Taskfile.li.yaml
   hi: Taskfile.hi.yaml
   hv: Taskfile.hv.yaml
+  app: Taskfile.ut.yaml
 
 env:
   SHELL : /bin/bash

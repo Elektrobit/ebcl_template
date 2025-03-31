@@ -1,0 +1,48 @@
+version: "3"
+
+vars:
+  ut_checkout: /workspace/apps/ebcl-userland-utils
+  hi_app_builddir: "{{.hi_result_folder}}/app"
+  hi_app_install_dir_no_lisa: "{{.hi_app_builddir}}/install_no_lisa"
+  hi_app_install_dir: "{{.hi_app_builddir}}/install"
+  li_app_builddir: "{{.li_result_folder}}/app"
+  li_app_install_dir: "{{.li_app_builddir}}/install"
+
+tasks:
+  cmake_hi:
+    desc: Build the cmake part of high integrity part of the userland-utils
+    generates:
+      - "{{.hi_app_install_dir_no_lisa}}/**/*"
+    cmds:
+      - cmake -S {{.ut_checkout}} -B {{.hi_app_builddir}} --toolchain /build/cmake/toolchain-ebclfsa-aarch64.cmake --preset hi-release -D UNIT_TESTS=OFF -DSMOKE_TESTS=OFF
+      - cmake --build {{.hi_app_builddir}}
+      - cmake --install {{.hi_app_builddir}} --prefix {{.hi_app_install_dir_no_lisa}}
+
+  elf_enabler_hi:
+    deps:
+      - cmake_hi
+    sources:
+      - "{{.hi_app_install_dir_no_lisa}}/**/*"
+    generates:
+      - "{{.hi_app_install_dir}}/**/*"
+    cmds:
+      - mkdir -p {{.hi_app_install_dir}}
+      - cp -r {{.hi_app_install_dir_no_lisa}}/* {{.hi_app_install_dir}}
+      - for f in {{.hi_app_install_dir}}/bin/*; do lisa-elf-enabler $f; done
+
+  build_hi:
+    desc: Build the high integrity part of the userland-utils
+    deps:
+      - cmake_hi
+      - elf_enabler_hi
+
+
+
+  build_li:
+    desc: Build the low integrity part of the userland-utils
+    generates:
+      - "{{.li_app_install_dir}}/**/*"
+    cmds:
+      - cmake -S {{.ut_checkout}} -B {{.li_app_builddir}} --toolchain /build/cmake/toolchain-aarch64.cmake --preset li-release -D UNIT_TESTS=OFF -DSMOKE_TESTS=OFF
+      - cmake --build {{.li_app_builddir}}
+      - cmake --install {{.li_app_builddir}} --prefix {{.li_app_install_dir}}

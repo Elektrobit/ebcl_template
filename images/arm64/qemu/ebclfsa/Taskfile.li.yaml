@@ -1,16 +1,12 @@
 version: "3"
 
 vars:
-  li_result_folder: "{{.result_folder}}/li"
   li_root_spec: li/root.yaml
   li_base_tarball: "{{.li_result_folder}}/root.tar"
   li_config_root: li/config_root.sh
   li_root_files: li/**/*
   li_root_tarball: "{{.li_result_folder}}/root.config.tar"
   li_sysroot_tarball: "{{.li_result_folder}}/root_sysroot.tar"
-
-  li_demo_builddir: "{{.li_result_folder}}/demo"
-  li_demo_install_dir: "{{.li_demo_builddir}}/install"
 
   li_boot_spec: li/boot.yaml
   li_kernel: "{{.li_result_folder}}/Image_li"
@@ -28,18 +24,10 @@ tasks:
     status:
       - test -d {{.hi_result_folder}}
 
-  demo_app:
-    desc: Build the low integrity part of the demo application
-    generates:
-      - "{{.li_demo_install_dir}}/**/*"
-    cmds:
-      - cmake -S {{.demo_app}} -B {{.li_demo_builddir}} --preset li-app
-      - make -C {{.li_demo_builddir}} install DESTDIR=install
-
   root_base:
     desc: Build the base low integrity root file system
-    deps: 
-      - demo_app
+    deps:
+      - :app:build_li
       - build_dir
     sources:
       - "{{.li_root_spec}}"
