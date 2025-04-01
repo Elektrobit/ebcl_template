@@ -1,11 +1,5 @@
 # Setup
 
-<div class="warning">
-At the moment, the QEMU user mode package of Ubuntu 24.04 is partially broken.
-This issue causes arm64 deboostrap for Ubuntu 22.04 packages to segfault.
-Please use Ubuntu 22.04 to for building arm64 images.
-</div>
-
 The EB corbos Linux template workspace is tested using Ubuntu 22.04 and Ubuntu 24.04 host environments on x86_64 machines.
 It was verified once successfully that the container works also on [arm64 hosts](./arm64_host.md), but this variant is not covered by continuous testing.
 
