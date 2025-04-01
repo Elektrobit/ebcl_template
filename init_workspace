@@ -60,7 +60,7 @@ echo "--------------------------------------------------------------------------
 ARCH=$(uname -m)
 if [ "$ARCH" = "aarch64" ] ||  [ "$ARCH" = "arm64" ]; then
     echo "ARM platform detected. No QEMU binfmt support is required."
-elif [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ] && [ -e /usr/bin/qemu-aarch64-static ]; then
+elif [ -e /proc/sys/fs/binfmt_misc/qemu-aarch64 ] && which qemu-aarch64-static; then
     echo "QEMU binfmt support is already enabled."
 else
     echo "Error: QEMU binfmt support is missing. Please install the required packages and try again."
