@@ -22,6 +22,7 @@
 	"settings": {
 		"git.ignoreLimitWarning": true,
 		"cSpell.words": [
+			"Autosar",
 			"BINDIR",
 			"bootargs",
 			"buildinfo",
@@ -37,6 +38,7 @@
 			"devicetrees",
 			"devpts",
 			"ebcl",
+			"Elektrobit",
 			"embdgen",
 			"fakechroot",
 			"fakeedit",

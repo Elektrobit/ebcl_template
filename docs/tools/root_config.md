@@ -26,6 +26,6 @@ The internal steps are:
 # You can define multiple configuration scripts that will run "in" the tarball
 scripts:
   - name: <name.sh>
-    env: <chroot|chfake>
+    env: <chroot|fake|sudo|shell>
   - name: ...
 ```

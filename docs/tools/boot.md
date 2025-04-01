@@ -28,7 +28,7 @@ The internal steps are:
 base: <base.yaml>
 kernel: as in base yaml, if build locally set to null
 tar: <true|false>
-use_packages:<true|false>
+use_packages: <true|false>
 # Name of the boot root archive, if given will be used as initial tarball base
 base_tarball: $$RESULTS$$/boot_root.tar
 # Files to copy form the host environment
@@ -41,5 +41,5 @@ files:
 # You can define multiple configuration scripts that will run "in" the tarball
 scripts:
   - name: <name.sh>
-    env: <chroot|chfake>
+    env: <chroot|fake|sudo|shell>
 ```
