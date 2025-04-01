@@ -44,7 +44,7 @@ modules_urls: [<module.deb>]
 # if none given busybox-static from mirrors defined in base.yaml will be used
 busybox_url: '<url.deb>'
 # If not using the kernel meta-package specify a concrete version
-kversion: <version>
+kernel_version: <version>
 # Root device to mount
 root_device: dev/<root_device>
 # devices to be available in init, type can be block ot char

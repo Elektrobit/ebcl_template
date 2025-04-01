@@ -1,11 +1,5 @@
 # Setup
 
-<div class="warning">
-At the moment, the QEMU user mode package of Ubuntu 24.04 is partially broken.
-This issue causes arm64 deboostrap for Ubuntu 22.04 packages to segfault.
-Please use Ubuntu 22.04 to for building arm64 images.
-</div>
-
 The EB corbos Linux template workspace is tested using Ubuntu 22.04 and Ubuntu 24.04 host environments on x86_64 machines.
 It was verified once successfully that the container works also on [arm64 hosts](./arm64_host.md), but this variant is not covered by continuous testing.
 
@@ -88,7 +82,7 @@ This should install `qemu-aarch64` version 6.2.0.
 **WARNING**:
 When using a distribution that provides qemu in a version greater or equal to 8.1.1 (like Ubuntu 24.04) building for arm64 targets is broken due to a [bug](https://gitlab.com/qemu-project/qemu/-/issues/1913) in qemu. It will fail with a message like `W: Failure trying to run: chroot "/tmp/tmpp7s0kahl" /sbin/ldconfig`.
 We recommend either switching to Ubuntu 22.04 or downgrade qemu (and hold back updates).
-his can be done for example using:
+This can be done for example using:
 ```sh
 sudo apt remove qemu-user-static
 wget http://launchpadlibrarian.net/690251791/qemu-user-static_8.0.4+dfsg-1ubuntu3_amd64.deb
@@ -127,7 +121,7 @@ Now you can use the VS Code build tasks (_Ctrl_ + _Shift_ + _B_) to build the ex
 If you don’t want to use VS Code, or you want to integrate the EBcL SDK in your CI workflows, you can use the dev container stand-alone.
 For more details on how to do this, take a look at [dev container CLI](dev_container.md).
 
-### EBcL SDK setup customisation
+### EBcL SDK setup customization
 
 When the workspace container is initialized the file ~/.ebcl_config/.env from your host will be sourced.
 You can specify environment variables to customize the setup of the EBcL SDK.

@@ -17,3 +17,5 @@ A basic set of these files that should fit all versions of the hypervisor is del
 Additionally a directory containing specialization for the files can be passed to the hypervisor.
 This specialization should be bundled together with the hypervisor version used.
 It allows adding features to the configurator based on the hypervisor version used.
+
+See [Hypervisor config generator documentation](https://elektrobit.github.io/ebcl_build_tools/hypervisor_config.html) for details.
