@@ -32,7 +32,7 @@ apt_repos:
       - multiverse
       - restricted
   # Get Latest Community Tested Package Fixes
-  # This Repository is soley added for one reason:
+  # This Repository is solely added for one reason:
   # The flash-kernel postinstall script will try to execute
   # and write files to memory. This will not work in our build env (chroot).
   # flash-kernel will not do this on a system that is running in EFI Mode and
@@ -52,7 +52,7 @@ Please not that the EB corbos Linux APT repository is enabled in parallel to the
 This is in general possible, but the resulting image will contain the newer package versions form Ubuntu, 
 which are not qualified with the EB corbos Linux configuration and config and compatibility issues may happen.
 Please also be aware that _jammy-updates_ may provide upgraded libraries which are not supported with EB corbos Linux,
-since we only base on _jammy-secuirty_, to minimize the impact of the security maintenance to existing solutions.
+since we only base on _jammy-security_, to minimize the impact of the security maintenance to existing solutions.
 
 For booting, the Raspberry Pi expects to find a fat32 partition as first partition on the SD card,
 and this partition is expected to contain the firmware and kernel binaries and devicetrees,

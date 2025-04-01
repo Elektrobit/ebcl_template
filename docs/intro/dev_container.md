@@ -57,7 +57,7 @@ devcontainer exec --workspace-folder ./ebcl_template/ bash
 (venv) ebcl@25b055e27967:/workspace/images/amd64/appdev/qemu/ebcl_1.x_crinit$ task
 ```
 
-2. Ensure the ssh conection from your original decontainer session:
+2. Ensure the ssh connection from your original devcontainer session:
 
 ```
 TARGET=<preset> source /workspace/apps/common/deployment.targets && /workspace/apps/common/check_and_update_ssh_key.sh  --prefix "$SSH_PREFIX"  --port $SSH_PORT --user $SSH_USER --target $TARGET_IP
@@ -65,7 +65,7 @@ TARGET=<preset> source /workspace/apps/common/deployment.targets && /workspace/a
 
 Where `<preset>` is the one also used when building the to be deployed application.
 
-3. Deploy the application from your original decontainer session:
+3. Deploy the application from your original devcontainer session:
 
 ```
 TARGET=<preset> source /workspace/apps/common/deployment.targets && $SSH_PREFIX rsync -rlptv -e "ssh -p $SSH_PORT" --exclude */include/* --exclude *.debug /workspace/results/apps/<application>/qemu-aarch64/build/install/ $SSH_USER@[$TARGET_IP]:/

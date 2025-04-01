@@ -18,7 +18,7 @@ to update them separately from the root image, a bundling according to the needs
 
 We don’t recommend apt as an update tool for embedded solutions, since it doesn’t support an A/B update schema, and it’s not prepared to be used together with a read-only and dm-verity protected root filesystem, which you may use if you implement a secure boot solution.
 For such scenarios, the existing embedded update solutions, and containers are much better solutions.
-If you need a customized update solution, or consulting for building online updateable HPC platforms, please [contact us](https://www.elektrobit.com/contact-us/).
+If you need a customized update solution, or consulting for building online updatable HPC platforms, please [contact us](https://www.elektrobit.com/contact-us/).
 
 ## Preparing the Debian package metadata
 
