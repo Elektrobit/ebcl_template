@@ -84,3 +84,6 @@ robot_tests/test_results
 robot_tests/*_performance.txt
 robot_tests/qemu.log
 robot_tests/downloaded_images
+
+
+_build

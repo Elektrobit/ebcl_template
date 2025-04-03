@@ -6,6 +6,13 @@
         "**/images/rdb2.yml",
         "**/images/raspberry.yml",
       ]
-    }
+    },
+    "cmake.sourceDirectory" : [
+      "${workspaceFolder}/images/amd64/appdev/qemu/ebcl_1.x_crinit",
+      "${workspaceFolder}/images/arm64/appdev/qemu/ebcl_1.x_crinit",
+      "${workspaceFolder}/images/arm64/qemu/ebclfsa"
+    ],
+    "cmake.buildDirectory" : "${sourceDirectory}/_build",
+    "cmake.parallelJobs": 1
   
 }
