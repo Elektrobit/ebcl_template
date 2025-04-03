@@ -8,7 +8,6 @@ name: tools
 # Packages for tools.tar
 packages:
   - eb-hv-qemu-noml
-  - eb-hv-qemu-noml-config-extension
   - eb-hv-qemu-tools
   - device-tree-compiler
   - uboot-qemu-bart
