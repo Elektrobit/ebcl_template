@@ -29,7 +29,8 @@ tasks:
       - "{{.hi_demo_install_dir}}/**/*"
     cmds:
       - cmake -S {{.demo_app}} -B {{.hi_demo_builddir}} --preset hi-app
-      - make -C {{.hi_demo_builddir}} install DESTDIR=install
+      - cmake --build {{.hi_demo_builddir}}
+      - cmake --install {{.hi_demo_builddir}} --prefix {{.hi_demo_builddir}}/install
 
   root_base:
     desc: Build the base high integrity root file system

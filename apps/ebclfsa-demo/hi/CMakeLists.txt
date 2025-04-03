@@ -23,4 +23,4 @@ target_link_libraries(hi_forward shmlib)
 target_enable_hi(hi_forward)
 
 
-install(TARGETS hi_main hi_forward DESTINATION /)
+install(TARGETS hi_main hi_forward DESTINATION .)

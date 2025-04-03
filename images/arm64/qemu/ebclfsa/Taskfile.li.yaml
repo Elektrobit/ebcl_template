@@ -34,7 +34,8 @@ tasks:
       - "{{.li_demo_install_dir}}/**/*"
     cmds:
       - cmake -S {{.demo_app}} -B {{.li_demo_builddir}} --preset li-app
-      - make -C {{.li_demo_builddir}} install DESTDIR=install
+      - cmake --build {{.li_demo_builddir}}
+      - cmake --install {{.li_demo_builddir}} --prefix {{.li_demo_builddir}}/install
 
   root_base:
     desc: Build the base low integrity root file system
