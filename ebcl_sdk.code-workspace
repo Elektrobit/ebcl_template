@@ -81,7 +81,13 @@
 			"virt",
 			"virtio"
 		],
-		"terminal.integrated.sendKeybindingsToShell": true
+		"terminal.integrated.sendKeybindingsToShell": true,
+		"terminal.integrated.profiles.linux": {
+			"bash": {
+				"path": "/bin/bash",
+				"args": [ "-l" ]
+			},
+		}
 	},
 	"launch": {
 		"version": "0.2.0",
