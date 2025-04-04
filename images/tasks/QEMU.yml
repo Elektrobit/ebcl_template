@@ -77,7 +77,7 @@ tasks:
     vars:
       qemu_net_append: '{{.qemu_net_append | default ""}}'
       result_folder: '{{.result_folder | default "./build/"}}'
-      efi_image: '{{.efi_image | default "image.raw"}}'
+      efi_image: '{{.efi_image | default "image.efi.raw"}}'
     cmds:
       - |
         qemu-system-aarch64 \
@@ -87,8 +87,9 @@ tasks:
         -nographic \
         -netdev user,id=mynet0{{.qemu_net_append}} \
         -device virtio-net-pci,netdev=mynet0 \
-        -drive format=raw,file={{.result_folder}}{{.disc_image}},if=virtio
-        -bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd
+        -drive format=raw,file={{.result_folder}}{{.efi_image}},if=none,id=hd0 \
+        -device virtio-blk-pci,drive=hd0 \
+        -bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd 
     preconditions:
       - test -f {{.result_folder}}{{.efi_image}}
     method: none
