@@ -1,55 +1,72 @@
-# yaml-language-server: $schema=https://taskfile.dev/schema.json
+# yaml-language-server: $schema=https:/taskfile.dev/schema.json
 version: '3'
 
 tasks:
-  install-grub:
-    desc: Install grub-efi
+  install-boot:
+    desc: Install grub, kernel and initrd for efi boot
     vars:
-      result_folder: '{{.result_folder | default "./build/"}}'
+      result_folder: '{{.result_folder | default "./build"}}'
       disc_image: '{{.disc_image | default "image.raw"}}'
       efi_image: '{{.efi_image | default "image.efi.raw"}}'
       grub_config: '{{.grub_config | default "grub.cfg"}}'
+      arch: '{{.arch | default "amd64"}}'
+      grub_package: '{{if eq .arch "aarch64"}}grub-efi-arm64-bin{{else}}grub-efi-amd64-bin{{end}}'
+      grub_target: '{{if eq .arch "aarch64"}}arm64-efi{{else}}x86_64-efi{{end}}'
+      kernel: '{{.kernel | default "vmlinuz"}}'
+      initrd: '{{.initrd | default "initrd.img"}}'
     cmds:
       # Copy image
-      - rm -f {{.result_folder}}{{.efi_image}}
-      - cp {{.result_folder}}{{.disc_image}} {{.result_folder}}{{.efi_image}}
+      - rm -f {{.result_folder}}/{{.efi_image}}
+      - cp {{.result_folder}}/{{.disc_image}} {{.result_folder}}/{{.efi_image}}
       # Mount image copy
-      - sudo losetup -fP --show {{.result_folder}}{{.efi_image}} > {{.result_folder}}loop_device
-      - mkdir -p {{.result_folder}}mnt
+      - sudo losetup -fP --show {{.result_folder}}/{{.efi_image}} > {{.result_folder}}/loop_device
+      # defer statements are FILO (first in, last out), executing in reverse
+      # order popping off a stack. Unmount the image on task exit
+      - defer: sudo losetup -d $(cat {{.result_folder}}/loop_device)
+      - mkdir -p {{.result_folder}}/mnt
       # Mount root partition
-      - sudo mount $(cat {{.result_folder}}loop_device)p2 {{.result_folder}}mnt
+      - sudo mount $(cat {{.result_folder}}/loop_device)p2 {{.result_folder}}/mnt
+      # Umount the root filesystem
+      - defer: sudo umount {{.result_folder}}/mnt 
       # Mount efi partition
-      - sudo mkdir -p {{.result_folder}}mnt/boot/efi
-      - sudo mount $(cat {{.result_folder}}/loop_device)p1 {{.result_folder}}mnt/boot/efi
-      # Mount special file systems
-      - sudo mount --bind /dev {{.result_folder}}mnt/dev
-      - sudo mkdir -p {{.result_folder}}mnt/dev/pts
-      - sudo mount -t devpts /dev/pts {{.result_folder}}mnt/dev/pts
-      - sudo mount -t proc proc {{.result_folder}}mnt/proc
-      - sudo mount -t sysfs sysfs {{.result_folder}}mnt/sys
-      - sudo mount -t tmpfs tmpfs {{.result_folder}}mnt/tmp
-      # Install grub
-      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck --no-nvram --removable"
-      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "update-grub"
-      # Replace grub config
-      - sudo rm {{.result_folder}}mnt/boot/efi/EFI/BOOT/grub.cfg
-      - sudo cp {{.grub_config}} {{.result_folder}}mnt/boot/efi/EFI/BOOT/grub.cfg
-      # Umount special file systems
-      - defer: sudo umount {{.result_folder}}mnt/dev/pts
-      - defer: sudo umount {{.result_folder}}mnt/dev      
-      - defer: sudo umount {{.result_folder}}mnt/proc
-      - defer: sudo umount {{.result_folder}}mnt/sys
-      - defer: sudo umount {{.result_folder}}mnt/tmp
+      - sudo mkdir -p {{.result_folder}}/mnt/boot/efi
+      - sudo mount $(cat {{.result_folder}}/loop_device)p1 {{.result_folder}}/mnt/boot/efi
       # Umount efi partition
       - defer: sudo umount {{.result_folder}}/mnt/boot/efi
-      # Umount the root filesystem
-      - defer: sudo umount {{.result_folder}}/mnt
-      # Unmount the image
-      - defer: sudo losetup -d $(cat {{.result_folder}}/loop_device)
+      # Mount special file systems
+      - sudo mount --bind /dev {{.result_folder}}/mnt/dev
+      - defer: sudo umount {{.result_folder}}/mnt/dev      
+      - sudo mkdir -p {{.result_folder}}/mnt/dev/pts
+      - sudo mount -t devpts /dev/pts {{.result_folder}}/mnt/dev/pts
+      - defer: sudo umount {{.result_folder}}/mnt/dev/pts
+      - sudo mount -t proc proc {{.result_folder}}/mnt/proc
+      - defer: sudo umount {{.result_folder}}/mnt/proc
+      - sudo mount -t sysfs sysfs {{.result_folder}}/mnt/sys
+      - defer: sudo umount {{.result_folder}}/mnt/sys
+      - sudo mount -t tmpfs tmpfs {{.result_folder}}/mnt/tmp
+      - defer: sudo umount {{.result_folder}}/mnt/tmp 
+      # Install grub
+      #- sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --recheck --no-nvram --removable"
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "apt update && apt install -y {{.grub_package}} e2fsprogs"
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "grub-install --target={{.grub_target}} --efi-directory=/boot/efi --recheck --no-nvram --removable"
+      - sudo chroot {{.result_folder}}/mnt /bin/sh -c "update-grub"
+      # Replace grub config
+      - sudo rm {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
+      - sudo cp {{.grub_config}} {{.result_folder}}/mnt/boot/efi/EFI/BOOT/grub.cfg
+      # Install kernel 
+      - sudo cp {{.result_folder}}/{{.kernel}} {{.result_folder}}/mnt/boot 
+      # Install initrd
+      - sudo cp {{.result_folder}}/{{.initrd}} {{.result_folder}}/mnt/boot 
+      # Assign a label
+      - sudo e2label $(cat {{.result_folder}}/loop_device)p2 rootfs
     preconditions:
-      - test -f {{.result_folder}}{{.disc_image}}
+      - test -f {{.result_folder}}/{{.kernel}}
+      - test -f {{.result_folder}}/{{.initrd}}
+      - test -f {{.result_folder}}/{{.disc_image}}
     sources:
       - '{{.grub_config}}'
-      - '{{.result_folder}}{{.disc_image}}'
+      - '{{.result_folder}}/{{.kernel}}'
+      - '{{.result_folder}}/{{.initrd}}'
+      - '{{.result_folder}}/{{.disc_image}}'
     generates:
-      - '{{.result_folder}}{{.efi_image}}'
+      - '{{.result_folder}}/{{.efi_image}}'
