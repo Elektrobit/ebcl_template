@@ -101,3 +101,9 @@ Pre debug:
 Post debug:
 
 * Stop gdbserver on remote target
+
+## Create your own application
+
+You can create a new application from a predefined template. This task simplifies the process by automating several steps:
+Open the Command Palette in Visual Studio Code (`Ctrl+Shift+P` ) search for and run the task labeled **"Create new App"**.
+When prompted, enter the desired name for your new application. The task will create the application directory, copy and configure the templates for CMake.
