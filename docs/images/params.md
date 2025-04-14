@@ -65,6 +65,7 @@ host_files:
 ```
 The _destination_ is the path in the target root filesystem or chroot environment.
 In addition, the parameters “mode”, to specify the mode of the file, “uid”, to specify the owner of the file, and “gid”, to specify the owning group of the file, can be used.
+If an included file also is included in a Package that is installed, the host_files takes precedence. 
 
 - **files** _(boot)_  \[default: None \]: Files to get as result from the chroot environment.
 Example:
