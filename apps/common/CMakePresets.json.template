@@ -5,28 +5,6 @@
         "minor": 21
     },
     "include": [
-        "/build/cmake/BasePresets.json"
-    ],
-    "configurePresets": [
-        {
-            "name": "base-app-env",
-            "inherits": "base",
-            "hidden": true,
-            "environment": {
-                "APP_NAME": "my-qt-app"
-            }
-        }
-    ]
-}
-
-
-{
-    "version": 4,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 21
-    },
-    "include": [
         "/build/cmake/ebclPresets.json"
     ],
     "configurePresets": [
@@ -34,21 +12,21 @@
             "name": "qemu-x86_64",
             "inherits": "ebcl-x86_64",
             "environment": {
-                "APP_NAME": "my-qt-app"
+                "APP_NAME": "YOUR_APP_NAME"
             }
         },
         {
             "name": "qemu-aarch64",
             "inherits": "ebcl-aarch64",
             "environment": {
-                "APP_NAME": "my-qt-app"
+                "APP_NAME": "YOUR_APP_NAME"
             }
         },
         {
             "name": "hardware",
             "inherits": "ebcl-aarch64",
             "environment": {
-                "APP_NAME": "my-qt-app"
+                "APP_NAME": "YOUR_APP_NAME"
             }
         }
     ],

@@ -22,4 +22,4 @@ target_link_libraries(MyJsonApp ${JSONCPP_LIBRARIES})
 
 # Installation configuration
 install(TARGETS MyJsonApp DESTINATION ${CMAKE_INSTALL_BINDIR})
-#SET (CPACK_SET_DESTDIR "/usr/bin/")
+
