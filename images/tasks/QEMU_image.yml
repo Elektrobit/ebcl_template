@@ -23,12 +23,13 @@ tasks:
 
   build_efi:
     desc: Build and run the qemu efi image
-    cmds:
+    cmds:   
       - task: initrd:build
+      - task: boot:extract_kernel
       - task: root:build
       - task: root:config
-      - task: embdgen:build
-      - task: efi:install-grub
+      - task: embdgen:build 
+      - task: efi:install-boot
     method: none
 
   pack_image:

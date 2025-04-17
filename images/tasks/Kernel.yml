@@ -3,7 +3,7 @@ version: '3'
 
 tasks:
   build:
-    desc: Build kernel form Debian package sources.
+    desc: Build kernel from Debian package sources.
     vars:
       result_folder: '{{.result_folder | default "./build/"}}'
       base_spec: '{{.base_spec | default "base.yaml"}}'
