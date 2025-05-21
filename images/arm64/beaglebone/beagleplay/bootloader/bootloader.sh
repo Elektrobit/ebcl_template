@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${PWD}/../boot/bootloader_env.sh"
+. "${PWD}/../bootloader/bootloader_env.sh"
 
 
 if [ ! -d ${PROJECT_HOME}/${TOOLCHAIN_DIR}/ ] ; then
@@ -20,9 +20,9 @@ fi
 
 mkdir -p ${PROJECT_HOME}/${BOOTLOADER_DIR}
 
-#if [ -d ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot/ ] ; then
-#    rm -rf ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot/
-#fi
+if [ -d ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot/ ] ; then
+    rm -rf ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot/
+fi
 
 mkdir -p ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/
 
@@ -30,7 +30,7 @@ sudo apt install -y swig python3-dev libgnutls28-dev
 sudo chown -R $(whoami):$(whoami) /build/venv
 pip install yamllint jsonschema pyelftools
 
-./../boot/bootloader_tfa.sh
-./../boot/bootloader_optee.sh
-./../boot/bootloader_uboot_cortexR.sh
-./../boot/bootloader_uboot_cortexA.sh
+./../bootloader/bootloader_tfa.sh
+./../bootloader/bootloader_optee.sh
+./../bootloader/bootloader_uboot_cortexR.sh
+./../bootloader/bootloader_uboot_cortexA.sh

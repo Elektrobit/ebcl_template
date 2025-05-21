@@ -1,9 +1,8 @@
 #!/bin/sh
 
-. "${PWD}/../boot/bootloader_env.sh"
-UBOOT="v2025.01-Beagle"
+. "${PWD}/../bootloader/bootloader_env.sh"
 
-if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tiboot3.bin ] ; then
+#if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tiboot3.bin ] ; then
     if [ ! -d ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot ] ; then
         global="https://github.com/beagleboard/u-boot.git"
         mirror="${global}"
@@ -28,9 +27,9 @@ if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tiboot3.bin ] ; then
             cp -v ${PROJECT_HOME}/${BOOTLOADER_DIR}/CORTEXR/sysfw-${SOC_NAME}-${SECURITY_TYPE}-evm.itb ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/sysfw.itb
         fi
     fi
-else
-    echo "${BLUE}CORTEXR u-boot binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tiboot3.bin already present${NC}"
-fi
+#else
+#    echo "${BLUE}CORTEXR u-boot binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tiboot3.bin already present${NC}"
+#fi
 
 #rm -rf ${PROJECT_HOME}/${BOOTLOADER_DIR}/CORTEXR/ || true
 

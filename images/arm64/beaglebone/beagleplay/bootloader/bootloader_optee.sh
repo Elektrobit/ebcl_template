@@ -1,15 +1,14 @@
 #!/bin/sh
 
-. "${PWD}/../boot/bootloader_env.sh"
+. "${PWD}/../bootloader/bootloader_env.sh"
 
 #export LD_LIBRARY_PATH=/workspace/sysroot_aarch64/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
 #export PATH=/workspace/sysroot_aarch64/bin:$PATH
 #export AS=aarch64-linux-gnu-as
 #export PYTHON3=/build/venv/bin/python3
 #export PATH=/build/venv/bin:$PATH
-OPTEE="4.4.0"
 
-if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin ] ; then
+#if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin ] ; then
     if [ ! -d ${PROJECT_HOME}/${BOOTLOADER_DIR}/optee_os/ ] ; then
         echo "${CYAN}git clone -b ${OPTEE} https://github.com/OP-TEE/optee_os.git${NC}"
         git clone -b ${OPTEE} https://github.com/OP-TEE/optee_os.git --depth=10 ${PROJECT_HOME}/${BOOTLOADER_DIR}/optee_os/
@@ -27,6 +26,6 @@ if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin ] ; then
 
     echo "${CYAN}rm -rf ${PROJECT_HOME}/${BOOTLOADER_DIR}/optee${NC}"
     #rm -rf ${PROJECT_HOME}/${BOOTLOADER_DIR}/optee/ || true
-else
-    echo "${BLUE}optee binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin already present${NC}"
-fi
+#else
+#    echo "${BLUE}optee binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin already present${NC}"
+#fi

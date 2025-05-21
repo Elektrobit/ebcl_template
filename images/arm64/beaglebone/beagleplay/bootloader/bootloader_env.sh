@@ -30,6 +30,10 @@ OPTEE_PLATFORM="k3-am62x"
 OPTEE_EXTRA_ARGS="CFG_WITH_SOFTWARE_PRNG=y"
 UBOOT_CFG_CORTEXR="am62x_beagleplay_r5_defconfig"
 UBOOT_CFG_CORTEXA="am62x_beagleplay_a53_defconfig"
+TI_FIRMWARE="10.01.10"
+TRUSTED_FIRMWARE="v2.12.0"
+OPTEE="4.4.0"
+UBOOT="v2025.01-Beagle"
 
 if [ ! "${CORES}" ] ; then
 	CORES=$(($(getconf _NPROCESSORS_ONLN) * 2)) # cores and thread

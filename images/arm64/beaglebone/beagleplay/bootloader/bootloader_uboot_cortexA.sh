@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${PWD}/../boot/bootloader_env.sh"
+. "${PWD}/../bootloader/bootloader_env.sh"
 
 #export LD_LIBRARY_PATH=/workspace/sysroot_aarch64/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
 #export CROSS_COMPILE=/workspace/sysroot_aarch64/bin/aarch64-linux-gnu-
@@ -17,8 +17,8 @@
 #export OBJDUMP=${CROSS_COMPILE}objdump
 #export STRIP=${CROSS_COMPILE}strip
 #export PYTHONPATH=/workspace/images/arm64/beaglebone/beagleplay/crinit/build/bootloader/CORTEXA/scripts/dtc/pylibfdt:$PYTHONPATH
-ls -la ${PROJECT_HOME}/${BOOTLOADER_DIR}/public
-if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/u-boot.img ] ; then
+
+#if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/u-boot.img ] ; then
     if [ -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/bl31.bin ] ; then
         if [ -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/tee-pager_v2.bin ] ; then
             echo "${CYAN}make -C ${PROJECT_HOME}/${BOOTLOADER_DIR}/u-boot -j${CORES} O=${PROJECT_HOME}/${BOOTLOADER_DIR}/CORTEXA $UBOOT_CFG_CORTEXA${NC}"
@@ -47,6 +47,6 @@ if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/u-boot.img ] ; then
         echo "${RED}Missing ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/bl31.bin${NC}"
         exit 2
     fi
-else
-    echo "${BLUE}CORTEXA u-boot binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/u-boot.img already present${NC}"
-fi
+#else
+#   echo "${BLUE}CORTEXA u-boot binary ${PROJECT_HOME}/${BOOTLOADER_DIR}/public/u-boot.img already present${NC}"
+#fi
