@@ -5,14 +5,15 @@ kernel: bbb.io-kernel-5.10-ti
 packages:
   - apt
   - bash
-  - bb-beagle-flasher
-  - bb-beagle-version
-  - bb-customizations
-  - bb-u-boot-beagleboneai64
-  - bb-u-boot-beagleplay
-  - bb-usb-gadgets
+    #- bb-beagle-flasher
+  #- bb-beagle-version
+  #- bb-customizations
+  #- bb-u-boot-beagleboneai64
+  #- bb-u-boot-beagleplay
+  #- bb-usb-gadgets
   #- bb-wlan0-defaults
-  - bbb.io-clickid-manifests
+  #- bbb.io-clickid-manifests
+  #- bbb.io-kernel-6.12-ti
   - bbb.io-kernel-5.10-ti
   - bbb.io-keyring
   - ca-certificates

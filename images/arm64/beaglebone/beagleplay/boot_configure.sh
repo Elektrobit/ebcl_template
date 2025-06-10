@@ -17,7 +17,7 @@ echo "Using kernel version: ${KERNEL_VERSION}"
 mkdir -p outdir/extlinux
 mkdir -p outdir/ti
 
-cp opt/u-boot/bb-u-boot-beagleplay/microsd-extlinux.conf outdir/extlinux/extlinux.conf
+cp boot/extlinux.conf outdir/extlinux
 sed -i 's:init=[^ ]*:init=/usr/bin/init:g' outdir/extlinux/extlinux.conf
 
 cp boot/dtbs/${KERNEL_VERSION}/*/k3-am625-*.dtb outdir/

@@ -122,6 +122,7 @@ $(boot_contents): $(boot_extract_spec) $(boot_root) $(initrd_img)
 	@echo "Extracting required files from boot_root ..."
 	mkdir -p $(result_folder)
 	$(bootloader)
+	$(kernel)
 	set -o pipefail && boot_generator $(boot_extract_spec) $(result_folder) 2>&1 | tee $(boot_contents).log
 
 #--------------------------------------

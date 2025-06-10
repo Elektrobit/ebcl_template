@@ -20,7 +20,7 @@ packages:
   #- bb-beagle-version
   #- bb-customizations
   #- bb-usb-gadgets
-  - bb-u-boot-beagleplay
+  #- bb-u-boot-beagleplay
   ##- bb-wlan0-defaults
   ##- generic-sys-mods
   #- gt

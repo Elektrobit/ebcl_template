@@ -1,11 +1,13 @@
 #!/bin/sh
 
 PROJECT_HOME=${PWD}
-OUTPUT=${RESULT_FOLDER}
-DOWNLOAD_DIR=${OUTPUT}/download
-TOOLCHAIN_DIR=${OUTPUT}/toolchain
-BOOTLOADER_DIR=${OUTPUT}/bootloader
-KERNEL_DIR=${OUTPUT}/kernel
+OUTPUT_BOOTLOADER=build/out
+OUTPUT_GCC=build/out
+OUTPUT_KERNEL=build/out
+DOWNLOAD_DIR=${OUTPUT_GCC}/download
+TOOLCHAIN_DIR=${OUTPUT_GCC}/toolchain
+BOOTLOADER_DIR=${OUTPUT_BOOTLOADER}
+KERNEL_DIR=${OUTPUT_KERNEL}
 
 
 RED='\033[0;31m'
@@ -39,7 +41,3 @@ if [ ! "${CORES}" ] ; then
 	CORES=$(($(getconf _NPROCESSORS_ONLN) * 2)) # cores and thread
 fi
 
-echo "${BLUE}"
-${CC32}gcc --version
-${CC64}gcc --version
-echo "${NC}"

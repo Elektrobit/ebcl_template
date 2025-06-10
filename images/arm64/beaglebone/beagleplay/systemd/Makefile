@@ -13,9 +13,13 @@ root_filesystem_spec ?= root.yaml
 
 config_root ?= config_root.sh
 
-boot_extract_spec ?= ../boot_extract.yaml
+#boot_extract_spec ?= ../boot_extract.yaml
+boot_extract_spec ?= ../boot_compile.yaml
 
 boot_root_spec ?= ../boot_root.yaml
+
+bootloader ?= ../bootloader/bootloader.sh
+#kernel ?= ../kernel/kernel.sh
 
 variant = systemd
 #-------------------------
