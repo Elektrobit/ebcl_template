@@ -197,3 +197,4 @@ sysroot_install: $(sysroot_tarball)
 clean:
 	rm -rf $(result_folder) $(beaglebone_repo_key_src) $(beaglebone_repo_key)
 	sync -f
+	
