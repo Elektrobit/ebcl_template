@@ -1,4 +1,4 @@
-# Makefile for Beaglebone beagleplay systemd variant
+# Makefile for Beaglebone beagleplay crinit variant
 
 #---------------------
 # Image specifications
