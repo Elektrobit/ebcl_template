@@ -5,7 +5,7 @@ kernel: bbb.io-kernel-5.10-ti
 packages:
   - apt
   - bash
-    #- bb-beagle-flasher
+  #- bb-beagle-flasher
   #- bb-beagle-version
   #- bb-customizations
   #- bb-u-boot-beagleboneai64

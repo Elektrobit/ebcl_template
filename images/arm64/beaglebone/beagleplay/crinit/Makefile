@@ -1,4 +1,4 @@
-# Makefile for Beaglebone beagleplay systemd variant
+# Makefile for Beaglebone beagleplay crinit variant
 
 #---------------------
 # Image specifications
@@ -14,7 +14,6 @@ root_filesystem_spec ?= root.yaml
 config_root ?= config_root.sh
 
 #boot_extract_spec ?= ../boot_extract.yaml
-
 boot_extract_spec ?= ../boot_compile.yaml
 
 boot_root_spec ?= ../boot_root.yaml
