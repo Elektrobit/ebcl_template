@@ -12,7 +12,7 @@ ff02::2         ip6-allrouters
 EOF
 
 # allow name resolution (needed for apt update)
-ln -s /usr/lib/systemd/resolv.conf /etc/resolv.conf
+ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
 #configure eth0
 cat >/etc/systemd/network/20-wired.network <<- EOF
