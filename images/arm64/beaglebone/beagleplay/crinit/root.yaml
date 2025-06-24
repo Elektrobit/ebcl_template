@@ -14,6 +14,9 @@ packages:
   #- bb-wlan0-defaults
   #- bbb.io-clickid-manifests
   #- bbb.io-kernel-6.12-ti
+  - ubus
+  - netifd
+  - uci
   - bbb.io-kernel-5.10-ti
   - bbb.io-keyring
   - ca-certificates
