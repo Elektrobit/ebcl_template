@@ -25,15 +25,16 @@ if [ ! -d ${PROJECT_HOME}/${KERNEL_DIR}/linux_build ] ; then
     ${CC32}gcc --version
     ${CC64}gcc --version
     echo -e "${NC}"
-    if [ ! -f ${PROJECT_HOME}/${DOWNLOAD_DIR}/linux-6.1.46-ti-arm64-r13.tar.gz ] ; then
-    wget -P ${PROJECT_HOME}/${DOWNLOAD_DIR} https://git.beagleboard.org/beagleboard/linux/-/archive/6.1.46-ti-arm64-r13/linux-6.1.46-ti-arm64-r13.tar.gz
+    if [ ! -f ${PROJECT_HOME}/${DOWNLOAD_DIR}/v6.1.46-ti-arm64-r13.tar.gz ] ; then
+    wget -P ${PROJECT_HOME}/${DOWNLOAD_DIR} https://github.com/beagleboard/linux/archive/refs/heads/v6.1.46-ti-arm64-r13.tar.gz
     fi
     if [ ! -d ${PROJECT_HOME}/${KERNEL_DIR}/linux-6.1.46-ti-arm64-r13 ] ; then
-    tar -xf ${PROJECT_HOME}/${DOWNLOAD_DIR}/linux-6.1.46-ti-arm64-r13.tar.gz -C ${PROJECT_HOME}/${KERNEL_DIR}
+    tar -xf ${PROJECT_HOME}/${DOWNLOAD_DIR}/v6.1.46-ti-arm64-r13.tar.gz -C ${PROJECT_HOME}/${KERNEL_DIR}
     fi
     #make -C ${PROJECT_HOME}/${KERNEL_DIR}/linux-6.1.46-ti-arm64-r13 O=${PROJECT_HOME}/${KERNEL_DIR}/linux_build mrproper
     make -C ${PROJECT_HOME}/${KERNEL_DIR}/linux-6.1.46-ti-arm64-r13 O=${PROJECT_HOME}/${KERNEL_DIR}/linux_build defconfig
     make -C ${PROJECT_HOME}/${KERNEL_DIR}/linux-6.1.46-ti-arm64-r13 O=${PROJECT_HOME}/${KERNEL_DIR}/linux_build -j$(nproc)
+    make -C ${PROJECT_HOME}/${KERNEL_DIR}/linux-6.1.46-ti-arm64-r13 O=${PROJECT_HOME}/${KERNEL_DIR}/linux_build modules_install INSTALL_MOD_PATH=${PROJECT_HOME}/${KERNEL_DIR}/linux_build -j$(nproc)
 else
     echo "${ORANGE}${PROJECT_HOME}/${KERNEL_DIR}/linux_build folder exist which means kernel was already built. If the build was corrupted please delete the folder to force rebuild!${NC}"
 fi

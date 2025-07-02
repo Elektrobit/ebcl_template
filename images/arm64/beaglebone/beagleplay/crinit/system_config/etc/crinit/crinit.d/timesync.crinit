@@ -1,0 +1,7 @@
+NAME = timesync
+
+COMMAND = /usr/sbin/ntpdate -u pool.ntp.org
+PROVIDES = timesync:spawn
+RESPAWN = NO
+DEPENDS = udhcpc:wait
+

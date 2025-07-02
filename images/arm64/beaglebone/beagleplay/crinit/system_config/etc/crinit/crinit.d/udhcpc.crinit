@@ -1,0 +1,6 @@
+NAME = udhcpc
+
+COMMAND = /usr/sbin/udhcpc -b -i eth0
+DEPENDS = ""
+PROVIDES = udhcpc:spawn
+RESPAWN = NO

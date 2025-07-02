@@ -12,14 +12,14 @@ host_files:
   - source: $$RESULTS$$/initrd.img
   - source: $$RESULTS$$/out/public/*
     destination: boot
-  #- source: $$RESULTS$$/../kernel/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtb
-  #  destination: tmp
-  #- source: $$RESULTS$$/../kernel/out/linux_build/include/generated/utsrelease.h
-  #  destination: tmp
-  #- source: $$RESULTS$$/../kernel/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtbo
-  #  destination: tmp
-  #- source: $$RESULTS$$/../kernel/out/linux_build/arch/arm64/boot/Image
-  #  destination: tmp
+  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtb
+    destination: boot
+  - source: $$RESULTS$$/out/linux_build/include/generated/utsrelease.h
+    destination: boot
+  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtbo
+    destination: boot
+  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/Image
+    destination: boot
 
 files:
   - boot/tiboot3.bin
@@ -29,5 +29,5 @@ files:
   - outdir/*
 
 scripts:
-  #- name: boot_configure_custom_kernel.sh
-  - name: boot_configure.sh
+  - name: boot_configure_custom_kernel.sh
+  #- name: boot_configure.sh

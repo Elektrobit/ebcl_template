@@ -2,8 +2,17 @@
 base: base.yaml
 # Name of the boot root archive
 name: boot_root
+kernel: null
+# Do pack the files as tar
+tar: true
+# do not download and extract these packages
+use_packages: false
 # Packages for boot_root.tar
-packages:
+base_tarball: $$RESULTS$$/boot_root.tar
+host_files:
+   - source: $$RESULTS$$/out/linux_build/lib/modules/*
+     destination: usr/lib/modules/
+#packages:
 ###########################################################
   #- bbb.io-kernel-5.10-ti
   #- ti-sgx-23.1-am62-modules-5.10.168-ti-arm64-r118
@@ -13,9 +22,9 @@ packages:
   #- bb-u-boot-beagleplay
 ###########################################################
   #- bbb.io-clickid-manifests
-  - bbb.io-kernel-5.10-ti
-  - ti-sgx-23.1-am62-modules-5.10.168-ti-arm64-r118
-  ##- bbb.io-keyring
+  #- bbb.io-kernel-5.10-ti
+  #- ti-sgx-23.1-am62-modules-5.10.168-ti-arm64-r118
+  #- bbb.io-keyring
   ##- bb-beagle-flasher
   #- bb-beagle-version
   #- bb-customizations

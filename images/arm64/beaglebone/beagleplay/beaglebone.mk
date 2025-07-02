@@ -90,6 +90,7 @@ $(root_tarball): $(base_tarball) $(config_root) $(beaglebone_repo_key)
 	@echo "Configuring ${base_tarball} as ${root_tarball}..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
+	set -o pipefail && root_configurator $(boot_root_spec) $(root_tarball) $(root_tarball) 2>&1 | tee $(root_tarball)_modules.log
 
 # The initrd image is build using the initrd generator.
 # initrd_spec: specification of the initrd image.
@@ -116,13 +117,13 @@ $(sysroot_tarball): $(root_filesystem_spec)
 $(boot_root): $(boot_root_spec) $(beaglebone_repo_key)
 	@echo "Build $(boot_root) from $(boot_root_spec)..."
 	mkdir -p $(result_folder)
+	$(kernel)
 	set -o pipefail && root_generator --no-config $(boot_root_spec) $(result_folder) 2>&1 | tee $(boot_root).log
 
 $(boot_contents): $(boot_extract_spec) $(boot_root) $(initrd_img)
 	@echo "Extracting required files from boot_root ..."
 	mkdir -p $(result_folder)
 	$(bootloader)
-	$(kernel)
 	set -o pipefail && boot_generator $(boot_extract_spec) $(result_folder) 2>&1 | tee $(boot_contents).log
 
 #--------------------------------------

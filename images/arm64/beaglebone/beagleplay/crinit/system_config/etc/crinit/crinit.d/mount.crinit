@@ -1,6 +1,7 @@
 NAME = mount
 
-COMMAND = /bin/mount -t tmpfs none /tmp
+COMMAND = /bin/mount -o remount,rw /
+          /bin/mount -t tmpfs none /tmp
           /bin/mount -t tmpfs tmpfs /var/log
           /bin/mkdir -p /dev/shm
           /bin/mount -t tmpfs shmfs /dev/shm

@@ -6,8 +6,7 @@
 #       extlinux
 #          |------ extlinux.conf
 
-export KERNEL_VERSION=kernel_ver=$(cat "tmp/utsrelease.h" | awk '{print $3}' | sed 's/\"//g' )
-
+export KERNEL_VERSION=kernel_ver=$(cat "boot/utsrelease.h" | awk '{print $3}' | sed 's/\"//g' )
 echo "Using kernel version: ${KERNEL_VERSION}"
 
 mkdir -p outdir/extlinux
@@ -15,10 +14,11 @@ mkdir -p outdir/ti
 
 #cp opt/u-boot/bb-u-boot-beagleplay/microsd-extlinux.conf outdir/extlinux/extlinux.conf
 #sed -i 's:init=[^ ]*:init=/usr/bin/init:g' outdir/extlinux/extlinux.conf
+cp boot/extlinux.conf outdir/extlinux/
 
-cp tmp/k3-am625-*.dtb outdir/
-cp tmp/k3-am625-*.dtb outdir/ti
-cp tmp/Image outdir
+cp boot/k3-am625-*.dtb outdir/
+cp boot/k3-am625-*.dtb outdir/ti
+cp boot/Image outdir
 
 #cp boot/vmlinuz-${KERNEL_VERSION} outdir/
 #mv outdir/vmlinuz* outdir/Image.gz
@@ -27,4 +27,4 @@ cp tmp/Image outdir
 mkdir -p outdir/overlays
 
 #cp -r boot/dtbs/${KERNEL_VERSION}/*/overlays outdir/
-cp -r tmp/*.dtbo outdir/overlays
+cp -r boot/*.dtbo outdir/overlays

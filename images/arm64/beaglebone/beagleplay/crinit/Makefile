@@ -19,7 +19,7 @@ boot_extract_spec ?= ../boot_compile.yaml
 boot_root_spec ?= ../boot_root.yaml
 
 bootloader ?= ../bootloader/bootloader.sh
-#kernel ?= ../kernel/kernel.sh
+kernel ?= ../kernel/kernel.sh
 
 variant = crinit
 #-------------------------

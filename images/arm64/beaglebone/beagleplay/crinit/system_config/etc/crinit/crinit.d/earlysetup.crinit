@@ -1,8 +1,6 @@
 NAME = earlysetup
 
 COMMAND = /bin/hostname ebclbeagleplay
-          /bin/mount -o remount,rw /
-          /usr/sbin/ntpdate -u pool.ntp.org
 
 PROVIDES = machine-id:wait
 RESPAWN = NO

@@ -1,6 +1,7 @@
 base: ../base.yaml
 # reset the kernel value
-kernel: bbb.io-kernel-5.10-ti
+#kernel: bbb.io-kernel-5.10-ti
+kernel: null
 # Packages to install in the root tarball
 packages:
   - apt
@@ -14,9 +15,6 @@ packages:
   #- bb-wlan0-defaults
   #- bbb.io-clickid-manifests
   #- bbb.io-kernel-6.12-ti
-  - ubus
-  - netifd
-  - uci
   - bbb.io-kernel-5.10-ti
   - bbb.io-keyring
   - ca-certificates
@@ -47,6 +45,7 @@ packages:
   - linux-firmware
   - nano
   - neofetch
+  - netifd
   - ntpdate
   - openssh-client
   - openssh-server
@@ -54,6 +53,7 @@ packages:
   - ti-linux-firmware-sysfw
   - ti-psdk-firmware-09.02.00.05
   - ti-zephyr-firmware # for m4 core we can try classic Autosar using custome Zephyr instead AutocoreOS
+  - ubus
   - udev
   - udhcpc
   - ufw
