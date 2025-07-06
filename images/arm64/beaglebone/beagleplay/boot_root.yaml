@@ -9,9 +9,9 @@ tar: true
 use_packages: false
 # Packages for boot_root.tar
 base_tarball: $$RESULTS$$/boot_root.tar
-host_files:
-   - source: $$RESULTS$$/out/linux_build/lib/modules/*
-     destination: usr/lib/modules/
+#host_files:
+#   - source: $$RESULTS$$/out/linux_build/lib/modules/*
+#     destination: usr/lib/modules/
 #packages:
 ###########################################################
   #- bbb.io-kernel-5.10-ti

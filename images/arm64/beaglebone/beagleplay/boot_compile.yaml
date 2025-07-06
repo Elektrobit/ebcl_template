@@ -10,15 +10,15 @@ use_packages: false
 base_tarball: $$RESULTS$$/boot_root.tar
 host_files:
   - source: $$RESULTS$$/initrd.img
-  - source: $$RESULTS$$/out/public/*
+  - source: $$RESULTS$$/../bootloader/build/public/*
     destination: boot
-  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtb
+  - source: $$RESULTS$$/../kernel/build/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtb
     destination: boot
-  - source: $$RESULTS$$/out/linux_build/include/generated/utsrelease.h
+  - source: $$RESULTS$$/../kernel/build/linux_build/include/generated/utsrelease.h
     destination: boot
-  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtbo
+  - source: $$RESULTS$$/../kernel/build/linux_build/arch/arm64/boot/dts/ti/k3-am625-*.dtbo
     destination: boot
-  - source: $$RESULTS$$/out/linux_build/arch/arm64/boot/Image
+  - source: $$RESULTS$$/../kernel/build/linux_build/arch/arm64/boot/Image
     destination: boot
 
 files:

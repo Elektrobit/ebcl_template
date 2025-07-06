@@ -1,9 +1,9 @@
 #!/bin/sh
 
 PROJECT_HOME=${PWD}
-OUTPUT_BOOTLOADER=build/out
-OUTPUT_GCC=build/out
-OUTPUT_KERNEL=build/out
+OUTPUT_BOOTLOADER=../bootloader/build
+OUTPUT_GCC=../gcc/build/out
+OUTPUT_KERNEL=../kernel/build
 DOWNLOAD_DIR=${OUTPUT_GCC}/download
 TOOLCHAIN_DIR=${OUTPUT_GCC}/toolchain
 BOOTLOADER_DIR=${OUTPUT_BOOTLOADER}

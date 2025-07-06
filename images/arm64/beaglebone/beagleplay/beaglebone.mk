@@ -198,3 +198,9 @@ sysroot_install: $(sysroot_tarball)
 clean:
 	rm -rf $(result_folder) $(beaglebone_repo_key_src) $(beaglebone_repo_key)
 	sync -f
+
+.PHONY: clean_all
+clean_all:
+	make clean
+	rm -rf ../bootloader/build ../kernel/build ../gcc/build
+	sync -f
