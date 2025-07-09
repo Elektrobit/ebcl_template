@@ -1,4 +1,4 @@
 base: 
-  - ../../../common/qemu/arm64/base.yaml
+  - ../../../common/qemu/arm64/base_jammy.yaml
   - ../../../common/qemu/initrd.yaml
   - ../../../common/qemu/initrd_jammy.yaml
