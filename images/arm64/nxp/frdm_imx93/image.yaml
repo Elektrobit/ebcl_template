@@ -1,0 +1,36 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: mbr
+  boot_partition: flash
+
+  parts:
+    - name: flash
+      type: raw
+      start: 32768 B
+      content:
+        type: raw
+        file: build/flash.bin
+
+    - name: boot
+      type: partition
+      fstype: fat32
+      content:
+        type: fat32
+        content:
+          type: files
+          files:
+            - build/Image
+            - build/imx93-11x11-evk.dtb
+      size: 64 MB
+
+# Root filesystem partition (contains /boot/Image + dtb)
+    - name: root
+      type: partition
+      fstype: ext4
+      size: 1 GB
+      content:
+        type: ext4
+        content:
+          type: archive
+          archive: build/root.config.tar
