@@ -63,7 +63,7 @@ if [ ! -f ${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin ]; then
 
   echo "🔨 Building OP-TEE (tee.bin)..."
   sudo apt update
-  sudo apt install libgnutls28-dev -y
+  sudo apt install libgnutls28-dev u-boot-tools -y 
   python3 -m venv venv
   source venv/bin/activate
   pip install cryptography pyelftools

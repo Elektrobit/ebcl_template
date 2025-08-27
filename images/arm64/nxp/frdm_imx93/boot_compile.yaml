@@ -8,12 +8,18 @@ tar: false
 use_packages: false
 # Name of the boot root archive
 #base_tarball: $$RESULTS$$/boot_root.tar
-#scripts:
-  #- name: boot_configure_custom_kernel.sh
 host_files:
   - source: $$RESULTS$$/../bootloader/build/imx-mkimage/iMX93/flash.bin
     destination: flash.bin
+  - source: $$RESULTS$$/../frdm_imx93_fit.its
+    destination: frdm_imx93_fit.its
+  - source: $$RESULTS$$/../bootloader/boot.cmd
+    destination: boot.cmd
   - source: $$RESULTS$$/../kernel/build/linux_build/arch/arm64/boot/Image
     destination: Image
   - source: $$RESULTS$$/../kernel/build/linux_build/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
     destination: imx93-11x11-evk.dtb
+
+#scripts:
+#  - name: boot_configure.sh
+  #- name: boot_configure.sh

@@ -1,0 +1,78 @@
+/dts-v1/;
+
+/ {
+    description = "i.MX93 FIT image with kernel, FDT and boot script";
+    #address-cells = <1>;
+
+    images {
+        kernel {
+            description = "Linux kernel (for HAB)";
+            data = /incbin/("Image");
+            type = "kernel";
+            arch = "arm64";
+            os = "linux";
+            compression = "none";
+            load = <0x80400000>;    /* safe for HAB */
+            entry = <0x80400000>;
+            hash {
+                algo = "sha256";
+            };
+        };
+
+        fdt {
+            description = "i.MX93 Device Tree Blob";
+            data = /incbin/("imx93-11x11-evk.dtb");
+            type = "flat_dt";
+            arch = "arm64";
+            compression = "none";
+            load = <0x88000000>;
+            hash {
+                algo = "sha256";
+            };
+        };
+
+        bootscr {
+            description = "Boot script for auto-boot";
+            data = /incbin/("boot.scr");
+            type = "script";
+            arch = "arm64";
+            compression = "none";
+            hash {
+                algo = "sha256";
+            };
+        };
+
+        /* Optional initramfs */
+        /*
+        ramdisk {
+            description = "Initial ramdisk";
+            data = /incbin/("rootfs.cpio.gz");
+            type = "ramdisk";
+            arch = "arm64";
+            os = "linux";
+            compression = "gzip";
+            hash {
+                algo = "sha256";
+            };
+        };
+        */
+    };
+
+    configurations {
+        default = "conf";
+
+        conf {
+            description = "Boot Linux kernel + FDT + boot script on i.MX93";
+            kernel = "kernel";
+            fdt = "fdt";
+            bootscr = "bootscr";
+            /* ramdisk = "ramdisk"; */
+
+            signature {
+                algo = "sha256,rsa2048";
+                key-name-hint = "ubootkey";
+                sign-images = "kernel", "fdt", "bootscr";
+            };
+        };
+    };
+};

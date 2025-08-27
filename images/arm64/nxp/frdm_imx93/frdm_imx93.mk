@@ -80,6 +80,7 @@ $(root_tarball): $(base_tarball) $(config_root)
 	@echo "Configuring ${base_tarball} as ${root_tarball}..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
+	$(build_fitimage)
 
 # The initrd image is build using the initrd generator.
 # initrd_spec: specification of the initrd image.

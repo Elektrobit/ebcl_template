@@ -20,8 +20,10 @@ image:
         content:
           type: files
           files:
-            - build/Image
-            - build/imx93-11x11-evk.dtb
+            - build/fit.itb
+            - build/boot.scr
+            #- build/Image
+            #- build/imx93-11x11-evk.dtb
       size: 64 MB
 
 # Root filesystem partition (contains /boot/Image + dtb)

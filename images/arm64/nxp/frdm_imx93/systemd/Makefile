@@ -21,6 +21,9 @@ boot_root_spec ?= ../boot_root.yaml
 bootloader ?= ../bootloader/bootloader.sh
 kernel ?= ../kernel/kernel.sh
 
+# Build script for the fitimage
+build_fitimage = ../build_fitimage.sh
+
 variant = systemd
 #-------------------------
 # Additional configuration
