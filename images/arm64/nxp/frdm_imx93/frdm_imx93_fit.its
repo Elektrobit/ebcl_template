@@ -23,21 +23,21 @@
             type = "flat_dt";
             arch = "arm64";
             compression = "none";
-            load = <0x88000000>;
+            load = <0x83000000>;    /* ~44 MB after kernel */
             hash { algo = "sha256"; };
         };
 
-         bootscr {
+        bootscr {
             description = "Boot script for auto-boot";
             data = /incbin/("boot.scr");
             type = "script";
             arch = "arm64";
             compression = "none";
-            load = <0x93000000>;
+            load = <0x83100000>;    /* right after DTB */
             hash { algo = "sha256"; };
         };
+
         /*
-        // Optional initramfs
         ramdisk {
             description = "Initial ramdisk";
             data = /incbin/("rootfs.cpio.gz");
@@ -45,6 +45,7 @@
             arch = "arm64";
             os = "linux";
             compression = "gzip";
+            load = <0x83200000>;
             hash { algo = "sha256"; };
         };
         */
@@ -59,14 +60,11 @@
             fdt = "fdt";
             bootscr = "bootscr";
             /* ramdisk = "ramdisk"; */
-            /* 'bootscr' is executed via 'source <addr>:bootscr' at runtime */
 
             signature {
                 algo = "sha256,rsa2048";
                 key-name-hint = "ubootkey";
-                /* Sign all images we rely on */
                 sign-images = "kernel", "fdt", "bootscr";
-                // sign-images = "kernel", "fdt";
             };
         };
     };
