@@ -14,9 +14,7 @@
             compression = "none";
             load = <0x80400000>;    /* safe for HAB */
             entry = <0x80400000>;
-            hash {
-                algo = "sha256";
-            };
+            hash { algo = "sha256"; };
         };
 
         fdt {
@@ -26,24 +24,20 @@
             arch = "arm64";
             compression = "none";
             load = <0x88000000>;
-            hash {
-                algo = "sha256";
-            };
+            hash { algo = "sha256"; };
         };
 
-        bootscr {
+         bootscr {
             description = "Boot script for auto-boot";
             data = /incbin/("boot.scr");
             type = "script";
             arch = "arm64";
             compression = "none";
-            hash {
-                algo = "sha256";
-            };
+            load = <0x93000000>;
+            hash { algo = "sha256"; };
         };
-
-        /* Optional initramfs */
         /*
+        // Optional initramfs
         ramdisk {
             description = "Initial ramdisk";
             data = /incbin/("rootfs.cpio.gz");
@@ -51,9 +45,7 @@
             arch = "arm64";
             os = "linux";
             compression = "gzip";
-            hash {
-                algo = "sha256";
-            };
+            hash { algo = "sha256"; };
         };
         */
     };
@@ -62,16 +54,19 @@
         default = "conf";
 
         conf {
-            description = "Boot Linux kernel + FDT + boot script on i.MX93";
+            description = "Boot Linux kernel + FDT + signed bootscr on i.MX93";
             kernel = "kernel";
             fdt = "fdt";
             bootscr = "bootscr";
             /* ramdisk = "ramdisk"; */
+            /* 'bootscr' is executed via 'source <addr>:bootscr' at runtime */
 
             signature {
                 algo = "sha256,rsa2048";
                 key-name-hint = "ubootkey";
+                /* Sign all images we rely on */
                 sign-images = "kernel", "fdt", "bootscr";
+                // sign-images = "kernel", "fdt";
             };
         };
     };
