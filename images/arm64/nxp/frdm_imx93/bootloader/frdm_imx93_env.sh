@@ -37,4 +37,6 @@ MKIMG_REPO="https://github.com/nxp-imx/imx-mkimage.git"
 MKIMG_COMMIT="4c2e5b25232f5aa003976ddca9d1d2fb9667beb1"
 MKIMG_DIR="imx-mkimage"
 
+sudo apt-get update
+sudo apt-get install -y libgnutls28-dev u-boot-tools
 echo "configuration END"

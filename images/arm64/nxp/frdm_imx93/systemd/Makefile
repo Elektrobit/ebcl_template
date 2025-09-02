@@ -16,13 +16,15 @@ config_root ?= config_root.sh
 #boot_extract_spec ?= ../boot_extract.yaml
 boot_extract_spec ?= ../boot_compile.yaml
 
+linux_kernel ?= ../linux_kernel.yaml
+
 boot_root_spec ?= ../boot_root.yaml
 
 bootloader ?= ../bootloader/bootloader.sh
 kernel ?= ../kernel/kernel.sh
 
 # Build script for the fitimage
-build_fitimage = ../build_fitimage.sh
+#build_fitimage = ../build_fitimage.sh
 
 variant = systemd
 #-------------------------

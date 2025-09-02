@@ -61,8 +61,6 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     git checkout "${OPTEE_COMMIT}"
 
     echo "🔨 Building OP-TEE (tee.bin)..."
-    sudo apt-get update
-    sudo apt-get install -y libgnutls28-dev u-boot-tools
     python3 -m venv venv
     # shellcheck disable=SC1091
     source venv/bin/activate
@@ -109,13 +107,21 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     scripts/config --set-str CONFIG_BOOTCOMMAND \
       "mmc dev 1; fatload mmc 1:1 0x90000000 fit.itb; setenv script_addr 0x83100000; imxtract 0x90000000 bootscr \${script_addr}; source \${script_addr}"
 
-
     make olddefconfig
 
     echo "🏗️  Building U-Boot..."
     make -j"$(nproc)" CROSS_COMPILE="${CROSS_COMPILE}"
 
-    echo "✅ U-Boot build (with bl31.bin and tee.bin) complete."
+    ### Embed public key for FIT verification
+    echo "🔑 Embedding public key into U-Boot DT..."
+    echo "${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -A arm64 -T script -C none -n "EB FIT boot script" -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr"
+    ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -A arm64 -T script -C none -n "EB FIT boot script" -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr
+    echo " ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keys -r ${PROJECT_HOME}/build/fit.itb"
+    ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keys -r ${PROJECT_HOME}/build/fit.itb
+    #${PROJECT_HOME}/../build_fitimage.sh
+    make u-boot.bin CROSS_COMPILE="${CROSS_COMPILE}"
+
+    echo "✅ U-Boot build (with bl31.bin, tee.bin, and public key) complete."
   popd
 
   # === Step 5: Build flash.bin (imx-mkimage) ===

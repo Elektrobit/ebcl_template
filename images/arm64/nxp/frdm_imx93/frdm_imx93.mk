@@ -49,12 +49,14 @@ initrd_img ?= $(result_folder)/initrd.img
 sysroot_tarball ?= ebcl_frdm_imx93_sysroot.tar
 
 
-boot_root ?= $(result_folder)/boot_root.tar
+#boot_root ?= $(result_folder)/boot_root.tar
 
 boot_contents ?= $(result_folder)/boot.tar
 
+linux_kernel_contents ?= $(result_folder)/kernel.tar
+
 # Embdgen is used to build the SD card image.
-$(disc_image): $(initrd_img) $(root_tarball) $(partition_layout)
+$(disc_image): $(initrd_img) $(root_tarball) $(linux_kernel_contents) $(boot_contents) $(partition_layout)
 	@echo "Build image..."
 	mkdir -p $(result_folder)
 	set -o pipefail && embdgen -o ./$(disc_image) $(partition_layout) 2>&1 | tee $(disc_image).log
@@ -67,7 +69,7 @@ $(disc_image): $(initrd_img) $(root_tarball) $(partition_layout)
 # is done as a second step, because the build of this tarball is quite 
 # time consuming and configuration is fast. This is an optimization for 
 # the image development process.
-$(base_tarball): $(root_filesystem_spec) $(boot_contents)
+$(base_tarball): $(root_filesystem_spec) $(boot_root)
 	@echo "Build root.tar..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
@@ -80,7 +82,6 @@ $(root_tarball): $(base_tarball) $(config_root)
 	@echo "Configuring ${base_tarball} as ${root_tarball}..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_configurator $(root_filesystem_spec) $(base_tarball) $(root_tarball) 2>&1 | tee $(root_tarball).log
-	$(build_fitimage)
 
 # The initrd image is build using the initrd generator.
 # initrd_spec: specification of the initrd image.
@@ -107,10 +108,15 @@ $(sysroot_tarball): $(root_filesystem_spec)
 $(boot_root): $(boot_root_spec)
 	@echo "Build $(boot_root) from $(boot_root_spec)..."
 	mkdir -p $(result_folder)
-	$(kernel)
 	set -o pipefail && root_generator --no-config $(boot_root_spec) $(result_folder) 2>&1 | tee $(boot_root).log
 
-$(boot_contents): $(boot_extract_spec) $(boot_root) $(initrd_img)
+$(linux_kernel_contents): $(linux_kernel)
+	@echo "Generating kernel ..."
+	mkdir -p $(result_folder)
+	$(kernel)
+	set -o pipefail && boot_generator $(linux_kernel) $(result_folder) 2>&1 | tee $(linux_kernel_contents).log
+
+$(boot_contents): $(boot_extract_spec)
 	@echo "Extracting required files from boot_root ..."
 	mkdir -p $(result_folder)
 	$(bootloader)
@@ -164,7 +170,10 @@ root: $(base_tarball)
 .PHONY: initrd
 initrd: $(initrd_img)
 
-# build of the initrd.img(s)
+.PHONY: kernel
+kernel: $(linux_kernel_contents)
+
+# build of the u-boot, atf and optee
 .PHONY: boot
 boot: $(boot_contents)
 

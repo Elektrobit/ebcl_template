@@ -4,11 +4,11 @@ packages:
   - udev        # udev will create the device node for ttyS0
   - util-linux
 # Scripts to configure the root tarball
-host_files:
-  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/Image
-    destination: boot
-  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
-    destination: boot
+#host_files:
+#  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/Image
+#    destination: boot
+#  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
+#    destination: boot
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: sudo
