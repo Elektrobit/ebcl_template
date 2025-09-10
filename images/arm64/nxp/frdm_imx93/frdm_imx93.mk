@@ -116,7 +116,7 @@ $(linux_kernel_contents): $(linux_kernel)
 	$(kernel)
 	set -o pipefail && boot_generator $(linux_kernel) $(result_folder) 2>&1 | tee $(linux_kernel_contents).log
 
-$(boot_contents): $(boot_extract_spec)
+$(boot_contents):
 	@echo "Extracting required files from boot_root ..."
 	mkdir -p $(result_folder)
 	$(bootloader)
