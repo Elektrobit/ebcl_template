@@ -57,24 +57,6 @@
                 key-name-hint = "ubootkey";
             };
         };
-        /*
-        ramdisk {
-            description = "Initial ramdisk";
-            data = /incbin/("rootfs.cpio.gz");
-            type = "ramdisk";
-            arch = "arm64";
-            os = "linux";
-            compression = "gzip";
-            load = <0x83200000>;
-            hash-1 {
-                algo = "sha256";
-            };
-            signature-1 {
-                algo = "sha256,rsa2048";
-                key-name-hint = "ubootkey";
-            };
-        };
-        */
     };
 
     configurations {
@@ -85,12 +67,6 @@
             kernel = "kernel";
             fdt = "fdt";
             bootscr = "bootscr";
-            /* ramdisk = "ramdisk"; */
-            /*signature {
-                algo = "sha256,rsa2048";
-                key-name-hint = "ubootkey";
-                sign-images = "kernel", "fdt", "bootscr";
-            };*/
         };
     };
 };

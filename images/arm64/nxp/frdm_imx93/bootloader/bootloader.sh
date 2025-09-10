@@ -86,11 +86,10 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     cp "${OPTEE_BUILD_DIR}/core/tee-raw.bin" "../${UBOOT_DIR}/tee.bin"
   popd
 
-  # === Step 4: Build U-Boot ===
   pushd "${UBOOT_DIR}"
     echo "⚙️  Configuring U-Boot with patched FRDM defconfig..."
     make distclean
-    make imx93_11x11_frdm_defconfig
+    make  imx93_11x11_frdm_defconfig
 
     echo "➕ Enabling FIT + script + signature support and auto-boot command..."
     # Enable FIT & signatures
@@ -101,25 +100,67 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     scripts/config --enable CONFIG_FIT_SCRIPT
     scripts/config --enable CONFIG_CMD_SOURCE
     scripts/config --enable CONFIG_FIT_RSASSA_PSS || true
+    scripts/config --enable CONFIG_OF_CONTROL
+    scripts/config --disable CONFIG_LEGACY_IMAGE_FORMAT
+    scripts/config --enable CONFIG_FIT_FULL_CHECK
+    scripts/config --enable CONFIG_FIT_PRINT
 
     # Set boot delay and boot command (mmc1, load FIT, source embedded script)
     scripts/config --set-val CONFIG_BOOTDELAY 3
     scripts/config --set-str CONFIG_BOOTCOMMAND \
-      "mmc dev 1; fatload mmc 1:1 0x90000000 fit.itb; setenv script_addr 0x83100000; imxtract 0x90000000 bootscr \${script_addr}; source \${script_addr}"
+        "mmc dev 1; fatload mmc 1:1 0x90000000 fitA.itb; source 0x90000000:bootscr"
 
     make olddefconfig
-
-    echo "🏗️  Building U-Boot..."
+    #echo "🔨 make tools for u-boot"
+    #make CROSS_COMPILE="${CROSS_COMPILE}" HOSTCC=gcc tools
+    echo "🏗️  Building U-Boot (first pass, no key yet)..."
     make -j"$(nproc)" CROSS_COMPILE="${CROSS_COMPILE}"
+
+    ### Create boot script FIT subimage
+    #echo "🔑 Generating boot.scr..."
+    #${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage \
+     #   -A arm64 -T script -C none -n "EB FIT boot script" \
+     #   -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr
 
     ### Embed public key for FIT verification
     echo "🔑 Embedding public key into U-Boot DT..."
-    echo "${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -A arm64 -T script -C none -n "EB FIT boot script" -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr"
-    ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -A arm64 -T script -C none -n "EB FIT boot script" -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr
-    echo " ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keys -r ${PROJECT_HOME}/build/fit.itb"
-    ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keys -r ${PROJECT_HOME}/build/fit.itb
-    #${PROJECT_HOME}/../build_fitimage.sh
-    make u-boot.bin CROSS_COMPILE="${CROSS_COMPILE}"
+    cp u-boot.dtb u-boot_noKey.dtb
+
+    echo -e "${CYAN}Dump the u-boot.dtb BEFORE key insert${NC}"
+    dtc -I dtb -O dts u-boot.dtb | grep -A5 ubootkey || echo "⚠️ No key yet (expected)"
+    negative_test=false;
+    if [ "$negative_test" = "true" ]; then
+        #create u-boot.dtb and fit.itb with keyC
+        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K u-boot.dtb -k ${PROJECT_HOME}/../keysB -r ${PROJECT_HOME}/build/fitB.itb
+        #create u-boot_keysB.dtb renaming u-boot.dtb
+        mv u-boot.dtb u-boot_keysB.dtb
+        #restore the no key dtb u-boot_noKey.dtb as u-boot.dtb
+        cp u-boot_noKey.dtb u-boot.dtb
+        #remove the fit signded with keyC
+        rm ${PROJECT_HOME}/build/fitB.itb
+        #create u-boot.dtb and fit.itb with normal key
+        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keysA -r ${PROJECT_HOME}/build/fitA.itb
+        mv u-boot.dtb u-boot_keysA.dtb 
+        cp u-boot_keysB.dtb u-boot.dtb
+    else
+        echo "➡️  Running mkimage to inject key"
+        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage \
+            -f ${PROJECT_HOME}/build/frdm_imx93_fit.its \
+            -K u-boot.dtb \
+            -k ${PROJECT_HOME}/../keysA \
+            -r ${PROJECT_HOME}/build/fitA.itb
+    fi
+    echo -e "${CYAN}Dump the u-boot.dtb AFTER key insert...${NC}"
+    dtc -I dtb -O dts u-boot.dtb | grep -A10 ubootkey || echo "❌ Key not found!"
+    echo -e "${CYAN}Dump the u-boot.dtb AFTER key inserts... DONE${NC}"
+
+    cp u-boot.dtb arch/arm/dts/u-boot.dtb
+    make EXT_DTB=u-boot.dtb CROSS_COMPILE="${CROSS_COMPILE}" u-boot.bin
+    #cat u-boot_nokey.bin u-boot.dtb > u-boot.bin
+    #./tools/binman/binman replace -i u-boot_nokey.bin -f u-boot.dtb u-boot-dtb
+
+    echo "📖 Checking key presence inside final DTB..."
+    dtc -I dtb -O dts u-boot.dtb | grep -A10 ubootkey || echo "⚠️ Key not found!"
 
     echo "✅ U-Boot build (with bl31.bin, tee.bin, and public key) complete."
   popd

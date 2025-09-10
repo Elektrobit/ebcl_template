@@ -20,7 +20,7 @@ image:
         content:
           type: files
           files:
-            - build/fit.itb
+            - build/fitA.itb
             #- build/boot.scr
             #- build/Image
             #- build/imx93-11x11-evk.dtb
