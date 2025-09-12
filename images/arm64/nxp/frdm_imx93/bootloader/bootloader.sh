@@ -19,6 +19,7 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
       git am "${PATCHES_DIR}"/0002-*.patch
       git am "${PATCHES_DIR}"/0003-*.patch || echo "✅ 0003 skipped (optional)"
       git am "${PATCHES_DIR}"/0004-*.patch || echo "✅ 0004 skipped (partial patch for i.MX91)"
+      git apply "${PATCHES_DIR}"/signature.patch
     popd
   fi
 

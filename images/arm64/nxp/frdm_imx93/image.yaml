@@ -26,7 +26,7 @@ image:
             #- build/imx93-11x11-evk.dtb
       size: 64 MB
 
-# Root filesystem partition (contains /boot/Image + dtb)
+# Root filesystem partition
     - name: root
       type: partition
       fstype: ext4

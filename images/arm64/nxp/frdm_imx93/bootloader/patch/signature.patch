@@ -1,0 +1,31 @@
+diff --git a/boot/image-fit.c b/boot/image-fit.c
+index 3acee204c82..eb74eecf959 100644
+--- a/boot/image-fit.c
++++ b/boot/image-fit.c
+@@ -27,6 +27,7 @@
+ #include <malloc.h>
+ #include <memalign.h>
+ #include <asm/global_data.h>
++#include <hang.h>
+ #ifdef CONFIG_DM_HASH
+ #include <dm.h>
+ #include <u-boot/hash.h>
+@@ -1404,6 +1405,18 @@ error:
+ 	printf(" error!\n%s for '%s' hash node in '%s' image node\n",
+ 	       err_msg, fit_get_name(fit, noffset, NULL),
+ 	       fit_get_name(fit, image_noffset, NULL));
++	if (strcmp(err_msg, "Unable to verify required signature") == 0)
++	{
++#ifdef USE_HOSTCC
++		/* Running as host tool (mkimage, fit_check_sign, etc.) */
++		fprintf(stderr, "Signature check failed\n");
++		exit(1);
++#else
++		/* Running on target firmware (board) */
++		printf("Signature check failed → halting system\n");
++		hang();
++#endif
++	}
+ 	return 0;
+ }
+ 
