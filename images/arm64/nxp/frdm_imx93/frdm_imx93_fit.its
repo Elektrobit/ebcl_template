@@ -59,7 +59,7 @@
         };
         ramdisk {
             description = "Initial ramdisk (signed)";
-            data = /incbin/("initrd.img");
+            data = /incbin/("initrd-patched.img"); /* file from /build/ebcl_build_tools/ebcl/tools/initrd/init patched slightly with retry finding root partition */
             type = "ramdisk";
             arch = "arm64";
             os = "linux";

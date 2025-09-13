@@ -89,6 +89,7 @@ $(initrd_img): $(initrd_spec)
 	@echo "Build initrd.img..."
 	mkdir -p $(result_folder)
 	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
+	../initrd.sh build/initrd.img ../patched_initrd_init build/initrd-patched.img
 
 # The root generator is used to build a sysroot variant of the root filesystem.
 # root_filesystem_spec: specification of the root filesystem
