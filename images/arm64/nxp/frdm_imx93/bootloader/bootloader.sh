@@ -129,27 +129,27 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
 
     echo -e "${CYAN}Dump the u-boot.dtb BEFORE key insert${NC}"
     dtc -I dtb -O dts u-boot.dtb | grep -A5 ubootkey || echo "⚠️ No key yet (expected)"
-    negative_test=false;
+    negative_test=true;
     if [ "$negative_test" = "true" ]; then
         #create u-boot.dtb and fit.itb with keyC
-        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K u-boot.dtb -k ${PROJECT_HOME}/../keysB -r ${PROJECT_HOME}/build/fitB.itb
+        mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K u-boot.dtb -k ${PROJECT_HOME}/../keysB -r ${PROJECT_HOME}/${BOOTLOADER_DIR}/fitB.itb
         #create u-boot_keysB.dtb renaming u-boot.dtb
         mv u-boot.dtb u-boot_keysB.dtb
         #restore the no key dtb u-boot_noKey.dtb as u-boot.dtb
         cp u-boot_noKey.dtb u-boot.dtb
         #remove the fit signded with keyC
-        rm ${PROJECT_HOME}/build/fitB.itb
+        rm ${PROJECT_HOME}/${BOOTLOADER_DIR}/fitB.itb
         #create u-boot.dtb and fit.itb with normal key
-        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keysA -r ${PROJECT_HOME}/build/fitA.itb
+        mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb -k ${PROJECT_HOME}/../keysA -r ${PROJECT_HOME}/${BOOTLOADER_DIR}/fitA.itb
         mv u-boot.dtb u-boot_keysA.dtb 
         cp u-boot_keysB.dtb u-boot.dtb
     else
         echo "➡️  Running mkimage to inject key"
-        ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage \
+        mkimage \
             -f ${PROJECT_HOME}/build/frdm_imx93_fit.its \
-            -K u-boot.dtb \
+            -K ${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/u-boot.dtb \
             -k ${PROJECT_HOME}/../keysA \
-            -r ${PROJECT_HOME}/build/fitA.itb
+            -r ${PROJECT_HOME}/${BOOTLOADER_DIR}/fitA.itb
     fi
     echo -e "${CYAN}Dump the u-boot.dtb AFTER key insert...${NC}"
     dtc -I dtb -O dts u-boot.dtb | grep -A10 ubootkey || echo "❌ Key not found!"

@@ -11,6 +11,8 @@ use_packages: false
 host_files:
   - source: $$RESULTS$$/../bootloader/build/imx-mkimage/iMX93/flash.bin
     destination: flash.bin
+  - source: $$RESULTS$$/../bootloader/build/fitA.itb
+    destination: fitA.itb
 
 #scripts:
 #  - name: boot_configure.sh
