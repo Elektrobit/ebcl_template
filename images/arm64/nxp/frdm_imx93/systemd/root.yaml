@@ -11,4 +11,4 @@ packages:
 #    destination: boot
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
-    env: sudo
+    env: chroot # Type of execution environment

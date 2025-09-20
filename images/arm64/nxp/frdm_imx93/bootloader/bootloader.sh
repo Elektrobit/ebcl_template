@@ -96,20 +96,21 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     # Enable FIT & signatures
     scripts/config --enable CONFIG_FIT
     scripts/config --enable CONFIG_FIT_VERBOSE
+    # !LINKSTO EBCL-REQ-SWRS-01, 1
     scripts/config --enable CONFIG_FIT_SIGNATURE
     scripts/config --enable CONFIG_RSA
     scripts/config --enable CONFIG_FIT_SCRIPT
     scripts/config --enable CONFIG_CMD_SOURCE
     scripts/config --enable CONFIG_FIT_RSASSA_PSS || true
     scripts/config --enable CONFIG_OF_CONTROL
-    scripts/config --disable CONFIG_LEGACY_IMAGE_FORMAT
+    #scripts/config --disable CONFIG_LEGACY_IMAGE_FORMAT
     scripts/config --enable CONFIG_FIT_FULL_CHECK
     scripts/config --enable CONFIG_FIT_PRINT
 
     # Set boot delay and boot command (mmc1, load FIT, source embedded script)
     scripts/config --set-val CONFIG_BOOTDELAY 3
     scripts/config --set-str CONFIG_BOOTCOMMAND \
-        "mmc dev 1; fatload mmc 1:1 0x90000000 fitA.itb; source 0x90000000:bootscr"
+        "mmc dev 1; fatload mmc 1:1 0x90000000 fitA.itb; setenv script_addr 0x83100000; imxtract 0x90000000 bootscr \${script_addr}; source \${script_addr}"
 
     make olddefconfig
     #echo "🔨 make tools for u-boot"
@@ -118,10 +119,10 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     make -j"$(nproc)" CROSS_COMPILE="${CROSS_COMPILE}"
 
     ### Create boot script FIT subimage
-    #echo "🔑 Generating boot.scr..."
-    #${PROJECT_HOME}/${BOOTLOADER_DIR}/${UBOOT_DIR}/tools/mkimage \
-     #   -A arm64 -T script -C none -n "EB FIT boot script" \
-     #   -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr
+    echo "🔑 Generating boot.scr..."
+    mkimage \
+       -A arm64 -T script -C none -n "EB FIT boot script" \
+       -d ${PROJECT_HOME}/build/boot.cmd ${PROJECT_HOME}/build/boot.scr
 
     ### Embed public key for FIT verification
     echo "🔑 Embedding public key into U-Boot DT..."
@@ -129,8 +130,9 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
 
     echo -e "${CYAN}Dump the u-boot.dtb BEFORE key insert${NC}"
     dtc -I dtb -O dts u-boot.dtb | grep -A5 ubootkey || echo "⚠️ No key yet (expected)"
-    negative_test=true;
+    negative_test=false;
     if [ "$negative_test" = "true" ]; then
+        # !LINKSTO EBCL-REQ-SWRS-09, 1
         #create u-boot.dtb and fit.itb with keyC
         mkimage -f ${PROJECT_HOME}/build/frdm_imx93_fit.its -K u-boot.dtb -k ${PROJECT_HOME}/../keysB -r ${PROJECT_HOME}/${BOOTLOADER_DIR}/fitB.itb
         #create u-boot_keysB.dtb renaming u-boot.dtb
@@ -144,6 +146,7 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
         mv u-boot.dtb u-boot_keysA.dtb 
         cp u-boot_keysB.dtb u-boot.dtb
     else
+        # !LINKSTO EBCL-REQ-SWRS-10, 1
         echo "➡️  Running mkimage to inject key"
         mkimage \
             -f ${PROJECT_HOME}/build/frdm_imx93_fit.its \
