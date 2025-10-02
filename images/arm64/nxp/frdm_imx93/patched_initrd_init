@@ -1,45 +1,89 @@
 #!/bin/sh
+set -e
 
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
 
-cmdline=$(cat /proc/cmdline)
-echo "Kernel commandline: ${cmdline}"
+echo "Kernel commandline: $(cat /proc/cmdline)"
 
-# Mount root filesystem
-root=/dev/mmcblk1p2
-for param in $cmdline; do
-    if [[ $param == "root="* ]]; then
-        root=${param:5}
-    fi
+# Defaults
+#root=/dev/dm-0
+root=/dev/mapper/rootfs
+init=/sbin/init
+
+# --- Parse verity parameters from /proc/cmdline ---
+for param in $(cat /proc/cmdline); do
+    case $param in
+        verity.sectors=*)   SECTORS="${param#verity.sectors=}" ;;
+        verity.blksize=*)   BLOCK_SIZE="${param#verity.blksize=}" ;;
+        verity.datablocks=*) DATA_BLOCKS="${param#verity.datablocks=}" ;;
+        verity.hashstart=*) HASH_START="${param#verity.hashstart=}" ;;
+        verity.roothash=*)  ROOT_HASH="${param#verity.roothash=}" ;;
+        verity.salt=*)      SALT="${param#verity.salt=}" ;;
+    esac
 done
 
-# Handle LABEL and UUID
-if [[ $root == "LABEL="* ]] || [[ $root == "UUID="* ]]; then
-    $dev=$(findfs $root)
-    if [ $? -ne 0 ]; then
-        echo "No partition found for ${root}! Dropping to shell."
-        /bin/sh
-    else
-        echo "Found device $dev for $root"
-        $root=$dev
+echo "dm-verity params:"
+echo "  SECTORS=${SECTORS}"
+echo "  BLOCK_SIZE=${BLOCK_SIZE}"
+echo "  DATA_BLOCKS=${DATA_BLOCKS}"
+echo "  HASH_START=${HASH_START}"
+echo "  ROOT_HASH=${ROOT_HASH}"
+echo "  SALT=${SALT}"
+
+# Wait for the data device (rootfs partition)
+DATA_DEV=/dev/mmcblk1p2
+HASH_DEV=/dev/mmcblk1p3
+echo "Waiting for ${DATA_DEV}..."
+for i in $(seq 1 20); do
+    if [ -b "${DATA_DEV}" ]; then
+        echo "${DATA_DEV} found."
+        break
     fi
+    echo "  Attempt $i: ${DATA_DEV} not ready, retrying..."
+    sleep 1
+done
+
+if [ ! -b "${DATA_DEV}" ]; then
+    echo "ERROR: ${DATA_DEV} not found! Dropping to shell."
+    exec /bin/sh
 fi
 
-init=/sbin/init
-for param in $cmdline; do
-    if [[ $param == "init="* ]]; then
-        init=${param:5}
-        echo "Using $init as init."
+echo "Waiting for ${HASH_DEV}..."
+for i in $(seq 1 20); do
+    if [ -b "${HASH_DEV}" ]; then
+        echo "${HASH_DEV} found."
+        break
     fi
+    echo "  Attempt $i: ${HASH_DEV} not ready, retrying..."
+    sleep 1
 done
 
-#stat $root
-echo "Waiting for root device: $root ..."
+if [ ! -b "${HASH_DEV}" ]; then
+    echo "ERROR: ${HASH_DEV} not found! Dropping to shell."
+    exec /bin/sh
+fi
+
+# Create dm-verity mapping
+#TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
+#echo "Creating dm-verity mapping..."
+#echo "dmsetup create --readonly rootfs --table $TABLE"
+#dmsetup create --readonly rootfs --table "$TABLE"
+echo "Creating dm-verity mapping with veritysetup..."
+HASH_OFFSET=$((HASH_START * BLOCK_SIZE))
+veritysetup create rootfs $DATA_DEV $HASH_DEV \
+   --hash-offset=$HASH_OFFSET \
+   --data-blocks=$DATA_BLOCKS \
+   --data-block-size=$BLOCK_SIZE \
+   --hash-block-size=$BLOCK_SIZE \
+   --salt=$SALT \
+   $ROOT_HASH
+
+# Wait for /dev/dm-0
 for i in $(seq 1 10); do
     if [ -b "$root" ]; then
-        echo "Root device $root found."
+        echo "dm-verity device $root created."
         break
     fi
     echo "  Attempt $i: $root not ready, retrying..."
@@ -47,64 +91,13 @@ for i in $(seq 1 10); do
 done
 
 if [ ! -b "$root" ]; then
-    echo "Root device $root not found after retries. Dropping to shell."
-    ls -lah /dev/mmc*
-    /bin/sh
+    echo "ERROR: $root not found. Dropping to shell."
+    ls -lah /dev/mapper /dev/dm*
+    exec /bin/sh
 fi
 
-if [ $? -ne 0 ]; then
-    # List devices
-    echo "Available devices:"
-    ls -lah /dev/vd*
-    ls -lah /dev/sd*
-    ls -lah /dev/mmc*
+echo "Mounting $root read-only as rootfs..."
+mount -o ro "$root" /sysroot
 
-    echo "Root device not found! Dropping to shell."
-    echo "You can continue booting by exiting this shell."
-    /bin/sh
-fi
-
-read_only=1
-for param in $cmdline; do
-    if [[ $param == "rw" ]]; then
-        read_only=0
-    fi
-done
-
-if [ $read_only -ne 1 ]; then
-    echo "Using root $root writable."
-    mount $root /sysroot
-
-    # Ensure proc sys and dev exists
-    mkdir -p /sysroot/proc
-    mkdir -p /sysroot/sys
-    mkdir -p /sysroot/dev
-else
-    echo "Using device $root as read-only root."
-    mount -o ro $root /sysroot
-fi
-
-# Check if init exists
-init_ok=0
-if [ -L "/sysroot${init}" ]; then
-    echo "${init} is a symlink."
-    ls -lah "/sysroot${init}"
-    init_ok=1
-elif [ -f "/sysroot${init}" ]; then
-    echo "${init} is a file..."
-    if [ ! -x "/sysroot${init}" ]; then
-        echo "${init} is not executable!"
-    else
-        init_ok=1
-    fi
-fi
-
-
-# Switch to the new root filesystem
-if [ $init_ok -ne 1 ]; then
-    echo "There seems to be an issue with ${init}! Dropping to shell."
-    echo "You can continue booting by exiting this shell."
-    /bin/sh
-fi 
-
-exec switch_root /sysroot /sbin/init
+# Switch to the real root
+exec switch_root /sysroot "$init"

@@ -25,6 +25,9 @@ cd "$KERNEL_DIR"
 # === STEP 2: Apply defconfig ===
 make ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE O=${PROJECT_HOME}/${OUTPUT_KERNEL}/linux_build imx_v8_defconfig
 
+echo "➕ Enabling dm-verity ..."
+cp ../../patch/.config ${PROJECT_HOME}/${OUTPUT_KERNEL}/linux_build/.config
+
 # === STEP 3: Build with Yocto-equivalent flags ===
 KCFLAGS="-fno-pic \
 -march=armv8-a+crc+crypto \

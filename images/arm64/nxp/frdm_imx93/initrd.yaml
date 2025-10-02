@@ -4,3 +4,11 @@ base: base.yaml
 kernel: null
 # Root device to mount
 root_device: /dev/mmcblk1p2
+packages:
+  - dmsetup
+  - cryptsetup
+#  - initramfs-module-dmverity
+#  - initramfs-module-udev
+#  - lvm2-udevrules
+#  - udev
+#  - util-linux-mount
