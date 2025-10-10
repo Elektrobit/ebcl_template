@@ -8,11 +8,16 @@ mount -t devtmpfs none /dev
 echo "Kernel commandline: $(cat /proc/cmdline)"
 
 # Defaults
-#root=/dev/dm-0
 root=/dev/mapper/rootfs
 init=/sbin/init
 
 # --- Parse verity parameters from /proc/cmdline ---
+SECTORS=""
+BLOCK_SIZE=""
+DATA_BLOCKS=""
+HASH_START=""
+ROOT_HASH=""
+SALT=""
 for param in $(cat /proc/cmdline); do
     case $param in
         verity.sectors=*)   SECTORS="${param#verity.sectors=}" ;;
@@ -25,18 +30,25 @@ for param in $(cat /proc/cmdline); do
 done
 
 echo "dm-verity params:"
-echo "  SECTORS=${SECTORS}"
-echo "  BLOCK_SIZE=${BLOCK_SIZE}"
-echo "  DATA_BLOCKS=${DATA_BLOCKS}"
-echo "  HASH_START=${HASH_START}"
-echo "  ROOT_HASH=${ROOT_HASH}"
-echo "  SALT=${SALT}"
+echo "  SECTORS=${SECTORS:-<unset>}"
+echo "  BLOCK_SIZE=${BLOCK_SIZE:-<unset>}"
+echo "  DATA_BLOCKS=${DATA_BLOCKS:-<unset>}"
+echo "  HASH_START=${HASH_START:-<unset>}"
+echo "  ROOT_HASH=${ROOT_HASH:-<unset>}"
+echo "  SALT=${SALT:-<unset>}"
 
-# Wait for the data device (rootfs partition)
+# sanity
+if [ -z "$SECTORS" ] || [ -z "$BLOCK_SIZE" ] || [ -z "$DATA_BLOCKS" ] || [ -z "$ROOT_HASH" ] || [ -z "$SALT" ]; then
+    echo "Missing verity params; dropping to shell."
+    exec /bin/sh
+fi
+
+# Devices (adjust if your platform uses different device nodes)
 DATA_DEV=/dev/mmcblk1p2
 HASH_DEV=/dev/mmcblk1p3
+
 echo "Waiting for ${DATA_DEV}..."
-for i in $(seq 1 20); do
+for i in $(seq 1 30); do
     if [ -b "${DATA_DEV}" ]; then
         echo "${DATA_DEV} found."
         break
@@ -44,14 +56,13 @@ for i in $(seq 1 20); do
     echo "  Attempt $i: ${DATA_DEV} not ready, retrying..."
     sleep 1
 done
-
 if [ ! -b "${DATA_DEV}" ]; then
     echo "ERROR: ${DATA_DEV} not found! Dropping to shell."
     exec /bin/sh
 fi
 
 echo "Waiting for ${HASH_DEV}..."
-for i in $(seq 1 20); do
+for i in $(seq 1 30); do
     if [ -b "${HASH_DEV}" ]; then
         echo "${HASH_DEV} found."
         break
@@ -59,45 +70,88 @@ for i in $(seq 1 20); do
     echo "  Attempt $i: ${HASH_DEV} not ready, retrying..."
     sleep 1
 done
-
 if [ ! -b "${HASH_DEV}" ]; then
     echo "ERROR: ${HASH_DEV} not found! Dropping to shell."
     exec /bin/sh
 fi
 
-# Create dm-verity mapping
-#TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
-#echo "Creating dm-verity mapping..."
-#echo "dmsetup create --readonly rootfs --table $TABLE"
-#dmsetup create --readonly rootfs --table "$TABLE"
-echo "Creating dm-verity mapping with veritysetup..."
-HASH_OFFSET=$((HASH_START * BLOCK_SIZE))
-veritysetup create rootfs $DATA_DEV $HASH_DEV \
-   --hash-offset=$HASH_OFFSET \
-   --data-blocks=$DATA_BLOCKS \
-   --data-block-size=$BLOCK_SIZE \
-   --hash-block-size=$BLOCK_SIZE \
-   --salt=$SALT \
-   $ROOT_HASH
+# auto-detect verity header at start of hash device (first 4k contains "verity")
+if dd if="$HASH_DEV" bs=4096 count=1 2>/dev/null | head -c 6 | grep -q '^verity'; then
+    echo "found verity header on $HASH_DEV"
+    HASH_START=1
+else
+    HASH_START=0
+fi
+echo "Using HASH_START=$HASH_START"
 
-# Wait for /dev/dm-0
-for i in $(seq 1 10); do
-    if [ -b "$root" ]; then
-        echo "dm-verity device $root created."
-        break
-    fi
-    echo "  Attempt $i: $root not ready, retrying..."
-    sleep 1
-done
+# Build dm table
+TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
+echo "Creating dm-verity mapping..."
+echo "dmsetup create --readonly rootfs --table \"$TABLE\""
 
-if [ ! -b "$root" ]; then
-    echo "ERROR: $root not found. Dropping to shell."
-    ls -lah /dev/mapper /dev/dm*
+if ! dmsetup create --readonly rootfs --table "$TABLE"; then
+    echo "dmsetup create failed! Drop to shell."
     exec /bin/sh
 fi
 
+# ensure device nodes exist if udev is not running
+mkdir -p /dev/mapper
+dmsetup mknodes || true
+###############veritysetup setup version
+#echo "Creating dm-verity mapping with veritysetup..."
+#HASH_OFFSET=$((HASH_START * BLOCK_SIZE))
+#veritysetup create rootfs $DATA_DEV $HASH_DEV \
+#   --hash-offset=$HASH_OFFSET \
+#   --data-blocks=$DATA_BLOCKS \
+#   --data-block-size=$BLOCK_SIZE \
+#   --hash-block-size=$BLOCK_SIZE \
+#   --salt=$SALT \
+#   $ROOT_HASH
+########################################
+
+# fallback: if /dev/mapper/rootfs missing but /dev/dm-0 exists, create named node
+if [ ! -b /dev/mapper/rootfs ] && [ -b /dev/dm-0 ]; then
+    MAJ_HEX=$(stat -c '%t' /dev/dm-0)
+    MIN_HEX=$(stat -c '%T' /dev/dm-0)
+    MAJ=$((0x$MAJ_HEX))
+    MIN=$((0x$MIN_HEX))
+    if [ ! -e /dev/mapper/rootfs ]; then
+        echo "Creating /dev/mapper/rootfs node -> major:$MAJ minor:$MIN"
+        mknod /dev/mapper/rootfs b "$MAJ" "$MIN" || true
+        chmod 0600 /dev/mapper/rootfs || true
+    fi
+fi
+
+# wait for mapper node
+for i in $(seq 1 10); do
+    if [ -b "$root" ] || [ -b /dev/dm-0 ]; then
+        echo "dm-verity device ready."
+        break
+    fi
+    echo "  Attempt $i: waiting for $root..."
+    sleep 1
+done
+
+if [ ! -b "$root" ] && [ ! -b /dev/dm-0 ]; then
+    echo "ERROR: mapping node not found. Dropping to shell."
+    ls -lah /dev /dev/mapper /dev/dm*
+    exec /bin/sh
+fi
+
+# choose actual root device
+if [ -b /dev/mapper/rootfs ]; then
+    root=/dev/mapper/rootfs
+else
+    root=/dev/dm-0
+fi
+
+mkdir -p /sysroot
 echo "Mounting $root read-only as rootfs..."
-mount -o ro "$root" /sysroot
+mount -o ro "$root" /sysroot || {
+    echo "Mount failed; dumping dmesg last lines:"
+    dmesg | tail -n 50
+    exec /bin/sh
+}
 
 # Switch to the real root
 exec switch_root /sysroot "$init"

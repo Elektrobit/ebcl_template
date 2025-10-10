@@ -40,7 +40,7 @@ BLOCK_SIZE=$(grep -i '^Data block size:' "${VERITY_INFO}" | awk '{print $4}')
 HASH_START=$(grep -i '^Hash start:' "${VERITY_INFO}" | awk '{print $3}' || true)
 
 #HASH_START="${DATA_BLOCKS}"
-HASH_START=0 # start from 0 as it is seprate partition
+HASH_START=1 # start from 0 as it is seprate partition
 
 if [ -z "${ROOT_HASH}" ] || [ -z "${DATA_BLOCKS}" ] || [ -z "${BLOCK_SIZE}" ]; then
   echo "Failed to parse verity output (${VERITY_INFO})."
