@@ -153,5 +153,14 @@ mount -o ro "$root" /sysroot || {
     exec /bin/sh
 }
 
+# --- Writable tmpfs overlays ---
+echo "Mounting writable tmpfs overlays..."
+for dir in var run tmp; do
+    mkdir -p /sysroot/$dir
+    mount -t tmpfs tmpfs /sysroot/$dir
+    echo "  -> mounted tmpfs on /$dir"
+done
+echo "Writable overlays ready."
+
 # Switch to the real root
 exec switch_root /sysroot "$init"
