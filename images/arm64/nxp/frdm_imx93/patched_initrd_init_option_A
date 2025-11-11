@@ -155,7 +155,7 @@ mount -o ro "$root" /sysroot || {
 
 # --- Writable tmpfs overlays ---
 #echo "Mounting writable tmpfs overlays..."
-for dir in var run etc tmp; do
+for dir in var run tmp; do
     mkdir -p /sysroot/$dir
     mount -t tmpfs tmpfs /sysroot/$dir
     echo "  -> mounted tmpfs on /$dir"
