@@ -42,6 +42,15 @@
         type: raw
         file: build/root.ext4.hash
 
+   # Persistent data partition (for overlay upper/work, logs, etc)
+    - name: data
+      type: partition
+      fstype: ext4
+      content:
+        type: raw
+        file: build/data.img
+      size: 256 MB
+
 #    - name: root
 #      type: partition
 #      fstype: ext4

@@ -62,12 +62,13 @@ EOF
 systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
+
 #systemctl enable wpa_supplicant@wlan0.service
 
 #create eb user
-useradd -m -d /home/eb -s /bin/bash "eb"
-echo "eb:elektrobit" | chpasswd
+#useradd -m -d /home/eb -s /bin/bash "eb"
+#echo "eb:elektrobit" | chpasswd
 
 #prevent root login on console (TTY)
-echo "-:root:ALL" >> /etc/security/access.conf
-echo "auth required pam_access.so" >> /etc/pam.d/login
+#echo "-:root:ALL" >> /etc/security/access.conf
+#echo "auth required pam_access.so" >> /etc/pam.d/login

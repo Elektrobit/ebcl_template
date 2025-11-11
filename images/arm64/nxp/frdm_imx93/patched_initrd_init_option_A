@@ -46,34 +46,41 @@ fi
 # Devices (adjust if your platform uses different device nodes)
 DATA_DEV=/dev/mmcblk1p2
 HASH_DEV=/dev/mmcblk1p3
-# device for persistent data partition (adjust partition number)
-DATA_PER=/dev/mmcblk1p4
 
-echo "Waiting for ${DATA_DEV}, ${HASH_DEV} ..."
-# wait for the required block devices
-for dev in "${DATA_DEV}" "${HASH_DEV}"; do
-  echo "Waiting for ${dev}..."
-  for i in $(seq 1 20); do
-    [ -b "${dev}" ] && break
-    echo "  Attempt $i: ${dev} not ready, retrying..."
-    sleep 1
-  done
-  [ -b "${dev}" ] || { echo "ERROR: ${dev} not found! Dropping to shell."; exec /bin/sh; }
-done
-
-# DATA_PER is optional (non-fatal) — attempt to wait a short while
-echo "Waiting for ${DATA_PER} (optional persistent partition)..."
-for i in $(seq 1 20); do
-    [ -b "${DATA_PER}" ] && break
+echo "Waiting for ${DATA_DEV}..."
+for i in $(seq 1 30); do
+    if [ -b "${DATA_DEV}" ]; then
+        echo "${DATA_DEV} found."
+        break
+    fi
+    echo "  Attempt $i: ${DATA_DEV} not ready, retrying..."
     sleep 1
 done
+if [ ! -b "${DATA_DEV}" ]; then
+    echo "ERROR: ${DATA_DEV} not found! Dropping to shell."
+    exec /bin/sh
+fi
+
+echo "Waiting for ${HASH_DEV}..."
+for i in $(seq 1 30); do
+    if [ -b "${HASH_DEV}" ]; then
+        echo "${HASH_DEV} found."
+        break
+    fi
+    echo "  Attempt $i: ${HASH_DEV} not ready, retrying..."
+    sleep 1
+done
+if [ ! -b "${HASH_DEV}" ]; then
+    echo "ERROR: ${HASH_DEV} not found! Dropping to shell."
+    exec /bin/sh
+fi
 
 # auto-detect verity header at start of hash device (first 4k contains "verity")
 if dd if="$HASH_DEV" bs=4096 count=1 2>/dev/null | head -c 6 | grep -q '^verity'; then
     echo "found verity header on $HASH_DEV"
     HASH_START=1
 else
-    HASH_START=${HASH_START:-0}
+    HASH_START=0
 fi
 echo "Using HASH_START=$HASH_START"
 
@@ -117,7 +124,7 @@ fi
 
 # wait for mapper node
 for i in $(seq 1 10); do
-    if [ -b /dev/mapper/rootfs ] || [ -b /dev/dm-0 ]; then
+    if [ -b "$root" ] || [ -b /dev/dm-0 ]; then
         echo "dm-verity device ready."
         break
     fi
@@ -125,79 +132,35 @@ for i in $(seq 1 10); do
     sleep 1
 done
 
-if [ ! -b /dev/mapper/rootfs ] && [ ! -b /dev/dm-0 ]; then
+if [ ! -b "$root" ] && [ ! -b /dev/dm-0 ]; then
     echo "ERROR: mapping node not found. Dropping to shell."
     ls -lah /dev /dev/mapper /dev/dm*
     exec /bin/sh
 fi
 
-# --- choose actual root device ---
+# choose actual root device
 if [ -b /dev/mapper/rootfs ]; then
     root=/dev/mapper/rootfs
 else
     root=/dev/dm-0
 fi
 
-LOWERDIR=/lower 
-echo "Mounting verified root (read-only) on /lower..."
-mkdir -p ${LOWERDIR}
-mount -o ro "$root" ${LOWERDIR} || {
-    echo "Mount failed; dropping to shell."
+mkdir -p /sysroot
+echo "Mounting $root read-only as rootfs..."
+mount -o ro "$root" /sysroot || {
+    echo "Mount failed; dumping dmesg last lines:"
+    dmesg | tail -n 50
     exec /bin/sh
 }
 
-UPPERDIR=""
-WORKDIR=""
+# --- Writable tmpfs overlays ---
+#echo "Mounting writable tmpfs overlays..."
+for dir in var run etc tmp; do
+    mkdir -p /sysroot/$dir
+    mount -t tmpfs tmpfs /sysroot/$dir
+    echo "  -> mounted tmpfs on /$dir"
+done
+echo "Writable overlays ready."
 
-# Try mounting persistent data partition
-if [ -b "${DATA_PER}" ]; then
-    echo "Mounting data partition ${DATA_PER} to /data (rw)..."
-    mkdir -p /data
-    if mount "${DATA_PER}" /data; then
-        echo "/data mounted read-write."
-        mkdir -p /data/overlay/upper /data/overlay/work
-        chown -R root:root /data/overlay || true
-        UPPERDIR=/data/overlay/upper
-        WORKDIR=/data/overlay/work
-    else
-        echo "Failed to mount ${DATA_PER}; falling back to tmpfs upper."
-        USE_TMPFS_UPPER=1
-    fi
-else
-    echo "${DATA_PER} not present; using tmpfs overlay."
-    USE_TMPFS_UPPER=1
-fi
-
-# Fallback: create tmpfs overlay if persistent not mounted
-if [ "$USE_TMPFS_UPPER" -eq 1 ]; then
-    echo "Creating non-persistent tmpfs overlay..."
-    mkdir -p /tmp/overlay
-    mount -t tmpfs tmpfs /tmp/overlay
-    mkdir -p /tmp/overlay/upper /tmp/overlay/work
-    UPPERDIR=/tmp/overlay/upper
-    WORKDIR=/tmp/overlay/work
-fi
-
-# Sanity-check ownership & permissions
-mkdir -p "${UPPERDIR}" "${WORKDIR}"
-chmod 0700 "${WORKDIR}"
-chmod 0755 "${UPPERDIR}"
-chown root:root "${UPPERDIR}" "${WORKDIR}" || true
-
-# final overlay mount: lowerdir=/lower, upperdir=UPPERDIR, workdir=WORKDIR -> /newroot
-NEWROOT=/newroot
-mkdir -p "${NEWROOT}"
-echo "Mounting overlay: lower=${LOWERDIR}, upper=${UPPERDIR}, work=${WORKDIR} -> /newroot"
-if ! mount -t overlay overlay -o "lowerdir=${LOWERDIR},upperdir=${UPPERDIR},workdir=${WORKDIR}" "${NEWROOT}"; then
-    echo "Overlay mount failed. Check kernel supports overlayfs (CONFIG_OVERLAY_FS)."
-    echo "Falling back to read-only root."
-    exec switch_root "${LOWERDIR}" "$init"
-fi
-
-# Move essential pseudo-filesystems so switch_root works
-mount --move /dev "${NEWROOT}/dev"
-mount --move /proc "${NEWROOT}/proc"
-mount --move /sys "${NEWROOT}/sys"
-
-echo "Switching root..."
-exec switch_root "${NEWROOT}" "$init"
+# Switch to the real root
+exec switch_root /sysroot "$init"

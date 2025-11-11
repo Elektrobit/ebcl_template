@@ -1,4 +1,30 @@
 # Makefile for NXP iMX93 FRDM
+#---------------------
+# Image specifications
+#---------------------
+
+# Specification of the partition layout of the image.raw
+partition_layout = ../image.yaml
+# Specification of the initrd.img
+initrd_spec = ../initrd.yaml
+# Specification of the root filesystem content and configuration
+root_filesystem_spec ?= root.yaml
+
+config_root ?= config_root.sh
+
+#boot_extract_spec ?= ../boot_extract.yaml
+boot_extract_spec ?= ../boot_compile.yaml
+
+linux_kernel ?= ../linux_kernel.yaml
+
+boot_root_spec ?= ../boot_root.yaml
+
+bootloader ?= ../bootloader/bootloader.sh
+kernel ?= ../kernel/kernel.sh
+
+# Build script for the fitimage
+#build_fitimage = ../build_fitimage.sh
+
 
 # Arch for sysroot extraction
 arch ?= aarch64
@@ -73,6 +99,7 @@ $(base_tarball): $(root_filesystem_spec) $(boot_root)
 	@echo "Build root.tar..."
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
+	../config_root_persistant_partition.sh
 
 # The root configurator is used to run the user configuration scripts
 # as a separate step in the build process.
@@ -90,7 +117,7 @@ $(initrd_img): $(initrd_spec)
 	@echo "Build initrd.img..."
 	mkdir -p $(result_folder)
 	set -o pipefail && initrd_generator $(initrd_spec) $(result_folder) 2>&1 | tee $(initrd_img).log
-	../initrd.sh build/initrd.img ../patched_initrd_init build/initrd-patched.img
+	../initrd.sh build/initrd.img ../$(rootfs_design) build/initrd-patched.img
 
 # The root generator is used to build a sysroot variant of the root filesystem.
 # root_filesystem_spec: specification of the root filesystem

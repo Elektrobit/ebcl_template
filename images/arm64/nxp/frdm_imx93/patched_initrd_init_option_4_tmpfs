@@ -1,0 +1,99 @@
+#!/bin/sh
+set -e
+
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+echo "Kernel commandline: $(cat /proc/cmdline)"
+
+# Defaults
+root=/dev/mapper/rootfs
+init=/sbin/init
+
+# --- Parse verity parameters from /proc/cmdline ---
+for param in $(cat /proc/cmdline); do
+    case $param in
+        verity.sectors=*)   SECTORS="${param#verity.sectors=}" ;;
+        verity.blksize=*)   BLOCK_SIZE="${param#verity.blksize=}" ;;
+        verity.datablocks=*) DATA_BLOCKS="${param#verity.datablocks=}" ;;
+        verity.hashstart=*) HASH_START="${param#verity.hashstart=}" ;;
+        verity.roothash=*)  ROOT_HASH="${param#verity.roothash=}" ;;
+        verity.salt=*)      SALT="${param#verity.salt=}" ;;
+    esac
+done
+
+echo "dm-verity params:"
+echo "  SECTORS=${SECTORS}"
+echo "  BLOCK_SIZE=${BLOCK_SIZE}"
+echo "  DATA_BLOCKS=${DATA_BLOCKS}"
+echo "  HASH_START=${HASH_START}"
+echo "  ROOT_HASH=${ROOT_HASH}"
+echo "  SALT=${SALT}"
+
+DATA_DEV=/dev/mmcblk1p2
+HASH_DEV=/dev/mmcblk1p3
+
+echo "Waiting for ${DATA_DEV}..."
+for i in $(seq 1 20); do
+    [ -b "${DATA_DEV}" ] && { echo "${DATA_DEV} found."; break; }
+    echo "  Attempt $i: ${DATA_DEV} not ready, retrying..."
+    sleep 1
+done
+[ -b "${DATA_DEV}" ] || { echo "ERROR: ${DATA_DEV} not found!"; exec /bin/sh; }
+
+echo "Waiting for ${HASH_DEV}..."
+for i in $(seq 1 20); do
+    [ -b "${HASH_DEV}" ] && { echo "${HASH_DEV} found."; break; }
+    echo "  Attempt $i: ${HASH_DEV} not ready, retrying..."
+    sleep 1
+done
+[ -b "${HASH_DEV}" ] || { echo "ERROR: ${HASH_DEV} not found!"; exec /bin/sh; }
+
+# Detect verity header
+if dd if="$HASH_DEV" bs=4096 count=1 2>/dev/null | grep -q '^verity'; then
+    echo "found verity header"
+    HASH_START=1
+else
+    HASH_START=0
+fi
+
+# Create dm-verity mapping
+TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
+echo "Creating dm-verity mapping..."
+dmsetup create --readonly rootfs --table "$TABLE" || { echo "dmsetup create failed!"; exec /bin/sh; }
+
+# Ensure /dev/mapper/rootfs node exists
+mkdir -p /dev/mapper
+dmsetup mknodes
+
+# Wait for the device
+for i in $(seq 1 10); do
+    if [ -b "$root" ] || [ -b "/dev/dm-0" ]; then
+        echo "dm-verity device ready."
+        break
+    fi
+    echo "  Attempt $i: waiting for $root..."
+    sleep 1
+done
+
+[ -b "$root" ] || [ -b "/dev/dm-0" ] || { echo "ERROR: dm-verity device not found!"; exec /bin/sh; }
+
+# Fallback if /dev/mapper/rootfs missing
+[ -b /dev/mapper/rootfs ] || root=/dev/dm-0
+
+echo "Mounting $root read-only as rootfs..."
+mount -o ro "$root" /sysroot
+
+# --- Writable tmpfs overlays ---
+echo "Mounting writable tmpfs overlays..."
+for dir in var run tmp; do
+    mkdir -p /sysroot/$dir
+    mount -t tmpfs tmpfs /sysroot/$dir
+    echo "  -> mounted tmpfs on /$dir"
+done
+echo "Writable overlays ready."
+
+# Switch to verified rootfs
+echo "Switching to verified root filesystem..."
+exec switch_root /sysroot "$init"

@@ -1,11 +1,13 @@
 #!/bin/sh
 set -e
 
+log() { echo "[initrd] $*"; }
+
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount -t devtmpfs none /dev
 
-echo "Kernel commandline: $(cat /proc/cmdline)"
+log "Kernel commandline: $(cat /proc/cmdline)"
 
 # Defaults
 root=/dev/mapper/rootfs
@@ -29,17 +31,17 @@ for param in $(cat /proc/cmdline); do
     esac
 done
 
-echo "dm-verity params:"
-echo "  SECTORS=${SECTORS:-<unset>}"
-echo "  BLOCK_SIZE=${BLOCK_SIZE:-<unset>}"
-echo "  DATA_BLOCKS=${DATA_BLOCKS:-<unset>}"
-echo "  HASH_START=${HASH_START:-<unset>}"
-echo "  ROOT_HASH=${ROOT_HASH:-<unset>}"
-echo "  SALT=${SALT:-<unset>}"
+log "dm-verity params:"
+log "  SECTORS=${SECTORS:-<unset>}"
+log "  BLOCK_SIZE=${BLOCK_SIZE:-<unset>}"
+log "  DATA_BLOCKS=${DATA_BLOCKS:-<unset>}"
+log "  HASH_START=${HASH_START:-<unset>}"
+log "  ROOT_HASH=${ROOT_HASH:-<unset>}"
+log "  SALT=${SALT:-<unset>}"
 
 # sanity
 if [ -z "$SECTORS" ] || [ -z "$BLOCK_SIZE" ] || [ -z "$DATA_BLOCKS" ] || [ -z "$ROOT_HASH" ] || [ -z "$SALT" ]; then
-    echo "Missing verity params; dropping to shell."
+    log "Missing verity params; dropping to shell."
     exec /bin/sh
 fi
 
@@ -49,20 +51,20 @@ HASH_DEV=/dev/mmcblk1p3
 # device for persistent data partition (adjust partition number)
 DATA_PER=/dev/mmcblk1p4
 
-echo "Waiting for ${DATA_DEV}, ${HASH_DEV} ..."
+log "Waiting for ${DATA_DEV}, ${HASH_DEV} ..."
 # wait for the required block devices
 for dev in "${DATA_DEV}" "${HASH_DEV}"; do
-  echo "Waiting for ${dev}..."
+  log "Waiting for ${dev}..."
   for i in $(seq 1 20); do
     [ -b "${dev}" ] && break
-    echo "  Attempt $i: ${dev} not ready, retrying..."
+    log "  Attempt $i: ${dev} not ready, retrying..."
     sleep 1
   done
-  [ -b "${dev}" ] || { echo "ERROR: ${dev} not found! Dropping to shell."; exec /bin/sh; }
+  [ -b "${dev}" ] || { log "ERROR: ${dev} not found! Dropping to shell."; exec /bin/sh; }
 done
 
 # DATA_PER is optional (non-fatal) — attempt to wait a short while
-echo "Waiting for ${DATA_PER} (optional persistent partition)..."
+log "Waiting for ${DATA_PER} (optional persistent partition)..."
 for i in $(seq 1 20); do
     [ -b "${DATA_PER}" ] && break
     sleep 1
@@ -70,20 +72,20 @@ done
 
 # auto-detect verity header at start of hash device (first 4k contains "verity")
 if dd if="$HASH_DEV" bs=4096 count=1 2>/dev/null | head -c 6 | grep -q '^verity'; then
-    echo "found verity header on $HASH_DEV"
+    log "found verity header on $HASH_DEV"
     HASH_START=1
 else
     HASH_START=${HASH_START:-0}
 fi
-echo "Using HASH_START=$HASH_START"
+log "Using HASH_START=$HASH_START"
 
 # Build dm table
 TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
-echo "Creating dm-verity mapping..."
-echo "dmsetup create --readonly rootfs --table \"$TABLE\""
+log "Creating dm-verity mapping..."
+log "dmsetup create --readonly rootfs --table \"$TABLE\""
 
 if ! dmsetup create --readonly rootfs --table "$TABLE"; then
-    echo "dmsetup create failed! Drop to shell."
+    log "dmsetup create failed! Drop to shell."
     exec /bin/sh
 fi
 
@@ -91,7 +93,7 @@ fi
 mkdir -p /dev/mapper
 dmsetup mknodes || true
 ###############veritysetup setup version
-#echo "Creating dm-verity mapping with veritysetup..."
+#log "Creating dm-verity mapping with veritysetup..."
 #HASH_OFFSET=$((HASH_START * BLOCK_SIZE))
 #veritysetup create rootfs $DATA_DEV $HASH_DEV \
 #   --hash-offset=$HASH_OFFSET \
@@ -109,7 +111,7 @@ if [ ! -b /dev/mapper/rootfs ] && [ -b /dev/dm-0 ]; then
     MAJ=$((0x$MAJ_HEX))
     MIN=$((0x$MIN_HEX))
     if [ ! -e /dev/mapper/rootfs ]; then
-        echo "Creating /dev/mapper/rootfs node -> major:$MAJ minor:$MIN"
+        log "Creating /dev/mapper/rootfs node -> major:$MAJ minor:$MIN"
         mknod /dev/mapper/rootfs b "$MAJ" "$MIN" || true
         chmod 0600 /dev/mapper/rootfs || true
     fi
@@ -118,15 +120,15 @@ fi
 # wait for mapper node
 for i in $(seq 1 10); do
     if [ -b /dev/mapper/rootfs ] || [ -b /dev/dm-0 ]; then
-        echo "dm-verity device ready."
+        log "dm-verity device ready."
         break
     fi
-    echo "  Attempt $i: waiting for $root..."
+    log "  Attempt $i: waiting for $root..."
     sleep 1
 done
 
 if [ ! -b /dev/mapper/rootfs ] && [ ! -b /dev/dm-0 ]; then
-    echo "ERROR: mapping node not found. Dropping to shell."
+    log "ERROR: mapping node not found. Dropping to shell."
     ls -lah /dev /dev/mapper /dev/dm*
     exec /bin/sh
 fi
@@ -139,44 +141,22 @@ else
 fi
 
 LOWERDIR=/lower 
-echo "Mounting verified root (read-only) on /lower..."
+log "Mounting verified root (read-only) on /lower..."
 mkdir -p ${LOWERDIR}
 mount -o ro "$root" ${LOWERDIR} || {
-    echo "Mount failed; dropping to shell."
+    log "Mount failed; dropping to shell."
     exec /bin/sh
 }
 
 UPPERDIR=""
 WORKDIR=""
 
-# Try mounting persistent data partition
-if [ -b "${DATA_PER}" ]; then
-    echo "Mounting data partition ${DATA_PER} to /data (rw)..."
-    mkdir -p /data
-    if mount "${DATA_PER}" /data; then
-        echo "/data mounted read-write."
-        mkdir -p /data/overlay/upper /data/overlay/work
-        chown -R root:root /data/overlay || true
-        UPPERDIR=/data/overlay/upper
-        WORKDIR=/data/overlay/work
-    else
-        echo "Failed to mount ${DATA_PER}; falling back to tmpfs upper."
-        USE_TMPFS_UPPER=1
-    fi
-else
-    echo "${DATA_PER} not present; using tmpfs overlay."
-    USE_TMPFS_UPPER=1
-fi
-
-# Fallback: create tmpfs overlay if persistent not mounted
-if [ "$USE_TMPFS_UPPER" -eq 1 ]; then
-    echo "Creating non-persistent tmpfs overlay..."
-    mkdir -p /tmp/overlay
-    mount -t tmpfs tmpfs /tmp/overlay
-    mkdir -p /tmp/overlay/upper /tmp/overlay/work
-    UPPERDIR=/tmp/overlay/upper
-    WORKDIR=/tmp/overlay/work
-fi
+log "Creating non-persistent tmpfs overlay..."
+mkdir -p /tmp/overlay
+mount -t tmpfs tmpfs /tmp/overlay
+mkdir -p /tmp/overlay/upper /tmp/overlay/work
+UPPERDIR=/tmp/overlay/upper
+WORKDIR=/tmp/overlay/work
 
 # Sanity-check ownership & permissions
 mkdir -p "${UPPERDIR}" "${WORKDIR}"
@@ -187,10 +167,10 @@ chown root:root "${UPPERDIR}" "${WORKDIR}" || true
 # final overlay mount: lowerdir=/lower, upperdir=UPPERDIR, workdir=WORKDIR -> /newroot
 NEWROOT=/newroot
 mkdir -p "${NEWROOT}"
-echo "Mounting overlay: lower=${LOWERDIR}, upper=${UPPERDIR}, work=${WORKDIR} -> /newroot"
+log "Mounting overlay: lower=${LOWERDIR}, upper=${UPPERDIR}, work=${WORKDIR} -> /newroot"
 if ! mount -t overlay overlay -o "lowerdir=${LOWERDIR},upperdir=${UPPERDIR},workdir=${WORKDIR}" "${NEWROOT}"; then
-    echo "Overlay mount failed. Check kernel supports overlayfs (CONFIG_OVERLAY_FS)."
-    echo "Falling back to read-only root."
+    log "Overlay mount failed. Check kernel supports overlayfs (CONFIG_OVERLAY_FS)."
+    log "Falling back to read-only root."
     exec switch_root "${LOWERDIR}" "$init"
 fi
 
@@ -199,5 +179,5 @@ mount --move /dev "${NEWROOT}/dev"
 mount --move /proc "${NEWROOT}/proc"
 mount --move /sys "${NEWROOT}/sys"
 
-echo "Switching root..."
+log "Switching root..."
 exec switch_root "${NEWROOT}" "$init"

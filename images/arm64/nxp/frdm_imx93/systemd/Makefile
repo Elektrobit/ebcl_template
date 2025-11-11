@@ -1,34 +1,13 @@
-# Makefile for Beaglebone beaglepay systemd variant
-
-#---------------------
-# Image specifications
-#---------------------
-
-# Specification of the partition layout of the image.raw
-partition_layout = ../image.yaml
-# Specification of the initrd.img
-initrd_spec = ../initrd.yaml
-# Specification of the root filesystem content and configuration
-root_filesystem_spec ?= root.yaml
-
-config_root ?= config_root.sh
-
-#boot_extract_spec ?= ../boot_extract.yaml
-boot_extract_spec ?= ../boot_compile.yaml
-
-linux_kernel ?= ../linux_kernel.yaml
-
-boot_root_spec ?= ../boot_root.yaml
-
-bootloader ?= ../bootloader/bootloader.sh
-kernel ?= ../kernel/kernel.sh
-
-# Build script for the fitimage
-#build_fitimage = ../build_fitimage.sh
+# Makefile for NXP iMX93 FRDM
 
 variant = systemd
 #-------------------------
 # Additional configuration
 #-------------------------
-
+#Option Description Security Persistence Typical Use
+#A	Entire rootfs in read-only dm-verity (no writes, no persistence)	✅ Highest	❌ None	Kiosk, critical IoT
+#B	Rootfs in dm-verity, with overlayfs tmpfs upper (volatile writes only)	✅ High	❌ Volatile	Secure boot with ephemeral state
+#C	Rootfs in dm-verity, with overlayfs persistent upper on /data	⚠️ Medium-high	✅ Persistent	Secure base OS + user updates
+#D	Rootfs in dm-verity or dm-crypt, with authenticated/policy-controlled persistent layer (e.g., sealed key in TEE or secure enclave)
+rootfs_design ?= patched_initrd_init_option_C
 include ../frdm_imx93.mk

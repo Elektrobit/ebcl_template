@@ -9,6 +9,12 @@ packages:
 #    destination: boot
 #  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
 #    destination: boot
+# Scripts to configure the root tarball
+#host_files:
+#  - source: system_config/*
+#    uid: 0
+#    gid: 0
+#    mode: 755
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chroot # Type of execution environment
