@@ -1,8 +1,8 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
-	"name": "EB corbos Linux SDK 1.6.0",
-	"image": "ghcr.io/elektrobit/ebcl_dev_container:v1.6.0",
+	"name": "EB corbos Linux SDK 1.7.0",
+	"image": "ghcr.io/elektrobit/ebcl_dev_container:v1.7.0",
 	"initializeCommand": "${PWD}/init_workspace",
 	"postCreateCommand": "${PWD}/init_container",
 	"postStartCommand": "${PWD}/enter_container",
@@ -14,7 +14,8 @@
 			},
 			"extensions": [
 				"ms-vscode.cpptools-extension-pack@1.3.0",
-				"spmeesseman.vscode-taskexplorer@2.9.1"
+				"spmeesseman.vscode-taskexplorer@2.9.1",
+				"paulvarache.vscode-taskfile"
 			]
 		}
 	},
