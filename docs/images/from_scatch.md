@@ -103,7 +103,7 @@ apt_repos:
     components:
       - nxp_public
     key: file:///build/keys/elektrobit.pub
-    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
+    gpg: /etc/apt/trusted.gpg.d/elektrobit.gpg
 
 ```
 

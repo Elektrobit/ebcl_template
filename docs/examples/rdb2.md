@@ -17,7 +17,7 @@ apt_repos:
     components:
       - nxp_public
     key: file:///build/keys/elektrobit.pub
-    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
+    gpg: /etc/apt/trusted.gpg.d/elektrobit.gpg
 ```
 
 The packages for the NXP RDB2 board are provided as a separate distribution, called _ebcl_nxp_public_, as component _nxp_public_. For the RDB2 images, the kernel package _linux-image-unsigned-5.15.0-1034-s32-eb_ is used.
