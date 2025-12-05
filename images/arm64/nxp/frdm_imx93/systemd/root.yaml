@@ -1,8 +1,13 @@
 base: ../base.yaml
 packages:
   - systemd
-  - udev        # udev will create the device node for ttyS0
+  - udev # udev will create the device node for ttyS0
   - util-linux
+  #- uuid-dev # needed for optee-client and creating the sysroot
+  #- libc6-dev-arm64-cross # needed for optee-client and creating the sysroot
+  #- libc6:arm64
+  #- libc6-dev
+  #- libssl-dev
 # Scripts to configure the root tarball
 #host_files:
 #  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/Image
@@ -10,11 +15,11 @@ packages:
 #  - source: $$RESULTS$$/../../kernel/build/linux_build/arch/arm64/boot/dts/freescale/imx93-11x11-evk.dtb
 #    destination: boot
 # Scripts to configure the root tarball
-#host_files:
-#  - source: system_config/*
-#    uid: 0
-#    gid: 0
-#    mode: 755
+host_files:
+  - source: system_config/*
+    uid: 0
+    gid: 0
+    mode: 755
 scripts:
   - name: config_root.sh # Name of the script, relative path to this file
     env: chroot # Type of execution environment

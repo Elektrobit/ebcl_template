@@ -49,46 +49,13 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
 
     cp build-optee/imx93/release/bl31.bin "../${UBOOT_DIR}/"
   popd
-
-  # === Step 3: Build OP-TEE ===
-  if [ ! -d "${OPTEE_DIR}" ]; then
-    echo "🔧 Cloning OP-TEE..."
-    git clone "${OPTEE_REPO}" "${OPTEE_DIR}"
-  fi
-
-  pushd "${OPTEE_DIR}"
-    git clean -fdx
-    git reset --hard
-    git fetch --all
-    git checkout "${OPTEE_COMMIT}"
-
-    echo "🔨 Building OP-TEE (tee.bin)..."
-    python3 -m venv venv
-    # shellcheck disable=SC1091
-    source venv/bin/activate
-    pip install cryptography pyelftools
-
-    make -j"$(nproc)" -C . \
-      PLATFORM=imx-mx93evk \
-      O="${OPTEE_BUILD_DIR}" \
-      ARCH=arm \
-      CFG_ARM64_core=y \
-      CFG_TEE_CORE_LOG_LEVEL=0 \
-      CFG_TEE_TA_LOG_LEVEL=0 \
-      COMPILER=gcc \
-      CROSS_COMPILE64="${CROSS_COMPILE}" \
-      CROSS_COMPILE_core="${CROSS_COMPILE}" \
-      CROSS_COMPILE_ta_arm64="${CROSS_COMPILE}" \
-      OPTEE_CLIENT_EXPORT="${SYSROOT}/usr" \
-      TEEC_EXPORT="${SYSROOT}/usr" \
-      CFLAGS="--sysroot=${SYSROOT} -march=armv8-a+crc+crypto" \
-      LDFLAGS="--sysroot=${SYSROOT} -L${LIBGCC_DIR}" \
-      NOWERROR=1
-
-    cp "${OPTEE_BUILD_DIR}/core/tee-raw.bin" "../${UBOOT_DIR}/tee.bin"
-  popd
+  
+   # === Step 3: Build OP-TEE ===
+  /${PROJECT_HOME}/../optee/optee_os.sh .
+  cp "${OPTEE_DIR}/${OPTEE_BUILD_DIR}/core/tee-raw.bin" "${UBOOT_DIR}/tee.bin"
 fi
 
+ # === Step 4: Configure u-boot, generate boot.scr and inject keys ===
 pushd "${UBOOT_DIR}"
   echo "⚙️  Configuring U-Boot with patched FRDM defconfig..."
   make distclean

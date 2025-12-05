@@ -10,4 +10,6 @@ variant = systemd
 #C	Rootfs in dm-verity, with overlayfs persistent upper on /data	⚠️ Medium-high	✅ Persistent	Secure base OS + user updates
 #D	Rootfs in dm-verity or dm-crypt, with authenticated/policy-controlled persistent layer (e.g., sealed key in TEE or secure enclave)
 rootfs_design ?= patched_initrd_init_option_C
+full_optee ?= ../optee/optee.sh
+sysroot_filesystem_spec ?= sysroot.yaml
 include ../frdm_imx93.mk

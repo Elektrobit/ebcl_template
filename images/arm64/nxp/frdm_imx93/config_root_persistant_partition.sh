@@ -1,12 +1,14 @@
 #!/bin/sh
 set -e
-echo "set up persistent partition"
-pwd
+echo "=============================="
+echo "🛠️ set up persistent partition"
+echo "=============================="
+
 # ensure build dir exists
 mkdir -p build
 
 # create 256MB image file
-sudo dd if=/dev/zero of=build/data.img bs=1M count=256 status=progress
+sudo dd if=/dev/zero of=build/data.img bs=1M count=512 status=progress
 
 # format ext4 filesystem
 sudo mkfs.ext4 -F build/data.img

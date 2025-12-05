@@ -1,5 +1,8 @@
 #!/bin/bash
 set -euo pipefail
+echo "=============================="
+echo " 🛠️ patch the initrd"
+echo "=============================="
 
 if [ $# -ne 3 ]; then
     echo "Usage: $0 <initrd.img> <new-init> <output-initrd.img>"

@@ -10,18 +10,18 @@ apt_repos:
       - nxp_public
     key: file:///build/keys/elektrobit.pub
     gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
-#  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-#    distro: jammy
-#    components:
-#      - main
-#      - universe
-#      - multiverse
-#      - restricted
-# Get latest security fixes
-#  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
-#    distro: jammy-security
-#    components:
-#      - main
-#      - universe
-#      - multiverse
-#      - restricted
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted
+  # Get latest security fixes
+  - apt_repo: http://ports.ubuntu.com/ubuntu-ports
+    distro: jammy-security
+    components:
+      - main
+      - universe
+      - multiverse
+      - restricted

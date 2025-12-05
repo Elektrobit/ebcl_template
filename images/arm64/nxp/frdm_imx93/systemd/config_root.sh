@@ -1,6 +1,8 @@
 #!/bin/sh
 echo "configure rootfs"
 
+#cp /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1 /lib/ld-linux-aarch64.so.1
+
 # Link systemd as init
 if [ ! -e "./sbin/init"  ]; then
     ln -s /usr/lib/systemd/systemd ./sbin/init
@@ -63,7 +65,15 @@ systemctl enable systemd-networkd
 systemctl enable systemd-resolved
 systemctl enable systemd-timesyncd
 
+systemctl daemon-reload
+systemctl enable --now tee-supplicant.service
+systemctl status tee-supplicant.service
+
 #systemctl enable wpa_supplicant@wlan0.service
+
+systemctl daemon-reload
+systemctl enable tee-supplicant
+systemctl restart tee-supplicant
 
 #create eb user
 #useradd -m -d /home/eb -s /bin/bash "eb"

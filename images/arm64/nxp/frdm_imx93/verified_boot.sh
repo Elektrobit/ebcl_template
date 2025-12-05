@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
-echo "preparing rootfs for dm-verity"
+echo "=============================="
+echo "🛠️ preparing rootfs for dm-verity"
+echo "=============================="
 
 # === Paths ===
 ROOT_TAR="build/root.config.tar"

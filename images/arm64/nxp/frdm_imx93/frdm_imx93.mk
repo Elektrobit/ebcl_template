@@ -72,7 +72,7 @@ root_tarball ?= $(result_folder)/root.config.tar
 initrd_img ?= $(result_folder)/initrd.img
 
 # Sysroot tarball
-sysroot_tarball ?= ebcl_frdm_imx93_sysroot.tar
+sysroot_tarball ?= root_sysroot.tar
 
 
 #boot_root ?= $(result_folder)/boot_root.tar
@@ -97,6 +97,7 @@ $(disc_image): $(initrd_img) $(root_tarball) $(linux_kernel_contents) $(boot_con
 # the image development process.
 $(base_tarball): $(root_filesystem_spec) $(boot_root)
 	@echo "Build root.tar..."
+	$(full_optee) 
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
 	../config_root_persistant_partition.sh
@@ -120,13 +121,13 @@ $(initrd_img): $(initrd_spec)
 	../initrd.sh build/initrd.img ../$(rootfs_design) build/initrd-patched.img
 
 # The root generator is used to build a sysroot variant of the root filesystem.
-# root_filesystem_spec: specification of the root filesystem
+# root_filesystem_ssysroot_filesystem_specpec: specification of the root filesystem
 #
 # --no-config means that the configuration step is skipped
-$(sysroot_tarball): $(root_filesystem_spec)
+$(sysroot_tarball): $(sysroot_filesystem_spec)
 	@echo "Build sysroot.tar..."
 	mkdir -p $(result_folder)
-	set -o pipefail && root_generator --sysroot --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
+	set -o pipefail && root_generator --sysroot --no-config $(sysroot_filesystem_spec) $(result_folder) 2>&1 | tee $(sysroot_tarball).log
 
 
 # The root generator is used to build a chroot enviroment which contains all tools for building the fitimage.
