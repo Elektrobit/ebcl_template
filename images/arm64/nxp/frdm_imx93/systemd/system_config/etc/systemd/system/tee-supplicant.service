@@ -1,0 +1,13 @@
+[Unit]
+Description=TEE Supplicant
+After=optee.service
+Wants=optee.service
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/tee-supplicant
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

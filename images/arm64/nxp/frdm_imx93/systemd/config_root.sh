@@ -70,10 +70,8 @@ systemctl enable --now tee-supplicant.service
 systemctl status tee-supplicant.service
 
 #systemctl enable wpa_supplicant@wlan0.service
-
-systemctl daemon-reload
-systemctl enable tee-supplicant
-systemctl restart tee-supplicant
+systemctl enable tee-supplicant.service
+systemctl restart tee-supplicant.service
 
 #create eb user
 #useradd -m -d /home/eb -s /bin/bash "eb"
