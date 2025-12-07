@@ -1,16 +1,4 @@
-#base: ../base.yaml
-# CPU architecture
-arch: arm64
-# Add the EB corbos Linux apt repo
-use_ebcl_apt: true
-# Add repo with NXP RDB2 packages
-apt_repos:
-  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/v1.7.0
-    distro: ebcl_nxp_public
-    components:
-      - nxp_public
-    key: file:///build/keys/elektrobit.pub
-    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
+base: ../base.yaml
 packages:
   - systemd
   - udev # udev will create the device node for ttyS0
