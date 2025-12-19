@@ -1,4 +1,4 @@
-kernel: linux-image-unsigned-5.15.0-1042-s32-eb-optimized
+kernel: linux-image-unsigned-5.15.0-1048-s32-eb-optimized
 # CPU architecture
 arch: arm64
 # Add the EB corbos Linux apt repo
