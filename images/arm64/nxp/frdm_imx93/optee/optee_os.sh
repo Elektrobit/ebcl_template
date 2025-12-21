@@ -1,13 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
-. "/workspace/images/arm64/nxp/frdm_imx93/bootloader/frdm_imx93_env.sh"
+OPTEE_REPO="https://github.com/nxp-imx/imx-optee-os.git"
+OPTEE_COMMIT="612bc5a642a4608d282abeee2349d86de996d7ee"
+OPTEE_DIR="optee_os"
+OPTEE_BUILD_DIR="out/arm-plat-imx"
+SYSROOT=/workspace/sysroot_aarch64/
+CROSS_COMPILE=aarch64-linux-gnu-
+LIBGCC_DIR="${SYSROOT}/lib/gcc/aarch64-linux-gnu/11"
 
 echo "path ${1}"
+mkdir -p "${1}"
 cd "${1}"
 
 if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
-  # === Step 3: Build OP-TEE ===
+  # === Step 1️⃣: Build OP-TEE ===
   if [ ! -d "${OPTEE_DIR}" ]; then
     echo "🔧 Cloning OP-TEE..."
     git clone "${OPTEE_REPO}" "${OPTEE_DIR}"
@@ -15,15 +22,15 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
 
   pushd "${OPTEE_DIR}"
     git clean -fdx
-    git reset --hard
+    #git reset --hard
     git fetch --all
     git checkout "${OPTEE_COMMIT}"
 
     echo "🔨 Building OP-TEE (tee.bin)..."
-    python3 -m venv venv
+    #python3 -m venv venv
     # shellcheck disable=SC1091
-    source venv/bin/activate
-    pip install cryptography pyelftools
+    #source venv/bin/activate
+    #pip install cryptography pyelftools
 
     make -j"$(nproc)" -C . \
       PLATFORM=imx-mx93evk \
@@ -31,7 +38,7 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
       ARCH=arm \
       CFG_ARM64_core=y \
       CFG_TEE_CORE_LOG_LEVEL=0 \
-      CFG_TEE_TA_LOG_LEVEL=0 \
+      CFG_TEE_TA_LOG_LEVEL=3 \
       COMPILER=gcc \
       CROSS_COMPILE64="${CROSS_COMPILE}" \
       CROSS_COMPILE_core="${CROSS_COMPILE}" \

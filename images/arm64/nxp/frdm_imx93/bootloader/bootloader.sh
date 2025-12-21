@@ -8,7 +8,7 @@ cd "${PROJECT_HOME}/${BOOTLOADER_DIR}"
 #if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; then
 if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; then
 
-  # === Step 1: Clone and patch U-Boot ===
+  # === Step 1️⃣: Clone and patch U-Boot ===
   if [ ! -d "${UBOOT_DIR}" ]; then
     echo "📦 Cloning U-Boot from NXP..."
     git clone "${UBOOT_REPO}" "${UBOOT_DIR}"
@@ -24,7 +24,7 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     popd
   fi
 
-  # === Step 2: Build TF-A ===
+  # === Step 2️⃣: Build TF-A ===
   if [ ! -d "${ATF_DIR}" ]; then
     echo "🛠️ Cloning TF-A..."
     git clone "${ATF_REPO}" "${ATF_DIR}"
@@ -50,12 +50,12 @@ if [ ! -f "${PROJECT_HOME}/${BOOTLOADER_DIR}/${MKIMG_DIR}/iMX93/flash.bin" ]; th
     cp build-optee/imx93/release/bl31.bin "../${UBOOT_DIR}/"
   popd
   
-   # === Step 3: Build OP-TEE ===
-  /${PROJECT_HOME}/../optee/optee_os.sh .
-  cp "${OPTEE_DIR}/${OPTEE_BUILD_DIR}/core/tee-raw.bin" "${UBOOT_DIR}/tee.bin"
+   # === Step 3️⃣: Build OP-TEE ===
+  /${PROJECT_HOME}/../optee/optee_os.sh "${PROJECT_HOME}/../optee/build"
+  cp "${PROJECT_HOME}/../optee/build/${OPTEE_DIR}/${OPTEE_BUILD_DIR}/core/tee-raw.bin" "${UBOOT_DIR}/tee.bin"
 fi
 
- # === Step 4: Configure u-boot, generate boot.scr and inject keys ===
+ # === Step 4️⃣: Configure u-boot, generate boot.scr and inject keys ===
 pushd "${UBOOT_DIR}"
   echo "⚙️  Configuring U-Boot with patched FRDM defconfig..."
   make distclean
@@ -138,7 +138,7 @@ pushd "${UBOOT_DIR}"
   echo "✅ U-Boot build (with bl31.bin, tee.bin, and public key) complete."
 popd
 
-# === Step 5: Build flash.bin (imx-mkimage) ===
+# === Step 5️⃣: Build flash.bin (imx-mkimage) ===
 if [ ! -d "${MKIMG_DIR}" ]; then
   git clone https://github.com/nxp-imx/imx-mkimage.git "${MKIMG_DIR}"
   pushd "${MKIMG_DIR}"

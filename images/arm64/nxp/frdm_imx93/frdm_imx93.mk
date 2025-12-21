@@ -226,11 +226,18 @@ sysroot_install: $(sysroot_tarball)
 .PHONY: clean
 clean:
 	rm -rf $(result_folder)
+	rm -rf system_config/usr/
 	sync -f
 
 .PHONY: clean_boot
 clean_boot:
+	make clean_optee
 	rm -rf ../bootloader/build
+	sync -f
+
+.PHONY: clean_optee
+clean_optee:
+	rm -rf ../optee/build
 	sync -f
 
 .PHONY: clean_kernel
@@ -241,5 +248,7 @@ clean_kernel:
 .PHONY: clean_all
 clean_all:
 	make clean
-	rm -rf ../bootloader/build ../kernel/build
+	make clean_boot
+	make clean_optee
+	make clean_kernel
 	sync -f

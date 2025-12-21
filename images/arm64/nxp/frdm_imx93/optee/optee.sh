@@ -6,11 +6,11 @@ echo " 🔨 OP-TEE Full Build Script"
 echo "=============================="
 
 # --------------------------------------------------
-# Global Paths (ADJUST IF NEEDED)
+# Global Paths
 # --------------------------------------------------
 
 WORKSPACE=/workspace/images/arm64/nxp/frdm_imx93
-BUILD_DIR=$WORKSPACE/bootloader/build
+BUILD_DIR=$WORKSPACE/optee/build
 SYSROOT=/workspace/sysroot_aarch64
 CROSS=aarch64-linux-gnu-
 
@@ -27,11 +27,15 @@ export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 export PKG_CONFIG_PATH=$SYSROOT/usr/lib/aarch64-linux-gnu/pkgconfig
 
 # --------------------------------------------------
-# 1️⃣ OP-TEE CLIENT
+# 1️⃣ OP-TEE OS
 # --------------------------------------------------
-mkdir -p "${BUILD_DIR}"
+#mkdir -p "${BUILD_DIR}"
 /${WORKSPACE}/optee/optee_os.sh "${BUILD_DIR}"
 echo ">>> Building imx-optee-client"
+
+# --------------------------------------------------
+# 2️⃣ OP-TEE CLIENT
+# --------------------------------------------------
 
 cd $BUILD_DIR
 
@@ -53,7 +57,7 @@ mkdir -p $SYSTEM_CONFIG
 cp -R $OPTEE_CLIENT_EXPORT $SYSTEM_CONFIG/
 
 # --------------------------------------------------
-# 2️⃣ OP-TEE HELLO WORLD EXAMPLE
+# 3️⃣ OP-TEE HELLO WORLD EXAMPLE
 # --------------------------------------------------
 
 echo ">>> Building optee_examples (hello world)"
@@ -67,26 +71,47 @@ fi
 cd optee_examples
 git checkout 3ef17eb
 
+cd hello_world
 # ---- Host App
-cd hello_world/host
-make CROSS_COMPILE=$CROSS TEEC_EXPORT=$OPTEE_CLIENT_EXPORT --no-builtin-variables
+make -C host CROSS_COMPILE=$CROSS TEEC_EXPORT=$OPTEE_CLIENT_EXPORT --no-builtin-variables
 
 # ---- Trusted Application
-cd ../ta
-make CROSS_COMPILE=$CROSS \
-     TA_DEV_KIT_DIR=$OPTEE_OS_EXPORT \
-     PLATFORM=arm-plat-imx
+make -C ta CROSS_COMPILE=$CROSS TA_DEV_KIT_DIR=$OPTEE_OS_EXPORT PLATFORM=arm-plat-imx O=out
+
 
 # ---- Install TA + Host App
 mkdir -p $SYSTEM_CONFIG/usr/lib/optee_armtz
-cp *.ta $SYSTEM_CONFIG/usr/lib/optee_armtz/
+cp ta/out/*.ta $SYSTEM_CONFIG/usr/lib/optee_armtz/
 
 mkdir -p $SYSTEM_CONFIG/usr/bin
-chmod +x ../host/optee_example_hello_world
-cp ../host/optee_example_hello_world $SYSTEM_CONFIG/usr/bin/
+chmod +x host/optee_example_hello_world
+cp host/optee_example_hello_world $SYSTEM_CONFIG/usr/bin/
 
 # --------------------------------------------------
-# 3️⃣ OP-TEE TEST (WITH PKCS11 SUPPORT)
+# 4️⃣ OP-TEE disk encryption key
+# --------------------------------------------------
+
+echo ">>> Building disk encryption key"
+cd $WORKSPACE/optee/data_key
+mkdir -p $WORKSPACE/optee/build/data_key
+# ---- Host App
+make -C host CROSS_COMPILE=$CROSS TEEC_EXPORT=$OPTEE_CLIENT_EXPORT --no-builtin-variables
+mv host/optee_get_key ../build/data_key
+mv host/optee_get_key.o ../build/data_key
+# ---- Trusted Application
+make -C ta CROSS_COMPILE=$CROSS TA_DEV_KIT_DIR=$OPTEE_OS_EXPORT PLATFORM=arm-plat-imx O=out
+mv ta/out ../build/data_key
+
+# ---- Install TA + Host App
+mkdir -p $SYSTEM_CONFIG/usr/lib/optee_armtz
+cp ../build/data_key/out/*.ta $SYSTEM_CONFIG/usr/lib/optee_armtz/
+
+mkdir -p $SYSTEM_CONFIG/usr/bin
+chmod +x ../build/data_key/optee_get_key
+cp ../build/data_key/optee_get_key $SYSTEM_CONFIG/usr/bin/ # copy binary
+
+# --------------------------------------------------
+# 5️⃣ OP-TEE TEST (WI+6TH PKCS11 SUPPORT)
 # --------------------------------------------------
 
 echo ">>> Building imx-optee-test with PKCS11"
