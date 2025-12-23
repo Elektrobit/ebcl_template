@@ -12,12 +12,12 @@ arch: arm64
 use_ebcl_apt: true
 # Add repo with NXP RDB2 packages
 apt_repos:
-  - apt_repo: http://linux.elektrobit.com/eb-corbos-linux/1.2
+  - apt_repo: https://linux.elektrobit.com/eb-corbos-linux/1.2
     distro: ebcl_nxp_public
     components:
       - nxp_public
     key: file:///build/keys/elektrobit.pub
-    gpg: /etc/berrymill/keyrings.d/elektrobit.gpg
+    gpg: /etc/apt/trusted.gpg.d/elektrobit.gpg
 ```
 
 The packages for the NXP RDB2 board are provided as a separate distribution, called _ebcl_nxp_public_, as component _nxp_public_. For the RDB2 images, the kernel package _linux-image-unsigned-5.15.0-1034-s32-eb_ is used.
