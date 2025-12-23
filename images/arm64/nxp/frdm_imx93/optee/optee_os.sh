@@ -13,6 +13,11 @@ echo "path ${1}"
 mkdir -p "${1}"
 cd "${1}"
 
+if [ ! -d "${SYSROOT}usr" ]; then
+  echo "⚠️  ${SYSROOT}usr not found, please build it first: make sysroot_install"
+  exit 1
+fi
+
 if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
   # === Step 1️⃣: Build OP-TEE ===
   if [ ! -d "${OPTEE_DIR}" ]; then
@@ -37,8 +42,11 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
       O="${OPTEE_BUILD_DIR}" \
       ARCH=arm \
       CFG_ARM64_core=y \
-      CFG_TEE_CORE_LOG_LEVEL=0 \
-      CFG_TEE_TA_LOG_LEVEL=3 \
+      CFG_TEE_CORE_LOG_LEVEL=4 \
+      CFG_CRYPTO_AES=y \
+      CFG_CRYPTO_GCM=y \
+      CFG_CRYPTO_SHA256=y \
+      CFG_WITH_SOFTWARE_PRNG=y \
       COMPILER=gcc \
       CROSS_COMPILE64="${CROSS_COMPILE}" \
       CROSS_COMPILE_core="${CROSS_COMPILE}" \

@@ -132,6 +132,14 @@ static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
         IMSG("aes_gcm_encrypt TEE_AEInit");
         TEE_AEInit(op, iv, sizeof(iv), tag_len, /*aadLen*/ 0, /*payloadLen*/ (uint32_t)in_len);
 
+        TEE_OperationInfo info;
+        TEE_GetOperationInfo(op, &info);
+        IMSG("AEInit: alg=0x%x class=%u state=0x%x digestLen=%u",
+             (unsigned)info.algorithm,
+             (unsigned)info.operationClass,
+             (unsigned)info.handleState,
+             (unsigned)info.digestLength);
+
         IMSG("Encrypt: in_len=%u", (unsigned)in_len);
         IMSG("Encrypt: dst_len before=%u", (unsigned)dst_len);
         IMSG("Before TEE_AEEncryptFinal: res=%u", res);

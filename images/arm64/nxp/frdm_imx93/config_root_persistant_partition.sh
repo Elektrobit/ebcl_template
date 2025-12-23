@@ -7,7 +7,7 @@ echo "=============================="
 # ensure build dir exists
 mkdir -p build
 
-# create 256MB image file
+# create 512MB image file
 sudo dd if=/dev/zero of=build/data.img bs=1M count=512 status=progress
 
 # format ext4 filesystem
