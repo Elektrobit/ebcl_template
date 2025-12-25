@@ -43,10 +43,7 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
       ARCH=arm \
       CFG_ARM64_core=y \
       CFG_TEE_CORE_LOG_LEVEL=4 \
-      CFG_CRYPTO_AES=y \
-      CFG_CRYPTO_GCM=y \
-      CFG_CRYPTO_SHA256=y \
-      CFG_WITH_SOFTWARE_PRNG=y \
+      CFG_TEE_TA_LOG_LEVEL=3 \
       COMPILER=gcc \
       CROSS_COMPILE64="${CROSS_COMPILE}" \
       CROSS_COMPILE_core="${CROSS_COMPILE}" \

@@ -90,7 +90,7 @@ static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
     uint8_t tag[16];
     uint32_t tag_len = sizeof(tag);
     uint32_t dst_len = (uint32_t)in_len; /* ciphertext size equals plaintext size */
-    IMSG("aes_gcm_encrypt");
+    IMSG("aes_gcm_encrypt begin4");
 
     if (*out_len < (sizeof(iv) + sizeof(tag) + in_len))
     {
@@ -130,7 +130,12 @@ static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
 
         TEE_GenerateRandom(iv, sizeof(iv));
         IMSG("aes_gcm_encrypt TEE_AEInit");
-        TEE_AEInit(op, iv, sizeof(iv), tag_len, /*aadLen*/ 0, /*payloadLen*/ (uint32_t)in_len);
+        TEE_AEInit(op, iv, sizeof(iv), tag_len,
+                   /* aadLen */ 0,
+                   /* payloadLen */ (uint32_t)in_len);
+
+        /* REQUIRED even when aadLen == 0 */
+        TEE_AEUpdateAAD(op, NULL, 0);
 
         TEE_OperationInfo info;
         TEE_GetOperationInfo(op, &info);
