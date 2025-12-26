@@ -36,14 +36,13 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
     # shellcheck disable=SC1091
     #source venv/bin/activate
     #pip install cryptography pyelftools
-
+#      CFG_TEE_CORE_LOG_LEVEL=4 \
+#      CFG_TEE_TA_LOG_LEVEL=3 \
     make -j"$(nproc)" -C . \
       PLATFORM=imx-mx93evk \
       O="${OPTEE_BUILD_DIR}" \
       ARCH=arm \
       CFG_ARM64_core=y \
-      CFG_TEE_CORE_LOG_LEVEL=4 \
-      CFG_TEE_TA_LOG_LEVEL=3 \
       COMPILER=gcc \
       CROSS_COMPILE64="${CROSS_COMPILE}" \
       CROSS_COMPILE_core="${CROSS_COMPILE}" \

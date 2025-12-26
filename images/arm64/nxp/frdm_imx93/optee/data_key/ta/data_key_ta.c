@@ -7,7 +7,7 @@
 
 #include <tee_internal_api.h>
 #include <tee_internal_api_extensions.h>
-#include <trace.h> /* provides IMSG(), EMSG() */
+// #include <trace.h> /* provides IMSG(), EMSG() */
 #include <string.h>
 #include "data_key_ta.h"
 
@@ -29,7 +29,6 @@ static TEE_Result get_or_create_kek(uint8_t *kek, size_t kek_len)
     TEE_ObjectHandle oh = TEE_HANDLE_NULL;
     TEE_Result res = TEE_ERROR_GENERIC;
     bool kek_present = false;
-    IMSG("get_or_create_kek TEE_OpenPersistentObject");
 
     /* Try opening an existing KEK object */
     res = TEE_OpenPersistentObject(storage_id, KEK_OBJ_ID, strlen(KEK_OBJ_ID),
@@ -40,27 +39,19 @@ static TEE_Result get_or_create_kek(uint8_t *kek, size_t kek_len)
         uint32_t read_bytes = 0;
         kek_present = true; // kek found
 
-        IMSG("get_or_create_kek TEE_ReadObjectData");
         res = TEE_ReadObjectData(oh, kek, (uint32_t)kek_len, &read_bytes);
 
-        IMSG("get_or_create_kek TEE_CloseObject");
         TEE_CloseObject(oh);
         if ((res == TEE_SUCCESS) && (read_bytes != kek_len))
         {
-            IMSG("get_or_create_kek TEE_ERROR_GENERIC");
             res = TEE_ERROR_GENERIC;
         }
     }
     if (kek_present == false)
     {
-        IMSG("get_or_create_kek TEE_GenerateRandom");
         /* Create a new KEK and persist it */
         TEE_GenerateRandom(kek, kek_len);
-        IMSG("get_or_create_kek TEE_GenerateRandom len:%lu", kek_len);
-        IMSG("0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", kek[0], kek[1], kek[2], kek[3], kek[4], kek[5], kek[6], kek[7]);
-        IMSG("0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x, 0x%x", kek[8], kek[9], kek[10], kek[11], kek[12], kek[13], kek[14], kek[15]);
 
-        IMSG("get_or_create_kek TEE_CreatePersistentObject");
         res = TEE_CreatePersistentObject(storage_id, KEK_OBJ_ID, strlen(KEK_OBJ_ID),
                                          TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE |
                                              TEE_DATA_FLAG_OVERWRITE,
@@ -70,7 +61,7 @@ static TEE_Result get_or_create_kek(uint8_t *kek, size_t kek_len)
             TEE_CloseObject(oh);
         }
     }
-    IMSG("get_or_create_kek res:%u", res);
+
     return res;
 }
 
@@ -88,80 +79,54 @@ static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
 
     uint8_t iv[12];
     uint8_t tag[16];
-    uint32_t tag_len = sizeof(tag);
+    uint32_t tag_len = sizeof(tag) * 8;
     uint32_t dst_len = (uint32_t)in_len; /* ciphertext size equals plaintext size */
-    IMSG("aes_gcm_encrypt begin4");
 
     if (*out_len < (sizeof(iv) + sizeof(tag) + in_len))
     {
-        IMSG("aes_gcm_encrypt TEE_ERROR_SHORT_BUFFER *out_len: %lu is not smaller than %u", *out_len, (sizeof(iv) + sizeof(tag) + in_len));
         res = TEE_ERROR_SHORT_BUFFER;
     }
 
     if (res == TEE_SUCCESS)
     {
-        IMSG("aes_gcm_encrypt TEE_AllocateTransientObject");
         /* Prepare transient key object */
         res = TEE_AllocateTransientObject(TEE_TYPE_AES, KEK_BITS, &key);
     }
     if (res == TEE_SUCCESS)
     {
         TEE_Attribute attr;
-        IMSG("aes_gcm_encrypt TEE_InitRefAttribute");
         TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, kek, kek_len);
-        IMSG("aes_gcm_encrypt TEE_PopulateTransientObject");
         res = TEE_PopulateTransientObject(key, &attr, 1);
     }
 
     if (res == TEE_SUCCESS)
     {
-        IMSG("aes_gcm_encrypt TEE_AllocateOperation");
         /* Allocate operation */
         res = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM, TEE_MODE_ENCRYPT, KEK_BITS);
     }
     if (res == TEE_SUCCESS)
     {
-        IMSG("aes_gcm_encrypt TEE_SetOperationKey");
         res = TEE_SetOperationKey(op, key);
     }
     if (res == TEE_SUCCESS)
     {
-        IMSG("aes_gcm_encrypt TEE_GenerateRandom");
 
         TEE_GenerateRandom(iv, sizeof(iv));
-        IMSG("aes_gcm_encrypt TEE_AEInit");
-        TEE_AEInit(op, iv, sizeof(iv), tag_len,
-                   /* aadLen */ 0,
-                   /* payloadLen */ (uint32_t)in_len);
-
-        /* REQUIRED even when aadLen == 0 */
-        TEE_AEUpdateAAD(op, NULL, 0);
+        TEE_AEInit(op, iv, sizeof(iv), tag_len, 0, in_len);
 
         TEE_OperationInfo info;
         TEE_GetOperationInfo(op, &info);
-        IMSG("AEInit: alg=0x%x class=%u state=0x%x digestLen=%u",
-             (unsigned)info.algorithm,
-             (unsigned)info.operationClass,
-             (unsigned)info.handleState,
-             (unsigned)info.digestLength);
-
-        IMSG("Encrypt: in_len=%u", (unsigned)in_len);
-        IMSG("Encrypt: dst_len before=%u", (unsigned)dst_len);
-        IMSG("Before TEE_AEEncryptFinal: res=%u", res);
 
         /* Encrypt to out_buf + IV+TAG offset */
         res = TEE_AEEncryptFinal(op,
                                  (void *)in_buf, (uint32_t)in_len,
                                  (uint8_t *)out_buf + sizeof(iv) + sizeof(tag), &dst_len,
                                  tag, &tag_len);
-        IMSG("After TEE_AEEncryptFinal: res=%u", res);
     }
     if (res == TEE_SUCCESS)
     {
-        IMSG("aes_gcm_encrypt TEE_MemMove");
         /* Layout: IV | TAG | CIPHERTEXT */
         TEE_MemMove(out_buf, iv, sizeof(iv));
-        IMSG("aes_gcm_encrypt TEE_MemMove");
         TEE_MemMove((uint8_t *)out_buf + sizeof(iv), tag, sizeof(tag));
         *out_len = sizeof(iv) + sizeof(tag) + dst_len;
     }
@@ -169,7 +134,6 @@ static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
         TEE_FreeOperation(op);
     if (key)
         TEE_FreeTransientObject(key);
-    IMSG("Encrypt: res=0x%x", res);
     return res;
 }
 
@@ -190,7 +154,6 @@ static TEE_Result aes_gcm_decrypt(const uint8_t *kek, size_t kek_len,
     TEE_Result res = TEE_SUCCESS;
 
     uint32_t dst_len = (uint32_t)ct_len; /* plaintext size equals ciphertext size */
-    IMSG("aes_gcm_decrypt");
 
     if (*out_len < ct_len)
         return TEE_ERROR_SHORT_BUFFER;
@@ -213,7 +176,7 @@ static TEE_Result aes_gcm_decrypt(const uint8_t *kek, size_t kek_len,
     if (res)
         goto out;
 
-    TEE_AEInit(op, iv, 12, /*tagLen*/ 16, /*aadLen*/ 0, /*payloadLen*/ (uint32_t)ct_len);
+    TEE_AEInit(op, iv, 12, /*tagLen*/ 128, /*aadLen*/ 0, /*payloadLen*/ (uint32_t)ct_len);
 
     res = TEE_AEDecryptFinal(op,
                              (void *)ct, (uint32_t)ct_len,
@@ -347,7 +310,6 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
                                          TEE_PARAM_TYPE_NONE,
                                          TEE_PARAM_TYPE_NONE,
                                          TEE_PARAM_TYPE_NONE);
-    IMSG("TA_InvokeCommandEntryPoint called");
 
     if (param_types != exp)
         return TEE_ERROR_BAD_PARAMETERS;
