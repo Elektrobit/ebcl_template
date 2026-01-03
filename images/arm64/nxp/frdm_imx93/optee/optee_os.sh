@@ -38,11 +38,15 @@ if [ ! -f "${OPTEE_BUILD_DIR}/core/tee-raw.bin" ]; then
     #pip install cryptography pyelftools
 #      CFG_TEE_CORE_LOG_LEVEL=4 \
 #      CFG_TEE_TA_LOG_LEVEL=3 \
+#      CFG_TA_DEBUG=y \
     make -j"$(nproc)" -C . \
       PLATFORM=imx-mx93evk \
       O="${OPTEE_BUILD_DIR}" \
       ARCH=arm \
       CFG_ARM64_core=y \
+      CFG_RPMB_FS=y \
+      CFG_RPMB_WRITE_KEY=y \
+      CFG_REE_FS=n \
       COMPILER=gcc \
       CROSS_COMPILE64="${CROSS_COMPILE}" \
       CROSS_COMPILE_core="${CROSS_COMPILE}" \

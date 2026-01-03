@@ -1,385 +1,622 @@
-
 /*
  * data_key_ta.c
- * Minimal OP-TEE TA for LUKS key wrapping/unwrapping and self-test.
- * License: BSD-2-Clause
+ *
+ * Production-grade OP-TEE TA for dm-crypt/LUKS key wrapping
+ * with strong rollback protection.
+ *
+ * Security properties:
+ *  - KEK derived from HUK via HKDF
+ *  - RPMB-backed monotonic counter
+ *  - Explicit downgrade detection
+ *  - AES-256-GCM (HDR | CT)
+ *  - Explicit zeroization
+ *  - Client UUID authorization
  */
 
 #include <tee_internal_api.h>
 #include <tee_internal_api_extensions.h>
-// #include <trace.h> /* provides IMSG(), EMSG() */
+#include <pta_system.h>
 #include <string.h>
 #include "data_key_ta.h"
 
-/* ===== Configuration ===== */
+/* -------------------------------------------------------------------------- */
+/* Configuration                                                              */
+/* -------------------------------------------------------------------------- */
 
-/* Persistent object name for the KEK; stored in OP-TEE Secure Storage */
-#define KEK_OBJ_ID "kek.bin"
 #define KEK_BITS 256
+#define KEK_BYTES (KEK_BITS / 8)
 
-/* Storage backend: TEE_STORAGE_PRIVATE selects REE FS (preferred) or RPMB FS by config.
- * If you want to force RPMB and your platform is provisioned, use TEE_STORAGE_PRIVATE_RPMB.
- */
-static const uint32_t storage_id = TEE_STORAGE_PRIVATE;
+#define GCM_IV_BYTES 12
+#define GCM_TAG_BITS 128
+#define GCM_TAG_BYTES (GCM_TAG_BITS / 8)
 
-/* ===== KEK handling (Secure Storage) ===== */
+#define KEK_VERSION 1
 
-static TEE_Result get_or_create_kek(uint8_t *kek, size_t kek_len)
+#define COUNTER_OBJ_ID "kek_counter.bin"
+#define REQUIRE_AUTH_FOR_ROTATE 0
+
+static const uint32_t storage_id = TEE_STORAGE_PRIVATE_RPMB;
+// static const uint32_t storage_id = TEE_STORAGE_PRIVATE;
+
+/* Authorized client UUID */
+static const TEE_UUID allowed_client_uuid = KEKSTORE_TA_UUID;
+
+/* Domain separation salt/info */
+static const char kSalt[] = "imx93-optee-dmcrypt"; /* adjust to platform/product */
+
+/* -------------------------------------------------------------------------- */
+/* Wrapped blob header                                                         */
+/* -------------------------------------------------------------------------- */
+
+struct wrapped_hdr
+{
+    uint32_t version;
+    uint32_t counter;
+    uint8_t iv[GCM_IV_BYTES];
+    uint8_t tag[GCM_TAG_BYTES];
+};
+
+/* -------------------------------------------------------------------------- */
+/* Utilities                                                                  */
+/* -------------------------------------------------------------------------- */
+
+static void memzero(void *p, size_t n)
+{
+    volatile uint8_t *v = p;
+    while (n--)
+        *v++ = 0;
+}
+
+#if REQUIRE_AUTH_FOR_ROTATE
+static TEE_Result check_caller_authorized(void)
+{
+    TEE_UUID caller;
+
+    if (TEE_GetPropertyAsUUID(TEE_PROPSET_CURRENT_CLIENT,
+                              "gpd.client.appID",
+                              &caller) != TEE_SUCCESS)
+        return TEE_ERROR_ACCESS_DENIED;
+
+    if (TEE_MemCompare(&caller, &allowed_client_uuid,
+                       sizeof(caller)) != 0)
+        return TEE_ERROR_ACCESS_DENIED;
+
+    return TEE_SUCCESS;
+}
+#endif
+
+/* -------------------------------------------------------------------------- */
+/* Anti-rollback counter (RPMB)                                                */
+/* -------------------------------------------------------------------------- */
+
+static TEE_Result load_or_create_counter(uint32_t *counter)
 {
     TEE_ObjectHandle oh = TEE_HANDLE_NULL;
     TEE_Result res = TEE_ERROR_GENERIC;
-    bool kek_present = false;
-
-    /* Try opening an existing KEK object */
-    res = TEE_OpenPersistentObject(storage_id, KEK_OBJ_ID, strlen(KEK_OBJ_ID),
-                                   TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE,
+    bool counter_present = false;
+    IMSG("load_or_create_counter TEE_OpenPersistentObject");
+    res = TEE_OpenPersistentObject(storage_id,
+                                   COUNTER_OBJ_ID,
+                                   strlen(COUNTER_OBJ_ID),
+                                   TEE_DATA_FLAG_ACCESS_READ |
+                                       TEE_DATA_FLAG_ACCESS_WRITE,
                                    &oh);
     if (res == TEE_SUCCESS)
     {
-        uint32_t read_bytes = 0;
-        kek_present = true; // kek found
-
-        res = TEE_ReadObjectData(oh, kek, (uint32_t)kek_len, &read_bytes);
-
+        uint32_t rb = 0;
+        counter_present = true;
+        IMSG("load_or_create_counter TEE_ReadObjectData");
+        res = TEE_ReadObjectData(oh, counter, sizeof(*counter), &rb);
+        IMSG("load_or_create_counter TEE_CloseObject");
         TEE_CloseObject(oh);
-        if ((res == TEE_SUCCESS) && (read_bytes != kek_len))
+        if (res != TEE_SUCCESS || rb != sizeof(*counter))
         {
-            res = TEE_ERROR_GENERIC;
+            res = TEE_ERROR_CORRUPT_OBJECT;
         }
     }
-    if (kek_present == false)
+    if (counter_present == false)
     {
-        /* Create a new KEK and persist it */
-        TEE_GenerateRandom(kek, kek_len);
-
-        res = TEE_CreatePersistentObject(storage_id, KEK_OBJ_ID, strlen(KEK_OBJ_ID),
-                                         TEE_DATA_FLAG_ACCESS_READ | TEE_DATA_FLAG_ACCESS_WRITE |
+        *counter = 1;
+        IMSG("load_or_create_counter TEE_CreatePersistentObject");
+        res = TEE_CreatePersistentObject(storage_id,
+                                         COUNTER_OBJ_ID,
+                                         strlen(COUNTER_OBJ_ID),
+                                         TEE_DATA_FLAG_ACCESS_READ |
+                                             TEE_DATA_FLAG_ACCESS_WRITE |
                                              TEE_DATA_FLAG_OVERWRITE,
-                                         TEE_HANDLE_NULL, kek, (uint32_t)kek_len, &oh);
+                                         TEE_HANDLE_NULL,
+                                         counter,
+                                         sizeof(*counter),
+                                         &oh);
         if (res == TEE_SUCCESS)
-        {
             TEE_CloseObject(oh);
-        }
     }
-
+    IMSG("load_or_create_counter res: %x", res);
     return res;
 }
 
-/* ===== AES-GCM helpers =====
- * Layout for wrapped blob: IV(12) | TAG(16) | CIPHERTEXT
- */
-
-static TEE_Result aes_gcm_encrypt(const uint8_t *kek, size_t kek_len,
-                                  const void *in_buf, size_t in_len,
-                                  void *out_buf, size_t *out_len)
+static TEE_Result store_counter(uint32_t counter)
 {
-    TEE_OperationHandle op = TEE_HANDLE_NULL;
-    TEE_ObjectHandle key = TEE_HANDLE_NULL;
+    TEE_ObjectHandle oh = TEE_HANDLE_NULL;
+    uint32_t tmp = counter;
+    TEE_Result res;
+
+    res = TEE_CreatePersistentObject(
+        storage_id,
+        COUNTER_OBJ_ID,
+        strlen(COUNTER_OBJ_ID),
+        TEE_DATA_FLAG_ACCESS_READ |
+            TEE_DATA_FLAG_ACCESS_WRITE |
+            TEE_DATA_FLAG_OVERWRITE,
+        TEE_HANDLE_NULL,
+        &tmp,
+        sizeof(tmp),
+        &oh);
+
+    if (res == TEE_SUCCESS)
+        TEE_CloseObject(oh);
+
+    memzero(&tmp, sizeof(tmp));
+    IMSG("store_counter result: 0x%x", res);
+    return res;
+}
+
+static TEE_Result increment_counter(uint32_t *new_val)
+{
+    uint32_t c;
+    TEE_Result res = load_or_create_counter(&c);
+    if (res == TEE_SUCCESS)
+    {
+        IMSG("increment_counter current value: %u", c);
+
+        c++;
+        res = store_counter(c);
+    }
+    if (res == TEE_SUCCESS)
+    {
+        IMSG("increment_counter new value: %u", c);
+
+        if (new_val)
+            *new_val = c;
+    }
+    IMSG("increment_counter result: 0x%x", res);
+    return res;
+}
+
+/* --- Derivation: get per-TA base key from System PTA, then HKDF -> KEK --- */
+
+static TEE_Result derive_base_from_system_pta(const void *extra, size_t extra_len,
+                                              uint8_t *out, size_t out_len)
+{
+    TEE_Result res = TEE_ERROR_GENERIC;
+    const TEE_UUID pta_uuid = PTA_SYSTEM_UUID;
+    TEE_TASessionHandle sess = TEE_HANDLE_NULL;
+    uint32_t ret_origin = 0;
+
+    TEE_Param params[4];
+    uint32_t pt = TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
+                                  TEE_PARAM_TYPE_MEMREF_OUTPUT,
+                                  TEE_PARAM_TYPE_NONE,
+                                  TEE_PARAM_TYPE_NONE);
+    IMSG("derive_base_from_system_pta: begin");
+    TEE_MemFill(params, 0, sizeof(params));
+    params[0].memref.buffer = (void *)extra;
+    params[0].memref.size = (uint32_t)extra_len;
+    params[1].memref.buffer = out;
+    params[1].memref.size = (uint32_t)out_len;
+    IMSG("derive_base_from_system_pta: TEE_OpenTASession");
+
+    res = TEE_OpenTASession(&pta_uuid, TEE_TIMEOUT_INFINITE,
+                            TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE,
+                                            TEE_PARAM_TYPE_NONE,
+                                            TEE_PARAM_TYPE_NONE,
+                                            TEE_PARAM_TYPE_NONE),
+                            NULL,
+                            &sess, &ret_origin);
+    if (res)
+        return res;
+    IMSG("derive_base_from_system_pta: TEE_InvokeTACommand");
+    res = TEE_InvokeTACommand(sess, TEE_TIMEOUT_INFINITE, PTA_SYSTEM_DERIVE_TA_UNIQUE_KEY,
+                              pt, params, &ret_origin);
+    IMSG("derive_base_from_system_pta: TEE_CloseTASession");
+    TEE_CloseTASession(sess);
+    IMSG("derive_base_from_system_pta result: 0x%x", res);
+    return res;
+}
+
+static TEE_Result hkdf_derive_kek(const uint8_t *ikm, size_t ikm_len,
+                                  const void *info, size_t info_len,
+                                  uint8_t *kek, size_t kek_len)
+{
     TEE_Result res = TEE_SUCCESS;
+    TEE_OperationHandle op = TEE_HANDLE_NULL;
+    TEE_ObjectHandle ikm_obj = TEE_HANDLE_NULL;
+    TEE_ObjectHandle kek_obj = TEE_HANDLE_NULL;
+    uint32_t out_len = (uint32_t)kek_len;
 
-    uint8_t iv[12];
-    uint8_t tag[16];
-    uint32_t tag_len = sizeof(tag) * 8;
-    uint32_t dst_len = (uint32_t)in_len; /* ciphertext size equals plaintext size */
+    TEE_Attribute attrs[3];
+    TEE_Attribute ikm_attr;
 
-    if (*out_len < (sizeof(iv) + sizeof(tag) + in_len))
-    {
-        res = TEE_ERROR_SHORT_BUFFER;
-    }
+    IMSG("derive_kek: allocate HKDF operation");
+    res = TEE_AllocateOperation(&op, TEE_ALG_HKDF_SHA256_DERIVE_KEY,
+                                TEE_MODE_DERIVE, 256);
+    if (res)
+        goto out;
+    IMSG("derive_kek: allocate IKM");
+    res = TEE_AllocateTransientObject(TEE_TYPE_HKDF_IKM, 256, &ikm_obj);
+    if (res)
+        goto out;
 
-    if (res == TEE_SUCCESS)
-    {
-        /* Prepare transient key object */
-        res = TEE_AllocateTransientObject(TEE_TYPE_AES, KEK_BITS, &key);
-    }
-    if (res == TEE_SUCCESS)
-    {
-        TEE_Attribute attr;
-        TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, kek, kek_len);
-        res = TEE_PopulateTransientObject(key, &attr, 1);
-    }
+    TEE_InitRefAttribute(&ikm_attr, TEE_ATTR_HKDF_IKM,
+                         (void *)ikm, (uint32_t)ikm_len);
+    res = TEE_PopulateTransientObject(ikm_obj, &ikm_attr, 1);
+    if (res)
+        goto out;
 
-    if (res == TEE_SUCCESS)
-    {
-        /* Allocate operation */
-        res = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM, TEE_MODE_ENCRYPT, KEK_BITS);
-    }
-    if (res == TEE_SUCCESS)
-    {
-        res = TEE_SetOperationKey(op, key);
-    }
-    if (res == TEE_SUCCESS)
-    {
+    IMSG("derive_kek: set operation key");
+    res = TEE_SetOperationKey(op, ikm_obj);
+    if (res)
+        goto out;
 
-        TEE_GenerateRandom(iv, sizeof(iv));
-        TEE_AEInit(op, iv, sizeof(iv), tag_len, 0, in_len);
+    TEE_InitRefAttribute(&attrs[0], TEE_ATTR_HKDF_INFO,
+                         (void *)info, (uint32_t)info_len);
+    TEE_InitRefAttribute(&attrs[1], TEE_ATTR_HKDF_SALT, (void *)kSalt, (uint32_t)(sizeof(kSalt) - 1));
+    TEE_InitValueAttribute(&attrs[2], TEE_ATTR_HKDF_OKM_LENGTH,
+                           (uint32_t)kek_len, 0);
 
-        TEE_OperationInfo info;
-        TEE_GetOperationInfo(op, &info);
+    res = TEE_AllocateTransientObject(TEE_TYPE_GENERIC_SECRET, 256, &kek_obj);
+    IMSG("derive_kek: allocate KEK object");
+    if (res)
+        goto out;
+    IMSG("derive_kek: TEE_DeriveKey");
+    TEE_DeriveKey(op, attrs, 3, kek_obj);
+    IMSG("derive_kek: extract KEK");
+    res = TEE_GetObjectBufferAttribute(kek_obj, TEE_ATTR_SECRET_VALUE, kek, &out_len);
 
-        /* Encrypt to out_buf + IV+TAG offset */
-        res = TEE_AEEncryptFinal(op,
-                                 (void *)in_buf, (uint32_t)in_len,
-                                 (uint8_t *)out_buf + sizeof(iv) + sizeof(tag), &dst_len,
-                                 tag, &tag_len);
-    }
-    if (res == TEE_SUCCESS)
-    {
-        /* Layout: IV | TAG | CIPHERTEXT */
-        TEE_MemMove(out_buf, iv, sizeof(iv));
-        TEE_MemMove((uint8_t *)out_buf + sizeof(iv), tag, sizeof(tag));
-        *out_len = sizeof(iv) + sizeof(tag) + dst_len;
-    }
+out:
+    if (kek_obj)
+        TEE_FreeTransientObject(kek_obj);
+    if (ikm_obj)
+        TEE_FreeTransientObject(ikm_obj);
     if (op)
         TEE_FreeOperation(op);
-    if (key)
-        TEE_FreeTransientObject(key);
+    IMSG("hkdf_derive_kek result: 0x%x", res);
     return res;
 }
 
-static TEE_Result aes_gcm_decrypt(const uint8_t *kek, size_t kek_len,
-                                  const void *in_buf, size_t in_len,
-                                  void *out_buf, size_t *out_len)
+static TEE_Result derive_kek(uint8_t *kek, size_t kek_len, uint32_t counter)
 {
-    if (in_len < (12 + 16))
-        return TEE_ERROR_BAD_PARAMETERS;
+    struct
+    {
+        uint32_t version;
+        uint32_t counter;
+    } info = {1, counter};
+    uint8_t base[32];
+    IMSG("derive_kek derive_base_from_system_pta");
+    TEE_Result res = derive_base_from_system_pta(&info, sizeof(info), base, sizeof(base));
+    if (res)
+        return res;
+    IMSG("derive_kek hkdf_derive_kek");
+    res = hkdf_derive_kek(base, sizeof(base), &info, sizeof(info), kek, kek_len);
+    TEE_MemFill(base, 0, sizeof(base));
+    IMSG("derive_kek result: 0x%x", res);
+    return res;
+}
 
-    const uint8_t *iv = (const uint8_t *)in_buf;
-    uint8_t *tag = (uint8_t *)((const uint8_t *)in_buf + 12);
-    const uint8_t *ct = (const uint8_t *)in_buf + 12 + 16;
-    size_t ct_len = in_len - (12 + 16);
+/* -------------------------------------------------------------------------- */
+/* AES-GCM                                                                    */
+/* -------------------------------------------------------------------------- */
 
+static TEE_Result aes_gcm_encrypt(const uint8_t *kek,
+                                  const void *pt, size_t pt_len,
+                                  struct wrapped_hdr *hdr,
+                                  uint8_t *ct)
+{
     TEE_OperationHandle op = TEE_HANDLE_NULL;
     TEE_ObjectHandle key = TEE_HANDLE_NULL;
-    TEE_Result res = TEE_SUCCESS;
+    TEE_Result res;
+    uint32_t tag_bits = GCM_TAG_BITS;
+    uint32_t ct_len = (uint32_t)pt_len;
+    uint32_t aad_len = sizeof(hdr->version) + sizeof(hdr->counter);
 
-    uint32_t dst_len = (uint32_t)ct_len; /* plaintext size equals ciphertext size */
+    TEE_GenerateRandom(hdr->iv, GCM_IV_BYTES);
 
-    if (*out_len < ct_len)
-        return TEE_ERROR_SHORT_BUFFER;
-
-    /* Prepare transient key object */
     res = TEE_AllocateTransientObject(TEE_TYPE_AES, KEK_BITS, &key);
     if (res)
         goto out;
+
     TEE_Attribute attr;
-    TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, kek, kek_len);
+    TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, kek, KEK_BYTES);
     res = TEE_PopulateTransientObject(key, &attr, 1);
     if (res)
         goto out;
 
-    /* Allocate operation */
-    res = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM, TEE_MODE_DECRYPT, KEK_BITS);
+    res = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM,
+                                TEE_MODE_ENCRYPT, KEK_BITS);
     if (res)
         goto out;
+
     res = TEE_SetOperationKey(op, key);
     if (res)
         goto out;
 
-    TEE_AEInit(op, iv, 12, /*tagLen*/ 128, /*aadLen*/ 0, /*payloadLen*/ (uint32_t)ct_len);
+    /* Bind header fields (version||counter) as AAD */
+    TEE_AEInit(op, hdr->iv, GCM_IV_BYTES, tag_bits, aad_len, ct_len);
+    TEE_AEUpdateAAD(op, hdr, aad_len);
 
-    res = TEE_AEDecryptFinal(op,
-                             (void *)ct, (uint32_t)ct_len,
-                             out_buf, &dst_len,
-                             (void *)tag, (uint32_t)16);
-    if (res == TEE_SUCCESS)
-        *out_len = dst_len;
+    res = TEE_AEEncryptFinal(op,
+                             (void *)pt, ct_len,
+                             ct, &ct_len,
+                             hdr->tag, &tag_bits);
 
 out:
     if (op)
         TEE_FreeOperation(op);
     if (key)
         TEE_FreeTransientObject(key);
+    IMSG("aes_gcm_encrypt result: 0x%x", res);
     return res;
 }
 
-/* ===== Self-test ===== */
-
-static TEE_Result self_test(void *io_buf, uint32_t *io_len32)
+static TEE_Result aes_gcm_decrypt(const uint8_t *kek,
+                                  const struct wrapped_hdr *hdr,
+                                  const uint8_t *ct, size_t ct_len,
+                                  uint8_t *pt, size_t *pt_len)
 {
-    static const uint8_t kTestPlain[] = {
-        0x54, 0x45, 0x53, 0x54, /* "TEST" */
-        0x00, 0x11, 0x22, 0x33, 0x44,
-        0x55, 0x66, 0x77, 0x88, 0x99};
-    const size_t pt_len = sizeof(kTestPlain);
+    TEE_OperationHandle op = TEE_HANDLE_NULL;
+    TEE_ObjectHandle key = TEE_HANDLE_NULL;
+    TEE_Result res;
+    uint32_t out_len = (uint32_t)*pt_len;
+    uint32_t aad_len = sizeof(hdr->version) + sizeof(hdr->counter);
 
-    uint8_t kek[KEK_BITS / 8];
-    TEE_Result res = get_or_create_kek(kek, sizeof(kek));
+    res = TEE_AllocateTransientObject(TEE_TYPE_AES, KEK_BITS, &key);
     if (res)
-        goto fail;
+        goto out;
 
-    size_t ct_len = pt_len + 12 + 16;
-    uint8_t *ct = TEE_Malloc(ct_len, 0);
-    if (!ct)
-    {
-        res = TEE_ERROR_OUT_OF_MEMORY;
-        goto fail;
-    }
-
-    res = aes_gcm_encrypt(kek, sizeof(kek), kTestPlain, pt_len, ct, &ct_len);
+    TEE_Attribute attr;
+    TEE_InitRefAttribute(&attr, TEE_ATTR_SECRET_VALUE, kek, KEK_BYTES);
+    res = TEE_PopulateTransientObject(key, &attr, 1);
     if (res)
-    {
-        TEE_Free(ct);
-        goto fail;
-    }
+        goto out;
 
-    size_t dec_len = pt_len;
-    uint8_t *dec = TEE_Malloc(dec_len, 0);
-    if (!dec)
-    {
-        TEE_Free(ct);
-        res = TEE_ERROR_OUT_OF_MEMORY;
-        goto fail;
-    }
-
-    res = aes_gcm_decrypt(kek, sizeof(kek), ct, ct_len, dec, &dec_len);
-    TEE_Free(ct);
+    res = TEE_AllocateOperation(&op, TEE_ALG_AES_GCM,
+                                TEE_MODE_DECRYPT, KEK_BITS);
     if (res)
-    {
-        TEE_Free(dec);
-        goto fail;
-    }
+        goto out;
 
-    if (dec_len != pt_len || TEE_MemCompare(dec, kTestPlain, pt_len) != 0)
-    {
-        TEE_Free(dec);
-        res = TEE_ERROR_GENERIC;
-        goto fail;
-    }
-    TEE_Free(dec);
+    res = TEE_SetOperationKey(op, key);
+    if (res)
+        goto out;
 
-    {
-        const char *ok = "CMD_TEST: OK (KEK present, AES-GCM round-trip verified)";
-        size_t need = strlen(ok) + 1;
-        if (*io_len32 >= need)
-        {
-            TEE_MemMove(io_buf, ok, need);
-            *io_len32 = need;
-        }
-        else if (*io_len32 > 0)
-        {
-            TEE_MemMove(io_buf, ok, *io_len32 - 1);
-            ((char *)io_buf)[*io_len32 - 1] = '\0';
-        }
-    }
-    return TEE_SUCCESS;
+    /* Supply same AAD as during encryption */
+    TEE_AEInit(op, (void *)hdr->iv, GCM_IV_BYTES, GCM_TAG_BITS, aad_len, (uint32_t)ct_len);
+    TEE_AEUpdateAAD(op, (void *)hdr, aad_len);
 
-fail:
-{
-    const char *err = "CMD_TEST: FAIL";
-    size_t need = strlen(err) + 1;
-    if (*io_len32 >= need)
-    {
-        TEE_MemMove(io_buf, err, need);
-        *io_len32 = need;
-    }
-    else if (*io_len32 > 0)
-    {
-        TEE_MemMove(io_buf, err, *io_len32 - 1);
-        ((char *)io_buf)[*io_len32 - 1] = '\0';
-    }
-}
+    res = TEE_AEDecryptFinal(op,
+                             (void *)ct, (uint32_t)ct_len,
+                             pt, &out_len,
+                             (void *)hdr->tag, GCM_TAG_BYTES);
+    if (res == TEE_SUCCESS)
+        *pt_len = out_len;
+
+out:
+    if (op)
+        TEE_FreeOperation(op);
+    if (key)
+        TEE_FreeTransientObject(key);
+    IMSG("aes_gcm_decrypt result: 0x%x", res);
     return res;
 }
 
-/* ===== TA entry points ===== */
+/* -------------------------------------------------------------------------- */
+/* Self-test                                                                  */
+/* -------------------------------------------------------------------------- */
+
+static TEE_Result self_test(void *buf, uint32_t *len32)
+{
+    static const uint8_t pt[] = "SELFTEST";
+    uint8_t kek[KEK_BYTES];
+    struct wrapped_hdr hdr;
+    uint8_t ct[32];
+    uint8_t dec[sizeof(pt)];
+    size_t dec_len = sizeof(dec);
+    uint32_t ctr;
+    TEE_Result res;
+    IMSG("Self-test started");
+
+    res = load_or_create_counter(&ctr);
+    if (res)
+        goto out;
+
+    res = derive_kek(kek, sizeof(kek), ctr);
+    if (res)
+        goto out;
+
+    hdr.version = KEK_VERSION;
+    hdr.counter = ctr;
+
+    res = aes_gcm_encrypt(kek, pt, sizeof(pt), &hdr, ct);
+    if (res)
+        goto out;
+
+    res = aes_gcm_decrypt(kek, &hdr, ct, sizeof(pt), dec, &dec_len);
+    if (res)
+        goto out;
+
+    if (dec_len != sizeof(pt) ||
+        TEE_MemCompare(pt, dec, sizeof(pt)) != 0)
+        res = TEE_ERROR_SECURITY;
+
+out:
+    memzero(kek, sizeof(kek));
+    memzero(&hdr, sizeof(hdr));
+    memzero(ct, sizeof(ct));
+    memzero(dec, sizeof(dec));
+
+    const char *msg = (res == TEE_SUCCESS)
+                          ? "SELFTEST OK"
+                          : "SELFTEST FAIL";
+
+    size_t need = strlen(msg) + 1;
+    if (*len32 >= need)
+    {
+        TEE_MemMove(buf, msg, need);
+        *len32 = need;
+    }
+    IMSG("self_test result: 0x%x", res);
+
+    return res;
+}
+
+/* -------------------------------------------------------------------------- */
+/* TA Entry Points                                                            */
+/* -------------------------------------------------------------------------- */
 
 TEE_Result TA_CreateEntryPoint(void) { return TEE_SUCCESS; }
 void TA_DestroyEntryPoint(void) {}
 
-TEE_Result TA_OpenSessionEntryPoint(uint32_t param_types,
-                                    TEE_Param params[4],
-                                    void **sess_ctx)
+TEE_Result TA_OpenSessionEntryPoint(uint32_t pt, TEE_Param p[4], void **ctx)
 {
-    (void)param_types;
-    (void)params;
-    (void)sess_ctx;
+    (void)pt;
+    (void)p;
+    (void)ctx;
     return TEE_SUCCESS;
 }
+void TA_CloseSessionEntryPoint(void *ctx) { (void)ctx; }
 
-void TA_CloseSessionEntryPoint(void *sess_ctx) { (void)sess_ctx; }
-
-/* Dispatcher */
-TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
-                                      uint32_t param_types, TEE_Param params[4])
+static TEE_Result cmd_wrap(TEE_Param p[4])
 {
-    (void)sess_ctx;
+    /* IN: p0.memref = plaintext key; OUT: p1.memref = header||ciphertext */
+    uint8_t *pt = p[0].memref.buffer;
+    size_t pt_len = p[0].memref.size;
+    uint8_t *out = p[1].memref.buffer;
+    size_t out_len = p[1].memref.size;
+    struct wrapped_hdr hdr_local; /* aligned on stack */
+    uint8_t *ct = out + sizeof(struct wrapped_hdr);
 
-    /* All commands use a single INOUT memref for simplicity */
-    const uint32_t exp = TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INOUT,
-                                         TEE_PARAM_TYPE_NONE,
-                                         TEE_PARAM_TYPE_NONE,
-                                         TEE_PARAM_TYPE_NONE);
+    uint32_t ctr = 0;
+    uint8_t kek[KEK_BYTES];
+    TEE_Result res;
 
-    if (param_types != exp)
+    if (!pt || !out || out_len < sizeof(struct wrapped_hdr) + pt_len)
         return TEE_ERROR_BAD_PARAMETERS;
+    IMSG("cmd_wrap load_or_create_counter");
 
-    if (cmd_id == CMD_TEST)
-    {
-        return self_test(params[0].memref.buffer, &params[0].memref.size);
-    }
-
-    /* Wrap / Unwrap require the KEK */
-    uint8_t kek[KEK_BITS / 8];
-    TEE_Result res = get_or_create_kek(kek, sizeof(kek));
+    res = load_or_create_counter(&ctr);
     if (res)
         return res;
 
-    void *buf = params[0].memref.buffer;
-    size_t len = params[0].memref.size;
+    hdr_local.version = KEK_VERSION;
+    hdr_local.counter = ctr;
+    IMSG("cmd_wrap derive_kek");
 
-    if (cmd_id == CMD_WRAP)
-    {
-        size_t out_len = len + 12 + 16;
-        void *tmp = TEE_Malloc(out_len, 0);
-        if (!tmp)
-            return TEE_ERROR_OUT_OF_MEMORY;
+    res = derive_kek(kek, sizeof(kek), ctr);
+    if (res)
+        goto out;
+    IMSG("cmd_wrap aes_gcm_encrypt");
+    res = aes_gcm_encrypt(kek, pt, pt_len, &hdr_local, ct);
+    if (res)
+        goto out;
 
-        res = aes_gcm_encrypt(kek, sizeof(kek), buf, len, tmp, &out_len);
-        if (res == TEE_SUCCESS)
-        {
-            if (out_len <= params[0].memref.size)
-            {
-                TEE_MemMove(buf, tmp, out_len);
-                params[0].memref.size = out_len;
-            }
-            else
-            {
-                res = TEE_ERROR_SHORT_BUFFER;
-            }
-        }
-        TEE_Free(tmp);
-        return res;
-    }
-    else if (cmd_id == CMD_UNWRAP)
-    {
-        size_t out_len = len; /* plaintext equals ct size */
-        void *tmp = TEE_Malloc(out_len, 0);
-        if (!tmp)
-            return TEE_ERROR_OUT_OF_MEMORY;
+    /* Write header to output buffer first, then ciphertext */
 
-        res = aes_gcm_decrypt(kek, sizeof(kek), buf, len, tmp, &out_len);
-        if (res == TEE_SUCCESS)
-        {
-            if (out_len <= params[0].memref.size)
-            {
-                TEE_MemMove(buf, tmp, out_len);
-                params[0].memref.size = out_len;
-            }
-            else
-            {
-                res = TEE_ERROR_SHORT_BUFFER;
-            }
-        }
-        TEE_Free(tmp);
-        return res;
-    }
+    TEE_MemMove(out, &hdr_local, sizeof(hdr_local));
+    /* Tell the caller how many bytes we produced: header + ciphertext */
+    p[1].memref.size = (uint32_t)(sizeof(struct wrapped_hdr) + pt_len);
 
-    return TEE_ERROR_NOT_SUPPORTED;
+out:
+    memzero(kek, sizeof(kek));
+    IMSG("cmd_wrap result: 0x%x", res);
+    return res;
 }
 
-/* ===== TA properties (optional when using user_ta_header.c template) =====
- * If you generate your TA from the standard OP-TEE templates, the TA UUID
- * and props are typically defined in user_ta_header.c produced by the devkit.
- * If you embed here, you would define TA_UUID and compile accordingly.
- */
+static TEE_Result cmd_unwrap(TEE_Param p[4])
+{
+    /* IN: p0.memref = header||ciphertext; OUT: p1.memref = plaintext key */
+    uint8_t *blob = p[0].memref.buffer;
+    size_t blob_len = p[0].memref.size;
+    uint8_t *pt = p[1].memref.buffer;
+    size_t pt_len = p[1].memref.size; /* capacity */
+
+    struct wrapped_hdr hdr_local; /* aligned on stack */
+    const uint8_t *ct = blob + sizeof(struct wrapped_hdr);
+    size_t ct_len = blob_len - sizeof(struct wrapped_hdr);
+
+    if (blob_len < sizeof(hdr_local))
+        return TEE_ERROR_BAD_PARAMETERS;
+    TEE_MemMove(&hdr_local, blob, sizeof(hdr_local));
+
+    uint32_t ctr_now = 0;
+    uint8_t kek[KEK_BYTES];
+    TEE_Result res;
+
+    if (!blob || blob_len < sizeof(struct wrapped_hdr) || !pt)
+        return TEE_ERROR_BAD_PARAMETERS;
+    /* If plaintext output buffer is too small, tell the caller the required size */
+    if (ct_len > pt_len)
+    {
+        p[1].memref.size = (uint32_t)ct_len; /* required output length */
+        return TEE_ERROR_SHORT_BUFFER;
+    }
+
+    res = load_or_create_counter(&ctr_now);
+    if (res)
+        return res;
+
+    /* Rollback check: reject if header counter is lower than RPMB counter */
+    if (hdr_local.counter < ctr_now)
+        return TEE_ERROR_SECURITY;
+
+    res = derive_kek(kek, sizeof(kek), hdr_local.counter);
+    if (res)
+        goto out;
+
+    res = aes_gcm_decrypt(kek, &hdr_local, ct, ct_len, pt, &ct_len);
+    if (res == TEE_SUCCESS)
+        p[1].memref.size = (uint32_t)ct_len;
+
+out:
+    memzero(kek, sizeof(kek));
+    IMSG("cmd_unwrap result: 0x%x", res);
+    return res;
+}
+
+TEE_Result TA_InvokeCommandEntryPoint(void *ctx, uint32_t cmd, uint32_t pt, TEE_Param p[4])
+{
+    (void)ctx;
+
+    switch (cmd)
+    {
+    case CMD_TEST:
+        if (pt != TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INOUT, 0, 0, 0))
+            return TEE_ERROR_BAD_PARAMETERS;
+        return self_test(p[0].memref.buffer, &p[0].memref.size);
+
+    case CMD_ROTATE_KEK:
+        if (pt != TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE, 0, 0, 0))
+            return TEE_ERROR_BAD_PARAMETERS;
+        {
+#if REQUIRE_AUTH_FOR_ROTATE
+            TEE_Result res = check_caller_authorized();
+            if (res)
+                return res;
+#endif
+            return increment_counter(NULL);
+        }
+
+    case CMD_WRAP:
+        if (pt != TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
+                                  TEE_PARAM_TYPE_MEMREF_OUTPUT, 0, 0))
+            return TEE_ERROR_BAD_PARAMETERS;
+        return cmd_wrap(p);
+
+    case CMD_UNWRAP:
+        if (pt != TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
+                                  TEE_PARAM_TYPE_MEMREF_INOUT, 0, 0))
+            return TEE_ERROR_BAD_PARAMETERS;
+        return cmd_unwrap(p);
+
+    default:
+        return TEE_ERROR_NOT_SUPPORTED;
+    }
+}

@@ -10,6 +10,7 @@ enum
 {
     CMD_WRAP = 0x0001,   /* INOUT: plaintext -> IV|TAG|CIPHERTEXT */
     CMD_UNWRAP = 0x0002, /* INOUT: IV|TAG|CIPHERTEXT -> plaintext */
-    CMD_TEST = 0x0003    /* INOUT: returns status text */
+    CMD_TEST = 0x0003,   /* INOUT: returns status text */
+    CMD_ROTATE_KEK = 0x0004
 };
 #endif
