@@ -38,8 +38,10 @@
 static const uint32_t storage_id = TEE_STORAGE_PRIVATE_RPMB;
 // static const uint32_t storage_id = TEE_STORAGE_PRIVATE;
 
+#if REQUIRE_AUTH_FOR_ROTATE
 /* Authorized client UUID */
 static const TEE_UUID allowed_client_uuid = KEKSTORE_TA_UUID;
+#endif
 
 /* Domain separation salt/info */
 static const char kSalt[] = "imx93-optee-dmcrypt"; /* adjust to platform/product */
