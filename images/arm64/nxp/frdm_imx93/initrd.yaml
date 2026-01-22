@@ -6,7 +6,8 @@ kernel: null
 root_device: /dev/mmcblk1p2
 packages:
   - dmsetup
-#  - cryptsetup
+  - cryptsetup
+  - e2fsprogs
 #  - initramfs-module-dmverity
 #  - initramfs-module-udev
 #  - lvm2-udevrules

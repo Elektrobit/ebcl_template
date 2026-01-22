@@ -93,6 +93,9 @@ cp host/optee_example_hello_world $SYSTEM_CONFIG/usr/bin/
 
 echo ">>> Building disk encryption key"
 cd $WORKSPACE/optee/data_key
+if [ -d $WORKSPACE/optee/build/data_key ]; then
+    rm -rf $WORKSPACE/optee/build/data_key
+fi
 mkdir -p $WORKSPACE/optee/build/data_key
 # ---- Host App
 make -C host CROSS_COMPILE=$CROSS TEEC_EXPORT=$OPTEE_CLIENT_EXPORT --no-builtin-variables

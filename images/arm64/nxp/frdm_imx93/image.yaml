@@ -41,6 +41,14 @@ image:
       content:
         type: raw
         file: build/root.ext4.hash
+    # Wrapped key partition
+    - name: wrapped_key
+      type: partition
+      fstype: ext4
+      content:
+        type: raw
+        file: build/wrapped_key.img
+      size: 1 MB
 
     # Persistent data partition (for overlay upper/work, logs, etc)
     - name: data

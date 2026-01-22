@@ -1,0 +1,357 @@
+#!/bin/sh
+set -e
+
+log() { echo "[initrd] $*"; }
+
+USE_TMPFS_UPPER=0
+
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+udevadm settle 2>/dev/null || sleep 1
+
+log "Kernel commandline: $(cat /proc/cmdline)"
+
+root=/dev/mapper/rootfs
+init=/sbin/init
+
+# --- Parse verity parameters ---
+SECTORS=""
+BLOCK_SIZE=""
+DATA_BLOCKS=""
+HASH_START=""
+ROOT_HASH=""
+SALT=""
+
+for param in $(cat /proc/cmdline); do
+    case $param in
+        verity.sectors=*)    SECTORS="${param#verity.sectors=}" ;;
+        verity.blksize=*)    BLOCK_SIZE="${param#verity.blksize=}" ;;
+        verity.datablocks=*) DATA_BLOCKS="${param#verity.datablocks=}" ;;
+        verity.hashstart=*)  HASH_START="${param#verity.hashstart=}" ;;
+        verity.roothash=*)   ROOT_HASH="${param#verity.roothash=}" ;;
+        verity.salt=*)       SALT="${param#verity.salt=}" ;;
+    esac
+done
+
+log "dm-verity params:"
+log "  SECTORS=${SECTORS:-<unset>}"
+log "  BLOCK_SIZE=${BLOCK_SIZE:-<unset>}"
+log "  DATA_BLOCKS=${DATA_BLOCKS:-<unset>}"
+log "  HASH_START=${HASH_START:-<unset>}"
+log "  ROOT_HASH=${ROOT_HASH:-<unset>}"
+log "  SALT=${SALT:-<unset>}"
+
+# sanity
+if [ -z "$SECTORS" ] || [ -z "$BLOCK_SIZE" ] || [ -z "$DATA_BLOCKS" ] || [ -z "$ROOT_HASH" ] || [ -z "$SALT" ]; then
+    log "Missing verity params; dropping to shell."
+    exec /bin/sh
+fi
+
+# Devices (adjust if your platform uses different device nodes)
+DATA_DEV=/dev/mmcblk1p2
+HASH_DEV=/dev/mmcblk1p3
+# device for persistent data partition (adjust partition number)
+DATA_PER=/dev/mmcblk1p6
+KEY_DEV=/dev/mmcblk1p5
+
+log "Waiting for ${DATA_DEV}, ${HASH_DEV} ..."
+# wait for the required block devices
+for dev in "${DATA_DEV}" "${HASH_DEV}"; do
+  log "Waiting for ${dev}..."
+  for i in $(seq 1 20); do
+    [ -b "${dev}" ] && break
+    log "  Attempt $i: ${dev} not ready, retrying..."
+    sleep 1
+  done
+  [ -b "${dev}" ] || { log "ERROR: ${dev} not found! Dropping to shell."; exec /bin/sh; }
+done
+
+# DATA_PER is optional (non-fatal) ? attempt to wait a short while
+log "Waiting for ${DATA_PER} (optional persistent partition)..."
+for i in $(seq 1 20); do
+    [ -b "${DATA_PER}" ] && break
+    sleep 1
+done
+
+# auto-detect verity header at start of hash device (first 4k contains "verity")
+if dd if="$HASH_DEV" bs=4096 count=1 2>/dev/null | head -c 6 | grep -q '^verity'; then
+    log "found verity header on $HASH_DEV"
+    HASH_START=1
+else
+    HASH_START=${HASH_START:-0}
+fi
+
+log "Using HASH_START=$HASH_START"
+
+# Build dm table
+TABLE="0 ${SECTORS} verity 1 ${DATA_DEV} ${HASH_DEV} ${BLOCK_SIZE} ${BLOCK_SIZE} ${DATA_BLOCKS} ${HASH_START} sha256 ${ROOT_HASH} ${SALT}"
+log "Creating dm-verity mapping..."
+log "dmsetup create --readonly rootfs --table \"$TABLE\""
+
+if ! dmsetup create --readonly rootfs --table "$TABLE"; then
+    log "dmsetup create failed! Drop to shell."
+    exec /bin/sh
+fi
+dmsetup mknodes
+###############veritysetup setup version
+#log "Creating dm-verity mapping with veritysetup..."
+#HASH_OFFSET=$((HASH_START * BLOCK_SIZE))
+#veritysetup create rootfs $DATA_DEV $HASH_DEV \
+#   --hash-offset=$HASH_OFFSET \
+#   --data-blocks=$DATA_BLOCKS \
+#   --data-block-size=$BLOCK_SIZE \
+#   --hash-block-size=$BLOCK_SIZE \
+#   --salt=$SALT \
+#   $ROOT_HASH
+########################################
+
+
+mkdir -p /lower
+mount -o ro /dev/mapper/rootfs /lower
+
+cp /lower/usr/sbin/tee-supplicant usr/sbin/
+mkdir -p /lib/optee_armtz
+cp /lower/usr/lib/optee_armtz/65024bcf-47a0-4a08-9498-bb634c46ec9e.ta /lib/optee_armtz/
+cp /lower/usr/lib/libteec.so* /usr/lib/
+cp /lower/usr/bin/optee_get_key /usr/bin/
+
+#start TEE supplicant
+log "Starting TEE supplicant ..."
+tee-supplicant &
+sleep 1
+
+KEY_MOUNT="/wrapped_key"
+# Mount persistent partition early
+KEY_WRAPPED=$KEY_MOUNT/keys/data.key.wrapped
+#CRYPT_KEY_WRAPPED=/data/keys/data.key.wrapped
+KEY_PLAIN=""
+
+
+mkdir -p $KEY_MOUNT
+log "Mounting wrapped key partition (read-only) $KEY_DEV on $KEY_MOUNT ..."
+if ! mount -t ext4 -o ro "$KEY_DEV" "$KEY_MOUNT"; then
+    log "Key partition not formatted, creating filesystem"
+    mkfs.ext4 -L keydev "$KEY_DEV" || {
+        log "mkfs.ext4 on KEY_DEV failed"
+        exec /bin/sh
+    }
+    sync
+    mount -t ext4 -o ro "$KEY_DEV" "$KEY_MOUNT" || {
+        log "mount KEY_DEV failed after format"
+        exec /bin/sh
+    }
+fi
+
+# ---- Provision dm-crypt key via OP-TEE if missing ----
+if [ ! -f "$KEY_WRAPPED" ]; then
+    log "No wrapped dm-crypt key found ? provisioning"
+    mount -o remount,rw "$KEY_MOUNT" || {
+        log "ERROR: failed to remount key partition read-write"
+        exec /bin/sh
+    }
+    mkdir -p "$KEY_MOUNT/keys"
+    chmod 0700 "$KEY_MOUNT/keys"
+    KEY_PLAIN=$(mktemp)
+    # 64 bytes = AES-256-XTS total (two 256-bit subkeys)
+    head -c 64 /dev/urandom > "$KEY_PLAIN"
+
+    if ! optee_get_key --wrap --in "$KEY_PLAIN" --out "$KEY_WRAPPED"; then
+        log "ERROR: failed to wrap master key"
+        exec /bin/sh
+    fi
+    chmod 0600 "$KEY_WRAPPED"
+
+    sync
+
+    dd if=/dev/zero of="$KEY_PLAIN" bs=64 count=1 conv=notrunc 2>/dev/null
+    rm -f "$KEY_PLAIN"
+    sync
+    mount -o remount,ro "$KEY_MOUNT" || {
+        log "Failed to remount key partition read-only"
+        exec /bin/sh
+    }
+
+    log "Unmounting wrapped key partition"
+    umount "$KEY_MOUNT" || {
+        log "WARNING: failed to unmount key partition"
+    }
+
+    log "Key provisioning complete. Reboot required."
+    #reboot -f
+    #sleep 2
+    exec /bin/sh
+else
+    log "Found existing wrapped dm-crypt key."
+fi
+
+# ---- Unwrap dm-crypt key via OP-TEE ----
+#[ -x /bin/optee_get_key ] || { log "optee_get_key missing"; exec /bin/sh; }
+#[ -f "$KEY_WRAPPED" ] || { log "Wrapped key missing"; exec /bin/sh; }
+
+PLAINTEXT_KEY=$(mktemp)
+log "Unwrapping dm-crypt key via OP-TEE ..."
+optee_get_key --unwrap --in "$KEY_WRAPPED" --out "$PLAINTEXT_KEY" || {
+    log "ERROR: failed to unwrap dm-crypt key"
+    exec /bin/sh
+}
+
+KEY_HEX=$(hexdump -ve '1/1 "%02x"' "$PLAINTEXT_KEY")
+rm -f "$PLAINTEXT_KEY"
+
+log "Unmounting wrapped key partition"
+umount "$KEY_MOUNT" || {
+    log "WARNING: failed to unmount key partition"
+}
+
+KEY_LEN=${#KEY_HEX}
+if [ "${#KEY_HEX}" -ne 128 ]; then
+    log "Invalid dm-crypt key length: $KEY_LEN hex chars"
+    exec /bin/sh
+fi
+
+# ---- dm-crypt ----
+sync
+
+# 1) Unmount the plain partition to free the underlying block device
+#log "Unmounting raw persistent partition $DATA_PER"
+#if [ "$RAW_MOUNTED" = "1" ]; then
+#    umount /data_raw || {
+#      log "umount /data_raw failed (still busy?)"
+#      # Optional: diagnostic
+#      mount | grep " $DATA_PER " || true
+#      exec /bin/sh
+#    }
+#fi
+
+
+# 2) Flush buffers, settle udev (good hygiene before stacking)
+#log "Flushing buffers on $DATA_PER"
+#blockdev --flushbufs "$DATA_PER" 2>/dev/null || true
+#udevadm settle 2>/dev/null || sleep 1
+
+# Ensure the /dev/mapper directory exists
+mkdir -p /dev/mapper
+
+# Create the mapping AND ask dmsetup to create the device node
+log "Creating dm-crypt mapping on $DATA_PER"
+SECTORS_PER=$(blockdev --getsz "$DATA_PER") || {
+  log "blockdev --getsz failed on $DATA_PER"; exec /bin/sh; }
+
+CRYPT_NAME=cryptdata
+
+
+# Use --addnodeoncreate so /dev/mapper/$CRYPT_NAME is created without udev
+log "dmsetup create --addnodeoncreate $CRYPT_NAME --table \"0 $SECTORS_PER crypt aes-xts-plain64 $KEY_HEX 0 $DATA_PER 0\""
+if ! dmsetup create "$CRYPT_NAME" --addnodeoncreate --table \
+  "0 $SECTORS_PER crypt aes-xts-plain64 $KEY_HEX 0 $DATA_PER 0"; then
+  log "dmsetup create $CRYPT_NAME failed"; exec /bin/sh
+fi
+unset KEY_HEX
+
+# Fallback: explicitly create device nodes if needed
+log "Ensuring device node /dev/mapper/$CRYPT_NAME exists"
+dmsetup mknodes || true
+
+# Sanity check: is the block device node present?
+log "Checking for /dev/mapper/$CRYPT_NAME ..."
+if [ ! -b "/dev/mapper/$CRYPT_NAME" ]; then
+  log "Mapper node /dev/mapper/$CRYPT_NAME missing; dmsetup targets/table:"
+  dmsetup targets || true
+  dmsetup table "$CRYPT_NAME" || true
+  exec /bin/sh
+fi
+
+
+
+
+# --- Robust filesystem detection/creation on encrypted mapper ---
+CRYPT_DEV="/dev/mapper/$CRYPT_NAME"
+
+# Ensure the mapper node is fully ready
+for i in $(seq 1 40); do
+  [ -b "$CRYPT_DEV" ] && sz="$(blockdev --getsz "$CRYPT_DEV" 2>/dev/null || echo 0)"
+  [ -n "$sz" ] && [ "$sz" -gt 0 ] && break
+  log "Waiting for $CRYPT_DEV to be ready..."
+  udevadm settle 2>/dev/null || true
+  sleep 0.25
+done
+sz="$(blockdev --getsz "$CRYPT_DEV" 2>/dev/null || echo 0)"
+[ "$sz" -gt 0 ] || { log "ERROR: $CRYPT_DEV size is 0"; exec /bin/sh; }
+
+has_ext4=0
+
+# 1) blkid probe (best case)
+if command -v blkid >/dev/null 2>&1; then
+  if blkid -p -o value -s TYPE "$CRYPT_DEV" 2>/dev/null | grep -q '^ext4$'; then
+    has_ext4=1
+    log "Encrypted mapper already has ext4 (blkid probe)"
+  fi
+fi
+
+# 2) e2fsck quick check (fallback)
+if [ "$has_ext4" -eq 0 ] && command -v e2fsck >/dev/null 2>&1; then
+  if e2fsck -pf "$CRYPT_DEV" >/dev/null 2>&1; then
+    has_ext4=1
+    log "Encrypted mapper ext4 validated by e2fsck"
+  fi
+fi
+
+# 3) Read superblock magic directly (last resort)
+# ext4 superblock is at byte 1024, magic at offset +56 (0x38) -> 0xEF53
+if [ "$has_ext4" -eq 0 ]; then
+  magic="$(dd if="$CRYPT_DEV" bs=1 skip=$((1024+56)) count=2 status=none 2>/dev/null \
+           | hexdump -v -e '1/2 "%04x\n"' 2>/dev/null || echo "")"
+  if [ "$magic" = "53ef" ] || [ "$magic" = "ef53" ]; then
+    has_ext4=1
+    log "Encrypted mapper superblock magic indicates ext4 (0x$magic)"
+  fi
+fi
+
+# Create filesystem only if none of the probes detected ext4
+if [ "$has_ext4" -eq 0 ]; then
+  log "No valid filesystem detected -> creating ext4 (first boot only!)"
+  # Non-interactive, never prompt:
+  mkfs.ext4 -F -L data "$CRYPT_DEV" || { log "mkfs.ext4 failed"; exec /bin/sh; }
+  sync
+fi
+
+# Mount and set a 'done' marker (handy for debugging)
+mkdir -p /data
+mount "$CRYPT_DEV" /data || { log "mount $CRYPT_DEV failed"; exec /bin/sh; }
+[ -f /data/.encrypted_ok ] || { echo ok > /data/.encrypted_ok; sync; }
+log "Encrypted data partition mounted on /data"
+
+# ---- overlayfs ----
+LOWERDIR=/lower 
+UPPERDIR=/data/overlay/upper
+WORKDIR=/data/overlay/work
+
+
+# Sanity-check ownership & permissions
+mkdir -p "${UPPERDIR}" "${WORKDIR}"
+chmod 0700 "${WORKDIR}"
+chmod 0755 "${UPPERDIR}"
+#chown root:root "${UPPERDIR}" "${WORKDIR}" || true
+#chattr +i "${WORKDIR}" 2>/dev/null || true
+
+# final overlay mount: lowerdir=/lower, upperdir=UPPERDIR, workdir=WORKDIR -> /newroot
+NEWROOT=/newroot
+mkdir -p "${NEWROOT}"
+log "Mounting overlay: lower=${LOWERDIR}, upper=${UPPERDIR}, work=${WORKDIR} -> /newroot"
+if ! mount -t overlay overlay -o "lowerdir=${LOWERDIR},upperdir=${UPPERDIR},workdir=${WORKDIR}" \
+    "${NEWROOT}"; then
+    log "Overlay mount failed, falling back to RO root"
+    exec switch_root "${LOWERDIR}" "$init"
+fi
+
+# Move essential pseudo-filesystems so switch_root works
+mount --move /dev "${NEWROOT}/dev"
+mount --move /proc "${NEWROOT}/proc"
+mount --move /sys "${NEWROOT}/sys"
+mkdir -p "${NEWROOT}/data"
+mount --move /data "${NEWROOT}/data"
+
+log "Switching root..."
+exec switch_root "${NEWROOT}" "$init"

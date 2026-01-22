@@ -100,7 +100,8 @@ $(base_tarball): $(root_filesystem_spec) $(boot_root)
 	$(full_optee) 
 	mkdir -p $(result_folder)
 	set -o pipefail && root_generator --no-config $(root_filesystem_spec) $(result_folder) 2>&1 | tee $(base_tarball).log
-	../config_root_persistant_partition.sh
+	$(persistent_partition)
+	$(wrapped_key_partition)
 
 # The root configurator is used to run the user configuration scripts
 # as a separate step in the build process.
