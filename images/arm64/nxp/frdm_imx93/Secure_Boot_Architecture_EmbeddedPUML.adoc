@@ -1,0 +1,200 @@
+= Secure Boot & Storage Architecture
+EBCL — i.MX93 (FRDM) Platform
+:doctype: book
+:toc: left
+:toclevels: 3
+:icons: font
+:sectnums:
+:revdate: 2026-02-15
+:revnumber: 1.2
+
+== Executive Summary
+This document captures the end-to-end secure boot and storage architecture implemented on the i.MX93 platform. It explains the chain of trust, runtime protections, authenticated storage design (dm‑integrity + dm‑crypt), threat mapping (STRIDE), and compliance mappings (ISO/SAE 21434 and UNECE R155).
+
+The design now includes **dm‑integrity with HMAC‑SHA256**, providing *authenticated integrity* for the writable `/data` filesystem, in addition to dm‑crypt AES‑XTS encryption and OP‑TEE–backed key protection.
+
+== Architecture Overview
+* *AHAB Secure Boot (ROM)* verifies the signed boot container (`flash.bin`) containing TF‑A (BL31), OP‑TEE, and U‑Boot.
+* *U‑Boot* verifies a signed FIT image (kernel, DTB, initrd, boot script) using an embedded RSA‑2048 public key.
+* *Linux kernel* boots with *dm-verity* enforcing an immutable, Merkle-verified root filesystem.
+* *Initrd*:
+  - Starts the OP‑TEE supplicant.
+  - Unwraps two device-bound keys via OP‑TEE:
+    **(1)** dm‑crypt AES‑XTS 512‑bit key  
+    **(2)** dm‑integrity 32‑byte HMAC key (raw binary)
+  - Opens *dm-integrity* on `/dev/mmcblk1p6`.
+  - Opens *dm-crypt* on top of the integrity-mapper.
+  - Mounts the resulting stack at `/data`.
+* *overlayfs* provides writable persistence using:
+  - `lowerdir=/` (verity-protected root)
+  - `upperdir=/data/overlay/upper` (encrypted & integrity-protected)
+
+== Chain of Trust (PlantUML)
+The following diagram illustrates the verified boot sequence and the now-authenticated storage path.
+
+[plantuml, Chain_of_Trust, png]
+----
+@startuml
+skinparam backgroundColor #ffffff
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam defaultTextAlignment center
+skinparam RectangleFontSize 12
+skinparam PackageFontSize 12
+
+rectangle "Silicon ROM (AHAB)" as ROM #1f77b4 <<hardware>>
+rectangle "Signed Container: flash.bin\n(SPL/U-Boot, TF-A bl31, OP-TEE)" as CONT #2ca02c
+rectangle "U-Boot\n(verifies FIT signatures)" as UBOOT #9467bd
+
+package "FIT image" #17becf {
+  rectangle "Linux kernel" as KERN #ff7f0e
+  rectangle "Device Tree (DTB)" as DTB #ff7f0e
+  rectangle "Initrd (patched)" as INITRD #ff7f0e
+  rectangle "Boot script (bootscr)" as BOOTSCR #ff7f0e
+}
+
+rectangle "OP-TEE (secure world)\nKEK → AES-GCM unwrap" as OPTEE #8c564b
+rectangle "dm-verity RootFS\n(Merkle-verified RO)" as VERITY #7f7f7f
+
+rectangle "dm-integrity\nHMAC-SHA256 integrity tags" as INTEG #f6c542
+rectangle "dm-crypt (AES-XTS)\nEncrypted /data" as DMCRYPT #bcbd22
+
+ROM --> CONT : AHAB verify
+CONT --> UBOOT : load
+UBOOT --> KERN
+UBOOT --> DTB
+UBOOT --> INITRD
+UBOOT --> BOOTSCR
+
+INITRD --> VERITY : mount RO
+INITRD --> OPTEE : unwrap keys
+OPTEE --> INTEG : provide integrity key
+INTEG --> DMCRYPT : stacked mapper
+@enduml
+----
+
+== Boot Parameters
+Example kernel command line from the signed bootscr:
+
+[source,shell]
+----
+console=ttyLP0,115200 root=/dev/dm-0 ro \
+  verity.sectors=<SECTORS> \
+  verity.blksize=<BLOCK_SIZE> \
+  verity.datablocks=<DATA_BLOCKS> \
+  verity.hashstart=<HASH_START> \
+  verity.roothash=<ROOT_HASH> \
+  verity.salt=<SALT>
+----
+
+== Runtime Protections
+* *AHAB ROM* authenticates the boot container before executing any untrusted code.
+* *FIT signatures* authenticate kernel, DTB, initrd, and the boot script.
+* *dm-verity* enforces an immutable, integrity-verified root filesystem.
+* *OP-TEE* unwraps keys using AES‑GCM with a KEK derived from hardware-bound secrets via system PTA.
+  - The wrapped keys at rest cannot be decrypted or tampered with outside OP‑TEE.
+* *dm-integrity* (HMAC-SHA256)
+  - Uses per-sector authentication tags to detect tampering or corruption.
+  - Guarantees atomic writes of data+tags via a journal.
+* *dm-crypt* (AES‑XTS 512-bit)
+  - Provides confidentiality for all user data at rest.
+* *Authenticated encryption-at-rest*:
+  - AES‑XTS for confidentiality  
+  - HMAC-SHA256 for per-sector integrity  
+  - AES‑GCM only for key wrapping  
+* *overlayfs* ensures all writable system state is stored inside the encrypted and integrity-protected `/data`, keeping the base OS immutable.
+
+== Authenticated Storage (dm-integrity + dm-crypt)
+The writable `/data` partition is protected by a two-layer mapper:
+
+1. **dm-integrity**  
+   *Integrity provider*  
+   * Key: 32‑byte raw HMAC key  
+   * Algorithm: `hmac(sha256)`  
+   * Tag size: 32 bytes  
+   * Journal: ensures atomic writes  
+   * Detects tampering, replay, and silent corruption.
+
+2. **dm-crypt (AES-XTS)**  
+   *Confidentiality provider*  
+   * Key: 512‑bit XTS key (two 256‑bit keys)  
+   * Encryption only—no integrity  
+
+Together they form an *authenticated encryption-at-rest* system.
+
+== STRIDE Threat Mapping
+[cols="20,25,55", options="header"]
+|===
+| Threat | Surface/Asset | Mitigation
+
+| Spoofing
+| Boot components, keys
+| AHAB secure boot; FIT signatures; OP‑TEE key unwrapping
+
+| Tampering
+| `/data`, dm-crypt keyblob, integrity tags
+| dm-verity; dm-integrity HMAC; AES-GCM-wrapped keys; integrity journal
+
+| Repudiation
+| Provisioning, updates
+| Signed artifacts; auditable build logs; persistent key counters in RPMB
+
+| Information Disclosure
+| Encrypted `/data`
+| dm-crypt AES-XTS; OP‑TEE KEK; no plaintext on storage
+
+| DoS
+| Integrity metadata, storage
+| dm-integrity journal; recovery; enforced atomic writes
+
+| Elevation of Privilege
+| Writable filesystem, kernel
+| Immutable dm-verity root; authenticated upper layer; prevents persistent malware
+|===
+
+== Compliance Mapping (ISO/SAE 21434, UNECE R155)
+[cols="25,25,50", options="header"]
+|===
+| Standard/Req | Topic | Design Alignment
+
+| ISO 21434 Clauses 8–10
+| Cybersecurity concept, risk treatment
+| Verified boot + OP‑TEE key mgmt + authenticated `/data` + STRIDE model
+
+| ISO 21434 Clause 11
+| Cybersecurity validation
+| Verifiable hashes, integrity metadata, reproducible builds
+
+| UNECE R155 Annex 5
+| Threat classes T.1–T.7
+| Secure boot, dm‑verity, encrypted & integrity‑protected user data, RPMB anti‑rollback
+
+| UNECE R155 §7 CSMS
+| Evidence & processes
+| Key lifecycle, signing chain, dm‑integrity metadata, incident traceability
+|===
+
+== Operational Notes
+* Program OTP/SRK fuses to permanently enable secure boot.
+* Lock debug (SJC) as policy allows.
+* Keep FIT signing keys offline.
+* Maintain reproducible builds and metadata for audit trails.
+* Ensure initrd always includes: `integritysetup`, OP‑TEE clients, and TAs.
+
+== Appendix A — Configuration Parameters
+* FIT signatures: RSA‑2048, SHA‑256
+* dm-verity:
+  - Merkle tree over rootfs  
+  - `roothash` + `salt` passed via kernel cmdline
+* dm-crypt:
+  - AES‑XTS with 512‑bit key  
+  - XTS key unwrapped via OP‑TEE and hex-encoded into dm‑crypt table
+* dm-integrity:
+  - Algorithm: `hmac(sha256)`
+  - Tag size: 32 bytes
+  - Journal size: 32 MiB
+  - Integrity key: **raw 32-byte file** (`/run/keys/integrity.key`)
+* OP-TEE:
+  - KEK derived via system PTA hardware secrets
+  - AES‑GCM-wrapped key blobs stored in keyfs
+  - RPMB counters protect key rollback
