@@ -4,7 +4,7 @@
 #---------------------
 
 # Specification of the partition layout of the image.raw
-partition_layout = ../image.yaml
+partition_layout = ../$(image_partition_layer)
 # Specification of the initrd.img
 initrd_spec = ../initrd.yaml
 # Specification of the root filesystem content and configuration

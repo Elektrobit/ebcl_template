@@ -112,17 +112,15 @@ dmsetup mknodes
 mkdir -p /lower
 mount -o ro /dev/mapper/rootfs /lower
 
-mkdir -p /usr/sbin /usr/bin /usr/lib
-cp /lower/usr/sbin/tee-supplicant /usr/sbin/
-mkdir -p /lib/optee_armtz
-cp /lower/usr/lib/optee_armtz/65024bcf-47a0-4a08-9498-bb634c46ec9e.ta /lib/optee_armtz/
-cp /lower/usr/lib/libteec.so* /usr/lib/
-cp /lower/usr/bin/optee_get_key /usr/bin/
+# ---------- Use verified root’s OP-TEE stack directly (NO RAM /usr shadow) ----------
+# We run tee-supplicant and client from /lower with correct env. Do NOT copy into /usr in RAM.
+export LD_LIBRARY_PATH=/lower/usr/lib
+export TEEC_LOAD_PATH=/lower/usr/lib/optee_armtz
 
 #start TEE supplicant
 log "Starting TEE supplicant ..."
-tee-supplicant &
-sleep 1
+ /lower/usr/sbin/tee-supplicant -d --ta-path=/lower/usr/lib/optee_armtz &
+sleep 0.3
 
 KEY_MOUNT="/wrapped_key"
 # Mount persistent partition early
@@ -160,7 +158,7 @@ if [ ! -f "$KEY_WRAPPED" ]; then
     # 64 bytes = AES-256-XTS total (two 256-bit subkeys)
     head -c 64 /dev/urandom > "$KEY_PLAIN"
 
-    if ! optee_get_key --wrap --in "$KEY_PLAIN" --out "$KEY_WRAPPED"; then
+    if ! /lower/usr/bin/optee_get_key --wrap --in "$KEY_PLAIN" --out "$KEY_WRAPPED"; then
         log "ERROR: failed to wrap master key"
         exec /bin/sh
     fi
@@ -174,7 +172,7 @@ if [ ! -f "$KEY_WRAPPED" ]; then
 
     KEY_PLAIN_INT=$(mktemp)
     head -c 32 /dev/urandom > "$KEY_PLAIN_INT"
-    if ! optee_get_key --wrap --in "$KEY_PLAIN_INT" --out "$KEY_WRAPPED_INT"; then
+    if ! /lower/usr/bin/optee_get_key --wrap --in "$KEY_PLAIN_INT" --out "$KEY_WRAPPED_INT"; then
         log "ERROR: failed to wrap integrity key"
         exec /bin/sh
     fi
@@ -203,13 +201,9 @@ else
     log "Found existing wrapped dm-crypt key."
 fi
 
-# ---- Unwrap dm-crypt key via OP-TEE ----
-#[ -x /bin/optee_get_key ] || { log "optee_get_key missing"; exec /bin/sh; }
-#[ -f "$KEY_WRAPPED" ] || { log "Wrapped key missing"; exec /bin/sh; }
-
 PLAINTEXT_KEY=$(mktemp)
 log "Unwrapping dm-crypt key via OP-TEE ..."
-optee_get_key --unwrap --in "$KEY_WRAPPED" --out "$PLAINTEXT_KEY" || {
+/lower/usr/bin/optee_get_key --unwrap --in "$KEY_WRAPPED" --out "$PLAINTEXT_KEY" || {
     log "ERROR: failed to unwrap dm-crypt key"
     exec /bin/sh
 }
@@ -221,7 +215,7 @@ rm -f "$PLAINTEXT_KEY"
 
 
 PLAINTEXT_KEY_INT=$(mktemp)
-optee_get_key --unwrap --in "$KEY_WRAPPED_INT" --out "$PLAINTEXT_KEY_INT" || {
+/lower/usr/bin/optee_get_key --unwrap --in "$KEY_WRAPPED_INT" --out "$PLAINTEXT_KEY_INT" || {
     log "ERROR: failed to unwrap dm-integrity key"
     exec /bin/sh
 }

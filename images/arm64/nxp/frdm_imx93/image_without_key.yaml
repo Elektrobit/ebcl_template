@@ -1,0 +1,61 @@
+# Partition layout of the image
+# For more details see https://elektrobit.github.io/embdgen/index.html
+image:
+  type: mbr
+  boot_partition: flash
+
+  parts:
+    - name: flash
+      type: raw
+      start: 32768 B
+      content:
+        type: raw
+        file: build/flash.bin
+
+    - name: boot
+      type: partition
+      fstype: fat32
+      content:
+        type: fat32
+        content:
+          type: files
+          files:
+            - build/fitA.itb
+            #- build/boot.scr
+            #- build/Image
+            #- build/imx93-11x11-evk.dtb
+      size: 128 MB
+
+    # Root filesystem partition
+    - name: root
+      type: partition
+      fstype: ext4
+      content:
+        type: raw
+        file: build/root.ext4
+
+    # Root hash
+    - name: root_hash
+      type: partition
+      fstype: ext4
+      content:
+        type: raw
+        file: build/root.ext4.hash
+
+    # Persistent data partition (for overlay upper/work, logs, etc)
+    - name: data
+      type: partition
+      fstype: ext4
+      content:
+        type: raw
+        file: build/data.img
+      size: 512 MB
+#    - name: root
+#      type: partition
+#      fstype: ext4
+#      size: 1 GB
+#      content:
+#        type: ext4
+#        content:
+#          type: archive
+#          archive: build/root.config.tar
