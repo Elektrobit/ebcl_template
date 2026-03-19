@@ -198,3 +198,728 @@ Together they form an *authenticated encryption-at-rest* system.
   - KEK derived via system PTA hardware secrets
   - AES‑GCM-wrapped key blobs stored in keyfs
   - RPMB counters protect key rollback
+
+  == Appendix B – Threat Model and Protection Overview
+
+This appendix clarifies what protections are achieved by combining:
+
+* **dm-verity** (immutable system partition)
+* **dm-integrity (HMAC-SHA256)** (authenticated integrity)
+* **dm-crypt (AES-XTS)** (confidentiality)
+* **OP-TEE hardware-bound key management**
+
+It answers the practical security question:  
+“What exactly are we protected against now?”
+
+=== 1. dm-verity: Immutable Verified RootFS
+The root filesystem (mounted at `/lower`) is protected by a Merkle tree and a
+signed root hash found in the FIT image.
+
+**Protects against:**
+
+* Physical attacker modifying the root filesystem offline  
+* Malware injection into:
+  - `/usr/bin`, `/lib`, `/etc`
+  - kernel modules, units, configs  
+* Rollback attacks on the OS image  
+* Offline tampering with startup scripts or initrd
+
+**Does NOT protect:**
+
+* Runtime memory attacks  
+* Tampering with writable data under `/data`
+
+=== 2. dm-crypt (AES-XTS): Confidentiality of User Data
+The `/data` partition is encrypted using AES-XTS with a 512-bit key unwrapped
+from OP-TEE.
+
+**Protects against:**
+
+* Offline attacker reading user data by removing the eMMC  
+* Recovery of logs, credentials, configs stored under `/data`
+
+**Does NOT protect:**
+
+* Tampering (AES-XTS provides no integrity)  
+* Replay/rollback of older encrypted blocks  
+* Bit flips (corruption produces garbage but not an error)
+
+This is why dm-integrity is required.
+
+=== 3. dm-integrity (HMAC-SHA256): Authenticated Integrity
+dm-integrity stores **per-sector HMAC tags** alongside encrypted data and enforces
+atomic updates via its journal.
+
+**Protects against:**
+
+* Offline tampering with `/data`
+* Injected or modified files in overlayfs upperdir
+* Rollback to older `/data` partitions (tags mismatch)
+* Silent corruption / bit-rot during power loss
+
+**Behavior when an attacker modifies /data:**
+
+* Integrity verification fails  
+* Kernel returns `EIO` (I/O error)  
+* Filesystem mount fails → device refuses to boot into tampered state
+
+This ensures **authenticated encryption at rest**:  
+Encryption (dm-crypt) + Integrity (dm-integrity).
+
+=== 4. OP-TEE KEK: Hardware-Bound Key Protection
+OP-TEE unwraps two keys:
+
+* **XTS key** (64 bytes), used only for encryption  
+* **HMAC key** (32 bytes), used only for integrity  
+
+These keys are:
+
+* Wrapped with AES-GCM (authenticated and tied to SoC secrets)
+* Protected by RPMB-backed anti-rollback counters
+* Never stored in plaintext outside OP-TEE
+* Never readable by Linux or user space
+
+**Protects against:**
+
+* Offline attempts to unwrap encrypted keys  
+* Key extraction by reading `/dev/mmcblk1p5`  
+* Manipulated wrapped-key blobs  
+* Rollback of key blobs (RPMB counters break integrity)  
+
+=== 5. Combined Security Properties
+
+[cols="25,25,25,25",options="header"]
+|===
+| Threat | dm-verity | dm-integrity | dm-crypt
+
+| Offline read of `/data`
+| n/a | n/a | ✔ blocks plaintext disclosure
+
+| Offline modification of `/data`
+| n/a | ✔ detects → fails mount | n/a
+
+| Offline rollback of `/data`
+| n/a | ✔ HMAC mismatch | n/a
+
+| Offline corruption / bit-rot
+| n/a | ✔ detected | n/a
+
+| Malware injection into rootfs
+| ✔ Merkle tree | n/a | n/a
+
+| Persistent malware in overlayfs
+| n/a | ✔ rejects tampering | encrypted but unauthenticated alone
+|===
+
+**Result:**  
+The system achieves **Authenticated Encryption At Rest (AEAR)** for all writable
+data, and **Verified Boot** for all executable code.
+
+---
+
+== Appendix C – Physical Attacker Scenarios
+
+=== Scenario 1: Attacker removes eMMC and inspects `/data`
+*Encrypted garbage only.*  
+AES-XTS key is not extractable; attacker learns nothing.
+
+=== Scenario 2: Attacker modifies `/data` on a laptop
+dm-integrity rejects modified sectors → mount failure → safe halt.
+
+=== Scenario 3: Attacker rolls back `/data` to an old version
+Integrity tags mismatch → mount failure → safe halt.
+
+=== Scenario 4: Attacker injects malicious configuration into overlayfs upperdir
+Integrity-protected upperdir refuses to mount → attack fails.
+
+=== Scenario 5: Attacker replaces wrapped key blobs in keyfs
+AES-GCM tag mismatch / RPMB-counter mismatch → unwrap fails → boot fails safely.
+
+=== Scenario 6: Attacker corrupts sectors randomly (power cuts)
+dm-integrity detects corruption → EIO → filesystem recovery logic applies.
+
+---
+
+== Appendix D – Authenticated Encryption-at-Rest Explained
+
+The resulting storage design is:
+
+----
+dm-integrity (HMAC-SHA256 for integrity/authentication)
+        ↓
+dm-crypt (AES-XTS for confidentiality)
+        ↓
+ext4 on /data (overlay upperdir)
+----
+
+This provides:
+
+* **Confidentiality** (cannot read `/data`)  
+* **Integrity** (cannot tamper with `/data`)  
+* **Authenticity** (no attacker-controlled modifications)  
+* **Rollback protection**  
+* **Crash consistency**  
+
+Note that **AES-GCM is not used for data encryption**, only for *key wrapping* in
+OP-TEE, which is the correct separation of responsibilities.
+
+== Appendix E – dm-integrity Behavior Under Power Loss & Tamper Conditions
+
+This appendix explains how dm‑integrity behaves during unexpected power loss,
+offline tampering, and silent corruption events. It clarifies how the
+HMAC‑based integrity layer, journal, and data layout ensure authenticated,
+atomic storage for the writable `/data` partition.
+
+=== 1. How dm-integrity Writes Data (Normal Operation)
+
+For each data block, dm‑integrity maintains:
+
+* the **user data block**
+* the **integrity tag** (e.g., HMAC‑SHA256)
+* a **journal entry** that ensures atomic updates
+
+A write operation follows this sequence:
+
+. Write updated data + tag into the *journal*  
+. Mark journal entry as “dirty”  
+. Write updated data to final data region  
+. Write updated tag to tag region  
+. Mark journal entry as “clean”  
+
+This ensures *data and tag updates are atomic*.
+
+=== 2. Power Loss Handling (Crash Recovery)
+
+If the system loses power during any step, dm‑integrity performs **recovery**
+on next boot:
+
+* **Scan journal for incomplete entries**  
+* For each incomplete update:
+** If both data and tag are present → **replay** update  
+** If only one part is present → **rollback** update  
+* After replay/rollback, verify every data block against its tag
+
+If verification fails → **EIO (I/O error)** is returned to the filesystem.
+
+This prevents:
+
+* torn writes  
+* stale tag/data pairs  
+* inconsistent ext4 metadata  
+* silently corrupted overlayfs upperdir  
+* attacker‑modified ciphertext blocks
+
+=== 3. Protection Against Offline Tampering
+
+If an attacker removes the eMMC and modifies `/data` on another system:
+
+* dm‑crypt prevents reading plaintext  
+* dm‑integrity detects that the HMAC tag does not match  
+* The kernel refuses to read the tampered block → **EIO**  
+* ext4 mount fails → overlayfs cannot mount → system enters safe recovery
+
+The attacker cannot:
+
+* inject malicious files into the overlay upperdir  
+* roll back to an older version of `/data`  
+* corrupt configuration to influence boot  
+* perform stealth tampering (all corruption is detected)
+
+=== 4. Combined Security Properties (dm-crypt + dm-integrity + dm-verity)
+
+The three layers provide distinct protections:
+
+[cols="20,20,20,40", options="header"]
+|===
+| Threat | dm-verity | dm-integrity | dm-crypt | Result
+
+| Offline read
+| ❌
+| ❌
+| ✔
+| Confidentiality of `/data` (AES-XTS)
+
+| Offline write (tamper)
+| ❌
+| ✔
+| ❌
+| Authenticated writes; tamper produces EIO
+
+| Rootfs tamper
+| ✔
+| n/a
+| n/a
+| Immutable verified system (dm-verity)
+
+| Silent corruption / bit-rot
+| ❌
+| ✔
+| ❌
+| Detected during tag verification; fails safely
+
+| Replay / rollback attack
+| ❌
+| Partly ✔ (metadata mismatch)
+| ❌
+| Integrity tags mismatch; previous version rejected
+
+| Online attacker with root
+| ❌
+| ❌
+| ❌
+| Runtime protection out of scope (integrity-at-rest model)
+|===
+
+=== 5. Summary
+
+The combination of dm‑integrity and dm‑crypt provides:
+
+* **Confidentiality:** encrypted user data via AES‑XTS  
+* **Integrity:** per‑sector HMAC preventing silent tampering  
+* **Authenticity:** only OP‑TEE unwrapped keys can authenticate data  
+* **Atomicity:** journal ensures clean rollback/replay  
+* **Crash consistency:** power loss cannot corrupt integrity metadata  
+* **Tamper-evidence:** attacker cannot modify `/data` without detection  
+* **Rollback protection:** older or cloned partitions fail integrity checks
+
+Together with dm‑verity on the rootfs, the platform achieves:
+
+**Verified Boot + Authenticated Storage = Secure, Tamper-Resistant System**
+
+== Appendix F – FIT Image Structure & Security
+
+This appendix describes the role of the FIT image (`fit.its`) in the platform's
+chain of trust. The FIT (Flattened Image Tree) bundles all boot‑critical
+artifacts — kernel, device tree, initrd, and bootscr — into a single
+cryptographically signed container that U‑Boot verifies before execution.
+
+The syntax in this appendix corresponds to the snippet:
+
+[source,dts]
+----
+/dts-v1/;
+
+/ {
+    description = "i.MX93 FIT image with signed kernel, FDT and bootscr";
+    #address-cells = <1>;
+
+    images {
+        kernel { ... };
+        fdt { ... };
+        bootscr { ... };
+        ramdisk { ... };
+    };
+
+    configurations {
+        conf { ... };
+    };
+};
+----
+
+=== 1. Role of the FIT Image in the Chain of Trust
+
+The FIT image is the **handover point** from AHAB-verified U‑Boot to Linux.
+It ensures that *every component U‑Boot loads* is:
+
+* hashed (SHA‑256)
+* individually RSA‑signed (`sha256,rsa2048`)
+* verified by U‑Boot against a write‑protected public key in U‑Boot's .rodata
+
+This guarantees:
+
+* The kernel cannot be replaced  
+* The DTB cannot be modified  
+* The initrd cannot be substituted  
+* The boot script (bootscr) cannot be tampered with  
+* dm‑verity parameters originate from trusted bootscr  
+* No unsigned or altered code is executed after U‑Boot
+
+Together with AHAB secure boot, the FIT image establishes **end‑to‑end verified
+boot** from silicon to Linux userspace.
+
+=== 2. Images Section (kernel, DTB, bootscr, initrd)
+
+Each FIT "image" node contains:
+
+* the binary itself (`data = /incbin/("…")`)
+* type (kernel, flat_dt, script, ramdisk)
+* load/entry addresses
+* a SHA‑256 hash
+* an RSA‑2048 signature
+
+Example kernel:
+
+[source,dts]
+----
+kernel {
+    description = "Linux kernel (signed)";
+    data = /incbin/("Image");
+    type = "kernel";
+    arch = "arm64";
+    os = "linux";
+    compression = "none";
+    load = <0x80400000>;
+    entry = <0x80400000>;
+    hash-1 { algo = "sha256"; };
+    signature-1 {
+        algo = "sha256,rsa2048";
+        key-name-hint = "ubootkey";
+    };
+};
+----
+
+This ensures:
+
+* The kernel binary integrity is verified before execution.
+* The signature binds the kernel to the build process.
+* Any modification — even a single byte — causes boot rejection.
+
+=== 3. Signed Device Tree Blob (FDT)
+
+The DTB controls:
+
+* memory layout  
+* regulators  
+* clocks  
+* OP‑TEE reserved memory  
+* peripheral configuration  
+
+Because the DTB affects *security boundaries*, signing it ensures that:
+
+* attackers cannot enable disabled peripherals  
+* attackers cannot remap memory to bypass protections  
+* OP‑TEE memory regions cannot be altered  
+* kernel command lines cannot be modified via DTB overlays
+
+The DTB signature ties the platform configuration into the verified‑boot chain.
+
+=== 4. Signed Boot Script (bootscr)
+
+`bootscr` is the **bridge** between U‑Boot and the kernel:
+
+* It reads dm‑verity parameters (roothash + salt + layout)
+* It sets the kernel command line
+* It selects which kernel/FDT to boot
+* It loads the initrd
+
+Signing `bootscr` is critical because:
+
+* dm‑verity root hash originates from the script  
+* overlayfs mount parameters come from it  
+* bootflow choices cannot be hijacked  
+* secure boot cannot be bypassed with a modified command line
+
+If bootscr was not signed:
+
+→ attacker could inject their own rootfs roothash (TOCTOU attack)  
+→ attacker could disable dm‑verity  
+→ attacker could modify kernel args (panic=, init=, etc.)
+
+Signing bootscr closes this hole.
+
+=== 5. Signed Initrd (initrd-patched.img)
+
+The initrd contains:
+
+* OP‑TEE client binaries  
+* dm‑verity setup  
+* dm‑integrity setup  
+* dm‑crypt setup  
+* overlayfs assembly logic  
+* code that unpacks and unwraps the encryption keys  
+* logic that kicks off the Linux root pivot
+
+Signing the initrd prevents:
+
+* Injection of malicious init scripts  
+* Hijacking of the dm‑crypt key unwrap path  
+* Replacement of OP‑TEE helper binaries  
+* Tampering with system initialization  
+* Bypassing dm‑integrity/dm‑crypt  
+* Booting into a modified initrd shell
+
+The Linux kernel **refuses to boot** an unsigned or modified initrd.
+
+=== 6. Configurations Section
+
+[source,dts]
+----
+configurations {
+    default = "conf";
+    conf {
+        kernel = "kernel";
+        fdt = "fdt";
+        bootscr = "bootscr";
+        ramdisk = "ramdisk";
+    };
+};
+----
+
+This defines **which set of signed components** U‑Boot must load.
+
+It prevents:
+
+* switching to unsigned components  
+* rollback to older kernel/DTB/initrd  
+* mixing components from different builds  
+* multi-boot bypass of signature checks
+
+The entire configuration block becomes part of the signed object graph.
+
+=== 7. Security Guarantees Provided by the FIT Image
+
+The FIT image enforces:
+
+* **Integrity**: SHA‑256 for all components  
+* **Authenticity**: RSA‑2048 signature validation  
+* **Anti‑rollback**: U‑Boot rejects mismatched builds  
+* **Structure protection**: components must match the configuration  
+* **Trusted parameter origin**: kernel args come from signed bootscr  
+* **Strict immutability**: dm‑verity rootfs is bound to signed bootscr  
+* **Strong chain-of-trust**: AHAB → U‑Boot → FIT → kernel/initrd → dm‑verity → overlayfs  
+* **Defense in depth**: complements dm‑crypt and dm‑integrity
+
+Even if the attacker has:
+
+* full physical access  
+* can rewrite eMMC  
+* can modify the FIT file
+
+The device refuses to boot unless:
+
+* All component hashes match  
+* All signatures validate  
+* bootscr matches the expected roothash  
+* initrd is trusted  
+* kernel and DTB match the signature
+
+This makes the FIT image the **central enforcement point** for Verified Boot on i.MX93.
+
+=== 8. Summary
+
+The FIT image:
+
+* Is the **cryptographic root** of the software chain loaded by U‑Boot  
+* Ensures kernel, DTB, initrd, and boot logic cannot be forged  
+* Provides immutable, audited startup configuration  
+* Protects dm‑verity parameters  
+* Protects OP‑TEE key unwrap path from modification  
+* Ensures consistency between all signed boot artifacts
+
+Together with AHAB, dm‑verity, dm‑integrity, and dm‑crypt, the FIT image
+is a critical foundation for a tamper‑resistant embedded system.
+
+== Appendix G – FIT Signing, Key Injection, and mkimage Workflow
+
+This appendix explains how the platform generates a cryptographically signed FIT
+image and how the RSA public key is injected into U‑Boot’s device tree (DTB).
+This process establishes the Verified Boot boundary between AHAB (ROM) and
+Linux.
+
+All steps described below correspond directly to the U‑Boot build automation in
+`frdm_imx93_build.sh`.
+
+=== 1. Overview: Why FIT Signing Matters
+
+The FIT image bundles:
+
+* `Image` (kernel)
+* `imx93-11x11-evk.dtb` (device tree)
+* `initrd-patched.img` (initrd)
+* `boot.scr` (boot script)
+
+Each component contains:
+
+* a SHA‑256 hash  
+* an RSA‑2048 signature  
+
+U‑Boot verifies these signatures using a **public key embedded in u-boot.dtb**.
+This ensures:
+
+* tamper‑proof kernel / DTB / initrd / bootscr
+* the dm‑verity roothash inside bootscr is trusted  
+* no unauthorized or unsigned code reaches the kernel  
+
+This seals the complete chain of trust:
+
+`AHAB → U‑Boot → FIT image → kernel → initrd → dm-verity → overlayfs`.
+
+=== 2. Creating the Boot Script (boot.scr)
+
+The script `boot.cmd` contains:
+
+* kernel command line  
+* dm-verity arguments  
+* logic to load FIT  
+* logic to extract `bootscr` subimage  
+
+It is converted into a U‑Boot script image with:
+
+[source,shell]
+----
+mkimage \
+  -A arm64 -T script -C none \
+  -n "EB FIT boot script" \
+  -d boot.cmd boot.scr
+----
+
+This script is later inserted as a signed subimage inside the FIT.
+
+=== 3. Enabling FIT, RSA, and Signature Checking in U-Boot
+
+The build system enables:
+
+[source,shell]
+----
+CONFIG_FIT=y
+CONFIG_FIT_SIGNATURE=y
+CONFIG_RSA=y
+CONFIG_FIT_VERBOSE=y
+CONFIG_FIT_FULL_CHECK=y
+CONFIG_FIT_PRINT=y
+CONFIG_FIT_SCRIPT=y
+----
+
+These options enforce:
+
+* RSA validation for each FIT entry  
+* Rejection of unsigned or malformed images  
+* Full signature checking before loading  
+* No bypass of bootscr / kernel / DTB verification  
+
+This ensures U‑Boot only executes authenticated boot content.
+
+=== 4. Generating a Signed FIT (mkimage -f)
+
+The FIT descriptor (`frdm_imx93_fit.its`) defines:
+
+* subimages (kernel, fdt, bootscr, initrd)
+* their SHA‑256 hashes
+* RSA signatures
+* load addresses and configuration nodes
+
+The signed FIT is generated by:
+
+[source,shell]
+----
+mkimage \
+  -f frdm_imx93_fit.its \
+  -K u-boot.dtb \
+  -k ../keysA \
+  -r fitA.itb
+----
+
+The `-k` directory contains:
+
+* `keysA/key.pub` (public key)
+* `keysA/key.key` (private key) used **only at build time**
+
+The key-name used in the FIT subimages:
+
+[source,dts]
+----
+signature-1 {
+    algo = "sha256,rsa2048";
+    key-name-hint = "ubootkey";
+};
+----
+
+matching the key in `keysA/ubootkey.crt`.
+
+=== 5. Injecting the Public Key into U‑Boot DTB (the -K flag)
+
+The line:
+
+[source,shell]
+----
+mkimage -f frdm_imx93_fit.its -K u-boot.dtb -k ../keysA -r fitA.itb
+----
+
+does two things:
+
+. Signs all FIT subimages  
+. **Injects the public RSA key directly into `u-boot.dtb`**  
+
+After this, `u-boot.dtb` contains a new node under:
+
+
+[source,shell]
+----
+/signature/
+ubootkey {
+rsa,exponent = <0x10001>;
+rsa,modulus = [ 00 a5 4f ... ];
+algo = "sha256,rsa2048";
+};
+----
+
+This key is immutable once the final U‑Boot binary is produced, and is baked
+into the AHAB-signed `flash.bin`.
+
+=== 6. U‑Boot Signature Verification Flow
+
+At boot, U‑Boot executes the following steps:
+
+. Load FIT (`fitA.itb`) from storage  
+. Read the `conf` node (default configuration)  
+. For each image (`kernel`, `fdt`, `bootscr`, `ramdisk`):
+   * Extract hash from FIT  
+   * Recompute hash  
+   * Validate RSA signature using embedded public key  
+. If any validation fails:
+   → **Boot aborts**  
+   → No kernel is executed  
+   → No unsigned initrd reaches the CPU  
+
+Only fully signed FITs with the correct key can pass verification.
+
+=== 7. Secure Boot (AHAB) Integration
+
+The `flash.bin` container built by *imx-mkimage* includes:
+
+* U‑Boot SPL  
+* U‑Boot proper  
+* TF‑A (BL31)  
+* OP‑TEE (tee.bin)  
+* U‑Boot DTB with injected RSA key  
+
+The entire container is signed by **AHAB**, ensuring:
+
+* no unsigned U‑Boot is allowed to run  
+* no modified DTB can replace the embedded key  
+* tampering with U‑Boot binaries causes boot failure
+
+The secure boot contract becomes:
+
+`AHAB verifies U‑Boot → U‑Boot verifies FIT → FIT verifies kernel/DTB/initrd → initrd verifies dm-verity → dm-integrity protects /data`
+
+=== 8. Negative Test Case (Key Mismatch)
+
+The build script includes an optional negative test:
+
+[source,shell]
+----
+mkimage -f frdm_imx93_fit.its -K u-boot.dtb -k ../keysB -r fitB.itb
+----
+
+Then the script intentionally tries to boot with a FIT signed by keyB, while
+U‑Boot DTB contains keyA. Result:
+
+* U‑Boot rejects the FIT at signature check  
+* Boot does not proceed  
+* Verified Boot enforces key separation  
+
+This validates the correctness of signature enforcement.
+
+=== 9. Summary of the Signing Flow
+
+These are the exact cryptographic anchors of the system:
+
+. Private RSA key (keysA) signs FIT components  
+. Public RSA key is injected into U‑Boot DTB  
+. U‑Boot validates FIT image using RSA‑2048 and SHA‑256  
+. initrd is guaranteed authentic and verified  
+. dm‑verity roothash from bootscr is trusted  
+. Linux boot continues only with trusted kernel, DTB, and initrd  
+
+This forms the foundation of Verified Boot on the EBCL i.MX93 platform.
