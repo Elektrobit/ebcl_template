@@ -199,7 +199,7 @@ Together they form an *authenticated encryption-at-rest* system.
   - AES‑GCM-wrapped key blobs stored in keyfs
   - RPMB counters protect key rollback
 
-  == Appendix B – Threat Model and Protection Overview
+== Appendix B – Threat Model and Protection Overview
 
 This appendix clarifies what protections are achieved by combining:
 
@@ -316,175 +316,6 @@ The system achieves **Authenticated Encryption At Rest (AEAR)** for all writable
 data, and **Verified Boot** for all executable code.
 
 ---
-
-== Appendix C – Physical Attacker Scenarios
-
-=== Scenario 1: Attacker removes eMMC and inspects `/data`
-*Encrypted garbage only.*  
-AES-XTS key is not extractable; attacker learns nothing.
-
-=== Scenario 2: Attacker modifies `/data` on a laptop
-dm-integrity rejects modified sectors → mount failure → safe halt.
-
-=== Scenario 3: Attacker rolls back `/data` to an old version
-Integrity tags mismatch → mount failure → safe halt.
-
-=== Scenario 4: Attacker injects malicious configuration into overlayfs upperdir
-Integrity-protected upperdir refuses to mount → attack fails.
-
-=== Scenario 5: Attacker replaces wrapped key blobs in keyfs
-AES-GCM tag mismatch / RPMB-counter mismatch → unwrap fails → boot fails safely.
-
-=== Scenario 6: Attacker corrupts sectors randomly (power cuts)
-dm-integrity detects corruption → EIO → filesystem recovery logic applies.
-
----
-
-== Appendix D – Authenticated Encryption-at-Rest Explained
-
-The resulting storage design is:
-
-----
-dm-integrity (HMAC-SHA256 for integrity/authentication)
-        ↓
-dm-crypt (AES-XTS for confidentiality)
-        ↓
-ext4 on /data (overlay upperdir)
-----
-
-This provides:
-
-* **Confidentiality** (cannot read `/data`)  
-* **Integrity** (cannot tamper with `/data`)  
-* **Authenticity** (no attacker-controlled modifications)  
-* **Rollback protection**  
-* **Crash consistency**  
-
-Note that **AES-GCM is not used for data encryption**, only for *key wrapping* in
-OP-TEE, which is the correct separation of responsibilities.
-
-== Appendix E – dm-integrity Behavior Under Power Loss & Tamper Conditions
-
-This appendix explains how dm‑integrity behaves during unexpected power loss,
-offline tampering, and silent corruption events. It clarifies how the
-HMAC‑based integrity layer, journal, and data layout ensure authenticated,
-atomic storage for the writable `/data` partition.
-
-=== 1. How dm-integrity Writes Data (Normal Operation)
-
-For each data block, dm‑integrity maintains:
-
-* the **user data block**
-* the **integrity tag** (e.g., HMAC‑SHA256)
-* a **journal entry** that ensures atomic updates
-
-A write operation follows this sequence:
-
-. Write updated data + tag into the *journal*  
-. Mark journal entry as “dirty”  
-. Write updated data to final data region  
-. Write updated tag to tag region  
-. Mark journal entry as “clean”  
-
-This ensures *data and tag updates are atomic*.
-
-=== 2. Power Loss Handling (Crash Recovery)
-
-If the system loses power during any step, dm‑integrity performs **recovery**
-on next boot:
-
-* **Scan journal for incomplete entries**  
-* For each incomplete update:
-** If both data and tag are present → **replay** update  
-** If only one part is present → **rollback** update  
-* After replay/rollback, verify every data block against its tag
-
-If verification fails → **EIO (I/O error)** is returned to the filesystem.
-
-This prevents:
-
-* torn writes  
-* stale tag/data pairs  
-* inconsistent ext4 metadata  
-* silently corrupted overlayfs upperdir  
-* attacker‑modified ciphertext blocks
-
-=== 3. Protection Against Offline Tampering
-
-If an attacker removes the eMMC and modifies `/data` on another system:
-
-* dm‑crypt prevents reading plaintext  
-* dm‑integrity detects that the HMAC tag does not match  
-* The kernel refuses to read the tampered block → **EIO**  
-* ext4 mount fails → overlayfs cannot mount → system enters safe recovery
-
-The attacker cannot:
-
-* inject malicious files into the overlay upperdir  
-* roll back to an older version of `/data`  
-* corrupt configuration to influence boot  
-* perform stealth tampering (all corruption is detected)
-
-=== 4. Combined Security Properties (dm-crypt + dm-integrity + dm-verity)
-
-The three layers provide distinct protections:
-
-[cols="20,20,20,40", options="header"]
-|===
-| Threat | dm-verity | dm-integrity | dm-crypt | Result
-
-| Offline read
-| ❌
-| ❌
-| ✔
-| Confidentiality of `/data` (AES-XTS)
-
-| Offline write (tamper)
-| ❌
-| ✔
-| ❌
-| Authenticated writes; tamper produces EIO
-
-| Rootfs tamper
-| ✔
-| n/a
-| n/a
-| Immutable verified system (dm-verity)
-
-| Silent corruption / bit-rot
-| ❌
-| ✔
-| ❌
-| Detected during tag verification; fails safely
-
-| Replay / rollback attack
-| ❌
-| Partly ✔ (metadata mismatch)
-| ❌
-| Integrity tags mismatch; previous version rejected
-
-| Online attacker with root
-| ❌
-| ❌
-| ❌
-| Runtime protection out of scope (integrity-at-rest model)
-|===
-
-=== 5. Summary
-
-The combination of dm‑integrity and dm‑crypt provides:
-
-* **Confidentiality:** encrypted user data via AES‑XTS  
-* **Integrity:** per‑sector HMAC preventing silent tampering  
-* **Authenticity:** only OP‑TEE unwrapped keys can authenticate data  
-* **Atomicity:** journal ensures clean rollback/replay  
-* **Crash consistency:** power loss cannot corrupt integrity metadata  
-* **Tamper-evidence:** attacker cannot modify `/data` without detection  
-* **Rollback protection:** older or cloned partitions fail integrity checks
-
-Together with dm‑verity on the rootfs, the platform achieves:
-
-**Verified Boot + Authenticated Storage = Secure, Tamper-Resistant System**
 
 == Appendix F – FIT Image Structure & Security
 
@@ -923,3 +754,265 @@ These are the exact cryptographic anchors of the system:
 . Linux boot continues only with trusted kernel, DTB, and initrd  
 
 This forms the foundation of Verified Boot on the EBCL i.MX93 platform.
+
+== Appendix H – initrd Root Pivot and `newroot`
+
+This appendix explains the role of `newroot` during the transition from the
+signed initrd environment to the final Linux runtime filesystem.
+
+Although `newroot` is not a security control by itself, it is a critical
+architectural boundary in the verified boot flow.
+
+=== 1. What is `newroot`?
+
+`newroot` is a temporary mount point used in initrd to assemble the **final
+runtime root filesystem** before handing control to Linux userspace.
+
+In this design, `newroot` is constructed as:
+
+* `lowerdir` → dm‑verity protected root filesystem (read‑only)
+* `upperdir` → `/data/overlay/upper` (dm‑crypt + dm‑integrity protected)
+* `workdir`  → `/data/overlay/work`
+
+These are combined using `overlayfs`.
+
+The initrd then executes:
+
+----
+exec switch_root /newroot /sbin/init
+----
+
+At this point:
+
+* initrd is discarded
+* PID 1 becomes systemd from the verified root filesystem
+* runtime security assumptions apply
+
+=== 2. Why `newroot` Matters Architecturally
+
+`newroot` marks the **exact point where trust boundaries change**:
+
+Before `switch_root` (initrd):
+* Code execution is restricted to signed FIT + initrd
+* OP‑TEE is used to unwrap encryption and integrity keys
+* dm‑verity, dm‑integrity, and dm‑crypt mappings are created
+* tee‑supplicant runs temporarily to service secure world requests
+
+After `switch_root` (runtime system):
+* initrd environment no longer exists
+* systemd takes over as PID 1
+* a new tee‑supplicant instance is started under systemd
+* only the verified and authenticated filesystem remains visible
+
+Any files, binaries, or processes that exist only in initrd
+**do not persist** past `switch_root`.
+
+=== 3. Security Implications of the Root Pivot
+
+Because `newroot` only exposes:
+
+* dm‑verity verified rootfs
+* dm‑integrity + dm‑crypt protected `/data`
+
+the system guarantees that:
+
+* no initrd-only artifacts leak into runtime
+* no unsigned binaries survive the pivot
+* persistent state always resides on authenticated storage
+* OP‑TEE trust anchors are not bypassable via initrd manipulation
+
+This prevents attackers from:
+
+* injecting long‑lived processes during early boot
+* persisting malware via initrd temporary paths
+* modifying the runtime environment outside `/data`
+
+=== 4. Relationship to dm‑verity and dm‑integrity
+
+`newroot` itself does not provide cryptographic protection.
+
+Instead, it **exposes the results** of earlier verification steps:
+
+* dm‑verity → immutable root filesystem
+* dm‑integrity → authenticated writable storage
+* dm‑crypt → encrypted confidentiality
+* FIT signatures → trusted boot logic and parameters
+
+`newroot` is therefore the **handoff point**, not a security mechanism.
+
+=== 5. Summary
+
+* `newroot` defines the handover from initrd to the verified operating system
+* It ensures only authenticated and integrity‑protected storage is visible
+* It cleanly separates temporary boot logic from runtime execution
+* It supports enforcement of Verified Boot and Authenticated Storage
+* It should be documented as an architectural boundary, not as a protection layer
+
+== Appendix D – Authenticated Encryption-at-Rest Explained
+
+The resulting storage design is:
+
+----
+dm-integrity (HMAC-SHA256 for integrity/authentication)
+        ↓
+dm-crypt (AES-XTS for confidentiality)
+        ↓
+ext4 on /data (overlay upperdir)
+----
+
+This provides:
+
+* **Confidentiality** (cannot read `/data`)  
+* **Integrity** (cannot tamper with `/data`)  
+* **Authenticity** (no attacker-controlled modifications)  
+* **Rollback protection**  
+* **Crash consistency**  
+
+Note that **AES-GCM is not used for data encryption**, only for *key wrapping* in
+OP-TEE, which is the correct separation of responsibilities.
+
+== Appendix E – dm-integrity Behavior Under Power Loss & Tamper Conditions
+
+This appendix explains how dm‑integrity behaves during unexpected power loss,
+offline tampering, and silent corruption events. It clarifies how the
+HMAC‑based integrity layer, journal, and data layout ensure authenticated,
+atomic storage for the writable `/data` partition.
+
+=== 1. How dm-integrity Writes Data (Normal Operation)
+
+For each data block, dm‑integrity maintains:
+
+* the **user data block**
+* the **integrity tag** (e.g., HMAC‑SHA256)
+* a **journal entry** that ensures atomic updates
+
+A write operation follows this sequence:
+
+. Write updated data + tag into the *journal*  
+. Mark journal entry as “dirty”  
+. Write updated data to final data region  
+. Write updated tag to tag region  
+. Mark journal entry as “clean”  
+
+This ensures *data and tag updates are atomic*.
+
+=== 2. Power Loss Handling (Crash Recovery)
+
+If the system loses power during any step, dm‑integrity performs **recovery**
+on next boot:
+
+* **Scan journal for incomplete entries**  
+* For each incomplete update:
+** If both data and tag are present → **replay** update  
+** If only one part is present → **rollback** update  
+* After replay/rollback, verify every data block against its tag
+
+If verification fails → **EIO (I/O error)** is returned to the filesystem.
+
+This prevents:
+
+* torn writes  
+* stale tag/data pairs  
+* inconsistent ext4 metadata  
+* silently corrupted overlayfs upperdir  
+* attacker‑modified ciphertext blocks
+
+=== 3. Protection Against Offline Tampering
+
+If an attacker removes the eMMC and modifies `/data` on another system:
+
+* dm‑crypt prevents reading plaintext  
+* dm‑integrity detects that the HMAC tag does not match  
+* The kernel refuses to read the tampered block → **EIO**  
+* ext4 mount fails → overlayfs cannot mount → system enters safe recovery
+
+The attacker cannot:
+
+* inject malicious files into the overlay upperdir  
+* roll back to an older version of `/data`  
+* corrupt configuration to influence boot  
+* perform stealth tampering (all corruption is detected)
+
+=== 4. Combined Security Properties (dm-crypt + dm-integrity + dm-verity)
+
+The three layers provide distinct protections:
+
+[cols="20,20,20,40", options="header"]
+|===
+| Threat | dm-verity | dm-integrity | dm-crypt | Result
+
+| Offline read
+| ❌
+| ❌
+| ✔
+| Confidentiality of `/data` (AES-XTS)
+
+| Offline write (tamper)
+| ❌
+| ✔
+| ❌
+| Authenticated writes; tamper produces EIO
+
+| Rootfs tamper
+| ✔
+| n/a
+| n/a
+| Immutable verified system (dm-verity)
+
+| Silent corruption / bit-rot
+| ❌
+| ✔
+| ❌
+| Detected during tag verification; fails safely
+
+| Replay / rollback attack
+| ❌
+| Partly ✔ (metadata mismatch)
+| ❌
+| Integrity tags mismatch; previous version rejected
+
+| Online attacker with root
+| ❌
+| ❌
+| ❌
+| Runtime protection out of scope (integrity-at-rest model)
+|===
+
+=== 5. Summary
+
+The combination of dm‑integrity and dm‑crypt provides:
+
+* **Confidentiality:** encrypted user data via AES‑XTS  
+* **Integrity:** per‑sector HMAC preventing silent tampering  
+* **Authenticity:** only OP‑TEE unwrapped keys can authenticate data  
+* **Atomicity:** journal ensures clean rollback/replay  
+* **Crash consistency:** power loss cannot corrupt integrity metadata  
+* **Tamper-evidence:** attacker cannot modify `/data` without detection  
+* **Rollback protection:** older or cloned partitions fail integrity checks
+
+Together with dm‑verity on the rootfs, the platform achieves:
+
+**Verified Boot + Authenticated Storage = Secure, Tamper-Resistant System**
+
+== Appendix C – Physical Attacker Scenarios
+
+=== Scenario 1: Attacker removes eMMC and inspects `/data`
+*Encrypted garbage only.*  
+AES-XTS key is not extractable; attacker learns nothing.
+
+=== Scenario 2: Attacker modifies `/data` on a laptop
+dm-integrity rejects modified sectors → mount failure → safe halt.
+
+=== Scenario 3: Attacker rolls back `/data` to an old version
+Integrity tags mismatch → mount failure → safe halt.
+
+=== Scenario 4: Attacker injects malicious configuration into overlayfs upperdir
+Integrity-protected upperdir refuses to mount → attack fails.
+
+=== Scenario 5: Attacker replaces wrapped key blobs in keyfs
+AES-GCM tag mismatch / RPMB-counter mismatch → unwrap fails → boot fails safely.
+
+=== Scenario 6: Attacker corrupts sectors randomly (power cuts)
+dm-integrity detects corruption → EIO → filesystem recovery logic applies.
+
+---
